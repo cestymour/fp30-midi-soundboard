@@ -1,0 +1,574 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🎭 Impro — Instruments & Sons</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0c0c0e;
+      --surface:  #16161c;
+      --border:   #2c2c3a;
+      --txt:      #dddde8;
+      --dim:      #8888a8;
+
+      --active-bg:      #002a52;
+      --active-border:  #2288ff;
+      --active-glow:    #2288ff88;
+      --active-txt:     #55aaff;
+
+      --cat-classic:   #7c9cff;
+      --cat-sacre:     #ffe08a;
+      --cat-western:   #ffaa55;
+      --cat-medieval:  #88ddaa;
+      --cat-asian:     #ff9eb5;
+      --cat-jazz:      #ffcc55;
+      --cat-perc:      #ffaa88;
+      --cat-comedie:   #66ddcc;
+      --cat-futur:     #cc88ff;
+      --cat-mystere:   #6688cc;
+      --cat-horreur:   #aa66ff;
+      --cat-nature:    #4cffaa;
+      --cat-animal:    #ffdd55;
+      --cat-quotidien: #88ccff;
+      --cat-vehicle:   #ff9944;
+      --cat-humain:    #ff66aa;
+      --cat-sfx:       #dd66ff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--txt);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 3px;
+      color: var(--txt);
+      white-space: nowrap;
+    }
+
+    .vol-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .vol-wrap label {
+      font-size: 0.7rem;
+      color: var(--dim);
+      white-space: nowrap;
+      letter-spacing: 1px;
+    }
+    .vol-wrap input[type=range] {
+      flex: 1;
+      accent-color: var(--txt);
+      cursor: pointer;
+    }
+    #volVal {
+      font-size: 0.7rem;
+      color: var(--txt);
+      min-width: 28px;
+      text-align: right;
+    }
+
+    select {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      background: var(--bg);
+      color: var(--txt);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 4px;
+      min-width: 180px;
+    }
+
+    #status {
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--dim);
+      white-space: nowrap;
+    }
+    #status.ok  { color: #4cffaa; border-color: #4cffaa; }
+    #status.err { color: #ff4444; border-color: #ff4444; }
+
+    #activeLabel {
+      font-size: 0.72rem;
+      color: var(--dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 200px;
+      flex-shrink: 0;
+    }
+
+    #activeLabel span { color: var(--active-txt); font-weight: 600; }
+
+    /* ── Grille 4 colonnes ── */
+    main {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .column { display: flex; flex-direction: column; gap: 14px; }
+
+    .column.sounds-start {
+      border-left: 1px solid var(--border);
+      padding-left: 14px;
+    }
+
+    .cat-section { display: flex; flex-direction: column; gap: 8px; }
+
+    .cat-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 2px;
+    }
+    .cat-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .btn-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* ── Bouton ── */
+    .inst-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 9px 7px 8px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+      min-width: 72px;
+      max-width: 95px;
+      flex: 1 1 72px;
+      text-align: center;
+      user-select: none;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .inst-btn:hover { border-color: #555575; background: #1e1e2c; }
+
+    .inst-btn .icon { font-size: 1.5rem; line-height: 1; }
+
+    .inst-btn .name {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: #dcdcff;
+      line-height: 1.3;
+    }
+
+    /* ── État ACTIF ── */
+    .inst-btn.active {
+      background: var(--active-bg);
+      border-color: var(--active-border);
+      box-shadow: 0 0 0 2px var(--active-glow), inset 0 0 12px #0044ff18;
+    }
+    .inst-btn.active .name {
+      color: var(--active-txt);
+      font-weight: 700;
+    }
+    .inst-btn.active .icon { filter: drop-shadow(0 0 6px #2288ff); }
+
+    footer {
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.6rem;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎭 IMPRO</h1>
+  <div class="vol-wrap">
+    <label>VOL</label>
+    <input type="range" id="volSlider" min="0" max="127" value="100">
+    <span id="volVal">100</span>
+  </div>
+  <select id="selectInterface"><option value="">— Interface MIDI —</option></select>
+  <span id="status">Non connecté</span>
+  <div id="activeLabel">Actif : <span>—</span></div>
+</header>
+
+<main id="board"></main>
+
+<footer>FP-30X · Ch.1 · Clic = sélection · Jouer au piano</footer>
+
+<script>
+const COLUMNS = [
+
+  // ════════════════════════════════════════
+  // COL 0 — Instruments purs
+  // ════════════════════════════════════════
+  { col: 0, categories: [
+    {
+      label: '🎹 Classique / Romantique', color: 'var(--cat-classic)',
+      instruments: [
+        { name: 'Piano de concert',  icon: '🎹', pc:1,   msb:0,   lsb:68,  title: 'Roland => Concert Piano(GP1)' },
+        { name: 'Violons',           icon: '🎻', pc:49,  msb:16,  lsb:64,  title: 'Roland => Chamber Str' },
+        { name: 'Violon solo',       icon: '🎻', pc:41,  msb:121, lsb:0,   title: 'GM2 => Violin' },
+        { name: 'Chœur',             icon: '🎶', pc:53,  msb:8,   lsb:71,  title: 'Roland => Choir Aahs 1' },
+        { name: 'Guitare classique', icon: '🎸', pc:25,  msb:121, lsb:0,   title: 'GM2 => Nylon-str.Gt' },
+      ]
+    },
+    {
+      label: '⛪ Sacré / Mariage', color: 'var(--cat-sacre)',
+      instruments: [
+        { name: 'Orgue',             icon: '🎵', pc:20,  msb:8,   lsb:70,  title: 'Roland => Pipe Organ' },
+        { name: "Orgue d'église",    icon: '⛪', pc:20,  msb:8,   lsb:69,  title: 'Roland => ChurchOrgan2' },
+        { name: 'Cloches',           icon: '🔔', pc:15,  msb:121, lsb:0,   title: 'GM2 => TubularBells' },
+        { name: 'Gospel',            icon: '✝️', pc:17,  msb:0,   lsb:71,  title: 'Roland => Gospel Spin' },
+        { name: 'Clochettes Noël',   icon: '🎄', pc:113, msb:121, lsb:0,   title: 'GM2 => Tinkle Bell' },
+      ]
+    },
+    {
+      label: '🤠 Western / Saloon', color: 'var(--cat-western)',
+      instruments: [
+        { name: 'Piano Saloon',      icon: '🤠', pc:4,   msb:121, lsb:0,   title: 'GM2 => Honky-tonk' },
+        { name: 'Harmonica',         icon: '🎵', pc:23,  msb:121, lsb:0,   title: 'GM2 => Harmonica' },
+        { name: 'Banjo',             icon: '🪕', pc:106, msb:121, lsb:0,   title: 'GM2 => Banjo' },
+      ]
+    },
+    {
+      label: '⚔️ Médiéval / Fantastique', color: 'var(--cat-medieval)',
+      instruments: [
+        { name: 'Clavecin',          icon: '👑', pc:7,   msb:0,   lsb:67,  title: 'Roland => Harpsichord' },
+        { name: 'Harpe',             icon: '🪉', pc:47,  msb:121, lsb:0,   title: 'GM2 => Harp' },
+        { name: 'Sitar',             icon: '🪕', pc:105, msb:121, lsb:1,   title: 'GM2 => Sitar 2' },
+        { name: 'Accordéon',         icon: '🪗', pc:22,  msb:121, lsb:0,   title: 'GM2 => Accordion 1' },
+        { name: 'Flûte',             icon: '🪈', pc:74,  msb:121, lsb:0,   title: 'GM2 => Flute' },
+        { name: 'Flûte médiévale',   icon: '🌿', pc:20,  msb:16,  lsb:66,  title: "Roland => Nason flt 8'" },
+        { name: 'Flûte de Pan',      icon: '🎋', pc:76,  msb:121, lsb:0,   title: 'GM2 => Pan Flute' },
+      ]
+    },
+    {
+      label: '🎌 Sonorités asiatiques', color: 'var(--cat-asian)',
+      instruments: [
+        { name: 'Yang Qin',          icon: '🎌', pc:47,  msb:121, lsb:1,   title: 'GM2 => Yang Qin' },
+        { name: 'Shamisen',          icon: '🎌', pc:107, msb:121, lsb:0,   title: 'GM2 => Shamisen' },
+        { name: 'Koto',              icon: '🎌', pc:108, msb:121, lsb:0,   title: 'GM2 => Koto' },
+      ]
+    },
+    {
+      label: '🎷 Jazz / Années 50-60', color: 'var(--cat-jazz)',
+      instruments: [
+        { name: 'Voix jazz',         icon: '🗣️', pc:55,  msb:0,   lsb:65,  title: 'Roland => Jazz Scat' },
+        { name: 'Rhodes',            icon: '🎹', pc:5,   msb:16,  lsb:67,  title: 'Roland => E. Piano 1' },
+        { name: 'Orgue jazz',        icon: '🎼', pc:19,  msb:0,   lsb:69,  title: 'Roland => Combo Jz.Org' },
+        { name: 'Guitare jazz',      icon: '🎸', pc:27,  msb:121, lsb:0,   title: 'GM2 => Jazz Guitar' },
+        { name: 'Trompette',         icon: '🎺', pc:57,  msb:121, lsb:0,   title: 'GM2 => Trumpet' },
+        { name: 'Basse',             icon: '🎸', pc:34,  msb:121, lsb:0,   title: 'GM2 => FingeredBass' },
+        { name: 'Saxo',              icon: '🎷', pc:66,  msb:121, lsb:0,   title: 'GM2 => Alto Sax' },
+      ]
+    },
+  ]},
+
+  // ════════════════════════════════════════
+  // COL 1 — Instruments électro / hybrides
+  // ════════════════════════════════════════
+  { col: 1, categories: [
+    {
+      label: '🥁 Percussions', color: 'var(--cat-perc)',
+      instruments: [
+        { name: 'Percussions',       icon: '🥁', pc:1,   msb:120, lsb:0,   title: 'Roland => STANDARD Set' },
+        { name: 'Tom mélodique',     icon: '🪘', pc:118, msb:121, lsb:0,   title: 'GM2 => Melodic Tom1' },
+        { name: 'Grosse caisse',     icon: '🥁', pc:117, msb:121, lsb:1,   title: 'GM2 => Concert BD' },
+        { name: 'Castagnettes',      icon: '🫰', pc:116, msb:121, lsb:1,   title: 'GM2 => Castanets' },
+      ]
+    },
+    {
+      label: '🎪 Comédie / Cartoon', color: 'var(--cat-comedie)',
+      instruments: [
+        { name: 'Xylophone',         icon: '🥢', pc:12,  msb:0,   lsb:0,   title: 'Roland => Vibraphone' },
+        { name: 'Boîte à musique',   icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
+        { name: 'Coup de théâtre',   icon: '🎭', pc:56,  msb:121, lsb:0,   title: 'GM2 => OrchestraHit' },
+      ]
+    },
+    {
+      label: '🚀 Futuriste / SF', color: 'var(--cat-futur)',
+      instruments: [
+        { name: 'Laser / Synth',     icon: '🔆', pc:82,  msb:8,   lsb:67,  title: 'Roland => Super Saw' },
+        { name: 'Fantasia',          icon: '🚀', pc:89,  msb:0,   lsb:64,  title: 'Roland => D50 Fantasia' },
+        { name: 'Piano électrique',  icon: '💎', pc:6,   msb:8,   lsb:68,  title: 'Roland => EP Belle' },
+        { name: 'Pluie de cristal',  icon: '❄️', pc:97,  msb:121, lsb:0,   title: 'GM2 => Ice Rain' },
+      ]
+    },
+    {
+      label: '🌙 Mystère / Suspense', color: 'var(--cat-mystere)',
+      instruments: [
+        { name: 'Pad boréal',        icon: '🌌', pc:98,  msb:0,   lsb:68,  title: 'Roland => Boreal Pad' },
+        { name: 'Pad légendaire',    icon: '🌙', pc:93,  msb:0,   lsb:66,  title: 'Roland => Legend Pad' },
+        { name: 'Cordes Tron',       icon: '🔮', pc:51,  msb:0,   lsb:67,  title: 'Roland => Tron Strings' },
+        { name: 'Voix céleste',      icon: '👁️', pc:92,  msb:1,   lsb:64,  title: 'Roland => Voice of Hvn' },
+      ]
+    },
+    {
+      label: '👻 Horreur / Angoisse', color: 'var(--cat-horreur)',
+      instruments: [
+        { name: 'Nappe sombre',      icon: '🌀', pc:96,  msb:121, lsb:0,   title: 'GM2 => Sweep Pad' },
+        { name: 'Gobelins',          icon: '👹', pc:102, msb:121, lsb:0,   title: 'GM2 => Goblins' },
+        { name: 'Halo',              icon: '😱', pc:95,  msb:121, lsb:0,   title: 'GM2 => Halo Pad' },
+      ]
+    },
+  ]},
+
+  // ════════════════════════════════════════
+  // COL 2 — Sons / Bruits (gauche)
+  // ════════════════════════════════════════
+  { col: 2, soundsCol: true, categories: [
+    {
+      label: '🌿 Nature & Ambiances', color: 'var(--cat-nature)',
+      instruments: [
+        { name: 'Mer',               icon: '🌊', pc:123, msb:121, lsb:0,   title: 'GM2 => Seashore' },
+        { name: 'Pluie',             icon: '🌧️', pc:123, msb:121, lsb:1,   title: 'GM2 => Rain' },
+        { name: 'Tonnerre',          icon: '⚡', pc:123, msb:121, lsb:2,   title: 'GM2 => Thunder' },
+        { name: 'Vent',              icon: '💨', pc:123, msb:121, lsb:3,   title: 'GM2 => Wind' },
+        { name: 'Ruisseau',          icon: '🏞️', pc:123, msb:121, lsb:4,   title: 'GM2 => Stream' },
+        { name: 'Bulles',            icon: '🫧', pc:123, msb:121, lsb:5,   title: 'GM2 => Bubble' },
+      ]
+    },
+    {
+      label: '🐾 Animaux', color: 'var(--cat-animal)',
+      instruments: [
+        { name: 'Chien',             icon: '🐕', pc:124, msb:121, lsb:1,   title: 'GM2 => Dog' },
+        { name: 'Galop cheval',      icon: '🐴', pc:124, msb:121, lsb:2,   title: 'GM2 => Horse Gallop' },
+        { name: 'Oiseaux',           icon: '🐦', pc:124, msb:121, lsb:0,   title: 'GM2 => Bird 1' },
+      ]
+    },
+    {
+      label: '🚪 Sons quotidiens', color: 'var(--cat-quotidien)',
+      instruments: [
+        { name: 'Téléphone vieux',   icon: '☎️', pc:125, msb:121, lsb:0,   title: 'GM2 => Telephone 1' },
+        { name: 'Téléphone récent',  icon: '📞', pc:125, msb:121, lsb:1,   title: 'GM2 => Telephone 2' },
+        { name: 'Grincement porte',  icon: '🚪', pc:125, msb:121, lsb:2,   title: 'GM2 => DoorCreaking' },
+        { name: 'Claquement porte',  icon: '🚪', pc:125, msb:121, lsb:3,   title: 'GM2 => Door' },
+        { name: 'Scratch',           icon: '💿', pc:125, msb:121, lsb:4,   title: 'GM2 => Scratch' },
+        { name: 'Carillon (rêve)',   icon: '🎐', pc:125, msb:121, lsb:5,   title: 'GM2 => Wind Chimes' },
+        { name: 'Bloc de bois',      icon: '🪵', pc:116, msb:121, lsb:0,   title: 'GM2 => Woodblock' },
+      ]
+    },
+  ]},
+
+  // ════════════════════════════════════════
+  // COL 3 — Sons / Bruits (droite)
+  // ════════════════════════════════════════
+  { col: 3, soundsCol: true, categories: [
+    {
+      label: '🚗 Véhicules', color: 'var(--cat-vehicle)',
+      instruments: [
+        { name: 'Démarrage voiture', icon: '🔧', pc:126, msb:121, lsb:1,   title: 'GM2 => Car Engine' },
+        { name: 'Voiture',           icon: '🚗', pc:126, msb:121, lsb:3,   title: 'GM2 => Car Pass' },
+        { name: 'Freinage',          icon: '🛑', pc:126, msb:121, lsb:2,   title: 'GM2 => Car Stop' },
+        { name: 'Crash',             icon: '💥', pc:126, msb:121, lsb:4,   title: 'GM2 => Car Crash' },
+        { name: 'Sirène',            icon: '🚨', pc:126, msb:121, lsb:5,   title: 'GM2 => Siren' },
+        { name: 'Train',             icon: '🚂', pc:126, msb:121, lsb:6,   title: 'GM2 => Train' },
+        { name: 'Avion',             icon: '✈️', pc:126, msb:121, lsb:7,   title: 'GM2 => Jetplane' },
+        { name: 'Hélicoptère',       icon: '🚁', pc:126, msb:121, lsb:0,   title: 'GM2 => Helicopter' },
+        { name: 'Vaisseau spatial',  icon: '🛸', pc:126, msb:121, lsb:8,   title: 'GM2 => Starship' },
+        { name: 'Téléportation',     icon: '⚡', pc:126, msb:121, lsb:9,   title: 'GM2 => Burst Noise' },
+      ]
+    },
+    {
+      label: '👥 Humain', color: 'var(--cat-humain)',
+      instruments: [
+        /*{ name: 'Applaudissements',  icon: '👏', pc:127, msb:121, lsb:0,   title: 'GM2 => Applause' },*/
+        { name: 'Rire',              icon: '😂', pc:127, msb:121, lsb:1,   title: 'GM2 => Laughing' },
+        { name: 'Cri',               icon: '😱', pc:127, msb:121, lsb:2,   title: 'GM2 => Screaming' },
+        { name: 'Coup de poing',     icon: '🥊', pc:127, msb:121, lsb:3,   title: 'GM2 => Punch' },
+        { name: 'Cœur',              icon: '💓', pc:127, msb:121, lsb:4,   title: 'GM2 => Heart Beat' },
+        { name: 'Pas',               icon: '👣', pc:127, msb:121, lsb:5,   title: 'GM2 => Footsteps' },
+      ]
+    },
+    {
+      label: '🔫 Effets spéciaux', color: 'var(--cat-sfx)',
+      instruments: [
+        { name: 'Coup de feu',       icon: '🔫', pc:128, msb:121, lsb:0,   title: 'GM2 => Gun Shot' },
+        { name: 'Mitraillette',      icon: '🔫', pc:128, msb:121, lsb:1,   title: 'GM2 => Machine Gun' },
+        { name: 'Pistolet laser',    icon: '🔫', pc:128, msb:121, lsb:2,   title: 'GM2 => Laser Gun' },
+        { name: 'Explosion',         icon: '💣', pc:128, msb:121, lsb:3,   title: 'GM2 => Explosion' },
+      ]
+    },
+  ]},
+];
+
+// ═══════════════════════════════════════════════════════
+// MIDI
+// ═══════════════════════════════════════════════════════
+let midiOutput = null;
+let activeBtn  = null;
+let volume     = 100;
+
+navigator.requestMIDIAccess({ sysex: false }).then(access => {
+  const sel = document.getElementById('selectInterface');
+
+  const populate = () => {
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Interface MIDI —</option>';
+    access.outputs.forEach(out => {
+      const opt = document.createElement('option');
+      opt.value = out.id;
+      opt.textContent = out.name;
+      if (out.id === prev) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  };
+
+  sel.addEventListener('change', () => {
+    const selectedName = sel.options[sel.selectedIndex].text;
+    midiOutput = null;
+    let midiInput = null;
+
+    access.outputs.forEach(out => {
+      if (out.name === selectedName) midiOutput = out;
+    });
+    access.inputs.forEach(inp => {
+      if (inp.name === selectedName) midiInput = inp;
+    });
+
+    const st = document.getElementById('status');
+    st.textContent = midiOutput ? '● Connecté' : '● Non connecté';
+    st.className   = midiOutput ? 'ok' : 'err';
+
+    if (midiInput) {
+      midiInput.onmidimessage = (event) => {
+        console.log('MIDI IN:', event.data);
+      };
+    }
+
+    if (midiOutput) sendVolume(volume);
+  });
+
+  // populate() et auto-sélection APRÈS que le listener soit branché
+  populate();
+  if (sel.options.length === 2) {
+    sel.selectedIndex = 1;
+    sel.dispatchEvent(new Event('change'));
+  }
+
+  access.onstatechange = () => {
+    populate();
+    if (sel.options.length === 2 && sel.selectedIndex === 0) {
+      sel.selectedIndex = 1;
+      sel.dispatchEvent(new Event('change'));
+    }
+  };
+
+}, () => {
+  const st = document.getElementById('status');
+  st.textContent = '● MIDI refusé';
+  st.className = 'err';
+});
+
+function sendVolume(val) {
+  if (midiOutput)
+    midiOutput.send([0xB0, 0x07, val]); // CC7 Volume ch.1
+}
+
+document.getElementById('volSlider').addEventListener('input', function() {
+  volume = parseInt(this.value);
+  document.getElementById('volVal').textContent = volume;
+  sendVolume(volume);
+});
+
+function selectInstrument(btn, inst) {
+  if (activeBtn) activeBtn.classList.remove('active');
+  activeBtn = btn;
+  btn.classList.add('active');
+
+  document.getElementById('activeLabel').innerHTML =
+    `Actif : <span>${inst.name}</span>`;
+
+  if (midiOutput) {
+    midiOutput.send([0xB0, 0x00, inst.msb]); // Bank Select MSB
+    midiOutput.send([0xB0, 0x20, inst.lsb]); // Bank Select LSB
+    midiOutput.send([0xC0, inst.pc - 1]);     // Program Change (base 0)
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CONSTRUCTION DE L'INTERFACE
+// ═══════════════════════════════════════════════════════
+const board = document.getElementById('board');
+const cols  = [0,1,2,3].map(() => {
+  const c = document.createElement('div');
+  c.className = 'column';
+  board.appendChild(c);
+  return c;
+});
+
+cols[2].classList.add('sounds-start');
+
+COLUMNS.forEach(colDef => {
+  const col = cols[colDef.col];
+  colDef.categories.forEach(cat => {
+    const section = document.createElement('div');
+    section.className = 'cat-section';
+
+    const title = document.createElement('div');
+    title.className = 'cat-title';
+    title.style.color = cat.color;
+    title.textContent = cat.label;
+    section.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'btn-grid';
+
+    cat.instruments.forEach(inst => {
+      const btn = document.createElement('button');
+      btn.className = 'inst-btn';
+      btn.title = inst.title;
+      btn.innerHTML = `<span class="icon">${inst.icon}</span><span class="name">${inst.name}</span>`;
+      btn.addEventListener('click', () => selectInstrument(btn, inst));
+      grid.appendChild(btn);
+    });
+
+    section.appendChild(grid);
+    col.appendChild(section);
+  });
+});
+</script>
+</body>
+</html>
