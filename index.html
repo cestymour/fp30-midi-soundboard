@@ -493,6 +493,10 @@ navigator.requestMIDIAccess({ sysex: false }).then(access => {
     if (midiInput) {
       midiInput.onmidimessage = (event) => {
         console.log('MIDI IN:', event.data);
+        if (midiOutput) {
+          // Très important, cette ligne corriger le problème d'envoi du signal
+          midiOutput.send(event.data); // loopback
+        }
       };
     }
 
@@ -540,9 +544,12 @@ function selectInstrument(btn, inst) {
     `Actif : <span>${inst.name}</span>`;
 
   if (midiOutput) {
+    console.log('Envoi MIDI:', inst.name, 'MSB:', inst.msb, 'LSB:', inst.lsb, 'PC:', inst.pc - 1);
     midiOutput.send([0xB0, 0x00, inst.msb]); // Bank Select MSB
     midiOutput.send([0xB0, 0x20, inst.lsb]); // Bank Select LSB
     midiOutput.send([0xC0, inst.pc - 1]);     // Program Change (base 0)
+  } else {
+    console.error('PAS de midiOutput !');
   }
 }
 
