@@ -18,12 +18,17 @@ class BluetoothMIDI {
   #onNoteOff     = null;
   #onStatusChange= null;
   #onError       = null;
+  /** Une seule écriture GATT à la fois sur cette caractéristique (sinon « already in progress »). */
+  #writeQueue    = Promise.resolve();
+  /** Même idée que midiOutput.send(event.data) en USB : renvoyer le MIDI entrant vers le piano (FP-30). */
+  #loopbackIncoming = true;
 
-  constructor({ onNoteOn, onNoteOff, onStatusChange, onError } = {}) {
+  constructor({ onNoteOn, onNoteOff, onStatusChange, onError, loopbackIncoming = true } = {}) {
     this.#onNoteOn       = onNoteOn       ?? null;
     this.#onNoteOff      = onNoteOff      ?? null;
     this.#onStatusChange = onStatusChange ?? null;
     this.#onError        = onError        ?? null;
+    this.#loopbackIncoming = loopbackIncoming;
     if (!navigator.bluetooth) this.#setStatus('unsupported');
   }
 
@@ -35,23 +40,92 @@ class BluetoothMIDI {
    * Le format BLE MIDI impose : [header, timestamp, ...midiBytes]
    * header    = 0x80 (bit7=1, bit6=1, timestamp high = 0)
    * timestamp = 0x80 (bit7=1, timestamp low = 0)
+   *
+   * Banque + Program Change : utiliser sendBundled() — un seul paquet MMA multi-msg,
+   * plus fiable que 3 écritures séquentielles pour le moteur du FP-30.
    */
-  send(midiBytes) {
+  #encodeBleMidiMultiPacket(messageByteArrays) {
+    const out = [];
+    out.push(0x80);
+    let t = 0;
+    for (const msg of messageByteArrays) {
+      out.push(0x80 | (t & 0x7f));
+      t = (t + 1) & 0x7f;
+      for (let i = 0; i < msg.length; i++) out.push(msg[i]);
+    }
+    return new Uint8Array(out);
+  }
+
+  /**
+   * Plusieurs messages MIDI dans une seule valeur GATT (Bluetooth LE MIDI spec).
+   * @param {number[][]} messageByteArrays
+   */
+  sendBundled(messageByteArrays) {
+    if (!this.#characteristic || this.#status !== 'connected') return;
+    const packet = this.#encodeBleMidiMultiPacket(messageByteArrays);
+    console.log('MIDI OUT (BT bundled):', messageByteArrays.map(a => [...a]));
+    const char = this.#characteristic;
+    this.#writeQueue = this.#writeQueue
+      .then(() => {
+        if (!this.#characteristic) return;
+        if (typeof char.writeValueWithResponse === 'function') {
+          return char.writeValueWithResponse(packet).catch(err => {
+            console.warn('writeValueWithResponse (bundled) échoué, fallback:', err.message);
+            if (typeof char.writeValueWithoutResponse === 'function')
+              return char.writeValueWithoutResponse(packet);
+            if (typeof char.writeValue === 'function') return char.writeValue(packet);
+          });
+        }
+        if (typeof char.writeValueWithoutResponse === 'function') {
+          return char.writeValueWithoutResponse(packet).catch(err => {
+            console.warn('writeValueWithoutResponse (bundled) échoué, fallback:', err.message);
+            return char.writeValueWithResponse(packet);
+          });
+        }
+        if (typeof char.writeValue === 'function') return char.writeValue(packet);
+        console.error('Aucune méthode write disponible sur la caractéristique BLE');
+      })
+      .catch(e => console.error('MIDI OUT (BT bundled) échoué:', e.message));
+  }
+
+  /**
+   * @param {number[]} midiBytes
+   * @param {{ quiet?: boolean }} [opts] — quiet: pas de log (loopback notes)
+   */
+  send(midiBytes, opts = {}) {
     if (!this.#characteristic || this.#status !== 'connected') return;
     const packet = new Uint8Array([0x80, 0x80, ...midiBytes]);
-    console.log('MIDI OUT (BT):', Array.from(midiBytes));
+    if (!opts.quiet) console.log('MIDI OUT (BT):', Array.from(midiBytes));
     const char = this.#characteristic;
-    if (typeof char.writeValueWithoutResponse === 'function') {
-      char.writeValueWithoutResponse(packet)
-        .catch(err => {
-          console.warn('writeValueWithoutResponse échoué, fallback writeValueWithResponse:', err);
-          char.writeValueWithResponse(packet).catch(e => console.error('writeValueWithResponse échoué:', e));
-        });
-    } else if (typeof char.writeValue === 'function') {
-      char.writeValue(packet).catch(e => console.error('writeValue échoué:', e));
-    } else {
-      console.error('Aucune méthode write disponible sur la caractéristique BLE');
+    this.#writeQueue = this.#writeQueue
+      .then(() => {
+        if (!this.#characteristic) return;
+        if (typeof char.writeValueWithoutResponse === 'function') {
+          return char.writeValueWithoutResponse(packet).catch(err => {
+            console.warn('writeValueWithoutResponse échoué, fallback writeValueWithResponse:', err.message);
+            return char.writeValueWithResponse(packet);
+          });
+        }
+        if (typeof char.writeValueWithResponse === 'function')
+          return char.writeValueWithResponse(packet);
+        if (typeof char.writeValue === 'function') return char.writeValue(packet);
+        console.error('Aucune méthode write disponible sur la caractéristique BLE');
+      })
+      .catch(e => console.error('MIDI OUT (BT) échoué:', e.message));
+  }
+
+  /** Reconstitue les octets MIDI (comme event.data Web MIDI) pour le loopback. */
+  #bytesForLoopback(ev) {
+    if (ev?.type === 'sysex') return null;
+    const status = ev.midiStatus, one = ev.midiOne, two = ev.midiTwo;
+    if (typeof status !== 'number' || typeof one !== 'number') return null;
+    const hi = status & 0xf0;
+    if (hi === 0xc0 || hi === 0xd0) return [status, one];
+    if (hi >= 0x80 && hi <= 0xe0) {
+      if (typeof two !== 'number') return null;
+      return [status, one, two];
     }
+    return null;
   }
 
   // ─── Connexion ───────────────────────────────────────────────────────────
@@ -103,11 +177,19 @@ class BluetoothMIDI {
             if (!info?.events?.length) return;
             for (const ev of info.events) {
               const status = ev.midiStatus, one = ev.midiOne, two = ev.midiTwo;
-              if (typeof status !== 'number' || typeof one !== 'number' || typeof two !== 'number') continue;
-              console.log('MIDI IN (BT):', [status, one, two]);
+              if (this.#loopbackIncoming) {
+                const lb = this.#bytesForLoopback(ev);
+                if (lb) this.send(lb, { quiet: true });
+              }
+              if (typeof status !== 'number' || typeof one !== 'number') continue;
               const msgType = status & 0xf0;
-              if (msgType === 0x90 && two > 0)                              this.#onNoteOn?.(one);
-              else if (msgType === 0x80 || (msgType === 0x90 && two === 0)) this.#onNoteOff?.(one);
+              const hasTwo = typeof two === 'number';
+              if (!hasTwo && msgType !== 0xc0 && msgType !== 0xd0) continue;
+              console.log('MIDI IN (BT):', hasTwo ? [status, one, two] : [status, one]);
+              if (hasTwo) {
+                if (msgType === 0x90 && two > 0)                              this.#onNoteOn?.(one);
+                else if (msgType === 0x80 || (msgType === 0x90 && two === 0)) this.#onNoteOff?.(one);
+              }
             }
           };
           this.#onCharChange = handler;
@@ -145,6 +227,7 @@ class BluetoothMIDI {
   }
 
   async #cleanup() {
+    this.#writeQueue = Promise.resolve();
     if (this.#device && this.#onGattDisconn)
       this.#device.removeEventListener('gattserverdisconnected', this.#onGattDisconn);
     this.#onGattDisconn = null;

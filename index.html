@@ -516,7 +516,10 @@ const bt = new BluetoothMIDI({
           const st = document.getElementById('status');
           st.textContent = '● Connecté (BT)';
           st.className = 'ok';
-          sendVolume(volume);
+          // Roland FP-30 : GM2 System On réactive la réception Bank Select (doc MIDI Imple).
+          // Il faut ≥ 50 ms après ce SysEx avant tout autre message (même volume).
+          bt.send([0xf0, 0x7e, 0x7f, 0x09, 0x03, 0xf7]);
+          setTimeout(() => sendVolume(volume), 60);
         }
         break;
       case 'error':
@@ -548,6 +551,21 @@ btBtn.addEventListener('click', () => {
     bt.connect();
   }
 });
+
+function sendInstrumentPatch(inst) {
+  const bankMsb = [0xB0, 0x00, inst.msb];
+  const bankLsb = [0xB0, 0x20, inst.lsb];
+  const pc = [0xC0, inst.pc - 1];
+  if (midiOutput) {
+    midiOutput.send(bankMsb);
+    midiOutput.send(bankLsb);
+    midiOutput.send(pc);
+  } else if (bt.status === 'connected') {
+    bt.sendBundled([bankMsb, bankLsb, pc]);
+  } else {
+    console.error('PAS de connexion MIDI active !');
+  }
+}
 
 // ── Web MIDI (USB filaire) ──────────────────────────────
 navigator.requestMIDIAccess({ sysex: false }).then(access => {
@@ -634,9 +652,7 @@ function selectInstrument(btn, inst) {
     `Actif : <span>${inst.name}</span>`;
 
   console.log('Envoi MIDI:', inst.name, 'MSB:', inst.msb, 'LSB:', inst.lsb, 'PC:', inst.pc - 1);
-  sendMidi([0xB0, 0x00, inst.msb]); // Bank Select MSB
-  sendMidi([0xB0, 0x20, inst.lsb]); // Bank Select LSB
-  sendMidi([0xC0, inst.pc - 1]);     // Program Change (base 0)
+  sendInstrumentPatch(inst);
 }
 
 // ═══════════════════════════════════════════════════════
