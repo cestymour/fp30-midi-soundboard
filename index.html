@@ -91,6 +91,24 @@
       text-align: right;
     }
 
+    /* ── Bouton Bluetooth ── */
+    #btBtn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      background: var(--bg);
+      color: var(--dim);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.12s, color 0.12s;
+    }
+    #btBtn:hover { border-color: #555575; color: var(--txt); }
+    #btBtn.bt-scanning  { color: var(--dim);   border-color: var(--border); }
+    #btBtn.bt-connected { color: #4cffaa;       border-color: #4cffaa; }
+    #btBtn.bt-error     { color: #ff4444;       border-color: #ff4444; }
+
     select {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 0.75rem;
@@ -227,6 +245,7 @@
     <input type="range" id="volSlider" min="0" max="127" value="100">
     <span id="volVal">100</span>
   </div>
+  <button id="btBtn" title="Connexion Bluetooth MIDI">⬡ BT</button>
   <select id="selectInterface"><option value="">— Interface MIDI —</option></select>
   <span id="status">Non connecté</span>
   <div id="activeLabel">Actif : <span>—</span></div>
@@ -236,7 +255,10 @@
 
 <footer>FP-30X · Ch.1 · Clic = sélection · Jouer au piano</footer>
 
+<script src="ble-midi-parser.bundle.js"></script>
+<script src="bluetoothMIDI.js"></script>
 <script>
+
 const COLUMNS = [
 
   // ════════════════════════════════════════
@@ -459,6 +481,75 @@ let midiOutput = null;
 let activeBtn  = null;
 let volume     = 100;
 
+// ── Routage MIDI : USB ou Bluetooth ────────────────────
+// Envoie les octets MIDI vers la connexion active (USB en priorité, sinon BT).
+function sendMidi(bytes) {
+  if (midiOutput) {
+    midiOutput.send(bytes);
+  } else if (bt.status === 'connected') {
+    bt.send(bytes);
+  } else {
+    console.error('PAS de connexion MIDI active !');
+  }
+}
+
+// ── Bluetooth MIDI ──────────────────────────────────────
+const btBtn = document.getElementById('btBtn');
+
+const bt = new BluetoothMIDI({
+  onStatusChange: (status, error) => {
+    btBtn.className = '';
+    switch (status) {
+      case 'scanning':
+      case 'connecting':
+        btBtn.textContent = '⬡ BT…';
+        btBtn.classList.add('bt-scanning');
+        btBtn.disabled = true;
+        break;
+      case 'connected':
+        btBtn.textContent = '⬡ BT ✓';
+        btBtn.classList.add('bt-connected');
+        btBtn.disabled = false;
+        btBtn.title = 'Déconnecter le Bluetooth MIDI';
+        // Mettre à jour le badge de statut si pas de connexion USB active
+        if (!midiOutput) {
+          const st = document.getElementById('status');
+          st.textContent = '● Connecté (BT)';
+          st.className = 'ok';
+          sendVolume(volume);
+        }
+        break;
+      case 'error':
+        btBtn.textContent = '⬡ BT ✗';
+        btBtn.classList.add('bt-error');
+        btBtn.disabled = false;
+        btBtn.title = error ?? 'Erreur Bluetooth';
+        break;
+      default: // idle, unsupported
+        btBtn.textContent = '⬡ BT';
+        btBtn.disabled = (status === 'unsupported');
+        btBtn.title = status === 'unsupported'
+          ? 'Web Bluetooth non supporté par ce navigateur'
+          : 'Connexion Bluetooth MIDI';
+        // Si on vient de se déconnecter et qu'il n'y a plus de USB, remettre "Non connecté"
+        if (status === 'idle' && !midiOutput) {
+          const st = document.getElementById('status');
+          st.textContent = 'Non connecté';
+          st.className = '';
+        }
+    }
+  },
+});
+
+btBtn.addEventListener('click', () => {
+  if (bt.status === 'connected') {
+    bt.disconnect();
+  } else {
+    bt.connect();
+  }
+});
+
+// ── Web MIDI (USB filaire) ──────────────────────────────
 navigator.requestMIDIAccess({ sysex: false }).then(access => {
   const sel = document.getElementById('selectInterface');
 
@@ -525,8 +616,7 @@ navigator.requestMIDIAccess({ sysex: false }).then(access => {
 });
 
 function sendVolume(val) {
-  if (midiOutput)
-    midiOutput.send([0xB0, 0x07, val]); // CC7 Volume ch.1
+  sendMidi([0xB0, 0x07, val]); // CC7 Volume ch.1
 }
 
 document.getElementById('volSlider').addEventListener('input', function() {
@@ -543,14 +633,10 @@ function selectInstrument(btn, inst) {
   document.getElementById('activeLabel').innerHTML =
     `Actif : <span>${inst.name}</span>`;
 
-  if (midiOutput) {
-    console.log('Envoi MIDI:', inst.name, 'MSB:', inst.msb, 'LSB:', inst.lsb, 'PC:', inst.pc - 1);
-    midiOutput.send([0xB0, 0x00, inst.msb]); // Bank Select MSB
-    midiOutput.send([0xB0, 0x20, inst.lsb]); // Bank Select LSB
-    midiOutput.send([0xC0, inst.pc - 1]);     // Program Change (base 0)
-  } else {
-    console.error('PAS de midiOutput !');
-  }
+  console.log('Envoi MIDI:', inst.name, 'MSB:', inst.msb, 'LSB:', inst.lsb, 'PC:', inst.pc - 1);
+  sendMidi([0xB0, 0x00, inst.msb]); // Bank Select MSB
+  sendMidi([0xB0, 0x20, inst.lsb]); // Bank Select LSB
+  sendMidi([0xC0, inst.pc - 1]);     // Program Change (base 0)
 }
 
 // ═══════════════════════════════════════════════════════
