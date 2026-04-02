@@ -40,23 +40,6 @@ class BluetoothMIDI {
    * Le format BLE MIDI impose : [header, timestamp, ...midiBytes]
    * header    = 0x80 (bit7=1, bit6=1, timestamp high = 0)
    * timestamp = 0x80 (bit7=1, timestamp low = 0)
-   *
-   * Banque + Program Change : utiliser sendBundled() — un seul paquet MMA multi-msg,
-   * plus fiable que 3 écritures séquentielles pour le moteur du FP-30.
-   */
-  #encodeBleMidiMultiPacket(messageByteArrays) {
-    const out = [];
-    out.push(0x80);
-    let t = 0;
-    for (const msg of messageByteArrays) {
-      out.push(0x80 | (t & 0x7f));
-      t = (t + 1) & 0x7f;
-      for (let i = 0; i < msg.length; i++) out.push(msg[i]);
-    }
-    return new Uint8Array(out);
-  }
-
-  /**
    * @param {number[]} midiBytes
    * @param {{ quiet?: boolean }} [opts] — quiet: pas de log (loopback notes)
    */
