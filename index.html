@@ -558,8 +558,11 @@ function sendInstrumentPatch(inst) {
     midiOutput.send(bankLsb);
     midiOutput.send(pc);
   } else if (bt.status === 'connected') {
-    bt.sendBundled([bankMsb, bankLsb, pc]);
-  } else {
+    bt.send(bankMsb);
+    bt.send(bankLsb);
+    bt.send(pc);
+  }
+  else {
     console.error('PAS de connexion MIDI active !');
   }
 }

@@ -57,38 +57,6 @@ class BluetoothMIDI {
   }
 
   /**
-   * Plusieurs messages MIDI dans une seule valeur GATT (Bluetooth LE MIDI spec).
-   * @param {number[][]} messageByteArrays
-   */
-  sendBundled(messageByteArrays) {
-    if (!this.#characteristic || this.#status !== 'connected') return;
-    const packet = this.#encodeBleMidiMultiPacket(messageByteArrays);
-    console.log('MIDI OUT (BT bundled):', messageByteArrays.map(a => [...a]));
-    const char = this.#characteristic;
-    this.#writeQueue = this.#writeQueue
-      .then(() => {
-        if (!this.#characteristic) return;
-        if (typeof char.writeValueWithResponse === 'function') {
-          return char.writeValueWithResponse(packet).catch(err => {
-            console.warn('writeValueWithResponse (bundled) échoué, fallback:', err.message);
-            if (typeof char.writeValueWithoutResponse === 'function')
-              return char.writeValueWithoutResponse(packet);
-            if (typeof char.writeValue === 'function') return char.writeValue(packet);
-          });
-        }
-        if (typeof char.writeValueWithoutResponse === 'function') {
-          return char.writeValueWithoutResponse(packet).catch(err => {
-            console.warn('writeValueWithoutResponse (bundled) échoué, fallback:', err.message);
-            return char.writeValueWithResponse(packet);
-          });
-        }
-        if (typeof char.writeValue === 'function') return char.writeValue(packet);
-        console.error('Aucune méthode write disponible sur la caractéristique BLE');
-      })
-      .catch(e => console.error('MIDI OUT (BT bundled) échoué:', e.message));
-  }
-
-  /**
    * @param {number[]} midiBytes
    * @param {{ quiet?: boolean }} [opts] — quiet: pas de log (loopback notes)
    */
