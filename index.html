@@ -516,10 +516,7 @@ const bt = new BluetoothMIDI({
           const st = document.getElementById('status');
           st.textContent = '● Connecté (BT)';
           st.className = 'ok';
-          // Roland FP-30 : GM2 System On réactive la réception Bank Select (doc MIDI Imple).
-          // Il faut ≥ 50 ms après ce SysEx avant tout autre message (même volume).
-          bt.send([0xf0, 0x7e, 0x7f, 0x09, 0x03, 0xf7]);
-          setTimeout(() => sendVolume(volume), 60);
+          sendVolume(volume);
         }
         break;
       case 'error':
