@@ -69,6 +69,7 @@ class BluetoothMIDI {
   #bytesForLoopback(ev) {
     if (ev?.type === 'sysex') return null;
     const status = ev.midiStatus, one = ev.midiOne, two = ev.midiTwo;
+    console.log('TMP: BLE EV:', ev.type, status?.toString(16), one, two); // LOG TEMPORAIRE — à retirer après diagnostic
     if (typeof status !== 'number' || typeof one !== 'number') return null;
     const hi = status & 0xf0;
     if (hi === 0xc0 || hi === 0xd0) return [status, one];
