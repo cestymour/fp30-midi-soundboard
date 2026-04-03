@@ -90,6 +90,9 @@ const bt = new BluetoothMIDI({
       updateStatusBadge();
       sendVolume(volume);
     } else if (status === 'idle' || status === 'error') {
+      // Ne pas interférer si on est en train de basculer vers USB
+      if (isSwitchingToUsb) return;
+
       if (currentConnectionType === 'bt') {
         currentConnectionType = null;
         updateStatusBadge();
@@ -238,7 +241,8 @@ midiSelect.addEventListener('change', async () => {
       }
     }
   } else {
-    // Connexion USB
+    // ── Connexion USB ──
+    isSwitchingToUsb = true; // poser le flag AVANT disconnect BT
     if (bt.status === 'connected') {
       console.log('Switch BT → USB : déconnexion BT');
       bt.disconnect();
@@ -267,6 +271,7 @@ midiSelect.addEventListener('change', async () => {
     }
 
     currentConnectionType = midiOutput ? 'usb' : null;
+    isSwitchingToUsb = false; // relâcher le flag APRÈS configuration complète
     updateStatusBadge();
     if (midiOutput) sendVolume(volume);
   }
