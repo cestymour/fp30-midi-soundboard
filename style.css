@@ -336,21 +336,31 @@
   .vol-slider:active::-webkit-slider-thumb { transform: scale(1.2); }
   
   /* ═══════════════════════════════════════════════════════
-     PANNEAU MIDI — grille de catégories
+     PANNEAU MIDI — colonnes indépendantes
   ════════════════════════════════════════════════════════ */
   .midi-grid {
     flex: 1;
     min-height: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    display: flex;
+    flex-direction: row;
     gap: var(--gap);
-    align-content: start;
+    overflow: hidden;
   }
-  
+
+  .midi-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .cat-block {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    flex-shrink: 0;
   }
   
   /* Titre de catégorie — discret mais lisible */
@@ -368,7 +378,7 @@
     text-overflow: ellipsis;
   }
   
-  /* Grille de 4 boutons par catégorie */
+  /* Grille de boutons par catégorie */
   .btn-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -398,7 +408,8 @@
                 box-shadow 0.15s, transform 0.08s;
     user-select: none;
     text-align: center;
-    min-height: 100px;
+    min-height: 0;
+    height: var(--btn-h, 80px);
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -420,7 +431,7 @@
   .btn-icon {
     font-size: clamp(20px, 2.2vw, 28px);
     line-height: 1;
-    position: relative; /* pour le ::after ■ */
+    position: relative;
     z-index: 2;
   }
   .btn-label {
@@ -462,7 +473,7 @@
     filter: drop-shadow(0 0 4px var(--panel-accent));
   }
   
-  /* Hover sur un bouton MIDI actif — surbrillance visible */
+  /* Hover sur un bouton MIDI actif */
   .inst-btn.active:hover {
     background: color-mix(in srgb, var(--panel-accent) 28%, var(--bg-card));
     box-shadow: 0 0 16px color-mix(in srgb, var(--panel-accent) 50%, transparent);
@@ -476,8 +487,6 @@
   /* ═══════════════════════════════════════════════════════
      BOUTON AUDIO — progression + état playing
   ════════════════════════════════════════════════════════ */
-  
-  /* Fond de base — sous la progression */
   .sound-btn::after {
     content: '';
     position: absolute;
@@ -492,7 +501,6 @@
     background: color-mix(in srgb, var(--panel-accent) 10%, var(--bg-card));
   }
   
-  /* Barre de progression gauche→droite */
   .sound-btn::before {
     content: '';
     position: absolute;
@@ -506,10 +514,8 @@
     pointer-events: none;
   }
   
-  /* Tout le contenu au-dessus des pseudo-éléments */
   .sound-btn > * { position: relative; z-index: 2; }
   
-  /* État playing */
   .sound-btn.playing {
     color: var(--panel-accent);
     border-color: var(--panel-accent);
@@ -522,7 +528,6 @@
     to   { box-shadow: 0 0 22px color-mix(in srgb, var(--panel-accent) 55%, transparent); }
   }
   
-  /* Icône remplacée par ■ quand playing */
   .sound-btn.playing .btn-icon { font-size: 0; }
   .sound-btn.playing .btn-icon::after {
     content: '■';
@@ -530,7 +535,6 @@
     display: block;
   }
   
-  /* Fichier manquant */
   .sound-btn.missing {
     opacity: 0.35;
     text-decoration: line-through;
@@ -554,33 +558,26 @@
      RESPONSIVE
   ════════════════════════════════════════════════════════ */
   
-  /* Tablette paysage ~11" (priorité) */
   @media (min-width: 1024px) {
     :root { --gap: 10px; --header-h: 48px; --controls-h: 52px; }
     .tab-label { font-size: 13px; }
-    .midi-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
     .volume-wrap { width: min(400px, 35%); }
   }
   
-  /* Tablette portrait ~11" */
   @media (max-width: 1024px) and (orientation: portrait) {
     :root { --gap: 8px; }
-    .midi-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
     .audio-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
     .tab-label { font-size: 11px; }
     .tab-btn { min-width: 70px; }
     .volume-wrap { width: min(280px, 40%); }
   }
   
-  /* Mobile portrait (fallback) */
   @media (max-width: 600px) {
     :root { --header-h: 44px; --controls-h: 48px; --gap: 6px; }
     .tab-label { display: none; }
     .tab-btn { min-width: 48px; }
-    .midi-grid { grid-template-columns: repeat(2, 1fr); }
     .audio-grid { grid-template-columns: repeat(3, 1fr); }
     .volume-wrap { width: min(200px, 45%); }
     .midi-select { max-width: 130px; font-size: 10px; }
     .midi-badge  { min-width: 70px; font-size: 10px; }
   }
-  

@@ -7,6 +7,7 @@ const MIDI_TABS = [
     label: 'Instruments',
     icon: '🎹',
     accent: '#7c9cff',
+    cols: 6,
     categories: [
 
       {
@@ -14,7 +15,11 @@ const MIDI_TABS = [
         items: [
           { name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:68,  title: 'Roland => Concert Piano(GP1)' },
           { name: 'Harpe',            icon: '🪉', pc:47,  msb:121, lsb:0,   title: 'GM2 => Harp' },
+          { name: 'Harpe glissando',  icon: '🪉', pc:47,  msb:0,   lsb:70,  title: 'Roland => Harpiness' },
           { name: 'Chœur',            icon: '🎶', pc:53,  msb:8,   lsb:71,  title: 'Roland => Choir Aahs 1' },
+          { name: 'Boîte à musique',  icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
+          { name: 'Célesta',          icon: '✨', pc:9,   msb:121, lsb:0,   title: 'GM2 => Celesta' },
+          { name: 'Xylophone',        icon: '🥢', pc:12,  msb:0,   lsb:0,   title: 'Roland => Vibraphone' },
         ]
       },
 
@@ -35,6 +40,7 @@ const MIDI_TABS = [
           { name: 'Piano Saloon',     icon: '🤠', pc:4,   msb:121, lsb:0,   title: 'GM2 => Honky-tonk' },
           { name: 'Harmonica',        icon: '🎵', pc:23,  msb:121, lsb:0,   title: 'GM2 => Harmonica' },
           { name: 'Banjo',            icon: '🪕', pc:106, msb:121, lsb:0,   title: 'GM2 => Banjo' },
+          { name: 'Guitare folk',     icon: '🎸', pc:25,  msb:121, lsb:0,   title: 'GM2 => Nylon-str.Gt' },
         ]
       },
 
@@ -44,6 +50,7 @@ const MIDI_TABS = [
           { name: 'Clavecin',         icon: '👑', pc:7,   msb:0,   lsb:67,  title: 'Roland => Harpsichord' },
           { name: 'Cuivres',          icon: '📯', pc:62,  msb:121, lsb:0,   title: 'GM2 => Brass 1' },
           { name: 'Guitare',          icon: '🎸', pc:25,  msb:121, lsb:0,   title: 'GM2 => Nylon-str.Gt' },
+          { name: 'Flûte médiévale',  icon: '🌿', pc:20,  msb:16,  lsb:66,  title: "Roland => Nason flt 8'" },
         ]
       },
 
@@ -51,10 +58,8 @@ const MIDI_TABS = [
         label: 'Fantastique / Féérique', icon: '🧚', color: '#a8ffd8',
         items: [
           { name: 'Flûte',            icon: '🪈', pc:74,  msb:121, lsb:0,   title: 'GM2 => Flute' },
-          // { name: 'Flûte médiévale', icon: '🌿', pc:20,  msb:16,  lsb:66,  title: "Roland => Nason flt 8'" },
           { name: 'Flûte de Pan',     icon: '🎋', pc:76,  msb:121, lsb:0,   title: 'GM2 => Pan Flute' },
           { name: 'Kalimba',          icon: '🧝', pc:109, msb:121, lsb:0,   title: 'GM2 => Kalimba' },
-          { name: 'Harpe glissando',  icon: '🪉', pc:47,  msb:0,   lsb:70,  title: 'Roland => Harpiness' },
         ]
       },
 
@@ -75,8 +80,7 @@ const MIDI_TABS = [
           { name: 'Violons',          icon: '🎻', pc:49,  msb:16,  lsb:64,  title: 'Roland => Chamber Str' },
           { name: 'Violon solo',      icon: '🎻', pc:41,  msb:121, lsb:0,   title: 'GM2 => Violin' },
           { name: 'Accordéon',        icon: '🪗', pc:22,  msb:121, lsb:0,   title: 'GM2 => Accordion 1' },
-          // { name: 'Célesta',         icon: '✨', pc:9,   msb:121, lsb:0,   title: 'GM2 => Celesta' },
-          // { name: 'Saxo soprano',    icon: '🎷', pc:65,  msb:121, lsb:0,   title: 'GM2 => Soprano Sax' },
+          { name: 'Saxo soprano',     icon: '🎷', pc:65,  msb:121, lsb:0,   title: 'GM2 => Soprano Sax' },
         ]
       },
 
@@ -121,7 +125,16 @@ const MIDI_TABS = [
           { name: 'Saxo',             icon: '🎷', pc:66,  msb:121, lsb:0,   title: 'GM2 => Alto Sax' },
         ]
       },
-
+      
+      {
+        label: 'Percussions', icon: '🥁', color: '#ffaa88',
+        items: [
+          { name: 'Percu 🥁🪘🪇🎶', icon: '🥁', pc:1,   msb:120, lsb:0,   title: 'Roland => STANDARD Set' },
+          { name: 'Castagnettes',     icon: '🫰', pc:116, msb:121, lsb:1,   title: 'GM2 => Castanets' },
+          { name: 'Grosse caisse',    icon: '🥁', pc:117, msb:121, lsb:1,   title: 'GM2 => Concert BD' },
+          { name: 'Tom mélodique',    icon: '🪘', pc:118, msb:121, lsb:0,   title: 'GM2 => Melodic Tom1' },
+        ]
+      },
     ]
   },
 
@@ -130,22 +143,13 @@ const MIDI_TABS = [
   // ════════════════════════════════════════════════════════
   {
     label: 'Sons MIDI',
-    icon: '🔊',
+    icon: '🎹',
     accent: '#ffaa55',
+    cols: 5,
     categories: [
 
       {
-        label: 'Comédie / Cartoon', icon: '🎪', color: '#66ddcc',
-        items: [
-          { name: 'Xylophone',        icon: '🥢', pc:12,  msb:0,   lsb:0,   title: 'Roland => Vibraphone' },
-          { name: 'Boîte à musique',  icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
-          { name: 'Pas de loup',      icon: '🎻', pc:46,  msb:121, lsb:0,   title: 'GM2 => Pizzicato Str' },
-          { name: 'Coup de théâtre',  icon: '🎭', pc:56,  msb:121, lsb:0,   title: 'GM2 => OrchestraHit' },
-        ]
-      },
-
-      {
-        label: 'Nature & Ambiances', icon: '🌿', color: '#4cffaa',
+        label: 'Nature & Eau', icon: '🌿', color: '#4cffaa',
         items: [
           { name: 'Mer',              icon: '🌊', pc:123, msb:121, lsb:0,   title: 'GM2 => Seashore' },
           { name: 'Pluie',            icon: '🌧️', pc:123, msb:121, lsb:1,   title: 'GM2 => Rain' },
@@ -173,6 +177,12 @@ const MIDI_TABS = [
           { name: 'Téléphone récent', icon: '📞', pc:125, msb:121, lsb:1,   title: 'GM2 => Telephone 2' },
           { name: 'Grincement porte', icon: '🚪', pc:125, msb:121, lsb:2,   title: 'GM2 => DoorCreaking' },
           { name: 'Claque !',         icon: '🚪', pc:125, msb:121, lsb:3,   title: 'GM2 => Door' },
+        ]
+      },
+
+      {
+        label: '', icon: '🚪', color: '#88ccff',
+        items: [
           { name: 'Scratch',          icon: '💿', pc:125, msb:121, lsb:4,   title: 'GM2 => Scratch' },
           { name: 'Carillon (rêve)',  icon: '🎐', pc:125, msb:121, lsb:5,   title: 'GM2 => Wind Chimes' },
           { name: 'Bloc de bois',     icon: '🪵', pc:116, msb:121, lsb:0,   title: 'GM2 => Woodblock' },
@@ -181,53 +191,64 @@ const MIDI_TABS = [
       },
 
       {
-        label: 'Véhicules', icon: '🚗', color: '#ff9944',
+        label: 'Sci-Fi / Espace', icon: '🛸', color: '#cc88ff',
         items: [
-          { name: 'Démarrage voiture', icon: '🔧', pc:126, msb:121, lsb:1,  title: 'GM2 => Car Engine' },
-          { name: 'Voiture',          icon: '🚗', pc:126, msb:121, lsb:3,   title: 'GM2 => Car Pass' },
-          { name: 'Freinage',         icon: '🛑', pc:126, msb:121, lsb:2,   title: 'GM2 => Car Stop' },
-          { name: 'Crash',            icon: '💥', pc:126, msb:121, lsb:4,   title: 'GM2 => Car Crash' },
-          { name: 'Sirène',           icon: '🚨', pc:126, msb:121, lsb:5,   title: 'GM2 => Siren' },
-          { name: 'Train',            icon: '🚂', pc:126, msb:121, lsb:6,   title: 'GM2 => Train' },
-          { name: 'Avion',            icon: '✈️', pc:126, msb:121, lsb:7,   title: 'GM2 => Jetplane' },
-          { name: 'Hélicoptère',      icon: '🚁', pc:126, msb:121, lsb:0,   title: 'GM2 => Helicopter' },
           { name: 'Vaisseau spatial', icon: '🛸', pc:126, msb:121, lsb:8,   title: 'GM2 => Starship' },
           { name: 'Téléportation',    icon: '⚡', pc:126, msb:121, lsb:9,   title: 'GM2 => Burst Noise' },
           { name: 'Disparition',      icon: '🌀', pc:120, msb:121, lsb:0,   title: 'GM2 => Reverse Cymbal' },
+          { name: 'Pistolet laser',   icon: '🔫', pc:128, msb:121, lsb:2,   title: 'GM2 => Laser Gun' },
+        ]
+      },
+
+      {
+        label: 'Comédie / Cartoon', icon: '🎪', color: '#66ddcc',
+        items: [
+          // { name: 'Xylophone',        icon: '🥢', pc:12,  msb:0,   lsb:0,   title: 'Roland => Vibraphone' },
+          // { name: 'Boîte à musique',  icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
+          { name: 'Pas de loup',      icon: '🎻', pc:46,  msb:121, lsb:0,   title: 'GM2 => Pizzicato Str' },
+          { name: 'Coup de théâtre',  icon: '🎭', pc:56,  msb:121, lsb:0,   title: 'GM2 => OrchestraHit' },
+        ]
+      },
+
+      {
+        label: 'Voiture', icon: '🚗', color: '#ff9944',
+        items: [
+          { name: 'Démarrage voiture', icon: '🔧', pc:126, msb:121, lsb:1,  title: 'GM2 => Car Engine' },
+          { name: 'Vroooom',          icon: '🚗', pc:126, msb:121, lsb:3,   title: 'GM2 => Car Pass' },
+          { name: 'Freinage',         icon: '🛑', pc:126, msb:121, lsb:2,   title: 'GM2 => Car Stop' },
+          { name: 'Crash',            icon: '💥', pc:126, msb:121, lsb:4,   title: 'GM2 => Car Crash' },
+        ]
+      },
+
+      {
+        label: 'Transport', icon: '✈️', color: '#ff9944',
+        items: [
+          { name: 'Police',           icon: '🚨', pc:126, msb:121, lsb:5,   title: 'GM2 => Siren' },
+          { name: 'Train',            icon: '🚂', pc:126, msb:121, lsb:6,   title: 'GM2 => Train' },
+          { name: 'Avion',            icon: '✈️', pc:126, msb:121, lsb:7,   title: 'GM2 => Jetplane' },
+          { name: 'Hélicoptère',      icon: '🚁', pc:126, msb:121, lsb:0,   title: 'GM2 => Helicopter' },
         ]
       },
 
       {
         label: 'Humain', icon: '👥', color: '#ff66aa',
         items: [
-          // { name: 'Applaudissements', icon: '👏', pc:127, msb:121, lsb:0,  title: 'GM2 => Applause' },
           { name: 'Rire',             icon: '😂', pc:127, msb:121, lsb:1,   title: 'GM2 => Laughing' },
           { name: 'Cri',              icon: '😱', pc:127, msb:121, lsb:2,   title: 'GM2 => Screaming' },
-          { name: 'Coup de poing',    icon: '🥊', pc:127, msb:121, lsb:3,   title: 'GM2 => Punch' },
           { name: 'Cœur',             icon: '💓', pc:127, msb:121, lsb:4,   title: 'GM2 => Heart Beat' },
+          { name: 'Applaudissements', icon: '👏', pc:127, msb:121, lsb:0,   title: 'GM2 => Applause' },
         ]
       },
 
       {
-        label: 'Effets spéciaux', icon: '🔫', color: '#dd66ff',
+        label: 'Bagarre', icon: '⚔️', color: '#dd66ff',
         items: [
           { name: 'Coup de feu',      icon: '🔫', pc:128, msb:121, lsb:0,   title: 'GM2 => Gun Shot' },
           { name: 'Mitraillette',     icon: '🔫', pc:128, msb:121, lsb:1,   title: 'GM2 => Machine Gun' },
-          { name: 'Pistolet laser',   icon: '🔫', pc:128, msb:121, lsb:2,   title: 'GM2 => Laser Gun' },
+          { name: 'Coup de poing',    icon: '🥊', pc:127, msb:121, lsb:3,   title: 'GM2 => Punch' },
           { name: 'Explosion',        icon: '💣', pc:128, msb:121, lsb:3,   title: 'GM2 => Explosion' },
         ]
       },
-
-      {
-        label: 'Percussions', icon: '🥁', color: '#ffaa88',
-        items: [
-          { name: 'Percussions',      icon: '🥁', pc:1,   msb:120, lsb:0,   title: 'Roland => STANDARD Set' },
-          { name: 'Castagnettes',     icon: '🫰', pc:116, msb:121, lsb:1,   title: 'GM2 => Castanets' },
-          { name: 'Grosse caisse',    icon: '🥁', pc:117, msb:121, lsb:1,   title: 'GM2 => Concert BD' },
-          { name: 'Tom mélodique',    icon: '🪘', pc:118, msb:121, lsb:0,   title: 'GM2 => Melodic Tom1' },
-        ]
-      },
-
     ]
   },
 

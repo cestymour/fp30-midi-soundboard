@@ -73,6 +73,8 @@ function buildUI() {
     if (tab.type === 'midi') {
       panel.appendChild(buildMidiControls());
       panel.appendChild(buildMidiGrid(tab));
+      // Calcul des hauteurs après insertion dans le DOM
+      requestAnimationFrame(() => equalizeMidiButtons());
     } else {
       panel.appendChild(buildAudioControls());
       panel.appendChild(buildAudioGrid(tab));
@@ -161,7 +163,21 @@ function buildMidiGrid(tab) {
   const grid = document.createElement('div');
   grid.className = 'midi-grid';
 
-  tab.categories.forEach(cat => {
+  const colCount = tab.cols ?? 5;  // 5 par défaut si non défini
+
+  // Créer les colonnes vides
+  const cols = [];
+  for (let i = 0; i < colCount; i++) {
+    const col = document.createElement('div');
+    col.className = 'midi-col';
+    grid.appendChild(col);
+    cols.push(col);
+  }
+
+  // Répartir les catégories dans les colonnes (round-robin)
+  tab.categories.forEach((cat, catIdx) => {
+    const col = cols[catIdx % colCount];
+
     const block = document.createElement('div');
     block.className = 'cat-block';
 
@@ -187,10 +203,41 @@ function buildMidiGrid(tab) {
     });
 
     block.appendChild(btnGrid);
-    grid.appendChild(block);
+    col.appendChild(block);
   });
 
   return grid;
+}
+
+// ── Hauteur uniforme des boutons MIDI ──
+function equalizeMidiButtons() {
+  document.querySelectorAll('.panel.panel-midi.active').forEach(panel => {
+    const grid = panel.querySelector('.midi-grid');
+    if (!grid) return;
+
+    const gridH  = grid.clientHeight;
+    if (!gridH) return;  // panneau pas encore visible, on ignore
+
+    const gapPx  = parseInt(getComputedStyle(grid).gap) || 8;
+
+    grid.querySelectorAll('.midi-col').forEach(col => {
+      let totalRows = 0;
+      col.querySelectorAll('.btn-grid').forEach(btnGrid => {
+        totalRows += Math.ceil(btnGrid.children.length / 2);
+      });
+
+      const catCount     = col.querySelectorAll('.cat-block').length;
+      const titleH       = 20;  // hauteur approx d'un cat-title en px
+      const usedByTitles = catCount * (titleH + 5); // 5 = gap interne cat-block
+      const usedByGaps   = (catCount - 1) * gapPx;
+      const available    = gridH - usedByTitles - usedByGaps;
+
+      const gapsInGrid   = (totalRows - 1) * 5; // 5 = gap btn-grid
+      const btnH         = Math.floor((available - gapsInGrid) / totalRows);
+
+      col.style.setProperty('--btn-h', btnH + 'px');
+    });
+  });
 }
 
 // ── Grille Audio ──
@@ -232,6 +279,8 @@ function activateTab(idx) {
     b.classList.toggle('active', i === idx));
   document.querySelectorAll('.panel').forEach((p, i) =>
     p.classList.toggle('active', i === idx));
+  // Recalcul après que le panneau soit visible
+  requestAnimationFrame(() => equalizeMidiButtons());
 }
 
 tabNav.addEventListener('click', e => {
@@ -247,6 +296,12 @@ panelsEl.addEventListener('change', async e => {
   if (!e.target.classList.contains('midi-select')) return;
   await handleMidiSelectChange(e.target.value);
 });
+
+// ═══════════════════════════════════════════════════════
+// RESIZE — recalcul hauteurs boutons MIDI
+// ═══════════════════════════════════════════════════════
+const resizeObserver = new ResizeObserver(() => equalizeMidiButtons());
+resizeObserver.observe(document.getElementById('panels'));
 
 // ═══════════════════════════════════════════════════════
 // INIT
