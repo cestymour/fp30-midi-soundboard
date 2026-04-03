@@ -1,0 +1,36 @@
+name: Deploy Piano fp30x midi Soundboard to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Déclenche le workflow à chaque push sur la branche 'main'
+  workflow_dispatch:
+
+# Permet aux actions de déployer sur GitHub Pages
+permissions:
+  contents: read      # Pour lire le contenu du dépôt
+  pages: write        # Pour déployer sur GitHub Pages
+  id-token: write     # Pour l'authentification OIDC nécessaire au déploiement
+
+jobs:
+  # Job de déploiement
+  deploy:
+    environment:
+      name: github-pages      # Environnement de déploiement (standard pour GitHub Pages)
+      url: ${{ steps.deployment.outputs.page_url }} # URL du site après déploiement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: '.'           # Racine du projet (pas de dossier dist)
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # Action qui déploie l'artefact sur GitHub Pages
