@@ -1,9 +1,15 @@
-**README.md**
-```markdown
 # 🎭 Piano Soundboard
 
 Web-based PWA soundboard for live improv theater.  
 Designed for tablet use (Android / Chrome), landscape orientation.
+
+---
+
+## 🚀 Try it live !
+
+👉 **[Open the app — click here !](https://cestymour.github.io/fp30-midi-soundboard/)**
+
+> Works best on Chrome (Android tablet or desktop). MIDI features require a connected instrument.
 
 ---
 
@@ -211,6 +217,14 @@ MIT
 
 PWA soundboard pour spectacles d'improvisation théâtrale.  
 Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysage.
+
+---
+
+## 🚀 Essayer en ligne !
+
+👉 **[Ouvrir l'application — cliquez ici !](https://cestymour.github.io/fp30-midi-soundboard/)**
+
+> Fonctionne mieux sur Chrome (tablette Android ou ordinateur). Les fonctionnalités MIDI nécessitent un instrument connecté.
 
 ---
 
