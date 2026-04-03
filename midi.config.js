@@ -11,15 +11,13 @@ const MIDI_TABS = [
     categories: [
 
       {
-        label: 'Classique', icon: '🎹', color: '#7c9cff',
+        label: 'Romantique / Amour', icon: '🌹', color: '#ff8fab',
         items: [
           { name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:68,  title: 'Roland => Concert Piano(GP1)' },
           { name: 'Harpe',            icon: '🪉', pc:47,  msb:121, lsb:0,   title: 'GM2 => Harp' },
-          { name: 'Harpe glissando',  icon: '🪉', pc:47,  msb:0,   lsb:70,  title: 'Roland => Harpiness' },
-          { name: 'Chœur',            icon: '🎶', pc:53,  msb:8,   lsb:71,  title: 'Roland => Choir Aahs 1' },
-          { name: 'Boîte à musique',  icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
-          { name: 'Célesta',          icon: '✨', pc:9,   msb:121, lsb:0,   title: 'GM2 => Celesta' },
-          { name: 'Xylophone',        icon: '🥢', pc:12,  msb:0,   lsb:0,   title: 'Roland => Vibraphone' },
+          // { name: 'Violons',          icon: '🎻', pc:49,  msb:16,  lsb:64,  title: 'Roland => Chamber Str' },
+          { name: 'Violon solo',      icon: '🎻', pc:41,  msb:121, lsb:0,   title: 'GM2 => Violin' },
+          { name: 'Accordéon',        icon: '🪗', pc:22,  msb:121, lsb:0,   title: 'GM2 => Accordion 1' },
         ]
       },
 
@@ -40,7 +38,7 @@ const MIDI_TABS = [
           { name: 'Piano Saloon',     icon: '🤠', pc:4,   msb:121, lsb:0,   title: 'GM2 => Honky-tonk' },
           { name: 'Harmonica',        icon: '🎵', pc:23,  msb:121, lsb:0,   title: 'GM2 => Harmonica' },
           { name: 'Banjo',            icon: '🪕', pc:106, msb:121, lsb:0,   title: 'GM2 => Banjo' },
-          { name: 'Guitare folk',     icon: '🎸', pc:25,  msb:121, lsb:0,   title: 'GM2 => Nylon-str.Gt' },
+          { name: 'Guitare jazz',     icon: '🎸', pc:27,  msb:121, lsb:0,   title: 'GM2 => Jazz Guitar' },
         ]
       },
 
@@ -60,6 +58,7 @@ const MIDI_TABS = [
           { name: 'Flûte',            icon: '🪈', pc:74,  msb:121, lsb:0,   title: 'GM2 => Flute' },
           { name: 'Flûte de Pan',     icon: '🎋', pc:76,  msb:121, lsb:0,   title: 'GM2 => Pan Flute' },
           { name: 'Kalimba',          icon: '🧝', pc:109, msb:121, lsb:0,   title: 'GM2 => Kalimba' },
+          { name: 'Saxo soprano',     icon: '🎷', pc:65,  msb:121, lsb:0,   title: 'GM2 => Soprano Sax' },
         ]
       },
 
@@ -71,16 +70,37 @@ const MIDI_TABS = [
           // { name: 'Koto',            icon: '🎌', pc:108, msb:121, lsb:0,   title: 'GM2 => Koto' },
           { name: 'Steelpan',         icon: '🌴', pc:115, msb:121, lsb:0,   title: 'GM2 => Steel Drums' },
           { name: 'Sitar',            icon: '🕌', pc:105, msb:121, lsb:1,   title: 'GM2 => Sitar 2' },
+          { name: 'Harpe glissando',  icon: '🪉', pc:47,  msb:0,   lsb:70,  title: 'Roland => Harpiness' },
         ]
       },
 
       {
-        label: 'Romantique / Amour', icon: '🌹', color: '#ff8fab',
+        label: 'Drôle', icon: '🎹', color: '#7c9cff',
         items: [
-          { name: 'Violons',          icon: '🎻', pc:49,  msb:16,  lsb:64,  title: 'Roland => Chamber Str' },
-          { name: 'Violon solo',      icon: '🎻', pc:41,  msb:121, lsb:0,   title: 'GM2 => Violin' },
-          { name: 'Accordéon',        icon: '🪗', pc:22,  msb:121, lsb:0,   title: 'GM2 => Accordion 1' },
-          { name: 'Saxo soprano',     icon: '🎷', pc:65,  msb:121, lsb:0,   title: 'GM2 => Soprano Sax' },
+          { name: 'Boîte à musique',  icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
+          { name: 'Célesta',          icon: '✨', pc:9,   msb:121, lsb:0,   title: 'GM2 => Celesta' },
+          { name: 'Rhodes',           icon: '🎹', pc:5,   msb:16,  lsb:67,  title: 'Roland => E. Piano 1' },
+          { name: 'Voix jazz',        icon: '🗣️', pc:55,  msb:0,   lsb:65,  title: 'Roland => Jazz Scat' },
+        ]
+      },
+
+      {
+        label: 'Jazz / Années 50-60', icon: '🎷', color: '#ffcc55',
+        items: [
+          { name: 'Orgue jazz',       icon: '🎼', pc:19,  msb:0,   lsb:69,  title: 'Roland => Combo Jz.Org' },
+          { name: 'Trompette',        icon: '🎺', pc:57,  msb:121, lsb:0,   title: 'GM2 => Trumpet' },
+          { name: 'Basse',            icon: '🎸', pc:34,  msb:121, lsb:0,   title: 'GM2 => FingeredBass' },
+          { name: 'Saxo',             icon: '🎷', pc:66,  msb:121, lsb:0,   title: 'GM2 => Alto Sax' },
+        ]
+      },
+      
+      {
+        label: 'Percussions', icon: '🥁', color: '#ffaa88',
+        items: [
+          { name: 'Xylophone',        icon: '🥢', pc:12,  msb:0,   lsb:0,   title: 'Roland => Vibraphone' },
+          { name: 'Tom mélodique',    icon: '🪘', pc:118, msb:121, lsb:0,   title: 'GM2 => Melodic Tom1' },
+          { name: 'Percu 🥁🪘🪇🎶', icon: '🥁', pc:1,   msb:120, lsb:0,   title: 'Roland => STANDARD Set' },
+          { name: 'Grosse caisse',    icon: '🥁', pc:117, msb:121, lsb:1,   title: 'GM2 => Concert BD' },
         ]
       },
 
@@ -110,29 +130,7 @@ const MIDI_TABS = [
           { name: 'Nappe sombre',     icon: '🌀', pc:96,  msb:121, lsb:0,   title: 'GM2 => Sweep Pad' },
           { name: 'Gobelins',         icon: '👹', pc:102, msb:121, lsb:0,   title: 'GM2 => Goblins' },
           { name: 'Halo',             icon: '😱', pc:95,  msb:121, lsb:0,   title: 'GM2 => Halo Pad' },
-        ]
-      },
-
-      {
-        label: 'Jazz / Années 50-60', icon: '🎷', color: '#ffcc55',
-        items: [
-          { name: 'Voix jazz',        icon: '🗣️', pc:55,  msb:0,   lsb:65,  title: 'Roland => Jazz Scat' },
-          { name: 'Rhodes',           icon: '🎹', pc:5,   msb:16,  lsb:67,  title: 'Roland => E. Piano 1' },
-          { name: 'Orgue jazz',       icon: '🎼', pc:19,  msb:0,   lsb:69,  title: 'Roland => Combo Jz.Org' },
-          { name: 'Guitare jazz',     icon: '🎸', pc:27,  msb:121, lsb:0,   title: 'GM2 => Jazz Guitar' },
-          { name: 'Trompette',        icon: '🎺', pc:57,  msb:121, lsb:0,   title: 'GM2 => Trumpet' },
-          { name: 'Basse',            icon: '🎸', pc:34,  msb:121, lsb:0,   title: 'GM2 => FingeredBass' },
-          { name: 'Saxo',             icon: '🎷', pc:66,  msb:121, lsb:0,   title: 'GM2 => Alto Sax' },
-        ]
-      },
-      
-      {
-        label: 'Percussions', icon: '🥁', color: '#ffaa88',
-        items: [
-          { name: 'Percu 🥁🪘🪇🎶', icon: '🥁', pc:1,   msb:120, lsb:0,   title: 'Roland => STANDARD Set' },
-          { name: 'Castagnettes',     icon: '🫰', pc:116, msb:121, lsb:1,   title: 'GM2 => Castanets' },
-          { name: 'Grosse caisse',    icon: '🥁', pc:117, msb:121, lsb:1,   title: 'GM2 => Concert BD' },
-          { name: 'Tom mélodique',    icon: '🪘', pc:118, msb:121, lsb:0,   title: 'GM2 => Melodic Tom1' },
+          { name: 'Chœur',            icon: '🎶', pc:53,  msb:8,   lsb:71,  title: 'Roland => Choir Aahs 1' },
         ]
       },
     ]
@@ -161,6 +159,18 @@ const MIDI_TABS = [
       },
 
       {
+        label: 'Humain', icon: '👥', color: '#ff66aa',
+        items: [
+          { name: 'Rire',             icon: '😂', pc:127, msb:121, lsb:1,   title: 'GM2 => Laughing' },
+          { name: 'Cri',              icon: '😱', pc:127, msb:121, lsb:2,   title: 'GM2 => Screaming' },
+          { name: 'Cœur',             icon: '💓', pc:127, msb:121, lsb:4,   title: 'GM2 => Heart Beat' },
+          { name: 'Pas',              icon: '👣', pc:127, msb:121, lsb:5,   title: 'GM2 => Footsteps' },
+          { name: 'Claque doigt',     icon: '🫰', pc:116, msb:121, lsb:1,   title: 'GM2 => Castanets' },
+          { name: 'Applaudissements', icon: '👏', pc:127, msb:121, lsb:0,   title: 'GM2 => Applause' },
+        ]
+      },
+
+      {
         label: 'Animaux', icon: '🐾', color: '#ffdd55',
         items: [
           { name: 'Chien',            icon: '🐕', pc:124, msb:121, lsb:1,   title: 'GM2 => Dog' },
@@ -171,22 +181,12 @@ const MIDI_TABS = [
       },
 
       {
-        label: 'Sons quotidiens', icon: '🚪', color: '#88ccff',
+        label: 'Voiture', icon: '🚗', color: '#ff9944',
         items: [
-          { name: 'Téléphone vieux',  icon: '☎️', pc:125, msb:121, lsb:0,   title: 'GM2 => Telephone 1' },
-          { name: 'Téléphone récent', icon: '📞', pc:125, msb:121, lsb:1,   title: 'GM2 => Telephone 2' },
-          { name: 'Grincement porte', icon: '🚪', pc:125, msb:121, lsb:2,   title: 'GM2 => DoorCreaking' },
-          { name: 'Claque !',         icon: '🚪', pc:125, msb:121, lsb:3,   title: 'GM2 => Door' },
-        ]
-      },
-
-      {
-        label: '', icon: '🚪', color: '#88ccff',
-        items: [
-          { name: 'Scratch',          icon: '💿', pc:125, msb:121, lsb:4,   title: 'GM2 => Scratch' },
-          { name: 'Carillon (rêve)',  icon: '🎐', pc:125, msb:121, lsb:5,   title: 'GM2 => Wind Chimes' },
-          { name: 'Bloc de bois',     icon: '🪵', pc:116, msb:121, lsb:0,   title: 'GM2 => Woodblock' },
-          { name: 'Pas',              icon: '👣', pc:127, msb:121, lsb:5,   title: 'GM2 => Footsteps' },
+          { name: 'Démarrage voiture', icon: '🔧', pc:126, msb:121, lsb:1,  title: 'GM2 => Car Engine' },
+          { name: 'Vroooom',          icon: '🚗', pc:126, msb:121, lsb:3,   title: 'GM2 => Car Pass' },
+          { name: 'Freinage',         icon: '🛑', pc:126, msb:121, lsb:2,   title: 'GM2 => Car Stop' },
+          { name: 'Crash',            icon: '💥', pc:126, msb:121, lsb:4,   title: 'GM2 => Car Crash' },
         ]
       },
 
@@ -211,12 +211,21 @@ const MIDI_TABS = [
       },
 
       {
-        label: 'Voiture', icon: '🚗', color: '#ff9944',
+        label: ' Sons quotidiens', icon: '🚪', color: '#88ccff',
         items: [
-          { name: 'Démarrage voiture', icon: '🔧', pc:126, msb:121, lsb:1,  title: 'GM2 => Car Engine' },
-          { name: 'Vroooom',          icon: '🚗', pc:126, msb:121, lsb:3,   title: 'GM2 => Car Pass' },
-          { name: 'Freinage',         icon: '🛑', pc:126, msb:121, lsb:2,   title: 'GM2 => Car Stop' },
-          { name: 'Crash',            icon: '💥', pc:126, msb:121, lsb:4,   title: 'GM2 => Car Crash' },
+          // { name: 'Scratch',          icon: '💿', pc:125, msb:121, lsb:4,   title: 'GM2 => Scratch' },
+          { name: 'Carillon (rêve)',  icon: '🎐', pc:125, msb:121, lsb:5,   title: 'GM2 => Wind Chimes' },
+          { name: 'Bloc de bois',     icon: '🪵', pc:116, msb:121, lsb:0,   title: 'GM2 => Woodblock' },
+        ]
+      },
+
+      {
+        label: 'Sons quotidiens (suite)', icon: '🚪', color: '#88ccff',
+        items: [
+          { name: 'Téléphone vieux',  icon: '☎️', pc:125, msb:121, lsb:0,   title: 'GM2 => Telephone 1' },
+          { name: 'Téléphone récent', icon: '📞', pc:125, msb:121, lsb:1,   title: 'GM2 => Telephone 2' },
+          { name: 'Grincement porte', icon: '🚪', pc:125, msb:121, lsb:2,   title: 'GM2 => DoorCreaking' },
+          { name: 'Claque !',         icon: '🚪', pc:125, msb:121, lsb:3,   title: 'GM2 => Door' },
         ]
       },
 
@@ -227,16 +236,6 @@ const MIDI_TABS = [
           { name: 'Train',            icon: '🚂', pc:126, msb:121, lsb:6,   title: 'GM2 => Train' },
           { name: 'Avion',            icon: '✈️', pc:126, msb:121, lsb:7,   title: 'GM2 => Jetplane' },
           { name: 'Hélicoptère',      icon: '🚁', pc:126, msb:121, lsb:0,   title: 'GM2 => Helicopter' },
-        ]
-      },
-
-      {
-        label: 'Humain', icon: '👥', color: '#ff66aa',
-        items: [
-          { name: 'Rire',             icon: '😂', pc:127, msb:121, lsb:1,   title: 'GM2 => Laughing' },
-          { name: 'Cri',              icon: '😱', pc:127, msb:121, lsb:2,   title: 'GM2 => Screaming' },
-          { name: 'Cœur',             icon: '💓', pc:127, msb:121, lsb:4,   title: 'GM2 => Heart Beat' },
-          { name: 'Applaudissements', icon: '👏', pc:127, msb:121, lsb:0,   title: 'GM2 => Applause' },
         ]
       },
 
