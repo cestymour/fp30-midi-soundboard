@@ -103,6 +103,7 @@ function buildMidiControls() {
              style="--vol-pct:${volPct}%" />
       <span class="vol-value">${STATE.midiVolume}</span>
     </div>
+    <button class="emergency-stop-btn" title="All Notes Off">⏹</button>
   `;
 
   const slider = wrap.querySelector('.midi-vol');
@@ -118,6 +119,10 @@ function buildMidiControls() {
     sendVolume(STATE.midiVolume);
     syncMidiSliders(STATE.midiVolume);
   });
+
+  wrap.querySelector('.emergency-stop-btn').addEventListener('click', () => {
+    sendEmergencyStop();
+  });  
 
   return wrap;
 }

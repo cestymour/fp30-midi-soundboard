@@ -483,7 +483,39 @@
     from { box-shadow: 0 0 6px  color-mix(in srgb, var(--panel-accent) 25%, transparent); }
     to   { box-shadow: 0 0 16px color-mix(in srgb, var(--panel-accent) 50%, transparent); }
   }
-  
+
+  /* ═══════════════════════════════════════════════════════
+     BOUTON ARRET URGENCE
+  ════════════════════════════════════════════════════════ */
+  .emergency-stop-btn {
+    position: absolute;
+    right: 12px;
+    top: 6px;
+    bottom: 6px;
+    transform: none;
+    background: transparent;
+    border: 1px solid #ff3d71;
+    border-radius: var(--radius);
+    color: #ff3d71;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 0 9px 0 11px;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .emergency-stop-btn:hover {
+    background: color-mix(in srgb, #ff3d71 15%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, #ff3d71 35%, transparent);
+  }
+  .emergency-stop-btn:active {
+    background: color-mix(in srgb, #ff3d71 30%, transparent);
+    transform: translateY(-50%) scale(0.95);
+  }
+
   /* ═══════════════════════════════════════════════════════
      BOUTON AUDIO — progression + état playing
   ════════════════════════════════════════════════════════ */
