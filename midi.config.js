@@ -75,7 +75,7 @@ const MIDI_TABS = [
       },
 
       {
-        label: 'Drôle', icon: '🎹', color: '#7c9cff',
+        label: 'Comédie / Cartoon', icon: '🎪', color: '#66ddcc',
         items: [
           { name: 'Boîte à musique',  icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
           { name: 'Célesta',          icon: '✨', pc:9,   msb:121, lsb:0,   title: 'GM2 => Celesta' },
@@ -203,15 +203,13 @@ const MIDI_TABS = [
       {
         label: 'Comédie / Cartoon', icon: '🎪', color: '#66ddcc',
         items: [
-          // { name: 'Xylophone',        icon: '🥢', pc:12,  msb:0,   lsb:0,   title: 'Roland => Vibraphone' },
-          // { name: 'Boîte à musique',  icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
           { name: 'Pas de loup',      icon: '🎻', pc:46,  msb:121, lsb:0,   title: 'GM2 => Pizzicato Str' },
           { name: 'Coup de théâtre',  icon: '🎭', pc:56,  msb:121, lsb:0,   title: 'GM2 => OrchestraHit' },
         ]
       },
 
       {
-        label: ' Sons quotidiens', icon: '🚪', color: '#88ccff',
+        label: 'Sons quotidiens', icon: '🚪', color: '#88ccff',
         items: [
           // { name: 'Scratch',          icon: '💿', pc:125, msb:121, lsb:4,   title: 'GM2 => Scratch' },
           { name: 'Carillon (rêve)',  icon: '🎐', pc:125, msb:121, lsb:5,   title: 'GM2 => Wind Chimes' },
