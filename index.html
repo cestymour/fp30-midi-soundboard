@@ -91,6 +91,14 @@
       text-align: right;
     }
 
+    /* ── Zone connexion (select + badge) : taille fixe, ne bouge pas ── */
+    .connexion-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
     select {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 0.75rem;
@@ -99,18 +107,26 @@
       border: 1px solid var(--border);
       padding: 5px 10px;
       border-radius: 4px;
-      min-width: 180px;
+      width: 220px;
+      cursor: pointer;
+      transition: border-color 0.12s;
     }
+    select:hover { border-color: #555575; }
 
     #status {
       font-size: 0.72rem;
       padding: 4px 10px;
       border-radius: 20px;
       border: 1px solid var(--border);
-      color: var(--dim);
+      color: #ff4444;
+      border-color: #ff4444;
       white-space: nowrap;
+      width: 110px;
+      text-align: center;
+      flex-shrink: 0;
     }
-    #status.ok  { color: #4cffaa; border-color: #4cffaa; }
+    #status.usb { color: #4cffaa; border-color: #4cffaa; }
+    #status.bt  { color: #55aaff; border-color: #55aaff; }
     #status.err { color: #ff4444; border-color: #ff4444; }
 
     #activeLabel {
@@ -227,8 +243,10 @@
     <input type="range" id="volSlider" min="0" max="127" value="100">
     <span id="volVal">100</span>
   </div>
-  <select id="selectInterface"><option value="">— Interface MIDI —</option></select>
-  <span id="status">Non connecté</span>
+  <div class="connexion-wrap">
+    <select id="midiSelect"></select>
+    <span id="status">Non connecté</span>
+  </div>
   <div id="activeLabel">Actif : <span>—</span></div>
 </header>
 
@@ -236,7 +254,10 @@
 
 <footer>FP-30X · Ch.1 · Clic = sélection · Jouer au piano</footer>
 
+<script src="ble-midi-parser.bundle.js"></script>
+<script src="bluetoothMIDI.js"></script>
 <script>
+
 const COLUMNS = [
 
   // ════════════════════════════════════════
@@ -458,37 +479,202 @@ const COLUMNS = [
 let midiOutput = null;
 let activeBtn  = null;
 let volume     = 100;
+let currentConnectionType = null; // 'usb' | 'bt' | null
+
+// ── Routage MIDI : USB ou Bluetooth ────────────────────
+// Envoie les octets MIDI vers la connexion active (USB en priorité, sinon BT).
+function sendMidi(bytes) {
+  if (midiOutput) {
+    midiOutput.send(bytes);
+  } else if (bt.status === 'connected') {
+    bt.send(bytes);
+  } else {
+    console.error('PAS de connexion MIDI active !');
+  }
+}
+
+// ── Bluetooth MIDI ──────────────────────────────────────
+const bt = new BluetoothMIDI({
+  onStatusChange: (status, error) => {
+    if (status === 'connected') {
+      // Déconnecter USB si actif
+      if (midiOutput) {
+        console.log('Switch USB → BT : déconnexion USB');
+        midiOutput = null;
+      }
+      currentConnectionType = 'bt';
+      // Mettre à jour la sélection dans le select sans déclencher le handler
+      midiSelect.value = '__bluetooth__';
+      updateStatusBadge();
+      sendVolume(volume);
+    } else if (status === 'idle' || status === 'error') {
+      if (currentConnectionType === 'bt') {
+        currentConnectionType = null;
+        updateStatusBadge();
+      }
+      // Resynchroniser le select sur la connexion réelle
+      if (midiOutput) {
+        // Retrouver l'option USB correspondante
+        const usbOpt = Array.from(midiSelect.options).find(o => o.text === '🔌 ' + midiOutput.name);
+        midiSelect.value = usbOpt ? usbOpt.value : '__none__';
+      } else {
+        midiSelect.value = '__none__';
+      }
+    }
+  },
+});
+
+function sendInstrumentPatch(inst) {
+  const bankMsb = [0xB0, 0x00, inst.msb];
+  const bankLsb = [0xB0, 0x20, inst.lsb];
+  const pc = [0xC0, inst.pc - 1];
+  if (midiOutput) {
+    midiOutput.send(bankMsb);
+    midiOutput.send(bankLsb);
+    midiOutput.send(pc);
+  } else if (bt.status === 'connected') {
+    bt.send(bankMsb);
+    bt.send(bankLsb);
+    bt.send(pc);
+  }
+  else {
+    console.error('PAS de connexion MIDI active !');
+  }
+}
+
+// ── Web MIDI (USB filaire) ──────────────────────────────
+let midiAccess = null;
+const midiSelect = document.getElementById('midiSelect');
 
 navigator.requestMIDIAccess({ sysex: false }).then(access => {
-  const sel = document.getElementById('selectInterface');
+  midiAccess = access;
+  populateMidiSelect(true); // true = premier chargement → auto-sélection piano
+  access.onstatechange = () => populateMidiSelect(false);
+}, () => {
+  updateStatusBadge('error');
+});
 
-  const populate = () => {
-    const prev = sel.value;
-    sel.innerHTML = '<option value="">— Interface MIDI —</option>';
-    access.outputs.forEach(out => {
-      const opt = document.createElement('option');
-      opt.value = out.id;
-      opt.textContent = out.name;
-      if (out.id === prev) opt.selected = true;
-      sel.appendChild(opt);
-    });
-  };
+function populateMidiSelect(isFirstLoad = false) {
+  const prev = midiSelect.value;
 
-  sel.addEventListener('change', () => {
-    const selectedName = sel.options[sel.selectedIndex].text;
+  // Recenser les sorties USB disponibles
+  const usbOutputs = [];
+  if (midiAccess) {
+    midiAccess.outputs.forEach(out => usbOutputs.push(out));
+  }
+
+  midiSelect.innerHTML = '';
+
+  // Option "Sélectionner une connexion" — toujours présente en premier
+  const noneOpt = document.createElement('option');
+  noneOpt.value = '__none__';
+  noneOpt.textContent = '— Sélectionner une connexion —';
+  midiSelect.appendChild(noneOpt);
+
+  // Option Bluetooth (si supporté)
+  if (navigator.bluetooth) {
+    const btOpt = document.createElement('option');
+    btOpt.value = '__bluetooth__';
+    btOpt.textContent = '>ᛒ Bluetooth MIDI';
+    midiSelect.appendChild(btOpt);
+  }
+
+  // Options USB (avec emoji prise)
+  usbOutputs.forEach(out => {
+    const opt = document.createElement('option');
+    opt.value = out.id;
+    opt.textContent = '🎹 ' + out.name;
+    midiSelect.appendChild(opt);
+  });
+
+  // ── Restaurer / auto-sélectionner ──
+  if (currentConnectionType === 'bt') {
+    // BT actif : maintenir la sélection BT
+    midiSelect.value = '__bluetooth__';
+  } else if (currentConnectionType === 'usb' && prev) {
+    // USB actif : vérifier que l'option existe encore
+    const stillExists = Array.from(midiSelect.options).some(o => o.value === prev);
+    if (stillExists) {
+      midiSelect.value = prev;
+    } else {
+      // Le périphérique USB a disparu (débranché)
+      midiOutput = null;
+      currentConnectionType = null;
+      updateStatusBadge();
+      midiSelect.value = '__none__';
+    }
+  } else if (isFirstLoad) {
+    // Premier chargement : chercher un périphérique contenant "piano" (insensible à la casse)
+    const pianoOpt = Array.from(midiSelect.options).find(
+      o => o.value !== '__none__' && o.value !== '__bluetooth__' && o.textContent.toLowerCase().includes('piano')
+    );
+    if (pianoOpt) {
+      midiSelect.value = pianoOpt.value;
+      midiSelect.dispatchEvent(new Event('change'));
+    } else {
+      midiSelect.value = '__none__';
+    }
+  } else {
+    midiSelect.value = '__none__';
+  }
+}
+
+midiSelect.addEventListener('change', async () => {
+  const val = midiSelect.value;
+
+  if (val === '__none__') {
+    // Déconnexion totale
+    if (bt.status === 'connected') bt.disconnect();
+    midiOutput = null;
+    currentConnectionType = null;
+    updateStatusBadge();
+  } else if (val === '__bluetooth__') {
+    // Sauvegarder l'état USB avant de tenter le BT
+    const prevUsbOutput = midiOutput;
+    const prevUsbId     = midiOutput ? Array.from(midiSelect.options).find(o => o.textContent === '🔌 ' + midiOutput.name)?.value : null;
+
+    // Déconnecter USB si actif
+    if (midiOutput) {
+      console.log('Switch USB → BT : déconnexion USB');
+      midiOutput = null;
+    }
+    // Connecter BT si pas déjà connecté
+    if (bt.status !== 'connected') {
+      await bt.connect();
+      // Si l'utilisateur a annulé le dialog ou erreur → restaurer USB si possible
+      if (bt.status !== 'connected') {
+        if (prevUsbOutput && prevUsbId) {
+          // Retour sur la connexion USB précédente
+          midiOutput = prevUsbOutput;
+          currentConnectionType = 'usb';
+          midiSelect.value = prevUsbId;
+          updateStatusBadge();
+          console.log('Annulation BT → retour USB :', prevUsbOutput.name);
+        } else {
+          // Pas d'USB précédent → retour sur "Sélectionner une connexion"
+          currentConnectionType = null;
+          midiSelect.value = '__none__';
+          updateStatusBadge();
+        }
+      }
+    }
+  } else {
+    // Connexion USB
+    if (bt.status === 'connected') {
+      console.log('Switch BT → USB : déconnexion BT');
+      bt.disconnect();
+    }
+
+    // Retrouver la sortie par id
     midiOutput = null;
     let midiInput = null;
 
-    access.outputs.forEach(out => {
-      if (out.name === selectedName) midiOutput = out;
+    midiAccess.outputs.forEach(out => {
+      if (out.id === val) midiOutput = out;
     });
-    access.inputs.forEach(inp => {
-      if (inp.name === selectedName) midiInput = inp;
+    midiAccess.inputs.forEach(inp => {
+      if (inp.name === midiOutput?.name) midiInput = inp;
     });
-
-    const st = document.getElementById('status');
-    st.textContent = midiOutput ? '● Connecté' : '● Non connecté';
-    st.className   = midiOutput ? 'ok' : 'err';
 
     if (midiInput) {
       midiInput.onmidimessage = (event) => {
@@ -500,33 +686,31 @@ navigator.requestMIDIAccess({ sysex: false }).then(access => {
       };
     }
 
+    currentConnectionType = midiOutput ? 'usb' : null;
+    updateStatusBadge();
     if (midiOutput) sendVolume(volume);
-  });
-
-  // populate() et auto-sélection APRÈS que le listener soit branché
-  populate();
-  if (sel.options.length === 2) {
-    sel.selectedIndex = 1;
-    sel.dispatchEvent(new Event('change'));
   }
-
-  access.onstatechange = () => {
-    populate();
-    if (sel.options.length === 2 && sel.selectedIndex === 0) {
-      sel.selectedIndex = 1;
-      sel.dispatchEvent(new Event('change'));
-    }
-  };
-
-}, () => {
-  const st = document.getElementById('status');
-  st.textContent = '● MIDI refusé';
-  st.className = 'err';
 });
 
+function updateStatusBadge(forceError = false) {
+  const badge = document.getElementById('status');
+  if (forceError === 'error') {
+    badge.textContent = '● MIDI refusé';
+    badge.className = 'err';
+  } else if (currentConnectionType === 'usb') {
+    badge.textContent = '● USB';
+    badge.className = 'usb';
+  } else if (currentConnectionType === 'bt') {
+    badge.textContent = '● BT';
+    badge.className = 'bt';
+  } else {
+    badge.textContent = 'Non connecté';
+    badge.className = '';
+  }
+}
+
 function sendVolume(val) {
-  if (midiOutput)
-    midiOutput.send([0xB0, 0x07, val]); // CC7 Volume ch.1
+  sendMidi([0xB0, 0x07, val]); // CC7 Volume ch.1
 }
 
 document.getElementById('volSlider').addEventListener('input', function() {
@@ -543,14 +727,8 @@ function selectInstrument(btn, inst) {
   document.getElementById('activeLabel').innerHTML =
     `Actif : <span>${inst.name}</span>`;
 
-  if (midiOutput) {
-    console.log('Envoi MIDI:', inst.name, 'MSB:', inst.msb, 'LSB:', inst.lsb, 'PC:', inst.pc - 1);
-    midiOutput.send([0xB0, 0x00, inst.msb]); // Bank Select MSB
-    midiOutput.send([0xB0, 0x20, inst.lsb]); // Bank Select LSB
-    midiOutput.send([0xC0, inst.pc - 1]);     // Program Change (base 0)
-  } else {
-    console.error('PAS de midiOutput !');
-  }
+  console.log('Envoi MIDI:', inst.name, 'MSB:', inst.msb, 'LSB:', inst.lsb, 'PC:', inst.pc - 1);
+  sendInstrumentPatch(inst);
 }
 
 // ═══════════════════════════════════════════════════════
