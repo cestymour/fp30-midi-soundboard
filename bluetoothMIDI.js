@@ -20,7 +20,7 @@ class BluetoothMIDI {
   #onError       = null;
   /** Une seule écriture GATT à la fois sur cette caractéristique (sinon « already in progress »). */
   #writeQueue    = Promise.resolve();
-  /** Même idée que midiOutput.send(event.data) en USB : renvoyer le MIDI entrant vers le piano (FP-30). */
+  /** Loopback : renvoyer le MIDI entrant vers le piano (comme midiOutput.send(event.data) en USB). */
   #loopbackIncoming = true;
 
   constructor({ onNoteOn, onNoteOff, onStatusChange, onError, loopbackIncoming = true } = {}) {
@@ -37,7 +37,7 @@ class BluetoothMIDI {
 
   /**
    * Envoie des octets MIDI via la caractéristique BLE.
-   * Le format BLE MIDI impose : [header, timestamp, ...midiBytes]
+   * Format BLE MIDI : [header, timestamp, ...midiBytes]
    * header    = 0x80 (bit7=1, bit6=1, timestamp high = 0)
    * timestamp = 0x80 (bit7=1, timestamp low = 0)
    * @param {number[]} midiBytes
@@ -65,7 +65,7 @@ class BluetoothMIDI {
       .catch(e => console.error('MIDI OUT (BT) échoué:', e.message));
   }
 
-  /** Reconstitue les octets MIDI (comme event.data Web MIDI) pour le loopback. */
+  /** Reconstitue les octets MIDI bruts (comme event.data Web MIDI) pour le loopback. */
   #bytesForLoopback(ev) {
     if (ev?.type === 'sysex') return null;
     const status = ev.midiStatus, one = ev.midiOne, two = ev.midiTwo;
@@ -88,7 +88,7 @@ class BluetoothMIDI {
     }
     await this.#cleanup();
     this.#setStatus('scanning', null);
-    let attemptId = 0;
+    const attemptId = ++this.#attemptId; // snapshot local, immuable pour cette tentative
     try {
       const device = await navigator.bluetooth.requestDevice({
         filters:          [{ services: [MIDI_SERVICE_UUID] }],
@@ -96,7 +96,6 @@ class BluetoothMIDI {
       });
       this.#device = device;
       this.#characteristic = null;
-      attemptId = ++this.#attemptId;
 
       const onGattDisconnected = () => {
         if (attemptId !== this.#attemptId) return;
@@ -162,7 +161,8 @@ class BluetoothMIDI {
         }
       }
     } catch (err) {
-      if (attemptId !== 0 && attemptId !== this.#attemptId) return;
+      // On vérifie uniquement que cette tentative est toujours la courante
+      if (attemptId !== this.#attemptId) return;
       if (err.name === 'NotFoundError') {
         this.#setStatus('idle', null);
       } else {

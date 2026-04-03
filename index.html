@@ -18,23 +18,26 @@
       --active-glow:    #2288ff88;
       --active-txt:     #55aaff;
 
-      --cat-classic:   #7c9cff;
-      --cat-sacre:     #ffe08a;
-      --cat-western:   #ffaa55;
-      --cat-medieval:  #88ddaa;
-      --cat-asian:     #ff9eb5;
-      --cat-jazz:      #ffcc55;
-      --cat-perc:      #ffaa88;
-      --cat-comedie:   #66ddcc;
-      --cat-futur:     #cc88ff;
-      --cat-mystere:   #6688cc;
-      --cat-horreur:   #aa66ff;
-      --cat-nature:    #4cffaa;
-      --cat-animal:    #ffdd55;
-      --cat-quotidien: #88ccff;
-      --cat-vehicle:   #ff9944;
-      --cat-humain:    #ff66aa;
-      --cat-sfx:       #dd66ff;
+      --cat-classic:    #7c9cff;
+      --cat-sacre:      #ffe08a;
+      --cat-western:    #ffaa55;
+      --cat-medieval:   #88ddaa;
+      --cat-asian:      #ff9eb5;
+      --cat-jazz:       #ffcc55;
+      --cat-perc:       #ffaa88;
+      --cat-comedie:    #66ddcc;
+      --cat-futur:      #cc88ff;
+      --cat-mystere:    #6688cc;
+      --cat-horreur:    #aa66ff;
+      --cat-nature:     #4cffaa;
+      --cat-animal:     #ffdd55;
+      --cat-quotidien:  #88ccff;
+      --cat-vehicle:    #ff9944;
+      --cat-humain:     #ff66aa;
+      --cat-sfx:        #dd66ff;
+      --cat-romantique: #ff8fab;
+      --cat-fantastique:#a8ffd8;
+      --cat-monde:      #ffd6a5;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -299,7 +302,7 @@ const COLUMNS = [
       ]
 	},
     {
-      label: '⚔️ Fantastique / Féérique', color: 'var(--cat-fantastique)',
+      label: '🧚 Fantastique / Féérique', color: 'var(--cat-fantastique)',
       instruments: [
         { name: 'Flûte',             icon: '🪈', pc:74,  msb:121, lsb:0,   title: 'GM2 => Flute' },
         //{ name: 'Flûte médiévale',   icon: '🌿', pc:20,  msb:16,  lsb:66,  title: "Roland => Nason flt 8'" },
@@ -309,7 +312,7 @@ const COLUMNS = [
       ]
     },
     {
-      label: '🌍 Musique du monde', color: 'var(--cat-asian)',
+      label: '🌍 Musique du monde', color: 'var(--cat-monde)',
       instruments: [
         //{ name: 'Yang Qin',          icon: '🎌', pc:47,  msb:121, lsb:1,   title: 'GM2 => Yang Qin' },
         { name: 'Shamisen',          icon: '🎌', pc:107, msb:121, lsb:0,   title: 'GM2 => Shamisen' },
@@ -325,7 +328,7 @@ const COLUMNS = [
   // ════════════════════════════════════════
   { col: 1, categories: [
     {
-      label: '🌹 Romantique / Amour', color: 'var(--cat-humain)',
+      label: '🌹 Romantique / Amour', color: 'var(--cat-romantique)',
       instruments: [
         { name: 'Violons',           icon: '🎻', pc:49,  msb:16,  lsb:64,  title: 'Roland => Chamber Str' },
         { name: 'Violon solo',       icon: '🎻', pc:41,  msb:121, lsb:0,   title: 'GM2 => Violin' },
@@ -377,7 +380,7 @@ const COLUMNS = [
   // ════════════════════════════════════════
   // COL 2 (index 2) — Sons / Bruits (gauche)
   // ════════════════════════════════════════
-  { col: 2, soundsCol: true, categories: [
+  { col: 2, categories: [
     {
       label: '🎪 Comédie / Cartoon', color: 'var(--cat-comedie)',
       instruments: [
@@ -474,14 +477,24 @@ const COLUMNS = [
 ];
 
 // ═══════════════════════════════════════════════════════
-// MIDI
+// CONSTANTES MIDI
+// ═══════════════════════════════════════════════════════
+// Canal MIDI 1 (0 en notation binaire, les messages MIDI sont 0-indexed)
+const MIDI_CHANNEL = 0;
+
+// ═══════════════════════════════════════════════════════
+// ÉTAT
 // ═══════════════════════════════════════════════════════
 let midiOutput = null;
+let midiInput  = null; // gardé en module pour nettoyage lors des changements
 let activeBtn  = null;
 let volume     = 100;
 let currentConnectionType = null; // 'usb' | 'bt' | null
 
-// ── Routage MIDI : USB ou Bluetooth ────────────────────
+// ═══════════════════════════════════════════════════════
+// MIDI — Routage & Envoi
+// ═══════════════════════════════════════════════════════
+
 // Envoie les octets MIDI vers la connexion active (USB en priorité, sinon BT).
 function sendMidi(bytes) {
   if (midiOutput) {
@@ -493,7 +506,21 @@ function sendMidi(bytes) {
   }
 }
 
-// ── Bluetooth MIDI ──────────────────────────────────────
+// Envoie le patch complet (Bank MSB, Bank LSB, Program Change) pour un instrument.
+// Les PC dans les données sont en notation musicale (1–128) ; MIDI attend 0–127, d'où le -1.
+function sendInstrumentPatch(inst) {
+  sendMidi([0xB0 | MIDI_CHANNEL, 0x00, inst.msb]); // CC0  Bank Select MSB
+  sendMidi([0xB0 | MIDI_CHANNEL, 0x20, inst.lsb]); // CC32 Bank Select LSB
+  sendMidi([0xC0 | MIDI_CHANNEL, inst.pc - 1]);     // Program Change (0-indexed)
+}
+
+function sendVolume(val) {
+  sendMidi([0xB0 | MIDI_CHANNEL, 0x07, val]); // CC7 Volume
+}
+
+// ═══════════════════════════════════════════════════════
+// BLUETOOTH MIDI
+// ═══════════════════════════════════════════════════════
 const bt = new BluetoothMIDI({
   onStatusChange: (status, error) => {
     if (status === 'connected') {
@@ -514,8 +541,7 @@ const bt = new BluetoothMIDI({
       }
       // Resynchroniser le select sur la connexion réelle
       if (midiOutput) {
-        // Retrouver l'option USB correspondante
-        const usbOpt = Array.from(midiSelect.options).find(o => o.text === '🔌 ' + midiOutput.name);
+        const usbOpt = Array.from(midiSelect.options).find(o => o.text === '🎹 ' + midiOutput.name);
         midiSelect.value = usbOpt ? usbOpt.value : '__none__';
       } else {
         midiSelect.value = '__none__';
@@ -524,25 +550,9 @@ const bt = new BluetoothMIDI({
   },
 });
 
-function sendInstrumentPatch(inst) {
-  const bankMsb = [0xB0, 0x00, inst.msb];
-  const bankLsb = [0xB0, 0x20, inst.lsb];
-  const pc = [0xC0, inst.pc - 1];
-  if (midiOutput) {
-    midiOutput.send(bankMsb);
-    midiOutput.send(bankLsb);
-    midiOutput.send(pc);
-  } else if (bt.status === 'connected') {
-    bt.send(bankMsb);
-    bt.send(bankLsb);
-    bt.send(pc);
-  }
-  else {
-    console.error('PAS de connexion MIDI active !');
-  }
-}
-
-// ── Web MIDI (USB filaire) ──────────────────────────────
+// ═══════════════════════════════════════════════════════
+// WEB MIDI (USB filaire)
+// ═══════════════════════════════════════════════════════
 let midiAccess = null;
 const midiSelect = document.getElementById('midiSelect');
 
@@ -551,7 +561,8 @@ navigator.requestMIDIAccess({ sysex: false }).then(access => {
   populateMidiSelect(true); // true = premier chargement → auto-sélection piano
   access.onstatechange = () => populateMidiSelect(false);
 }, () => {
-  updateStatusBadge('error');
+  currentConnectionType = null;
+  updateStatusBadge(true); // true = forcer l'affichage erreur
 });
 
 function populateMidiSelect(isFirstLoad = false) {
@@ -598,6 +609,7 @@ function populateMidiSelect(isFirstLoad = false) {
       midiSelect.value = prev;
     } else {
       // Le périphérique USB a disparu (débranché)
+      disconnectMidiInput();
       midiOutput = null;
       currentConnectionType = null;
       updateStatusBadge();
@@ -619,23 +631,35 @@ function populateMidiSelect(isFirstLoad = false) {
   }
 }
 
+// Détache proprement le listener de l'entrée MIDI précédente.
+function disconnectMidiInput() {
+  if (midiInput) {
+    midiInput.onmidimessage = null;
+    midiInput = null;
+  }
+}
+
 midiSelect.addEventListener('change', async () => {
   const val = midiSelect.value;
 
   if (val === '__none__') {
     // Déconnexion totale
     if (bt.status === 'connected') bt.disconnect();
+    disconnectMidiInput();
     midiOutput = null;
     currentConnectionType = null;
     updateStatusBadge();
   } else if (val === '__bluetooth__') {
     // Sauvegarder l'état USB avant de tenter le BT
     const prevUsbOutput = midiOutput;
-    const prevUsbId     = midiOutput ? Array.from(midiSelect.options).find(o => o.textContent === '🔌 ' + midiOutput.name)?.value : null;
+    const prevUsbId     = midiOutput
+      ? Array.from(midiSelect.options).find(o => o.textContent === '🎹 ' + midiOutput.name)?.value
+      : null;
 
     // Déconnecter USB si actif
     if (midiOutput) {
       console.log('Switch USB → BT : déconnexion USB');
+      disconnectMidiInput();
       midiOutput = null;
     }
     // Connecter BT si pas déjà connecté
@@ -665,13 +689,14 @@ midiSelect.addEventListener('change', async () => {
       bt.disconnect();
     }
 
-    // Retrouver la sortie par id
+    disconnectMidiInput();
     midiOutput = null;
-    let midiInput = null;
 
     midiAccess.outputs.forEach(out => {
       if (out.id === val) midiOutput = out;
     });
+
+    // Chercher l'entrée correspondante (même nom) pour le loopback
     midiAccess.inputs.forEach(inp => {
       if (inp.name === midiOutput?.name) midiInput = inp;
     });
@@ -692,9 +717,12 @@ midiSelect.addEventListener('change', async () => {
   }
 });
 
-function updateStatusBadge(forceError = false) {
+// ═══════════════════════════════════════════════════════
+// UI — Badge de statut
+// ═══════════════════════════════════════════════════════
+function updateStatusBadge(isError = false) {
   const badge = document.getElementById('status');
-  if (forceError === 'error') {
+  if (isError) {
     badge.textContent = '● MIDI refusé';
     badge.className = 'err';
   } else if (currentConnectionType === 'usb') {
@@ -709,16 +737,18 @@ function updateStatusBadge(forceError = false) {
   }
 }
 
-function sendVolume(val) {
-  sendMidi([0xB0, 0x07, val]); // CC7 Volume ch.1
-}
-
+// ═══════════════════════════════════════════════════════
+// UI — Volume
+// ═══════════════════════════════════════════════════════
 document.getElementById('volSlider').addEventListener('input', function() {
   volume = parseInt(this.value);
   document.getElementById('volVal').textContent = volume;
   sendVolume(volume);
 });
 
+// ═══════════════════════════════════════════════════════
+// UI — Sélection instrument
+// ═══════════════════════════════════════════════════════
 function selectInstrument(btn, inst) {
   if (activeBtn) activeBtn.classList.remove('active');
   activeBtn = btn;
@@ -727,7 +757,7 @@ function selectInstrument(btn, inst) {
   document.getElementById('activeLabel').innerHTML =
     `Actif : <span>${inst.name}</span>`;
 
-  console.log('Envoi MIDI:', inst.name, 'MSB:', inst.msb, 'LSB:', inst.lsb, 'PC:', inst.pc - 1);
+  console.log('Envoi MIDI:', inst.name, '| MSB:', inst.msb, '| LSB:', inst.lsb, '| PC:', inst.pc - 1);
   sendInstrumentPatch(inst);
 }
 
@@ -742,6 +772,7 @@ const cols  = [0,1,2,3].map(() => {
   return c;
 });
 
+// Séparateur visuel entre instruments (col 0-1) et sons (col 2-3)
 cols[2].classList.add('sounds-start');
 
 COLUMNS.forEach(colDef => {
