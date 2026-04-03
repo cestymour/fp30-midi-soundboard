@@ -24,14 +24,8 @@ function syncAudioSliders(pct) {
   });
 }
 
-function syncMidiVolIcon(val) {
-  document.querySelectorAll('.midi-vol').forEach(s => {
-    updateVolIcon(s.closest('.volume-wrap').querySelector('.vol-icon'), val, 127);
-  });
-}
-
 function updateNowPlaying(text) {
-  document.querySelectorAll('.panel-audio.active .now-playing-label')
+  document.querySelectorAll('.panel-audio .now-playing-label')
     .forEach(el => el.textContent = text);
 }
 
@@ -133,6 +127,7 @@ function playSound(btn) {
   }, { once: true });
 
   audio.addEventListener('ended', () => stopSound(false), { once: true });
+
   audio.addEventListener('error', () => {
     console.warn('Fichier introuvable :', src);
     btn.classList.add('missing');
@@ -148,4 +143,17 @@ function playSound(btn) {
   updateNowPlaying('▶ ' + (btn.dataset.label || 'EN LECTURE'));
 
   audio.load();
+}
+
+// ═══════════════════════════════════════════════════════
+// RETOUR TACTILE
+// ═══════════════════════════════════════════════════════
+
+function initAudioTouchFeedback(panelsEl) {
+  panelsEl.addEventListener('touchstart', e => {
+    const btn = e.target.closest('.sound-btn, .inst-btn');
+    if (!btn || btn.classList.contains('missing')) return;
+    btn.style.transform = 'scale(0.93)';
+    setTimeout(() => { btn.style.transform = ''; }, 120);
+  }, { passive: true });
 }

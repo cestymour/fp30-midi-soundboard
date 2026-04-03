@@ -265,8 +265,9 @@ function init() {
   }
 
   buildUI();
-  initBluetooth();  // dans midi.js
-  initWebMidi();    // dans midi.js
+  initAudioTouchFeedback(panelsEl); // dans audio.js
+  initBluetooth();                  // dans midi.js
+  initWebMidi();                    // dans midi.js
 }
 
 init();
