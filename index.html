@@ -1,368 +1,571 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>🎭 Impro — Instruments & Sons</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>🎭 IMPRO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+<div id="app">
 
-<header>
-  <h1>🎭 IMPRO</h1>
-  <div class="vol-wrap">
-    <label>VOL</label>
-    <input type="range" id="volSlider" min="0" max="127" value="100">
-    <span id="volVal">100</span>
-  </div>
-  <div class="connexion-wrap">
-    <select id="midiSelect"></select>
-    <span id="status">Non connecté</span>
-  </div>
-  <div id="activeLabel">Actif : <span>—</span></div>
-</header>
+  <!-- ═══════════════════════════════════════
+       HEADER MINIMALISTE
+  ════════════════════════════════════════ -->
+  <header id="header">
+    <div id="logo">
+      <span class="logo-bracket">[</span>
+      <span class="logo-text">IMPRO</span>
+      <span class="logo-bracket">]</span>
+    </div>
+    <nav id="tab-nav">
+      <!-- Onglets MIDI -->
+      <button class="tab-btn active" data-tab="0" data-type="midi" style="--tab-accent:#7c9cff">
+        <span class="tab-icon">🎹</span>
+        <span class="tab-label">Instruments</span>
+      </button>
+      <button class="tab-btn" data-tab="1" data-type="midi" style="--tab-accent:#ffaa55">
+        <span class="tab-icon">🔊</span>
+        <span class="tab-label">Sons MIDI</span>
+      </button>
+      <!-- Séparateur visuel MIDI / Audio -->
+      <div class="tab-separator"></div>
+      <!-- Onglets Audio -->
+      <button class="tab-btn" data-tab="2" data-type="audio" style="--tab-accent:#4cffaa">
+        <span class="tab-icon">🌿</span>
+        <span class="tab-label">Nature</span>
+      </button>
+      <button class="tab-btn" data-tab="3" data-type="audio" style="--tab-accent:#88ccff">
+        <span class="tab-icon">🏙️</span>
+        <span class="tab-label">Ambiances</span>
+      </button>
+      <button class="tab-btn" data-tab="4" data-type="audio" style="--tab-accent:#dd66ff">
+        <span class="tab-icon">⚡</span>
+        <span class="tab-label">Effets</span>
+      </button>
+      <button class="tab-btn" data-tab="5" data-type="audio" style="--tab-accent:#ffcc55">
+        <span class="tab-icon">🎵</span>
+        <span class="tab-label">Musique</span>
+      </button>
+    </nav>
+  </header>
 
-<main id="board"></main>
+  <!-- ═══════════════════════════════════════
+       PANNEAUX
+  ════════════════════════════════════════ -->
+  <main id="panels">
 
-<footer>FP-30X · Ch.1 · Clic = sélection · Jouer au piano</footer>
+    <!-- ── PANNEAU MIDI 1 : Instruments ── -->
+    <section class="panel panel-midi active" data-panel="0" style="--panel-accent:#7c9cff">
 
-<script src="ble-midi-parser.bundle.js"></script>
-<script src="bluetoothMIDI.js"></script>
-<script src="tones.js"></script>
+      <div class="panel-controls">
+        <!-- Connexion MIDI -->
+        <div class="midi-connect">
+          <select class="midi-select">
+            <option value="__none__">— Connexion MIDI —</option>
+            <option value="__bluetooth__">ᛒ Bluetooth MIDI</option>
+            <option value="usb1">🎹 Roland FP-30X</option>
+          </select>
+          <span class="midi-badge usb">● USB</span>
+        </div>
+        <!-- Volume -->
+        <div class="volume-wrap">
+          <span class="vol-icon">🔊</span>
+          <input type="range" class="vol-slider" min="0" max="127" value="100" />
+          <span class="vol-value">100</span>
+        </div>
+      </div>
+
+      <!-- Grille catégories -->
+      <div class="midi-grid">
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#7c9cff">🎹 Classique</div>
+          <div class="btn-grid">
+            <button class="inst-btn active">
+              <span class="btn-icon">🎹</span>
+              <span class="btn-label">Piano</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🪉</span>
+              <span class="btn-label">Harpe</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎶</span>
+              <span class="btn-label">Chœur</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎵</span>
+              <span class="btn-label">Exemple</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ffe08a">⛪ Sacré</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">⛪</span>
+              <span class="btn-label">Orgue</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">✝️</span>
+              <span class="btn-label">Gospel</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🔔</span>
+              <span class="btn-label">Cloches</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎄</span>
+              <span class="btn-label">Noël</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ffaa55">🤠 Western</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">🤠</span>
+              <span class="btn-label">Saloon</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎵</span>
+              <span class="btn-label">Harmonica</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🪕</span>
+              <span class="btn-label">Banjo</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎸</span>
+              <span class="btn-label">Exemple</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#88ddaa">⚔️ Médiéval</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">👑</span>
+              <span class="btn-label">Clavecin</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">📯</span>
+              <span class="btn-label">Cuivres</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎸</span>
+              <span class="btn-label">Guitare</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎵</span>
+              <span class="btn-label">Exemple</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#a8ffd8">🧚 Fantastique</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">🪈</span>
+              <span class="btn-label">Flûte</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎋</span>
+              <span class="btn-label">Flûte Pan</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🧝</span>
+              <span class="btn-label">Kalimba</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🪉</span>
+              <span class="btn-label">Harpe glis.</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ffd6a5">🌍 Monde</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">🎌</span>
+              <span class="btn-label">Shamisen</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🌴</span>
+              <span class="btn-label">Steelpan</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🕌</span>
+              <span class="btn-label">Sitar</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎵</span>
+              <span class="btn-label">Exemple</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ff8fab">🌹 Romantique</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">🎻</span>
+              <span class="btn-label">Violons</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎻</span>
+              <span class="btn-label">Violon solo</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🪗</span>
+              <span class="btn-label">Accordéon</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎵</span>
+              <span class="btn-label">Exemple</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#cc88ff">🚀 Futuriste</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">🔆</span>
+              <span class="btn-label">Laser</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🚀</span>
+              <span class="btn-label">Fantasia</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">💎</span>
+              <span class="btn-label">Piano élec.</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">❄️</span>
+              <span class="btn-label">Cristal</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#6688cc">🌙 Mystère</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">🌌</span>
+              <span class="btn-label">Pad boréal</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🌙</span>
+              <span class="btn-label">Pad légend.</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🔮</span>
+              <span class="btn-label">Cordes Tron</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">👁️</span>
+              <span class="btn-label">Voix cél.</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#aa66ff">👻 Horreur</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">🌀</span>
+              <span class="btn-label">Nappe sombre</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">👹</span>
+              <span class="btn-label">Gobelins</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">😱</span>
+              <span class="btn-label">Halo</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎵</span>
+              <span class="btn-label">Exemple</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ffcc55">🎷 Jazz</div>
+          <div class="btn-grid">
+            <button class="inst-btn">
+              <span class="btn-icon">🗣️</span>
+              <span class="btn-label">Voix jazz</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎹</span>
+              <span class="btn-label">Rhodes</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎼</span>
+              <span class="btn-label">Orgue jazz</span>
+            </button>
+            <button class="inst-btn">
+              <span class="btn-icon">🎷</span>
+              <span class="btn-label">Saxo</span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /midi-grid -->
+    </section>
+
+    <!-- ── PANNEAU MIDI 2 : Sons MIDI ── -->
+    <section class="panel panel-midi" data-panel="1" style="--panel-accent:#ffaa55">
+
+      <div class="panel-controls">
+        <div class="midi-connect">
+          <select class="midi-select">
+            <option value="__none__">— Connexion MIDI —</option>
+            <option value="__bluetooth__">ᛒ Bluetooth MIDI</option>
+          </select>
+          <span class="midi-badge">Non connecté</span>
+        </div>
+        <div class="volume-wrap">
+          <span class="vol-icon">🔊</span>
+          <input type="range" class="vol-slider" min="0" max="127" value="100" />
+          <span class="vol-value">100</span>
+        </div>
+      </div>
+
+      <div class="midi-grid">
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#66ddcc">🎪 Comédie</div>
+          <div class="btn-grid">
+            <button class="inst-btn"><span class="btn-icon">🥢</span><span class="btn-label">Xylophone</span></button>
+            <button class="inst-btn"><span class="btn-icon">🎠</span><span class="btn-label">Boîte musique</span></button>
+            <button class="inst-btn"><span class="btn-icon">🎻</span><span class="btn-label">Pizzicato</span></button>
+            <button class="inst-btn"><span class="btn-icon">🎭</span><span class="btn-label">Coup théâtre</span></button>
+          </div>
+        </div>
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#4cffaa">🌿 Nature</div>
+          <div class="btn-grid">
+            <button class="inst-btn"><span class="btn-icon">🌊</span><span class="btn-label">Mer</span></button>
+            <button class="inst-btn"><span class="btn-icon">🌧️</span><span class="btn-label">Pluie</span></button>
+            <button class="inst-btn"><span class="btn-icon">⚡</span><span class="btn-label">Tonnerre</span></button>
+            <button class="inst-btn"><span class="btn-icon">💨</span><span class="btn-label">Vent</span></button>
+          </div>
+        </div>
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ffdd55">🐾 Animaux</div>
+          <div class="btn-grid">
+            <button class="inst-btn"><span class="btn-icon">🐕</span><span class="btn-label">Chien</span></button>
+            <button class="inst-btn"><span class="btn-icon">🐦</span><span class="btn-label">Oiseaux</span></button>
+            <button class="inst-btn"><span class="btn-icon">🐴</span><span class="btn-label">Galop</span></button>
+            <button class="inst-btn"><span class="btn-icon">🔔</span><span class="btn-label">Cloche vache</span></button>
+          </div>
+        </div>
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#88ccff">🚪 Quotidien</div>
+          <div class="btn-grid">
+            <button class="inst-btn"><span class="btn-icon">☎️</span><span class="btn-label">Téléphone</span></button>
+            <button class="inst-btn"><span class="btn-icon">🚪</span><span class="btn-label">Grincement</span></button>
+            <button class="inst-btn"><span class="btn-icon">🎐</span><span class="btn-label">Carillon</span></button>
+            <button class="inst-btn"><span class="btn-icon">👣</span><span class="btn-label">Pas</span></button>
+          </div>
+        </div>
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ff9944">🚗 Véhicules</div>
+          <div class="btn-grid">
+            <button class="inst-btn"><span class="btn-icon">🚗</span><span class="btn-label">Voiture</span></button>
+            <button class="inst-btn"><span class="btn-icon">🚨</span><span class="btn-label">Sirène</span></button>
+            <button class="inst-btn"><span class="btn-icon">🚂</span><span class="btn-label">Train</span></button>
+            <button class="inst-btn"><span class="btn-icon">🛸</span><span class="btn-label">Vaisseau</span></button>
+          </div>
+        </div>
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ff66aa">👥 Humain</div>
+          <div class="btn-grid">
+            <button class="inst-btn"><span class="btn-icon">😂</span><span class="btn-label">Rire</span></button>
+            <button class="inst-btn"><span class="btn-icon">😱</span><span class="btn-label">Cri</span></button>
+            <button class="inst-btn"><span class="btn-icon">🥊</span><span class="btn-label">Coup poing</span></button>
+            <button class="inst-btn"><span class="btn-icon">💓</span><span class="btn-label">Cœur</span></button>
+          </div>
+        </div>
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#dd66ff">🔫 Effets spéciaux</div>
+          <div class="btn-grid">
+            <button class="inst-btn"><span class="btn-icon">🔫</span><span class="btn-label">Coup de feu</span></button>
+            <button class="inst-btn"><span class="btn-icon">🔫</span><span class="btn-label">Mitraillette</span></button>
+            <button class="inst-btn"><span class="btn-icon">🔫</span><span class="btn-label">Laser</span></button>
+            <button class="inst-btn"><span class="btn-icon">💣</span><span class="btn-label">Explosion</span></button>
+          </div>
+        </div>
+        <div class="cat-block">
+          <div class="cat-title" style="--cat-color:#ffaa88">🥁 Percussions</div>
+          <div class="btn-grid">
+            <button class="inst-btn"><span class="btn-icon">🥁</span><span class="btn-label">Percussions</span></button>
+            <button class="inst-btn"><span class="btn-icon">🫰</span><span class="btn-label">Castagnettes</span></button>
+            <button class="inst-btn"><span class="btn-icon">🥁</span><span class="btn-label">Grosse caisse</span></button>
+            <button class="inst-btn"><span class="btn-icon">🪘</span><span class="btn-label">Tom mélodique</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PANNEAU AUDIO : Nature ── -->
+    <section class="panel panel-audio" data-panel="2" style="--panel-accent:#4cffaa">
+      <div class="panel-controls">
+        <div class="now-playing">
+          <span class="now-playing-label">NO SOUND PLAYING</span>
+          <span class="now-playing-dot"></span>
+        </div>
+        <div class="volume-wrap">
+          <span class="vol-icon">🔊</span>
+          <input type="range" class="vol-slider" min="0" max="100" value="75" />
+          <span class="vol-value">75%</span>
+        </div>
+      </div>
+      <div class="audio-grid">
+        <button class="sound-btn playing">
+          <span class="btn-icon">🌲</span>
+          <span class="btn-label">Forêt</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">🌧️</span>
+          <span class="btn-label">Pluie</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">⛈️</span>
+          <span class="btn-label">Orage</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">💨</span>
+          <span class="btn-label">Vent</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">🏞️</span>
+          <span class="btn-label">Rivière</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">🌊</span>
+          <span class="btn-label">Océan</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">🦗</span>
+          <span class="btn-label">Cigales</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">🐦</span>
+          <span class="btn-label">Oiseaux</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">🔥</span>
+          <span class="btn-label">Feu</span>
+        </button>
+        <button class="sound-btn">
+          <span class="btn-icon">🌩️</span>
+          <span class="btn-label">Tonnerre</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── PANNEAU AUDIO : Ambiances ── -->
+    <section class="panel panel-audio" data-panel="3" style="--panel-accent:#88ccff">
+      <div class="panel-controls">
+        <div class="now-playing">
+          <span class="now-playing-label">NO SOUND PLAYING</span>
+          <span class="now-playing-dot"></span>
+        </div>
+        <div class="volume-wrap">
+          <span class="vol-icon">🔊</span>
+          <input type="range" class="vol-slider" min="0" max="100" value="75" />
+          <span class="vol-value">75%</span>
+        </div>
+      </div>
+      <div class="audio-grid">
+        <button class="sound-btn"><span class="btn-icon">☕</span><span class="btn-label">Café</span></button>
+        <button class="sound-btn"><span class="btn-icon">🖥️</span><span class="btn-label">Bureau</span></button>
+        <button class="sound-btn"><span class="btn-icon">📚</span><span class="btn-label">Bibliothèque</span></button>
+        <button class="sound-btn"><span class="btn-icon">🚇</span><span class="btn-label">Métro</span></button>
+        <button class="sound-btn"><span class="btn-icon">🛒</span><span class="btn-label">Marché</span></button>
+        <button class="sound-btn"><span class="btn-icon">🍽️</span><span class="btn-label">Restaurant</span></button>
+        <button class="sound-btn"><span class="btn-icon">🌃</span><span class="btn-label">Nuit urbaine</span></button>
+        <button class="sound-btn"><span class="btn-icon">🚂</span><span class="btn-label">Train</span></button>
+      </div>
+    </section>
+
+    <!-- ── PANNEAU AUDIO : Effets ── -->
+    <section class="panel panel-audio" data-panel="4" style="--panel-accent:#dd66ff">
+      <div class="panel-controls">
+        <div class="now-playing">
+          <span class="now-playing-label">NO SOUND PLAYING</span>
+          <span class="now-playing-dot"></span>
+        </div>
+        <div class="volume-wrap">
+          <span class="vol-icon">🔊</span>
+          <input type="range" class="vol-slider" min="0" max="100" value="75" />
+          <span class="vol-value">75%</span>
+        </div>
+      </div>
+      <div class="audio-grid">
+        <button class="sound-btn"><span class="btn-icon">🖱️</span><span class="btn-label">Click</span></button>
+        <button class="sound-btn"><span class="btn-icon">🔔</span><span class="btn-label">Notif</span></button>
+        <button class="sound-btn"><span class="btn-icon">🚨</span><span class="btn-label">Alarme</span></button>
+        <button class="sound-btn"><span class="btn-icon">✅</span><span class="btn-label">Succès</span></button>
+        <button class="sound-btn"><span class="btn-icon">❌</span><span class="btn-label">Erreur</span></button>
+        <button class="sound-btn"><span class="btn-icon">🔴</span><span class="btn-label">Laser</span></button>
+        <button class="sound-btn"><span class="btn-icon">💥</span><span class="btn-label">Explosion</span></button>
+        <button class="sound-btn"><span class="btn-icon">🎆</span><span class="btn-label">Feux d'artifices</span></button>
+        <button class="sound-btn"><span class="btn-icon">📡</span><span class="btn-label">Glitch</span></button>
+        <button class="sound-btn"><span class="btn-icon">☕</span><span class="btn-label">Machine café</span></button>
+      </div>
+    </section>
+
+    <!-- ── PANNEAU AUDIO : Musique ── -->
+    <section class="panel panel-audio" data-panel="5" style="--panel-accent:#ffcc55">
+      <div class="panel-controls">
+        <div class="now-playing">
+          <span class="now-playing-label">NO SOUND PLAYING</span>
+          <span class="now-playing-dot"></span>
+        </div>
+        <div class="volume-wrap">
+          <span class="vol-icon">🔊</span>
+          <input type="range" class="vol-slider" min="0" max="100" value="75" />
+          <span class="vol-value">75%</span>
+        </div>
+      </div>
+      <div class="audio-grid">
+        <button class="sound-btn"><span class="btn-icon">🥁</span><span class="btn-label">Batterie</span></button>
+        <button class="sound-btn"><span class="btn-icon">🎸</span><span class="btn-label">Basse</span></button>
+        <button class="sound-btn"><span class="btn-icon">🎹</span><span class="btn-label">Piano</span></button>
+        <button class="sound-btn"><span class="btn-icon">🎻</span><span class="btn-label">Violon</span></button>
+        <button class="sound-btn"><span class="btn-icon">🎺</span><span class="btn-label">Trompette</span></button>
+        <button class="sound-btn"><span class="btn-icon">🎛️</span><span class="btn-label">Synthwave</span></button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Navigation onglets (JS minimal pour la démo visuelle) -->
 <script>
-// ═══════════════════════════════════════════════════════
-// CONSTANTES MIDI
-// ═══════════════════════════════════════════════════════
-// Canal MIDI 1 (0 en notation binaire, les messages MIDI sont 0-indexed)
-const MIDI_CHANNEL = 0;
-
-// ═══════════════════════════════════════════════════════
-// ÉTAT
-// ═══════════════════════════════════════════════════════
-let midiOutput = null;
-let midiInput  = null; // gardé en module pour nettoyage lors des changements
-let activeBtn  = null;
-let volume     = 100;
-let currentConnectionType = null; // 'usb' | 'bt' | null
-
-// ═══════════════════════════════════════════════════════
-// MIDI — Routage & Envoi
-// ═══════════════════════════════════════════════════════
-
-// Envoie les octets MIDI vers la connexion active (USB en priorité, sinon BT).
-function sendMidi(bytes) {
-  if (midiOutput) {
-    midiOutput.send(bytes);
-  } else if (bt.status === 'connected') {
-    bt.send(bytes);
-  } else {
-    console.error('PAS de connexion MIDI active !');
-  }
-}
-
-// Envoie le patch complet (Bank MSB, Bank LSB, Program Change) pour un instrument.
-// Les PC dans les données sont en notation musicale (1–128) ; MIDI attend 0–127, d'où le -1.
-function sendInstrumentPatch(inst) {
-  sendMidi([0xB0 | MIDI_CHANNEL, 0x00, inst.msb]); // CC0  Bank Select MSB
-  sendMidi([0xB0 | MIDI_CHANNEL, 0x20, inst.lsb]); // CC32 Bank Select LSB
-  sendMidi([0xC0 | MIDI_CHANNEL, inst.pc - 1]);     // Program Change (0-indexed)
-}
-
-function sendVolume(val) {
-  sendMidi([0xB0 | MIDI_CHANNEL, 0x07, val]); // CC7 Volume
-}
-
-// ═══════════════════════════════════════════════════════
-// BLUETOOTH MIDI
-// ═══════════════════════════════════════════════════════
-const bt = new BluetoothMIDI({
-  onStatusChange: (status, error) => {
-    if (status === 'connected') {
-      // Déconnecter USB si actif
-      if (midiOutput) {
-        console.log('Switch USB → BT : déconnexion USB');
-        midiOutput = null;
-      }
-      currentConnectionType = 'bt';
-      // Mettre à jour la sélection dans le select sans déclencher le handler
-      midiSelect.value = '__bluetooth__';
-      updateStatusBadge();
-      sendVolume(volume);
-    } else if (status === 'idle' || status === 'error') {
-      // Ne pas interférer si on est en train de basculer vers USB
-      if (isSwitchingToUsb) return;
-
-      if (currentConnectionType === 'bt') {
-        currentConnectionType = null;
-        updateStatusBadge();
-      }
-      // Resynchroniser le select sur la connexion réelle
-      if (midiOutput) {
-        const usbOpt = Array.from(midiSelect.options).find(o => o.text === '🎹 ' + midiOutput.name);
-        midiSelect.value = usbOpt ? usbOpt.value : '__none__';
-      } else {
-        midiSelect.value = '__none__';
-      }
-    }
-  },
-});
-
-// ═══════════════════════════════════════════════════════
-// WEB MIDI (USB filaire)
-// ═══════════════════════════════════════════════════════
-let midiAccess = null;
-const midiSelect = document.getElementById('midiSelect');
-
-navigator.requestMIDIAccess({ sysex: false }).then(access => {
-  midiAccess = access;
-  populateMidiSelect(true); // true = premier chargement → auto-sélection piano
-  access.onstatechange = () => populateMidiSelect(false);
-}, () => {
-  currentConnectionType = null;
-  updateStatusBadge(true); // true = forcer l'affichage erreur
-});
-
-function populateMidiSelect(isFirstLoad = false) {
-  const prev = midiSelect.value;
-
-  // Recenser les sorties USB disponibles
-  const usbOutputs = [];
-  if (midiAccess) {
-    midiAccess.outputs.forEach(out => usbOutputs.push(out));
-  }
-
-  midiSelect.innerHTML = '';
-
-  // Option "Sélectionner une connexion" — toujours présente en premier
-  const noneOpt = document.createElement('option');
-  noneOpt.value = '__none__';
-  noneOpt.textContent = '— Sélectionner une connexion —';
-  midiSelect.appendChild(noneOpt);
-
-  // Option Bluetooth (si supporté)
-  if (navigator.bluetooth) {
-    const btOpt = document.createElement('option');
-    btOpt.value = '__bluetooth__';
-    btOpt.textContent = '>ᛒ Bluetooth MIDI';
-    midiSelect.appendChild(btOpt);
-  }
-
-  // Options USB (avec emoji prise)
-  usbOutputs.forEach(out => {
-    const opt = document.createElement('option');
-    opt.value = out.id;
-    opt.textContent = '🎹 ' + out.name;
-    midiSelect.appendChild(opt);
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`.panel[data-panel="${idx}"]`).classList.add('active');
+    });
   });
-
-  // ── Restaurer / auto-sélectionner ──
-  if (currentConnectionType === 'bt') {
-    // BT actif : maintenir la sélection BT
-    midiSelect.value = '__bluetooth__';
-  } else if (currentConnectionType === 'usb' && prev) {
-    // USB actif : vérifier que l'option existe encore
-    const stillExists = Array.from(midiSelect.options).some(o => o.value === prev);
-    if (stillExists) {
-      midiSelect.value = prev;
-    } else {
-      // Le périphérique USB a disparu (débranché)
-      disconnectMidiInput();
-      midiOutput = null;
-      currentConnectionType = null;
-      updateStatusBadge();
-      midiSelect.value = '__none__';
-    }
-  } else if (isFirstLoad) {
-    // Premier chargement : chercher un périphérique contenant "piano" (insensible à la casse)
-    const pianoOpt = Array.from(midiSelect.options).find(
-      o => o.value !== '__none__' && o.value !== '__bluetooth__' && o.textContent.toLowerCase().includes('piano')
-    );
-    if (pianoOpt) {
-      midiSelect.value = pianoOpt.value;
-      midiSelect.dispatchEvent(new Event('change'));
-    } else {
-      midiSelect.value = '__none__';
-    }
-  } else {
-    midiSelect.value = '__none__';
-  }
-}
-
-// Détache proprement le listener de l'entrée MIDI précédente.
-function disconnectMidiInput() {
-  if (midiInput) {
-    midiInput.onmidimessage = null;
-    midiInput = null;
-  }
-}
-
-midiSelect.addEventListener('change', async () => {
-  const val = midiSelect.value;
-
-  if (val === '__none__') {
-    // Déconnexion totale
-    if (bt.status === 'connected') bt.disconnect();
-    disconnectMidiInput();
-    midiOutput = null;
-    currentConnectionType = null;
-    updateStatusBadge();
-  } else if (val === '__bluetooth__') {
-    // Sauvegarder l'état USB avant de tenter le BT
-    const prevUsbOutput = midiOutput;
-    const prevUsbId     = midiOutput
-      ? Array.from(midiSelect.options).find(o => o.textContent === '🎹 ' + midiOutput.name)?.value
-      : null;
-
-    // Déconnecter USB si actif
-    if (midiOutput) {
-      console.log('Switch USB → BT : déconnexion USB');
-      disconnectMidiInput();
-      midiOutput = null;
-    }
-    // Connecter BT si pas déjà connecté
-    if (bt.status !== 'connected') {
-      await bt.connect();
-      // Si l'utilisateur a annulé le dialog ou erreur → restaurer USB si possible
-      if (bt.status !== 'connected') {
-        if (prevUsbOutput && prevUsbId) {
-          // Retour sur la connexion USB précédente
-          midiOutput = prevUsbOutput;
-          currentConnectionType = 'usb';
-          midiSelect.value = prevUsbId;
-          updateStatusBadge();
-          console.log('Annulation BT → retour USB :', prevUsbOutput.name);
-        } else {
-          // Pas d'USB précédent → retour sur "Sélectionner une connexion"
-          currentConnectionType = null;
-          midiSelect.value = '__none__';
-          updateStatusBadge();
-        }
-      }
-    }
-  } else {
-    // ── Connexion USB ──
-    isSwitchingToUsb = true; // poser le flag AVANT disconnect BT
-    if (bt.status === 'connected') {
-      console.log('Switch BT → USB : déconnexion BT');
-      bt.disconnect();
-    }
-
-    disconnectMidiInput();
-    midiOutput = null;
-
-    midiAccess.outputs.forEach(out => {
-      if (out.id === val) midiOutput = out;
-    });
-
-    // Chercher l'entrée correspondante (même nom) pour le loopback
-    midiAccess.inputs.forEach(inp => {
-      if (inp.name === midiOutput?.name) midiInput = inp;
-    });
-
-    if (midiInput) {
-      midiInput.onmidimessage = (event) => {
-        console.log('MIDI IN:', event.data);
-        if (midiOutput) {
-          // Très important, cette ligne corriger le problème d'envoi du signal
-          midiOutput.send(event.data); // loopback
-        }
-      };
-    }
-
-    currentConnectionType = midiOutput ? 'usb' : null;
-    isSwitchingToUsb = false; // relâcher le flag APRÈS configuration complète
-    updateStatusBadge();
-    if (midiOutput) sendVolume(volume);
-  }
-});
-
-// ═══════════════════════════════════════════════════════
-// UI — Badge de statut
-// ═══════════════════════════════════════════════════════
-function updateStatusBadge(isError = false) {
-  const badge = document.getElementById('status');
-  if (isError) {
-    badge.textContent = '● MIDI refusé';
-    badge.className = 'err';
-  } else if (currentConnectionType === 'usb') {
-    badge.textContent = '● USB';
-    badge.className = 'usb';
-  } else if (currentConnectionType === 'bt') {
-    badge.textContent = '● BT';
-    badge.className = 'bt';
-  } else {
-    badge.textContent = 'Non connecté';
-    badge.className = '';
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// UI — Volume
-// ═══════════════════════════════════════════════════════
-document.getElementById('volSlider').addEventListener('input', function() {
-  volume = parseInt(this.value);
-  document.getElementById('volVal').textContent = volume;
-  sendVolume(volume);
-});
-
-// ═══════════════════════════════════════════════════════
-// UI — Sélection instrument
-// ═══════════════════════════════════════════════════════
-function selectInstrument(btn, inst) {
-  if (activeBtn) activeBtn.classList.remove('active');
-  activeBtn = btn;
-  btn.classList.add('active');
-
-  document.getElementById('activeLabel').innerHTML =
-    `Actif : <span>${inst.name}</span>`;
-
-  console.log('Envoi MIDI:', inst.name, '| MSB:', inst.msb, '| LSB:', inst.lsb, '| PC:', inst.pc - 1);
-  sendInstrumentPatch(inst);
-}
-
-// ═══════════════════════════════════════════════════════
-// CONSTRUCTION DE L'INTERFACE
-// ═══════════════════════════════════════════════════════
-const board = document.getElementById('board');
-const cols  = [0,1,2,3].map(() => {
-  const c = document.createElement('div');
-  c.className = 'column';
-  board.appendChild(c);
-  return c;
-});
-
-// Séparateur visuel entre instruments (col 0-1) et sons (col 2-3)
-cols[2].classList.add('sounds-start');
-
-COLUMNS.forEach(colDef => {
-  const col = cols[colDef.col];
-  colDef.categories.forEach(cat => {
-    const section = document.createElement('div');
-    section.className = 'cat-section';
-
-    const title = document.createElement('div');
-    title.className = 'cat-title';
-    title.style.color = cat.color;
-    title.textContent = cat.label;
-    section.appendChild(title);
-
-    const grid = document.createElement('div');
-    grid.className = 'btn-grid';
-
-    cat.instruments.forEach(inst => {
-      const btn = document.createElement('button');
-      btn.className = 'inst-btn';
-      btn.title = inst.title;
-      btn.innerHTML = `<span class="icon">${inst.icon}</span><span class="name">${inst.name}</span>`;
-      btn.addEventListener('click', () => selectInstrument(btn, inst));
-      grid.appendChild(btn);
-    });
-
-    section.appendChild(grid);
-    col.appendChild(section);
-  });
-});
 </script>
 </body>
 </html>
