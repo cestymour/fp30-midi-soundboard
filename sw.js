@@ -8,8 +8,10 @@
      ensuite
 ================================================================ */
 
-const APP_CACHE    = 'impro-app-v1';
-const AUDIO_CACHE  = 'impro-audio-v1';
+importScripts('version.js'); // expose APP_VERSION
+
+const APP_CACHE   = `impro-app-${APP_VERSION}`;
+const AUDIO_CACHE = `impro-audio-${APP_VERSION}`;
 
 // ── Fichiers app à précacher dès l'installation ──
 const APP_ASSETS = [
