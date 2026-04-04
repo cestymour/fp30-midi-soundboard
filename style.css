@@ -625,24 +625,32 @@
     border-radius: var(--radius);
     color: #ff3d71;
     font-family: var(--font-mono);
-    font-size: 18px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.1em;
-    padding: 0 9px 0 11px;
+    padding: 0 14px;
     cursor: pointer;
     transition: background 0.15s, box-shadow 0.15s, color 0.15s;
     flex-shrink: 0;
     white-space: nowrap;
+  
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    line-height: 1;
   }
+  
   .emergency-stop-btn:hover {
     background: color-mix(in srgb, #ff3d71 15%, transparent);
     box-shadow: 0 0 10px color-mix(in srgb, #ff3d71 35%, transparent);
   }
+  
   .emergency-stop-btn:active {
     background: color-mix(in srgb, #ff3d71 30%, transparent);
     transform: scale(0.93);
   }
-
+  
   /* ═══════════════════════════════════════════════════════
      BOUTON AUDIO — progression + état playing
   ════════════════════════════════════════════════════════ */

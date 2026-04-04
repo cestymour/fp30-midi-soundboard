@@ -119,7 +119,13 @@ function buildMidiControls() {
              style="--vol-pct:${volPct}%" />
       <span class="vol-value">${STATE.midiVolume}</span>
     </div>
-    <button class="emergency-stop-btn" title="All Notes Off">⏹</button>
+    <button class="emergency-stop-btn" title="All Notes Off">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+        <rect x="2" y="2" width="12" height="12" rx="1" fill="currentColor"/>
+      </svg>
+      STOP
+    </button>
+
   `;
 
   const slider = wrap.querySelector('.midi-vol');
