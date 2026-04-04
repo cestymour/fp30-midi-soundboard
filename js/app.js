@@ -368,6 +368,7 @@ function buildAboutPopup() {
   overlay.innerHTML = `
     <div id="about-card">
       <div id="about-title">[IMPRO] Soundboard</div>
+      <div id="about-work">Work with 🎹 Piano Roland FP30X</div>
       <div id="about-version">v${typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—'}</div>
       <div id="about-info">
         <span id="about-sw-status">Service Worker : vérification...</span>
