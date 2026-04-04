@@ -11,8 +11,8 @@
     --border:         #2a2a35;
     --border-glow:    #3a3a50;
     --text-primary:   #e8e8f0;
-    --text-secondary: #8888aa;
-    --text-muted:     #44445a;
+    --text-secondary: #b8b8d0;
+    --text-muted:     #666680;
   
     /* ── Accent courant ── */
     --current-accent: #7c9cff;
@@ -492,7 +492,7 @@
     color: var(--cat-color, var(--text-muted));
     text-transform: uppercase;
     padding: 2px 4px;
-    opacity: 0.75;
+    opacity: 0.9;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -810,6 +810,3 @@
     .vol-icon  { font-size: 18px; }
     .vol-value { font-size: 12px; min-width: 36px; }
   }
-  
-  }
-  
