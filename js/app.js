@@ -405,7 +405,7 @@ function initLogoInteraction() {
       pressTimer = setTimeout(() => {
         btn.classList.remove('pressing');
         openAbout();
-      }, 400);
+      }, 300);
     };
 
     const cancelPress = () => {
@@ -417,6 +417,7 @@ function initLogoInteraction() {
     btn.addEventListener('pointerup',    cancelPress);
     btn.addEventListener('pointerleave', cancelPress);
     btn.addEventListener('pointermove',  cancelPress);
+    btn.addEventListener('contextmenu',  e => e.preventDefault());
   } else {
     // Desktop : clic simple suffit
     btn.addEventListener('click', () => openAbout());
