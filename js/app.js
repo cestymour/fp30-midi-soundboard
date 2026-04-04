@@ -82,6 +82,8 @@ function buildUI() {
 
     panelsEl.appendChild(panel);
   });
+
+  buildAboutPopup();
 }
 
 // ── Contrôles MIDI ──
@@ -277,6 +279,101 @@ function buildAudioGrid(tab) {
 }
 
 // ═══════════════════════════════════════════════════════
+// POPUP "ABOUT"
+// ═══════════════════════════════════════════════════════
+function buildAboutPopup() {
+  // Overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'about-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+
+  // Carte
+  overlay.innerHTML = `
+    <div id="about-card">
+      <div id="about-title">[IMPRO] Soundboard</div>
+      <div id="about-version">v${typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—'}</div>
+      <div id="about-info">
+        <span id="about-sw-status">Service Worker : vérification...</span>
+      </div>
+      <div id="about-credit">by cestymour</div>
+      <div id="about-actions">
+        <button id="about-reload-btn">⟳ Vider le cache et recharger</button>
+        <button id="about-close-btn">Fermer</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('app').appendChild(overlay);
+
+  // Fermeture
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeAbout();
+  });
+  overlay.querySelector('#about-close-btn').addEventListener('click', closeAbout);
+
+  // Reload
+  overlay.querySelector('#about-reload-btn').addEventListener('click', async () => {
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) await reg.unregister();
+    }
+    location.reload(true);
+  });
+}
+
+function openAbout() {
+  const overlay = document.getElementById('about-overlay');
+  if (!overlay) return;
+
+  // Statut SW
+  const swEl = overlay.querySelector('#about-sw-status');
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    swEl.textContent = 'Service Worker : actif ✓';
+  } else {
+    swEl.textContent = 'Service Worker : inactif';
+  }
+
+  overlay.setAttribute('aria-hidden', 'false');
+  overlay.style.display = 'flex';
+}
+
+function closeAbout() {
+  const overlay = document.getElementById('about-overlay');
+  if (!overlay) return;
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.style.display = 'none';
+}
+
+function initLogoInteraction() {
+  const logo = document.getElementById('logo');
+
+  if ('ontouchstart' in window) {
+    let pressTimer = null;
+
+    const startPress = () => {
+      logo.classList.add('pressing');
+      pressTimer = setTimeout(() => {
+        logo.classList.remove('pressing');
+        openAbout();
+      }, 500);
+    };
+
+    const cancelPress = () => {
+      clearTimeout(pressTimer);
+      logo.classList.remove('pressing');
+    };
+
+    logo.addEventListener('pointerdown',  startPress);
+    logo.addEventListener('pointerup',    cancelPress);
+    logo.addEventListener('pointerleave', cancelPress);
+    logo.addEventListener('pointermove',  cancelPress);
+  } else {
+    logo.addEventListener('click', () => openAbout());
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════
 // NAVIGATION ONGLETS
 // ═══════════════════════════════════════════════════════
 function activateTab(idx) {
@@ -328,6 +425,7 @@ function init() {
   initAudioTouchFeedback(panelsEl); // dans audio.js
   initBluetooth();                  // dans midi.js
   initWebMidi();                    // dans midi.js
+  initLogoInteraction();
 }
 
 init();
