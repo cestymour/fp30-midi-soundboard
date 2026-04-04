@@ -344,6 +344,8 @@ function buildAboutPopup() {
       <div id="about-version">v${typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—'}</div>
       <div id="about-info">
         <span id="about-sw-status">Service Worker : vérification...</span>
+        <br>
+        <span id="about-wl-status">Wake Lock : vérification...</span>
       </div>
       <div id="about-credit">by cestymour</div>
       <div id="about-actions">
@@ -381,6 +383,18 @@ function openAbout() {
     swEl.textContent = 'Service Worker : actif ✓';
   } else {
     swEl.textContent = 'Service Worker : inactif';
+  }
+
+  // statut Wake Lock (Wake Lock = empêche la mise en veille)
+  const wlEl = overlay.querySelector('#about-wl-status');
+  if (wlEl) {
+    if (!('wakeLock' in navigator)) {
+      wlEl.textContent = 'Wake Lock : non supporté';
+    } else if (STATE.wakeLock) {
+      wlEl.textContent = 'Wake Lock : actif ✓';
+    } else {
+      wlEl.textContent = 'Wake Lock : inactif';
+    }
   }
 
   overlay.setAttribute('aria-hidden', 'false');
@@ -464,6 +478,30 @@ const resizeObserver = new ResizeObserver(() => equalizeMidiButtons());
 resizeObserver.observe(document.getElementById('panels'));
 
 // ═══════════════════════════════════════════════════════
+// WAKE LOCK — Empêche la mise en veille de l'écran
+// ═══════════════════════════════════════════════════════
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return; // non supporté, on ignore silencieusement
+  try {
+    STATE.wakeLock = await navigator.wakeLock.request('screen');
+    console.log('[WakeLock] Actif ✅');
+  } catch (err) {
+    console.warn('[WakeLock] Échec :', err.message);
+  }
+}
+
+function initWakeLock() {
+  requestWakeLock();
+
+  // Réactive automatiquement au retour sur l'appli
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      requestWakeLock();
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
 function init() {
@@ -484,6 +522,7 @@ function init() {
   initBluetooth();                  // dans midi.js
   initWebMidi();                    // dans midi.js
   initLogoInteraction();
+  initWakeLock();
 }
 
 init();
