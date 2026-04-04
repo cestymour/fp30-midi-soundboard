@@ -76,25 +76,40 @@
     z-index: 10;
   }
   
-  /* Logo — coin gauche, discret */
-  #logo {
+  /* bouton de paramètre coin haut gauche */
+  #settings-btn {
     display: flex;
     align-items: center;
-    padding: 0 12px 0 10px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    border-right: 1px solid var(--border);
-    white-space: nowrap;
-    flex-shrink: 0;
+    justify-content: center;
+    width: var(--header-h);
+    min-width: var(--header-h);
+    height: 100%;
+    border: none;
+    border-left: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    font-size: 30px;
     cursor: pointer;
-    transition: color 0.15s;
+    flex-shrink: 0;
+    transition: color 0.15s, background 0.15s;
     position: relative;
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none; /* Safari / Chrome Android */
   }
-  #logo::before {
+  
+  #settings-btn:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  #settings-btn:active {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+  }
+  
+  /* Effet pressing pour mobile (long press) */
+  #settings-btn::before {
     content: '';
     position: absolute;
     bottom: 0;
@@ -105,19 +120,16 @@
     transition: none;
     z-index: 0;
   }
-  #logo.pressing::before {
+  #settings-btn.pressing::before {
     width: 100%;
-    transition: width 500ms linear;
+    transition: width 300ms linear;
   }
   
-  /* Les enfants du logo passent au-dessus du fond */
-  #logo > * {
+  #settings-btn > * {
     position: relative;
     z-index: 1;
-  }  
+  }
   
-  .logo-bracket { color: var(--current-accent); }
-  .logo-text    { margin: 0 3px; }
   
   /* ═══════════════════════════════════════════════════════
      POPUP ABOUT

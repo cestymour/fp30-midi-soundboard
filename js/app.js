@@ -395,30 +395,31 @@ function closeAbout() {
 }
 
 function initLogoInteraction() {
-  const logo = document.getElementById('logo');
+  const btn = document.getElementById('settings-btn');
 
   if ('ontouchstart' in window) {
     let pressTimer = null;
 
     const startPress = () => {
-      logo.classList.add('pressing');
+      btn.classList.add('pressing');
       pressTimer = setTimeout(() => {
-        logo.classList.remove('pressing');
+        btn.classList.remove('pressing');
         openAbout();
-      }, 500);
+      }, 400);
     };
 
     const cancelPress = () => {
       clearTimeout(pressTimer);
-      logo.classList.remove('pressing');
+      btn.classList.remove('pressing');
     };
 
-    logo.addEventListener('pointerdown',  startPress);
-    logo.addEventListener('pointerup',    cancelPress);
-    logo.addEventListener('pointerleave', cancelPress);
-    logo.addEventListener('pointermove',  cancelPress);
+    btn.addEventListener('pointerdown',  startPress);
+    btn.addEventListener('pointerup',    cancelPress);
+    btn.addEventListener('pointerleave', cancelPress);
+    btn.addEventListener('pointermove',  cancelPress);
   } else {
-    logo.addEventListener('click', () => openAbout());
+    // Desktop : clic simple suffit
+    btn.addEventListener('click', () => openAbout());
   }
 }
 
