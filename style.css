@@ -513,7 +513,7 @@
   }
   .emergency-stop-btn:active {
     background: color-mix(in srgb, #ff3d71 30%, transparent);
-    transform: translateY(-50%) scale(0.95);
+    transform: scale(0.93);
   }
 
   /* ═══════════════════════════════════════════════════════
