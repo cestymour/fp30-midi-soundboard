@@ -120,9 +120,36 @@ function buildMidiControls() {
       <span class="vol-value">${STATE.midiVolume}</span>
     </div>
     <button class="emergency-stop-btn" title="All Notes Off">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+        <!-- Anneau rayures jaunes/noires -->
+        <circle cx="14" cy="14" r="13" fill="none" stroke-width="0"/>
+        <clipPath id="ring-clip">
+          <path d="M14 14 m-13 0 a13 13 0 1 1 26 0 a13 13 0 1 1 -26 0
+                  M14 14 m-9 0 a9 9 0 1 0 18 0 a9 9 0 1 0 -18 0" 
+                clip-rule="evenodd"/>
+        </clipPath>
+        <!-- Rayures diagonales jaune/noir sur l'anneau -->
+        <rect x="0" y="0" width="28" height="28" fill="url(#hazard)" clip-path="url(#ring-clip)"/>
+        
+        <defs>
+          <pattern id="hazard" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="4" height="8" fill="#f5c400"/>
+            <rect x="4" width="4" height="8" fill="#111111"/>
+          </pattern>
+        </defs>
+
+        <!-- Rond rouge central -->
+        <circle cx="14" cy="14" r="9" fill="#cc0000"/>
+        <!-- Reflet pour effet 3D -->
+        <circle cx="11" cy="11" r="3.5" fill="rgba(255,255,255,0.18)"/>
+        <!-- Carré stop blanc -->
+        <!--<rect x="10" y="10" width="8" height="8" rx="1" fill="white"/>-->
+      </svg>
+      <!-- (ancien bouton stop)
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
         <rect x="2" y="2" width="12" height="12" rx="1" fill="currentColor"/>
       </svg>
+      -->
       STOP
     </button>
 
