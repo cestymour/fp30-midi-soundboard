@@ -1,6 +1,5 @@
 /* ============================================================
    IMPRO SOUNDBOARD — style.css
-   Base : Projet 2 (Soundboard), fusion avec éléments Projet 1
    ============================================================ */
 
    :root {
@@ -731,13 +730,105 @@
     .tab-btn { min-width: 70px; }
     .volume-wrap { width: min(280px, 40%); }
   }
-  
   @media (max-width: 600px) {
-    :root { --header-h: 44px; --controls-h: 48px; --gap: 6px; }
+    :root { --header-h: 44px; --gap: 6px; }
+  
     .tab-label { display: none; }
     .tab-btn { min-width: 48px; }
     .audio-grid { grid-template-columns: repeat(3, 1fr); }
-    .volume-wrap { width: min(200px, 45%); }
     .midi-select { max-width: 130px; font-size: 10px; }
     .midi-badge  { min-width: 70px; font-size: 10px; }
   }
+  
+  /* ── Portrait petit écran : barre de contrôles sur 2 lignes ── */
+  @media (max-width: 600px) and (orientation: portrait) {
+    :root {
+      --controls-h: auto;
+    }
+  
+    /* Conteneur : 2 lignes */
+    .panel-controls {
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 6px 10px;
+      gap: 6px;
+      height: auto;
+      min-height: unset;
+    }
+  
+    /* ── Ligne 1 : select/now-playing (gauche) + STOP (droite) ── */
+  
+    .midi-connect,
+    .now-playing {
+      flex: 1;
+      min-width: 0;
+      /* hauteur naturelle de la ligne 1 */
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+    }
+  
+    /* STOP : static, prend toute la hauteur de la ligne 1 */
+    .emergency-stop-btn {
+      position: static;
+      top: unset;
+      bottom: unset;
+      right: unset;
+      transform: none;
+      /* s'étire sur toute la hauteur de la ligne 1 */
+      align-self: stretch;
+      height: auto;
+      padding: 0 12px;
+      flex-shrink: 0;
+    }
+  
+    /* ── Ligne 2 : volume full width ── */
+    .volume-wrap {
+      position: static;
+      transform: none;
+      left: unset;
+      /* pleine largeur, forcé sur ligne 2 */
+      width: 100%;
+      order: 10;
+      /* hauteur généreuse pour la manipulation tactile */
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  
+    /* Slider plus haut et facile à attraper */
+    .vol-slider {
+      height: 44px; /* zone tactile généreuse */
+      flex: 1;
+    }
+  
+    .vol-slider::-webkit-slider-runnable-track {
+      height: 14px; /* track un peu plus épaisse */
+    }
+    .vol-slider::-moz-range-track {
+      height: 14px;
+    }
+    .vol-slider::-moz-range-progress {
+      height: 14px;
+    }
+    .vol-slider::-webkit-slider-thumb {
+      width: 28px;
+      height: 28px;
+      margin-top: -7px; /* re-centrage : (28 - 14) / 2 */
+    }
+    .vol-slider::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+    }
+  
+    /* Icône et valeur : on les garde, taille légèrement augmentée */
+    .vol-icon {
+      font-size: 18px;
+    }
+    .vol-value {
+      font-size: 12px;
+      min-width: 36px;
+    }
+  }
+  

@@ -141,7 +141,7 @@ const MIDI_TABS = [
   // ════════════════════════════════════════════════════════
   {
     label: 'Sons MIDI',
-    icon: '🎹',
+    icon: '🔊',
     accent: '#ffaa55',
     cols: 5,
     categories: [
