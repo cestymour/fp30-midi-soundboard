@@ -84,7 +84,6 @@ function syncMidiSliders(val) {
 
 function initBluetooth() {
   STATE.bt = new BluetoothMIDI({
-    loopbackIncoming: false, // Tentative de correction de note Off manqué
     onStatusChange: (status) => {
       if (status === 'connected') {
         STATE.midiOutput = null;
