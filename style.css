@@ -86,16 +86,14 @@
     height: 100%;
     border: none;
     border-left: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-secondary);
+    background: transparent;
+    color: var(--text-muted);
     font-size: 30px;
     cursor: pointer;
     flex-shrink: 0;
     transition: color 0.15s, background 0.15s;
-    position: relative;
-    overflow: hidden;
     user-select: none;
-    -webkit-user-select: none; /* Safari / Chrome Android */
+    -webkit-user-select: none;
   }
   
   #settings-btn:hover {
@@ -106,23 +104,6 @@
   #settings-btn:active {
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.06);
-  }
-  
-  /* Effet pressing pour mobile (long press) */
-  #settings-btn::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0%;
-    height: 100%;
-    background: color-mix(in srgb, var(--current-accent) 15%, transparent);
-    transition: none;
-    z-index: 0;
-  }
-  #settings-btn.pressing::before {
-    width: 100%;
-    transition: width 300ms linear;
   }
   
   #settings-btn > * {

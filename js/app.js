@@ -437,32 +437,8 @@ function closeAbout() {
 
 function initLogoInteraction() {
   const btn = document.getElementById('settings-btn');
-
-  if ('ontouchstart' in window) {
-    let pressTimer = null;
-
-    const startPress = () => {
-      btn.classList.add('pressing');
-      pressTimer = setTimeout(() => {
-        btn.classList.remove('pressing');
-        openAbout();
-      }, 300);
-    };
-
-    const cancelPress = () => {
-      clearTimeout(pressTimer);
-      btn.classList.remove('pressing');
-    };
-
-    btn.addEventListener('pointerdown',  startPress);
-    btn.addEventListener('pointerup',    cancelPress);
-    btn.addEventListener('pointerleave', cancelPress);
-    btn.addEventListener('pointermove',  cancelPress);
-    btn.addEventListener('contextmenu',  e => e.preventDefault());
-  } else {
-    // Desktop : clic simple suffit
-    btn.addEventListener('click', () => openAbout());
-  }
+  btn.addEventListener('click', () => openAbout());
+  btn.addEventListener('contextmenu', e => e.preventDefault());
 }
 
 
