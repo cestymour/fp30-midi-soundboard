@@ -83,6 +83,20 @@ function buildUI() {
     panelsEl.appendChild(panel);
   });
 
+  // Disposition initiale selon l'orientation au chargement
+  const firstMidiPanel = document.querySelector('.panel.panel-midi.active');
+  if (firstMidiPanel) rearrangeMidiGrid(firstMidiPanel);
+
+  // Écouter les changements d'orientation
+  const orientationMQ = window.matchMedia('(orientation: portrait)');
+  orientationMQ.addEventListener('change', () => {
+    const activePanel = document.querySelector('.panel.active');
+    if (activePanel && activePanel.dataset.type === 'midi') {
+      rearrangeMidiGrid(activePanel);
+    }
+    equalizeMidiButtons();
+  });
+
   buildAboutPopup();
 }
 
@@ -171,6 +185,7 @@ function buildMidiGrid(tab) {
   grid.className = 'midi-grid';
 
   const colCount = tab.cols ?? 5;  // 5 par défaut si non défini
+  const blocksPerCol = Math.ceil(tab.categories.length / colCount);  // nb blocs par colonne
 
   // Créer les colonnes vides
   const cols = [];
@@ -181,9 +196,9 @@ function buildMidiGrid(tab) {
     cols.push(col);
   }
 
-  // Répartir les catégories dans les colonnes (round-robin)
+  // Répartir les catégories dans les colonnes (par bloc)
   tab.categories.forEach((cat, catIdx) => {
-    const col = cols[catIdx % colCount];
+    const col = cols[Math.floor(catIdx / blocksPerCol)];
 
     const block = document.createElement('div');
     block.className = 'cat-block';
@@ -276,6 +291,35 @@ function buildAudioGrid(tab) {
   });
 
   return grid;
+}
+
+// ── Réorganisation de la grille MIDI selon l'orientation ──
+function rearrangeMidiGrid(panel) {
+  const grid = panel.querySelector('.midi-grid');
+  if (!grid) return;
+
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+  const blocks = Array.from(grid.querySelectorAll('.cat-block'));
+  const cols = Array.from(grid.querySelectorAll('.midi-col'));
+
+  const colCount = isPortrait ? 2 : cols.length;
+  const blocksPerCol = Math.ceil(blocks.length / colCount);
+
+  // Masquer les colonnes inutilisées en portrait
+  cols.forEach((col, i) => {
+    col.style.display = i < colCount ? '' : 'none';
+  });
+
+  // Vider les colonnes actives
+  cols.slice(0, colCount).forEach(col => {
+    while (col.firstChild) col.removeChild(col.firstChild);
+  });
+
+  // Redistribuer les blocs par colonne
+  blocks.forEach((block, i) => {
+    const colIdx = Math.floor(i / blocksPerCol);
+    cols[colIdx].appendChild(block);
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -381,8 +425,14 @@ function activateTab(idx) {
     b.classList.toggle('active', i === idx));
   document.querySelectorAll('.panel').forEach((p, i) =>
     p.classList.toggle('active', i === idx));
-  // Recalcul après que le panneau soit visible
-  requestAnimationFrame(() => equalizeMidiButtons());
+
+  requestAnimationFrame(() => {
+    const activePanel = document.querySelector('.panel.active');
+    if (activePanel && activePanel.dataset.type === 'midi') {
+      rearrangeMidiGrid(activePanel);
+    }
+    equalizeMidiButtons();
+  });
 }
 
 tabNav.addEventListener('click', e => {
