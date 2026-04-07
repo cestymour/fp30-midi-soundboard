@@ -46,7 +46,7 @@ const AUDIO_TABS = [
       {
         label: 'Lieux', icon: '📍', color: '#88ccff',
         items: [
-          { name: 'Café',             icon: '☕', file: 'sounds/discussion_foule.ogg' },
+          { name: 'Café',             icon: '☕', file: 'sounds/discussion_foule.ogg', start: 12.6 },
           { name: 'Bureau',           icon: '🖥️', file: 'sounds/bureau.wav' },
           { name: 'Bibliothèque',     icon: '📚', file: 'sounds/bibliotheque.mp3' },
           { name: 'Marché',           icon: '🛒', file: 'sounds/marche.mp3' },

@@ -306,6 +306,7 @@ function buildAudioGrid(tab) {
       btn.className     = 'sound-btn';
       btn.dataset.audio = item.file;
       btn.dataset.label = item.name;
+      btn.dataset.start = item.start ?? 0;
       btn.style.setProperty('--progress', '0%');
 
       const isImage = item.icon && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(item.icon);

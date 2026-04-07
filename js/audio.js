@@ -53,12 +53,14 @@ function fadeAudio(audio, from, to, ms, onDone) {
 // PROGRESSION
 // ═══════════════════════════════════════════════════════
 
-function startProgressLoop(audio, btn) {
+function startProgressLoop(audio, btn, startOffset) {
   function tick() {
     if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
     const dur = audio.duration;
-    const pct = (dur && isFinite(dur))
-      ? Math.min(100, (audio.currentTime / dur) * 100).toFixed(1) + '%'
+    const playableDuration = (dur && isFinite(dur)) ? dur - startOffset : null;
+    const elapsed          = audio.currentTime - startOffset;
+    const pct = (playableDuration && playableDuration > 0)
+      ? Math.min(100, (elapsed / playableDuration) * 100).toFixed(1) + '%'
       : '0%';
     btn.style.setProperty('--progress', pct);
     STATE.progressRAF = requestAnimationFrame(tick);
@@ -114,14 +116,16 @@ function playSound(btn) {
   const src = btn.dataset.audio;
   if (!src) return;
 
+  const startOffset = parseFloat(btn.dataset.start || '0') || 0;
   const audio = new Audio(src);
   audio.volume = 0;
 
   audio.addEventListener('canplaythrough', () => {
+    if (startOffset > 0) audio.currentTime = startOffset;
     audio.play()
       .then(() => {
         fadeAudio(audio, 0, STATE.audioVolume, 300, null);
-        startProgressLoop(audio, btn);
+        startProgressLoop(audio, btn, startOffset);
       })
       .catch(() => stopSound());
   }, { once: true });
