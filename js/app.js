@@ -295,34 +295,149 @@ function equalizeMidiButtons() {
   });
 }
 
+// ── Hauteur uniforme des boutons AUDIO en mode colonnes ──
+function equalizeAudioButtons() {
+  document.querySelectorAll('.panel.panel-audio.active').forEach(panel => {
+    const grid = panel.querySelector('.audio-grid');
+    if (!grid || !grid.querySelector('.audio-col')) return; // pas en mode colonnes
+
+    const gridH = grid.clientHeight;
+    if (!gridH) return;
+
+    const gapPx = parseInt(getComputedStyle(grid).gap) || 8;
+
+    grid.querySelectorAll('.audio-col').forEach(col => {
+      let totalRows = 0;
+      col.querySelectorAll('.audio-cat-grid').forEach(btnGrid => {
+        totalRows += Math.ceil(btnGrid.children.length / 3); // 3 boutons par ligne
+      });
+
+      const catCount = col.querySelectorAll('.audio-cat-block').length;
+      const titleH = 20;
+      const usedByTitles = catCount * (titleH + 5);
+      const usedByGaps = (catCount - 1) * gapPx;
+      const available = gridH - usedByTitles - usedByGaps;
+
+      const gapsInGrid = (totalRows - 1) * 5;
+      const btnH = Math.floor((available - gapsInGrid) / totalRows);
+
+      col.style.setProperty('--btn-h', btnH + 'px');
+    });
+  });
+}
+
 // ── Grille Audio ──
 function buildAudioGrid(tab) {
   const grid = document.createElement('div');
   grid.className = 'audio-grid';
 
-  tab.categories.forEach(cat => {
-    cat.items.forEach(item => {
-      const btn = document.createElement('button');
-      btn.className     = 'sound-btn';
-      btn.dataset.audio = item.file;
-      btn.dataset.label = item.name;
-      btn.dataset.start = item.start ?? 0;
-      btn.style.setProperty('--progress', '0%');
+  // Si l'onglet a des colonnes définies (ex: Films)
+  if (tab.cols && tab.cols > 1) {
+    grid.style.display = 'flex';
+    grid.style.flexDirection = 'row';
+    grid.style.gap = 'var(--gap)';
+    grid.style.overflow = 'hidden';
 
-      const isImage = item.icon && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(item.icon);
-      const iconHTML = isImage
-        ? `<span class="btn-icon"><img src="${item.icon}" alt="${item.name}" /></span>`
-        : `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
+    const colCount = tab.cols;
+    const blocksPerCol = Math.ceil(tab.categories.length / colCount);
 
-      btn.innerHTML = `${iconHTML}<span class="btn-label">${item.name}</span>`;
-      btn.addEventListener('click', () => {
-        btn === STATE.currentSoundBtn
-          ? stopSound(true)
-          : (stopSound(true), playSound(btn));
+    // Créer les colonnes
+    const cols = [];
+    for (let i = 0; i < colCount; i++) {
+      const col = document.createElement('div');
+      col.className = 'audio-col';
+      col.style.flex = '1';
+      col.style.display = 'flex';
+      col.style.flexDirection = 'column';
+      col.style.gap = 'var(--gap)';
+      col.style.minWidth = '0';
+      grid.appendChild(col);
+      cols.push(col);
+    }
+
+    // Répartir les catégories dans les colonnes
+    tab.categories.forEach((cat, catIdx) => {
+      const col = cols[Math.floor(catIdx / blocksPerCol)];
+
+      const block = document.createElement('div');
+      block.className = 'audio-cat-block';
+      block.style.display = 'flex';
+      block.style.flexDirection = 'column';
+      block.style.gap = '5px';
+
+      const title = document.createElement('div');
+      title.className = 'cat-title';
+      title.style.setProperty('--cat-color', cat.color ?? 'var(--text-muted)');
+      title.textContent = `${cat.icon ?? ''} ${cat.label}`;
+      block.appendChild(title);
+
+      const btnGrid = document.createElement('div');
+      btnGrid.className = 'audio-cat-grid';
+      btnGrid.style.display = 'grid';
+      btnGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      btnGrid.style.gap = '5px';
+
+      cat.items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'sound-btn';
+        btn.dataset.audio = item.file;
+        btn.dataset.label = item.name;
+        btn.dataset.start = item.start ?? 0;
+        btn.style.setProperty('--progress', '0%');
+
+        // Gestion image OU icône
+        let iconHTML;
+        if (item.img) {
+          iconHTML = `<span class="btn-icon"><img src="${item.img}" alt="${item.name}" /></span>`;
+        } else {
+          const isImage = item.icon && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(item.icon);
+          iconHTML = isImage
+            ? `<span class="btn-icon"><img src="${item.icon}" alt="${item.name}" /></span>`
+            : `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
+        }
+
+        btn.innerHTML = `${iconHTML}<span class="btn-label">${item.name}</span>`;
+        btn.title = item.title ?? item.name;
+
+        btn.addEventListener('click', () => {
+          btn === STATE.currentSoundBtn
+            ? stopSound(true)
+            : (stopSound(true), playSound(btn));
+        });
+
+        btnGrid.appendChild(btn);
       });
-      grid.appendChild(btn);
+
+      block.appendChild(btnGrid);
+      col.appendChild(block);
     });
-  });
+
+  } else {
+    // Mode grille classique (Nature, Ambiances, Effets, Musique)
+    tab.categories.forEach(cat => {
+      cat.items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'sound-btn';
+        btn.dataset.audio = item.file;
+        btn.dataset.label = item.name;
+        btn.dataset.start = item.start ?? 0;
+        btn.style.setProperty('--progress', '0%');
+
+        const isImage = item.icon && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(item.icon);
+        const iconHTML = isImage
+          ? `<span class="btn-icon"><img src="${item.icon}" alt="${item.name}" /></span>`
+          : `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
+
+        btn.innerHTML = `${iconHTML}<span class="btn-label">${item.name}</span>`;
+        btn.addEventListener('click', () => {
+          btn === STATE.currentSoundBtn
+            ? stopSound(true)
+            : (stopSound(true), playSound(btn));
+        });
+        grid.appendChild(btn);
+      });
+    });
+  }
 
   return grid;
 }
@@ -457,8 +572,10 @@ function activateTab(idx) {
     const activePanel = document.querySelector('.panel.active');
     if (activePanel && activePanel.dataset.type === 'midi') {
       rearrangeMidiGrid(activePanel);
+      equalizeMidiButtons();
+    } else if (activePanel && activePanel.dataset.type === 'audio') {
+      equalizeAudioButtons();
     }
-    equalizeMidiButtons();
   });
 }
 
@@ -479,8 +596,12 @@ panelsEl.addEventListener('change', async e => {
 // ═══════════════════════════════════════════════════════
 // RESIZE — recalcul hauteurs boutons MIDI
 // ═══════════════════════════════════════════════════════
-const resizeObserver = new ResizeObserver(() => equalizeMidiButtons());
+const resizeObserver = new ResizeObserver(() => {
+  equalizeMidiButtons();
+  equalizeAudioButtons();
+});
 resizeObserver.observe(document.getElementById('panels'));
+
 
 // ═══════════════════════════════════════════════════════
 // WAKE LOCK — Empêche la mise en veille de l'écran
