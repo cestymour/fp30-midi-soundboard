@@ -567,13 +567,93 @@
   .inst-btn:hover .btn-label,
   .sound-btn:hover .btn-label { color: var(--text-primary); }
   
-  /* ── Image dans icône ── */
+  /* ── Image dans icône (défaut) ── */
   .btn-icon img {
-    width:  clamp(24px, 3vw, 40px);
-    height: clamp(24px, 3vw, 40px);
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     border-radius: 4px;
     display: block;
+  }
+  
+  /* ═══════════════════════════════════════════════════════
+  BOUTONS AUDIO avec IMAGE — image maximisée + label visible
+  ════════════════════════════════════════════════════════ */
+  .sound-btn:has(img) {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .sound-btn:has(img) .btn-icon {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    background: var(--bg-card);  /* ← Ajoute un fond pour les bandes vides */
+  }
+
+  .sound-btn:has(img) .btn-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;  /* ← CHANGÉ : affiche l'image entière sans recadrage */
+    display: block;
+    border-radius: 0;
+  }
+
+  .sound-btn:has(img) .btn-label {
+    flex-shrink: 0;
+    padding: 6px 8px;
+    font-size: clamp(9px, 1vw, 11px);
+    line-height: 1.2;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  /* Hover : label plus visible */
+  .sound-btn:has(img):hover .btn-label {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+  }
+
+  /* État playing : bordure + label accentué */
+  .sound-btn:has(img).playing {
+    border-color: var(--panel-accent);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--panel-accent) 50%, transparent);
+  }
+
+  .sound-btn:has(img).playing .btn-label {
+    background: color-mix(in srgb, var(--panel-accent) 15%, var(--bg-card));
+    color: var(--panel-accent);
+    border-top-color: var(--panel-accent);
+  }
+
+  /* Effet zoom léger sur l'image au hover */
+  .sound-btn:has(img):hover .btn-icon img {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+  }
+
+  /* Icône stop pour les boutons avec image en lecture */
+  .sound-btn:has(img).playing .btn-icon::after {
+    content: '■';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(24px, 3vw, 36px);
+    color: var(--panel-accent);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8),
+                 0 0 16px var(--panel-accent);
+    z-index: 3;
   }
   
   /* ═══════════════════════════════════════════════════════
@@ -712,6 +792,42 @@
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: var(--gap);
     align-content: start;
+  }
+  
+  /* ═══════════════════════════════════════════════════════
+   PANNEAU AUDIO — mode colonnes (Films)
+  ════════════════════════════════════════════════════════ */
+  .audio-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .audio-cat-block {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .audio-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+
+  .audio-col .sound-btn {
+    height: var(--btn-h, 80px);
+  }
+
+  /* Responsive : 2 colonnes en portrait */
+  @media (orientation: portrait) {
+    .audio-cat-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
   
   /* ═══════════════════════════════════════════════════════
