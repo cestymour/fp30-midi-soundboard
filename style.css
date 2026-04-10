@@ -596,13 +596,13 @@
     align-items: center;
     justify-content: center;
     font-size: 0;
-    background: var(--bg-card);  /* ← Ajoute un fond pour les bandes vides */
+    background: var(--bg-card);
   }
 
   .sound-btn:has(img) .btn-icon img {
     width: 100%;
     height: 100%;
-    object-fit: contain;  /* ← CHANGÉ : affiche l'image entière sans recadrage */
+    object-fit: contain;
     display: block;
     border-radius: 0;
   }
@@ -725,7 +725,7 @@
   }
   
   /* ═══════════════════════════════════════════════════════
-     BOUTON AUDIO — progression + état playing
+    BOUTON AUDIO — progression + état playing
   ════════════════════════════════════════════════════════ */
   .sound-btn::after {
     content: '';
@@ -750,7 +750,7 @@
     background: color-mix(in srgb, var(--panel-accent) 25%, transparent);
     z-index: 1;
     border-radius: inherit;
-    transition: width 0.25s linear;
+    transition: width var(--progress-transition, 0.25s) linear;
     pointer-events: none;
   }
   
@@ -829,7 +829,101 @@
       grid-template-columns: repeat(2, 1fr);
     }
   }
-  
+
+  /* ═══════════════════════════════════════════════════════
+    GRILLE ANIMAUX — 4×8 paysage, 8×4 portrait (transposé)
+  ════════════════════════════════════════════════════════ */
+  .audio-grid.animals-grid {
+    display: grid !important;
+    grid-template-columns: repeat(8, 1fr) !important;
+    grid-template-rows: repeat(4, 1fr) !important;
+    gap: 5px;
+    
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    align-content: stretch;
+    align-items: stretch;
+  }
+
+  .audio-grid.animals-grid .sound-btn {
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* ── Mode portrait : transposition (colonnes deviennent lignes) ── */
+  @media (orientation: portrait) {
+    .audio-grid.animals-grid {
+      grid-template-columns: repeat(4, 1fr) !important;
+      grid-template-rows: repeat(8, 1fr) !important;
+      grid-auto-flow: column; /* ← CLEF : remplit par colonnes au lieu de lignes */
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════
+    GRILLE ANIMAUX — Couleurs par catégorie (classes CSS)
+  ════════════════════════════════════════════════════════ */
+
+  /* Définition des couleurs de catégorie */
+  .animaux-domestique { --cat-accent: #ff00ff; }
+  .animaux-ferme      { --cat-accent: #44aa00; }
+  .animaux-foret      { --cat-accent: #7700ff; }
+  .animaux-oiseau     { --cat-accent: #0066ff; }
+  .animaux-insecte    { --cat-accent: #ff8000; }
+  .animaux-savane     { --cat-accent: #cccc00; }
+  .animaux-aquatique  { --cat-accent: #00ffee; }
+
+  /* ── État repos : bordure + fond teinté subtil ── */
+  .animals-grid .sound-btn {
+    border-color: color-mix(in srgb, var(--cat-accent, var(--border)) 35%, var(--border));
+    background: color-mix(in srgb, var(--cat-accent, transparent) 8%, var(--bg-card));
+  }
+
+  /* ── Hover : accentuation bordure + fond ── */
+  .animals-grid .sound-btn:hover {
+    border-color: color-mix(in srgb, var(--cat-accent, var(--border-glow)) 65%, var(--border-glow));
+    background: color-mix(in srgb, var(--cat-accent, transparent) 15%, var(--bg-card-hover));
+  }
+
+  /* ── Playing : couleur pleine ── */
+  .animals-grid .sound-btn.playing {
+    border-color: var(--cat-accent, var(--panel-accent));
+    background: color-mix(in srgb, var(--cat-accent, transparent) 20%, var(--bg-card));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--cat-accent, var(--panel-accent)) 40%, transparent);
+  }
+
+  .animals-grid .sound-btn.playing .btn-label {
+    color: var(--cat-accent, var(--panel-accent));
+  }
+
+  /* Animation glow avec couleur de catégorie (spécifique à la grille animaux) */
+  @keyframes playing-glow-cat {
+    from { box-shadow: 0 0 6px  color-mix(in srgb, var(--cat-accent) 25%, transparent); }
+    to   { box-shadow: 0 0 18px color-mix(in srgb, var(--cat-accent) 55%, transparent); }
+  }
+
+  .animals-grid .sound-btn.playing {
+    animation: playing-glow-cat 0.9s ease-in-out infinite alternate;
+  }
+
+  /* Barre de progression avec couleur de catégorie */
+  .animals-grid .sound-btn::before {
+    background: color-mix(in srgb, var(--cat-accent, var(--panel-accent)) 30%, transparent);
+  }
+
+  /* ── Gestion du pseudo-élément ::after (fond arrière-plan) ── */
+  .animals-grid .sound-btn::after {
+    background: color-mix(in srgb, var(--cat-accent, transparent) 8%, var(--bg-card));
+  }
+
+  .animals-grid .sound-btn:hover::after {
+    background: color-mix(in srgb, var(--cat-accent, transparent) 15%, var(--bg-card-hover));
+  }
+
+  .animals-grid .sound-btn.playing::after {
+    background: color-mix(in srgb, var(--cat-accent, transparent) 20%, var(--bg-card));
+  }
+
   /* ═══════════════════════════════════════════════════════
      RESPONSIVE
   ════════════════════════════════════════════════════════ */

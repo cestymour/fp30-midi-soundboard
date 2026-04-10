@@ -331,7 +331,41 @@ function buildAudioGrid(tab) {
   const grid = document.createElement('div');
   grid.className = 'audio-grid';
 
-  // Si l'onglet a des colonnes définies (ex: Films)
+  // ── CAS SPÉCIAL : Grille Animaux (4×8 paysage, 8×4 portrait) ──
+  if (tab.gridType === 'animals') {
+    grid.classList.add('animals-grid');
+    
+    // On aplatit tous les items (une seule catégorie normalement)
+    const allItems = tab.categories.flatMap(cat => cat.items);
+    
+    allItems.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'sound-btn';
+      btn.dataset.audio = item.file;
+      btn.dataset.label = item.name;
+      btn.dataset.start = item.start ?? 0;
+      btn.style.setProperty('--progress', '0%');
+      if (item.catClass) {
+        btn.classList.add(item.catClass);
+      }
+
+      const iconHTML = `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
+      btn.innerHTML = `${iconHTML}<span class="btn-label">${item.name}</span>`;
+      btn.title = item.title ?? item.name;
+
+      btn.addEventListener('click', () => {
+        btn === STATE.currentSoundBtn
+          ? stopSound(true)
+          : (stopSound(true), playSound(btn));
+      });
+
+      grid.appendChild(btn);
+    });
+
+    return grid;
+  }
+
+  // ── CAS : Mode colonnes (Films) ──
   if (tab.cols && tab.cols > 1) {
     grid.style.display = 'flex';
     grid.style.flexDirection = 'row';

@@ -1,7 +1,7 @@
 const AUDIO_TABS = [
 
   // ════════════════════════════════════════════════════════
-  // ONGLET 0 — Nature
+  // ONGLET — Nature
   // ════════════════════════════════════════════════════════
   {
     label: 'Nature',
@@ -35,7 +35,66 @@ const AUDIO_TABS = [
   },
 
   // ════════════════════════════════════════════════════════
-  // ONGLET 1 — Ambiances
+  // ONGLET — Animaux (grille 4×8)
+  // ════════════════════════════════════════════════════════
+  {
+    label: 'Animaux',
+    icon: '🐾',
+    accent: '#88ccff',
+    gridType: 'animals',
+    categories: [
+      {
+        label: 'Tous les animaux',
+        icon: '🔊',
+        color: '#88ccff',
+        items: [
+          // ── Ligne 1 ──
+          { name: 'Cheval : Hiii',         icon: '🐴', file: 'sounds/animaux/cheval_hennissement.mp3',                catClass: 'animaux-ferme',      title: 'Cheval Hennissement' },
+          { name: 'Cheval : Souffle',      icon: '🐎', file: 'sounds/animaux/cheval_souffle.ogg',                     catClass: 'animaux-ferme',      title: 'Cheval Souffle' },
+          //{ name: 'Galop Cheval',          icon: '🐎', file: 'sounds/animaux/cheval_galop.ogg',                       catClass: 'animaux-ferme',      title: 'Cheval Galop' },
+          { name: 'Poule : Cot-cot',       icon: '🐔', file: 'sounds/animaux/poule_gloussement.mp3',                  catClass: 'animaux-ferme',      title: 'Poule Gloussement' },
+          { name: 'Coq : Cocorico',        icon: '🐓', file: 'sounds/animaux/coq_cocorico.ogg',                       catClass: 'animaux-ferme',      title: 'Coq Cocorico' },
+          { name: 'Oiseau : Cui-cui',      icon: '🐦', file: 'sounds/animaux/chant_des_oiseaux.mp3',                  catClass: 'animaux-oiseau',     title: 'Chant des oiseaux Gazouillement' },
+          { name: 'Pigeon : Rou-rou',      icon: '🕊️', file: 'sounds/animaux/pigeon_roucoulement.mp3',                catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
+          { name: 'Lion/tigre : Roarrr',   icon: '🦁', file: 'sounds/animaux/lion_tigre_rugissement.mp3',             catClass: 'animaux-savane',     title: 'Lion/tigre Rugissement' },
+          { name: 'Hyène : Hi-hi',         icon: '🐆', file: 'sounds/animaux/hyene_rire.mp3',                         catClass: 'animaux-savane',     title: 'Hyène Rire' },
+
+          // ── Ligne 2 ──
+          { name: 'Vache : Meuh',          icon: '🐮', file: 'sounds/animaux/vache_meuglement.ogg',      start: 0.5,  catClass: 'animaux-ferme',      title: 'Vache Meuglement' },
+          { name: 'Âne : I-An',            icon: '🫏', file: 'sounds/animaux/ane_braiement.mp3',                      catClass: 'animaux-ferme',      title: 'Âne Braiement' },
+          { name: 'Dindon : Glouglou',     icon: '🦃', file: 'sounds/animaux/dindon_glouglou.mp3',                    catClass: 'animaux-ferme',      title: 'Dindon Glouglou' },
+          { name: 'Canard : Coin-coin',    icon: '🦆', file: 'sounds/animaux/canard_cancanement.mp3',                 catClass: 'animaux-ferme',      title: 'Canard Cancanement' },
+          { name: 'Corbeau : Croa-croa',   icon: '🐦‍⬛', file: 'sounds/animaux/corbeau_croassement.mp3',                catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
+          { name: 'Aigle : Cri perçant',   icon: '🦅', file: 'sounds/animaux/aigle_faucon_cri_percant.mp3',           catClass: 'animaux-oiseau',     title: 'Aigle / Faucon Cri perçant' },
+          { name: 'Éléphant',              icon: '🐘', file: 'sounds/animaux/elephant_barrissement.mp3', start: 0.5,  catClass: 'animaux-savane',     title: 'Éléphant Barrissement' },
+          { name: 'Singe : Ouh-ouh',       icon: '🐒', file: 'sounds/animaux/singe_cris.mp3',                         catClass: 'animaux-savane',     title: 'Singe Cris' },
+
+          // ── Ligne 3 ──
+          { name: 'Chat : Miaou',          icon: '🐱', file: 'sounds/animaux/chat_miaulement.mp3',                    catClass: 'animaux-domestique', title: 'Chat Miaulement' },
+          { name: 'Chat : Ronron',         icon: '🐈', file: 'sounds/animaux/chat_ronronnement.ogg',                  catClass: 'animaux-domestique', title: 'Chat Ronronnement' },
+          { name: 'Mouton : Bêêê',         icon: '🐑', file: 'sounds/animaux/mouton_chevre_belement.ogg',             catClass: 'animaux-ferme',      title: 'Mouton/Chèvre Bêlement' },
+          { name: 'Cochon : Groin',        icon: '🐷', file: 'sounds/animaux/cochon_grognement.mp3',                  catClass: 'animaux-ferme',      title: 'Cochon Grognement / Couinement' },
+          { name: 'Chouette : Hou-hou',    icon: '🦉', file: 'sounds/animaux/chouette_hibou_hululements.mp3',         catClass: 'animaux-oiseau',     title: 'Chouette / Hibou Hululements' },
+          { name: 'Grillon : Zzzzz',       icon: '🦗', file: 'sounds/animaux/grillon_gresillement.mp3',               catClass: 'animaux-insecte',    title: 'Grillon Grésillement' },
+          { name: 'Serpent : Sssss',       icon: '🐍', file: 'sounds/animaux/serpent_sifflement.mp3',                 catClass: 'animaux-savane',     title: 'Serpent Sifflement' },
+          { name: 'Grenouille : Coââ',     icon: '🐸', file: 'sounds/animaux/grenouille_coassement.mp3',              catClass: 'animaux-aquatique',  title: 'Grenouille Coassement' },
+
+          // ── Ligne 4 ──
+          { name: 'Chien : Ouaf',          icon: '🐶', file: 'sounds/animaux/chien_aboiement.mp3',                    catClass: 'animaux-domestique', title: 'Chien Aboiement' },
+          { name: 'Chien : Grrr',          icon: '🐕', file: 'sounds/animaux/chien_grognement.mp3',                   catClass: 'animaux-domestique', title: 'Chien Grognement' },
+          { name: 'Loup : Aouuuuh',        icon: '🐺', file: 'sounds/animaux/loup_hurlement.mp3',                     catClass: 'animaux-foret',      title: 'Loup Hurlement' },
+          { name: 'Ours : Grrr',           icon: '🐻', file: 'sounds/animaux/ours_grognement.mp3',                    catClass: 'animaux-foret',      title: 'Ours Grognement' },
+          { name: 'Cigale : Tszzzz',       icon: '🦗', file: 'sounds/animaux/cigale_chant.mp3',                       catClass: 'animaux-insecte',    title: 'Cigale Chant' },
+          { name: 'Abeille : Bzzzz',       icon: '🐝', file: 'sounds/animaux/moustique_bourdonnement.mp3',            catClass: 'animaux-insecte',    title: 'Abeille / Mouche / Moustique Bourdonnement' },
+          { name: 'Dauphin : I i i i',     icon: '🐬', file: 'sounds/animaux/dauphin_sifflements.mp3',                catClass: 'animaux-aquatique',  title: 'Dauphin Clics et sifflements' },
+          { name: 'Baleine : Chant',       icon: '🐋', file: 'sounds/animaux/baleine_chant.mp3',                      catClass: 'animaux-aquatique',  title: 'Baleine Chant' },
+        ]
+      }
+    ]
+  },
+
+  // ════════════════════════════════════════════════════════
+  // ONGLET — Ambiances
   // ════════════════════════════════════════════════════════
   {
     label: 'Ambiances',
@@ -67,7 +126,7 @@ const AUDIO_TABS = [
   },
 
   // ════════════════════════════════════════════════════════
-  // ONGLET 2 — Effets
+  // ONGLET — Effets
   // ════════════════════════════════════════════════════════
   {
     label: 'Effets',
@@ -101,7 +160,7 @@ const AUDIO_TABS = [
   },
 
   // ════════════════════════════════════════════════════════
-  // ONGLET 3 — Musique
+  // ONGLET — Musique
   // ════════════════════════════════════════════════════════
   {
     label: 'Musique',
@@ -125,7 +184,7 @@ const AUDIO_TABS = [
   },
 
   // ════════════════════════════════════════════════════════
-  // ONGLET 4 — Musique de films
+  // ONGLET — Musique de films
   // ════════════════════════════════════════════════════════
   {
     label: 'Films',

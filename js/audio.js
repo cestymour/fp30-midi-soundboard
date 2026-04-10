@@ -66,6 +66,19 @@ function startProgressLoop(audio, btn, startOffset) {
     STATE.progressRAF = requestAnimationFrame(tick);
   }
   if (STATE.progressRAF) cancelAnimationFrame(STATE.progressRAF);
+  
+  // ── Gestion transition adaptative pour sons courts ──
+  const dur = audio.duration;
+  if (dur && isFinite(dur)) {
+    if (dur < 3) {
+      btn.style.setProperty('--progress-transition', '0.05s');
+    } else if (dur < 10) {
+      btn.style.setProperty('--progress-transition', '0.15s');
+    } else {
+      btn.style.setProperty('--progress-transition', '0.30s');
+    }
+  }
+  
   STATE.progressRAF = requestAnimationFrame(tick);
 }
 
