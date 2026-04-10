@@ -53,32 +53,42 @@ function fadeAudio(audio, from, to, ms, onDone) {
 // PROGRESSION
 // ═══════════════════════════════════════════════════════
 
-function startProgressLoop(audio, btn, startOffset) {
+function startProgressLoop(audio, btn, startOffset, endOffset) {
   function tick() {
     if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
-    const dur = audio.duration;
-    const playableDuration = (dur && isFinite(dur)) ? dur - startOffset : null;
+
+    // Arrêt anticipé si on a dépassé endOffset
+    if (endOffset !== null && audio.currentTime >= endOffset) {
+      stopSound(false);
+      return;
+    }
+
+    const dur            = audio.duration;
+    const effectiveEnd   = endOffset !== null ? endOffset : (dur && isFinite(dur) ? dur : null);
+    const playableDuration = effectiveEnd !== null ? effectiveEnd - startOffset : null;
     const elapsed          = audio.currentTime - startOffset;
+
     const pct = (playableDuration && playableDuration > 0)
       ? Math.min(100, (elapsed / playableDuration) * 100).toFixed(1) + '%'
       : '0%';
+
     btn.style.setProperty('--progress', pct);
     STATE.progressRAF = requestAnimationFrame(tick);
   }
+
   if (STATE.progressRAF) cancelAnimationFrame(STATE.progressRAF);
-  
+
   // ── Gestion transition adaptative pour sons courts ──
   const dur = audio.duration;
-  if (dur && isFinite(dur)) {
-    if (dur < 3) {
-      btn.style.setProperty('--progress-transition', '0.05s');
-    } else if (dur < 10) {
-      btn.style.setProperty('--progress-transition', '0.15s');
-    } else {
-      btn.style.setProperty('--progress-transition', '0.30s');
-    }
+  const effectiveEnd       = endOffset !== null ? endOffset : (dur && isFinite(dur) ? dur : null);
+  const playableDuration   = effectiveEnd !== null ? effectiveEnd - startOffset : null;
+
+  if (playableDuration !== null) {
+    if (playableDuration < 3)       btn.style.setProperty('--progress-transition', '0.05s');
+    else if (playableDuration < 10) btn.style.setProperty('--progress-transition', '0.15s');
+    else                            btn.style.setProperty('--progress-transition', '0.30s');
   }
-  
+
   STATE.progressRAF = requestAnimationFrame(tick);
 }
 
@@ -130,6 +140,9 @@ function playSound(btn) {
   if (!src) return;
 
   const startOffset = parseFloat(btn.dataset.start || '0') || 0;
+  const endRaw      = btn.dataset.end;
+  const endOffset   = (endRaw !== '' && endRaw !== undefined) ? parseFloat(endRaw) : null;
+
   const audio = new Audio(src);
   audio.volume = 0;
 
@@ -138,7 +151,7 @@ function playSound(btn) {
     audio.play()
       .then(() => {
         fadeAudio(audio, 0, STATE.audioVolume, 300, null);
-        startProgressLoop(audio, btn, startOffset);
+        startProgressLoop(audio, btn, startOffset, endOffset);
       })
       .catch(() => stopSound());
   }, { once: true });

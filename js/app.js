@@ -340,6 +340,7 @@ function buildAudioGrid(tab) {
       btn.dataset.audio = item.file;
       btn.dataset.label = item.name;
       btn.dataset.start = item.start ?? 0;
+      btn.dataset.end   = item.end   ?? '';
       btn.style.setProperty('--progress', '0%');
       if (item.catClass) {
         btn.classList.add(item.catClass);
@@ -413,6 +414,7 @@ function buildAudioGrid(tab) {
         btn.dataset.audio = item.file;
         btn.dataset.label = item.name;
         btn.dataset.start = item.start ?? 0;
+        btn.dataset.end   = item.end   ?? '';
         btn.style.setProperty('--progress', '0%');
 
         // Gestion image OU icône
@@ -451,6 +453,7 @@ function buildAudioGrid(tab) {
         btn.dataset.audio = item.file;
         btn.dataset.label = item.name;
         btn.dataset.start = item.start ?? 0;
+        btn.dataset.end   = item.end   ?? '';
         btn.style.setProperty('--progress', '0%');
 
         const isImage = item.icon && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(item.icon);
