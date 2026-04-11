@@ -23,7 +23,7 @@ const STATE = {
   currentAudio:          null,
   currentSoundBtn:       null,
   progressRAF:           null,
-  audioVolume:           0.75,
+  audioVolume:           1,
 };
 
 // ═══════════════════════════════════════════════════════
