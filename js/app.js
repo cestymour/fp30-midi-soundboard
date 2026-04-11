@@ -33,10 +33,160 @@ const tabNav   = document.getElementById('tab-nav');
 const panelsEl = document.getElementById('panels');
 
 // ═══════════════════════════════════════════════════════
+// UTILITAIRES DOM — blocs réutilisables
+// ═══════════════════════════════════════════════════════
+
+/** Détecte si une chaîne est un chemin vers une image */
+function isImagePath(str) {
+  return str && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(str);
+}
+
+/** Génère le HTML d'icône (image ou emoji) et indique si c'est une image */
+function buildIconHTML(item) {
+  let hasImage = false;
+  let html;
+
+  if (item.img) {
+    hasImage = true;
+    html = `<span class="btn-icon"><img src="${item.img}" alt="${item.name}" /></span>`;
+  } else if (isImagePath(item.icon)) {
+    hasImage = true;
+    html = `<span class="btn-icon"><img src="${item.icon}" alt="${item.name}" /></span>`;
+  } else {
+    html = `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
+  }
+
+  return { html, hasImage };
+}
+
+/** Crée un titre de catégorie */
+function buildCatTitle(cat) {
+  const title = document.createElement('div');
+  title.className = 'cat-title';
+  title.style.setProperty('--cat-color', cat.color ?? 'var(--text-muted)');
+  title.textContent = `${cat.icon ?? ''} ${cat.label}`;
+  return title;
+}
+
+/** Crée un bloc catégorie (titre + grille de boutons vide) */
+function buildCatBlock(cat, blockClass, gridClass) {
+  const block = document.createElement('div');
+  block.className = blockClass;
+  block.appendChild(buildCatTitle(cat));
+
+  const btnGrid = document.createElement('div');
+  btnGrid.className = gridClass;
+  block.appendChild(btnGrid);
+
+  return { block, btnGrid };
+}
+
+/** Crée N colonnes dans un conteneur et retourne le tableau */
+function createColumns(container, count, className) {
+  const cols = [];
+  for (let i = 0; i < count; i++) {
+    const col = document.createElement('div');
+    col.className = className;
+    container.appendChild(col);
+    cols.push(col);
+  }
+  return cols;
+}
+
+/** Crée un bouton audio (sound-btn) avec tous ses attributs et son listener */
+function buildSoundBtn(item) {
+  const btn = document.createElement('button');
+  btn.className = 'sound-btn';
+  btn.dataset.audio = item.file;
+  btn.dataset.label = item.name;
+  btn.dataset.start = item.start ?? 0;
+  btn.dataset.end   = item.end   ?? '';
+  btn.style.setProperty('--progress', '0%');
+
+  if (item.catClass) btn.classList.add(item.catClass);
+
+  const icon = buildIconHTML(item);
+  if (icon.hasImage) btn.classList.add('sound-btn--img');
+
+  btn.innerHTML = `${icon.html}<span class="btn-label">${item.name}</span>`;
+  btn.title = item.title ?? item.name;
+
+  btn.addEventListener('click', () => {
+    btn === STATE.currentSoundBtn
+      ? stopSound(true)
+      : (stopSound(true), playSound(btn));
+  });
+
+  return btn;
+}
+
+/**
+ * Calcule et applique une hauteur uniforme aux boutons d'un panneau en colonnes.
+ * Factorise equalizeMidiButtons et equalizeAudioButtons.
+ */
+function equalizeColumnButtons(cfg) {
+  document.querySelectorAll(cfg.panelSelector).forEach(panel => {
+    const grid = panel.querySelector(cfg.gridSelector);
+    if (!grid) return;
+    if (cfg.guardSelector && !grid.querySelector(cfg.guardSelector)) return;
+
+    const gridH = grid.clientHeight;
+    if (!gridH) return;
+
+    const gapPx    = parseInt(getComputedStyle(grid).gap) || 8;
+    const gapInner = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap-inner')) || 5;
+
+    grid.querySelectorAll(cfg.colSelector).forEach(col => {
+      let totalRows = 0;
+      col.querySelectorAll(cfg.btnGridSelector).forEach(btnGrid => {
+        totalRows += Math.ceil(btnGrid.children.length / cfg.colsPerRow);
+      });
+
+      const catCount   = col.querySelectorAll(cfg.catBlockSelector).length;
+      const firstTitle = col.querySelector('.cat-title');
+      const titleH     = firstTitle ? firstTitle.offsetHeight : 20;
+
+      const usedByTitles = catCount * (titleH + gapInner);
+      const usedByGaps   = (catCount - 1) * gapPx;
+      const available    = gridH - usedByTitles - usedByGaps;
+
+      const gapsInGrid = (totalRows - 1) * gapInner;
+      const btnH       = Math.floor((available - gapsInGrid) / totalRows);
+
+      col.style.setProperty('--btn-h', btnH + 'px');
+    });
+  });
+}
+
+function equalizeMidiButtons() {
+  equalizeColumnButtons({
+    panelSelector:    '.panel.panel-midi.active',
+    gridSelector:     '.midi-grid',
+    guardSelector:    null,
+    colSelector:      '.midi-col',
+    btnGridSelector:  '.btn-grid',
+    catBlockSelector: '.cat-block',
+    colsPerRow:       2,
+  });
+}
+
+function equalizeAudioButtons() {
+  equalizeColumnButtons({
+    panelSelector:    '.panel.panel-audio.active',
+    gridSelector:     '.audio-grid',
+    guardSelector:    '.audio-col',
+    colSelector:      '.audio-col',
+    btnGridSelector:  '.audio-cat-grid',
+    catBlockSelector: '.audio-cat-block',
+    colsPerRow:       3,
+  });
+}
+
+// ═══════════════════════════════════════════════════════
 // CONSTRUCTION DU DOM
 // ═══════════════════════════════════════════════════════
 function buildUI() {
-  const allTabs      = [];
+  const allTabs       = [];
   const firstAudioIdx = MIDI_TABS.length;
 
   MIDI_TABS.forEach(tab  => allTabs.push({ ...tab, type: 'midi'  }));
@@ -73,7 +223,6 @@ function buildUI() {
     if (tab.type === 'midi') {
       panel.appendChild(buildMidiControls());
       panel.appendChild(buildMidiGrid(tab));
-      // Calcul des hauteurs après insertion dans le DOM
       requestAnimationFrame(() => equalizeMidiButtons());
     } else {
       panel.appendChild(buildAudioControls());
@@ -105,10 +254,9 @@ function buildMidiControls() {
   const wrap = document.createElement('div');
   wrap.className = 'panel-controls';
   
-  // ── Génère un ID unique pour éviter les conflits SVG entre onglets ──
   const uid = Math.random().toString(36).substr(2, 9);
-  
   const volPct = (STATE.midiVolume / 127 * 100).toFixed(1);
+
   wrap.innerHTML = `
     <div class="midi-connect">
       <select class="midi-select">
@@ -125,26 +273,20 @@ function buildMidiControls() {
     </div>
     <button class="emergency-stop-btn" title="All Notes Off">
       <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-        <!-- Anneau rayures jaunes/noires -->
         <circle cx="14" cy="14" r="13" fill="none" stroke-width="0"/>
         <clipPath id="ring-clip-${uid}">
           <path d="M14 14 m-13 0 a13 13 0 1 1 26 0 a13 13 0 1 1 -26 0
                   M14 14 m-9 0 a9 9 0 1 0 18 0 a9 9 0 1 0 -18 0" 
                 clip-rule="evenodd"/>
         </clipPath>
-        <!-- Rayures diagonales jaune/noir sur l'anneau -->
         <rect x="0" y="0" width="28" height="28" fill="url(#hazard-${uid})" clip-path="url(#ring-clip-${uid})"/>
-        
         <defs>
           <pattern id="hazard-${uid}" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <rect width="4" height="8" fill="#f5c400"/>
             <rect x="4" width="4" height="8" fill="#111111"/>
           </pattern>
         </defs>
-
-        <!-- Rond rouge central -->
         <circle cx="14" cy="14" r="9" fill="#cc0000"/>
-        <!-- Reflet pour effet 3D -->
         <circle cx="11" cy="11" r="3.5" fill="rgba(255,255,255,0.18)"/>
       </svg>
       STOP
@@ -177,6 +319,7 @@ function buildAudioControls() {
   const wrap = document.createElement('div');
   wrap.className = 'panel-controls';
   const pct = Math.round(STATE.audioVolume * 100);
+
   wrap.innerHTML = `
     <div class="now-playing">
       <span class="now-playing-label">NO SOUND PLAYING</span>
@@ -213,33 +356,13 @@ function buildMidiGrid(tab) {
   const grid = document.createElement('div');
   grid.className = 'midi-grid';
 
-  const colCount = tab.cols ?? 5;  // 5 par défaut si non défini
-  const blocksPerCol = Math.ceil(tab.categories.length / colCount);  // nb blocs par colonne
+  const colCount     = tab.cols ?? 5;
+  const blocksPerCol = Math.ceil(tab.categories.length / colCount);
+  const cols         = createColumns(grid, colCount, 'midi-col');
 
-  // Créer les colonnes vides
-  const cols = [];
-  for (let i = 0; i < colCount; i++) {
-    const col = document.createElement('div');
-    col.className = 'midi-col';
-    grid.appendChild(col);
-    cols.push(col);
-  }
-
-  // Répartir les catégories dans les colonnes (par bloc)
   tab.categories.forEach((cat, catIdx) => {
     const col = cols[Math.floor(catIdx / blocksPerCol)];
-
-    const block = document.createElement('div');
-    block.className = 'cat-block';
-
-    const title = document.createElement('div');
-    title.className = 'cat-title';
-    title.style.setProperty('--cat-color', cat.color ?? 'var(--text-muted)');
-    title.textContent = `${cat.icon ?? ''} ${cat.label}`;
-    block.appendChild(title);
-
-    const btnGrid = document.createElement('div');
-    btnGrid.className = 'btn-grid';
+    const { block, btnGrid } = buildCatBlock(cat, 'cat-block', 'btn-grid');
 
     cat.items.forEach(item => {
       const btn = document.createElement('button');
@@ -253,109 +376,10 @@ function buildMidiGrid(tab) {
       btnGrid.appendChild(btn);
     });
 
-    block.appendChild(btnGrid);
     col.appendChild(block);
   });
 
   return grid;
-}
-
-// ── Hauteur uniforme des boutons MIDI ──
-function equalizeMidiButtons() {
-  document.querySelectorAll('.panel.panel-midi.active').forEach(panel => {
-    const grid = panel.querySelector('.midi-grid');
-    if (!grid) return;
-
-    const gridH  = grid.clientHeight;
-    if (!gridH) return;  // panneau pas encore visible, on ignore
-
-    const gapPx    = parseInt(getComputedStyle(grid).gap) || 8;
-    const gapInner = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap-inner')) || 5;
-
-    grid.querySelectorAll('.midi-col').forEach(col => {
-      let totalRows = 0;
-      col.querySelectorAll('.btn-grid').forEach(btnGrid => {
-        totalRows += Math.ceil(btnGrid.children.length / 2);
-      });
-
-      const catBlocks    = col.querySelectorAll('.cat-block');
-      const catCount     = catBlocks.length;
-
-      const firstTitle   = col.querySelector('.cat-title');
-      const titleH       = firstTitle ? firstTitle.offsetHeight : 20;
-
-      const usedByTitles = catCount * (titleH + gapInner);
-      const usedByGaps   = (catCount - 1) * gapPx;
-      const available    = gridH - usedByTitles - usedByGaps;
-
-      const gapsInGrid   = (totalRows - 1) * gapInner;
-      const btnH         = Math.floor((available - gapsInGrid) / totalRows);
-
-      col.style.setProperty('--btn-h', btnH + 'px');
-    });
-  });
-}
-
-// ── Hauteur uniforme des boutons AUDIO en mode colonnes ──
-function equalizeAudioButtons() {
-  document.querySelectorAll('.panel.panel-audio.active').forEach(panel => {
-    const grid = panel.querySelector('.audio-grid');
-    if (!grid || !grid.querySelector('.audio-col')) return; // pas en mode colonnes
-
-    const gridH = grid.clientHeight;
-    if (!gridH) return;
-
-    const gapPx    = parseInt(getComputedStyle(grid).gap) || 8;
-    const gapInner = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap-inner')) || 5;
-
-    grid.querySelectorAll('.audio-col').forEach(col => {
-      let totalRows = 0;
-      col.querySelectorAll('.audio-cat-grid').forEach(btnGrid => {
-        totalRows += Math.ceil(btnGrid.children.length / 3); // 3 boutons par ligne
-      });
-
-      const catBlocks = col.querySelectorAll('.audio-cat-block');
-      const catCount  = catBlocks.length;
-
-      const firstTitle = col.querySelector('.cat-title');
-      const titleH     = firstTitle ? firstTitle.offsetHeight : 20;
-
-      const usedByTitles = catCount * (titleH + gapInner);
-      const usedByGaps   = (catCount - 1) * gapPx;
-      const available    = gridH - usedByTitles - usedByGaps;
-
-      const gapsInGrid = (totalRows - 1) * gapInner;
-      const btnH       = Math.floor((available - gapsInGrid) / totalRows);
-
-      col.style.setProperty('--btn-h', btnH + 'px');
-    });
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// UTILITAIRE — Détecte si une icône est une image
-// ═══════════════════════════════════════════════════════
-// Extraction de la logique de détection d'image
-function isImagePath(str) {
-  return str && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(str);
-}
-
-// Génère le HTML d'icône (image ou emoji) et indique si c'est une image
-function buildIconHTML(item) {
-  let hasImage = false;
-  let html;
-
-  if (item.img) {
-    hasImage = true;
-    html = `<span class="btn-icon"><img src="${item.img}" alt="${item.name}" /></span>`;
-  } else if (isImagePath(item.icon)) {
-    hasImage = true;
-    html = `<span class="btn-icon"><img src="${item.icon}" alt="${item.name}" /></span>`;
-  } else {
-    html = `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
-  }
-
-  return { html, hasImage };
 }
 
 // ── Grille Audio ──
@@ -366,37 +390,8 @@ function buildAudioGrid(tab) {
   // ── CAS SPÉCIAL : Grille Animaux (4×8 paysage, 8×4 portrait) ──
   if (tab.gridType === 'animals') {
     grid.classList.add('animals-grid');
-    
-    // On aplatit tous les items (une seule catégorie normalement)
     const allItems = tab.categories.flatMap(cat => cat.items);
-    
-    allItems.forEach(item => {
-      const btn = document.createElement('button');
-      btn.className = 'sound-btn';
-      btn.dataset.audio = item.file;
-      btn.dataset.label = item.name;
-      btn.dataset.start = item.start ?? 0;
-      btn.dataset.end   = item.end   ?? '';
-      btn.style.setProperty('--progress', '0%');
-      if (item.catClass) {
-        btn.classList.add(item.catClass);
-      }
-
-      const icon = buildIconHTML(item);
-      if (icon.hasImage) btn.classList.add('sound-btn--img');
-
-      btn.innerHTML = `${icon.html}<span class="btn-label">${item.name}</span>`;
-      btn.title = item.title ?? item.name;
-
-      btn.addEventListener('click', () => {
-        btn === STATE.currentSoundBtn
-          ? stopSound(true)
-          : (stopSound(true), playSound(btn));
-      });
-
-      grid.appendChild(btn);
-    });
-
+    allItems.forEach(item => grid.appendChild(buildSoundBtn(item)));
     return grid;
   }
 
@@ -404,85 +399,22 @@ function buildAudioGrid(tab) {
   if (tab.cols && tab.cols > 1) {
     grid.classList.add('audio-grid-cols');
 
-    const colCount = tab.cols;
+    const colCount     = tab.cols;
     const blocksPerCol = Math.ceil(tab.categories.length / colCount);
+    const cols         = createColumns(grid, colCount, 'audio-col');
 
-    // Créer les colonnes
-    const cols = [];
-    for (let i = 0; i < colCount; i++) {
-      const col = document.createElement('div');
-      col.className = 'audio-col';
-      grid.appendChild(col);
-      cols.push(col);
-    }
-
-    // Répartir les catégories dans les colonnes
     tab.categories.forEach((cat, catIdx) => {
       const col = cols[Math.floor(catIdx / blocksPerCol)];
+      const { block, btnGrid } = buildCatBlock(cat, 'audio-cat-block', 'audio-cat-grid');
 
-      const block = document.createElement('div');
-      block.className = 'audio-cat-block';
-
-      const title = document.createElement('div');
-      title.className = 'cat-title';
-      title.style.setProperty('--cat-color', cat.color ?? 'var(--text-muted)');
-      title.textContent = `${cat.icon ?? ''} ${cat.label}`;
-      block.appendChild(title);
-
-      const btnGrid = document.createElement('div');
-      btnGrid.className = 'audio-cat-grid';
-
-      cat.items.forEach(item => {
-        const btn = document.createElement('button');
-        btn.className = 'sound-btn';
-        btn.dataset.audio = item.file;
-        btn.dataset.label = item.name;
-        btn.dataset.start = item.start ?? 0;
-        btn.dataset.end   = item.end   ?? '';
-        btn.style.setProperty('--progress', '0%');
-
-        const icon = buildIconHTML(item);
-        if (icon.hasImage) btn.classList.add('sound-btn--img');
-
-        btn.innerHTML = `${icon.html}<span class="btn-label">${item.name}</span>`;
-        btn.title = item.title ?? item.name;
-
-        btn.addEventListener('click', () => {
-          btn === STATE.currentSoundBtn
-            ? stopSound(true)
-            : (stopSound(true), playSound(btn));
-        });
-
-        btnGrid.appendChild(btn);
-      });
-
-      block.appendChild(btnGrid);
+      cat.items.forEach(item => btnGrid.appendChild(buildSoundBtn(item)));
       col.appendChild(block);
     });
 
   } else {
     // Mode grille classique (Nature, Ambiances, Effets, Musique)
     tab.categories.forEach(cat => {
-      cat.items.forEach(item => {
-        const btn = document.createElement('button');
-        btn.className = 'sound-btn';
-        btn.dataset.audio = item.file;
-        btn.dataset.label = item.name;
-        btn.dataset.start = item.start ?? 0;
-        btn.dataset.end   = item.end   ?? '';
-        btn.style.setProperty('--progress', '0%');
-
-        const icon = buildIconHTML(item);
-        if (icon.hasImage) btn.classList.add('sound-btn--img');
-
-        btn.innerHTML = `${icon.html}<span class="btn-label">${item.name}</span>`;
-        btn.addEventListener('click', () => {
-          btn === STATE.currentSoundBtn
-            ? stopSound(true)
-            : (stopSound(true), playSound(btn));
-        });
-        grid.appendChild(btn);
-      });
+      cat.items.forEach(item => grid.appendChild(buildSoundBtn(item)));
     });
   }
 
@@ -522,12 +454,10 @@ function rearrangeMidiGrid(panel) {
 // POPUP "ABOUT"
 // ═══════════════════════════════════════════════════════
 function buildAboutPopup() {
-  // Overlay
   const overlay = document.createElement('div');
   overlay.id = 'about-overlay';
   overlay.setAttribute('aria-hidden', 'true');
 
-  // Carte
   overlay.innerHTML = `
     <div id="about-card">
       <div id="about-title">[IMPRO] Soundboard</div>
@@ -548,13 +478,11 @@ function buildAboutPopup() {
 
   document.getElementById('app').appendChild(overlay);
 
-  // Fermeture
   overlay.addEventListener('click', e => {
     if (e.target === overlay) closeAbout();
   });
   overlay.querySelector('#about-close-btn').addEventListener('click', closeAbout);
 
-  // Reload
   overlay.querySelector('#about-reload-btn').addEventListener('click', async () => {
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
@@ -568,7 +496,6 @@ function openAbout() {
   const overlay = document.getElementById('about-overlay');
   if (!overlay) return;
 
-  // Statut SW
   const swEl = overlay.querySelector('#about-sw-status');
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     swEl.textContent = 'Service Worker : actif ✓';
@@ -576,7 +503,6 @@ function openAbout() {
     swEl.textContent = 'Service Worker : inactif';
   }
 
-  // statut Wake Lock (Wake Lock = empêche la mise en veille)
   const wlEl = overlay.querySelector('#about-wl-status');
   if (wlEl) {
     if (!('wakeLock' in navigator)) {
@@ -604,7 +530,6 @@ function initLogoInteraction() {
   btn.addEventListener('click', () => openAbout());
   btn.addEventListener('contextmenu', e => e.preventDefault());
 }
-
 
 // ═══════════════════════════════════════════════════════
 // NAVIGATION ONGLETS
@@ -641,7 +566,7 @@ panelsEl.addEventListener('change', async e => {
 });
 
 // ═══════════════════════════════════════════════════════
-// RESIZE — recalcul hauteurs boutons MIDI
+// RESIZE — recalcul hauteurs boutons
 // ═══════════════════════════════════════════════════════
 const resizeObserver = new ResizeObserver(() => {
   equalizeMidiButtons();
@@ -649,12 +574,11 @@ const resizeObserver = new ResizeObserver(() => {
 });
 resizeObserver.observe(document.getElementById('panels'));
 
-
 // ═══════════════════════════════════════════════════════
 // WAKE LOCK — Empêche la mise en veille de l'écran
 // ═══════════════════════════════════════════════════════
 async function requestWakeLock() {
-  if (!('wakeLock' in navigator)) return; // non supporté, on ignore silencieusement
+  if (!('wakeLock' in navigator)) return;
   try {
     STATE.wakeLock = await navigator.wakeLock.request('screen');
     console.log('[WakeLock] Actif ✅');
@@ -665,8 +589,6 @@ async function requestWakeLock() {
 
 function initWakeLock() {
   requestWakeLock();
-
-  // Réactive automatiquement au retour sur l'appli
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       requestWakeLock();
@@ -696,9 +618,6 @@ function init() {
   initWebMidi();                    // dans midi.js
   initLogoInteraction();
   initWakeLock();
-
-  // Temp : on ouvre sur l'onglet films
-  activateTab(7);
 }
 
 init();

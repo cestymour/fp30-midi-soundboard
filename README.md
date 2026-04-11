@@ -1,38 +1,52 @@
 # 🎭 Piano Soundboard
 
-Web-based PWA soundboard for live improv theater.  
-Designed for tablet use (Android / Chrome), landscape orientation.
+> 🇬🇧 [English](#english) · 🇫🇷 [Français](#français)
 
 ---
 
-## 🚀 Try it live !
+<a id="english"></a>
 
-👉 **[Open the app — click here !](https://cestymour.github.io/fp30-midi-soundboard/)**
+## 🇬🇧 English
+
+Web-based PWA soundboard for live improv theater.  
+Designed for tablet use (Android / Chrome), landscape & portrait orientation.
+
+---
+
+### 🚀 Try it live!
+
+👉 **[Open the app — click here!](https://cestymour.github.io/fp30-midi-soundboard/)**
 
 > Works best on Chrome (Android tablet or desktop). MIDI features require a connected instrument.
 
 ---
 
-## What it does
+### What it does
 
 - Instantly switch between instruments and sound effects during a live performance
 - **MIDI instruments** — sends Bank Select + Program Change patches to a digital piano (Roland FP-30X or any GM2-compatible instrument)
 - **Audio soundboard** — plays MP3 / OGG / WAV files with fade in/out and progress bar
+- **Film soundboard** — movie themes organized by genre with cover images
+- **Animal soundboard** — 4×8 color-coded grid with category accents
 - Organized by cinematic universe (classical, western, medieval, jazz, sci-fi, horror, world music...) and sound category (nature, animals, vehicles, human, SFX...)
 - Auto-connects to the Roland FP-30X on page load
 - Volume control directly from the interface (MIDI CC7 and audio volume, independently)
+- **Emergency Stop** — All Notes Off button to silence the piano instantly
+- **Wake Lock** — prevents screen sleep during a performance
+- **Responsive layout** — automatic grid reorganization in portrait mode
+- **About popup** — shows Service Worker and Wake Lock status, cache reset button
 
-## How it works
+### How it works
 
-### MIDI tabs
+#### MIDI tabs
 Click a button → the instrument or sound is selected on the piano → play the keys to produce the sound.  
 **No sound is triggered automatically by the app** — the app configures the piano, the musician plays.
 
-### Audio tabs
+#### Audio tabs
 Click a button → the sound plays immediately from the device speakers.  
 Click again → the sound fades out and stops.
 
-## Notes
+### Notes
 
 - GM2 sounds will work on any GM2-compatible instrument.
 - Roland-specific sounds (Roland sound banks) are designed for the FP-30X and may not work as expected on other devices.
@@ -40,18 +54,19 @@ Click again → the sound fades out and stops.
 
 ---
 
-## Tech
+### Tech
 
 - Vanilla JavaScript — no framework, no npm dependency
 - Web MIDI API — USB wired connection
 - Web Bluetooth API — BLE MIDI wireless connection
 - Native `Audio` — audio playback
 - Service Worker — app cache + dynamic audio cache
+- Wake Lock API — prevents screen dimming
 - GitHub Actions — automatic deployment to GitHub Pages
 
 ---
 
-## Project structure
+### Project structure
 
 ```
 /
@@ -59,6 +74,7 @@ Click again → the sound fades out and stops.
 ├── style.css                       # Unified stylesheet
 ├── manifest.json                   # PWA manifest
 ├── sw.js                           # Service Worker
+├── version.js                      # App version constant (APP_VERSION)
 ├── midi.config.js                  # MIDI instrument data (MIDI_TABS)
 ├── audio.config.js                 # Audio sound data (AUDIO_TABS)
 ├── public/
@@ -72,15 +88,20 @@ Click again → the sound fades out and stops.
 │   ├── audio.js                    # Audio playback logic
 │   ├── bluetoothMIDI.js            # BluetoothMIDI class (BLE MIDI)
 │   └── ble-midi-parser.bundle.js   # BLE MIDI packet parser
+├── images/
+│   └── films/                      # Cover images for film soundboard
+│       └── *.jpg
 └── sounds/
-    └── *.mp3 / *.wav / *.ogg       # Audio files
+    ├── *.mp3 / *.wav / *.ogg       # Audio files
+    └── animaux/                    # Animal sounds
+        └── *.mp3 / *.ogg
 ```
 
 ---
 
-## Configuration
+### Configuration
 
-### MIDI instruments — `midi.config.js`
+#### MIDI instruments — `midi.config.js`
 
 Defines the `MIDI_TABS` variable — array of MIDI tabs, each containing categories and instruments:
 
@@ -90,6 +111,7 @@ const MIDI_TABS = [
     label: 'Instruments',   // Tab name
     icon: '🎹',             // Emoji displayed in the tab
     accent: '#7c9cff',      // Tab accent color
+    cols: 7,                // Number of columns (optional, default: 5)
     categories: [
       {
         label: 'Classique', // Category name
@@ -111,9 +133,9 @@ const MIDI_TABS = [
 ];
 ```
 
-### Audio sounds — `audio.config.js`
+#### Audio sounds — `audio.config.js`
 
-Defines the `AUDIO_TABS` variable — same structure as `MIDI_TABS`, items have a `file` field instead of MIDI fields:
+Defines the `AUDIO_TABS` variable — same structure as `MIDI_TABS`, with audio-specific fields:
 
 ```js
 const AUDIO_TABS = [
@@ -121,6 +143,9 @@ const AUDIO_TABS = [
     label: 'Nature',
     icon: '🌿',
     accent: '#4cffaa',
+    // Optional layout options:
+    // cols: 3,              // Multi-column layout (Films tab)
+    // gridType: 'animals',  // Special grid layout (Animals tab)
     categories: [
       {
         label: 'Nature & Water',
@@ -129,8 +154,14 @@ const AUDIO_TABS = [
         items: [
           {
             name: 'Forest',                     // Button label
-            icon: '🌲',                          // Button emoji
-            file: 'sounds/foret-oiseau.wav'     // Path to audio file
+            icon: '🌲',                          // Button emoji (or image path)
+            file: 'sounds/foret-oiseau.wav',    // Path to audio file
+            // Optional fields:
+            // img: 'images/films/cover.jpg',   // Cover image (overrides icon)
+            // start: 12.5,                     // Start time in seconds
+            // end: 45.0,                       // End time in seconds
+            // title: 'Custom tooltip',         // Tooltip text
+            // catClass: 'animaux-ferme',       // CSS class for category color
           },
         ]
       }
@@ -139,14 +170,34 @@ const AUDIO_TABS = [
 ];
 ```
 
+#### Special tab types
+
+**Multi-column layout** (e.g. Films tab):
+```js
+{
+  label: 'Films',
+  cols: 3,  // Items arranged in 3 columns with category headers
+  // ...
+}
+```
+
+**Animal grid** (fixed 4×8 landscape / 8×4 portrait):
+```js
+{
+  label: 'Animaux',
+  gridType: 'animals',  // Enables the special animal grid
+  // ...
+}
+```
+
 ---
 
-## Requirements
+### Requirements
 
 - A browser supporting the Web MIDI API — **Chrome or Edge recommended**
 - A Roland FP-30X (or any GM2-compatible instrument) connected via USB or Bluetooth
 
-## Browser compatibility
+### Browser compatibility
 
 | Feature | Required browser |
 |---|---|
@@ -154,14 +205,15 @@ const AUDIO_TABS = [
 | Web Bluetooth (BLE MIDI) | Chrome Android, Chrome Desktop |
 | Audio (MP3 / OGG / WAV) | All modern browsers |
 | PWA / Service Worker | Chrome, Edge, Safari 16.4+ |
+| Wake Lock API | Chrome, Edge |
 
 > ⚠️ Optimized for **Chrome on Android**. MIDI features are not available on Firefox and Safari.
 
 ---
 
-## Deployment
+### Deployment
 
-### GitHub Pages (automatic)
+#### GitHub Pages (automatic)
 
 Deployment is handled by GitHub Actions (`.github/workflows/deploy.yml`).  
 Every push to `main` automatically updates the live site.
@@ -171,7 +223,7 @@ Every push to `main` automatically updates the live site.
 2. Source: select **GitHub Actions**
 3. Push to `main` → deployment triggers automatically
 
-### Local development
+#### Local development
 
 No server required for basic development.  
 Open `index.html` directly in Chrome.
@@ -186,7 +238,7 @@ Open `index.html` directly in Chrome.
 
 ---
 
-## Updating the PWA cache
+### Updating the PWA cache
 
 When you modify app files (HTML, CSS, JS), increment the cache versions in `sw.js`:
 
@@ -197,7 +249,7 @@ const AUDIO_CACHE = 'impro-audio-v2';  // ← increment if sounds changed
 
 ---
 
-## Tested hardware
+### Tested hardware
 
 - **Piano**: Roland FP-30X
 - **USB connection**: USB-B → USB-A cable
@@ -206,21 +258,23 @@ const AUDIO_CACHE = 'impro-audio-v2';  // ← increment if sounds changed
 
 ---
 
-## License
+### License
 
 MIT
 
 ---
 ---
 
-# 🎭 Piano Soundboard — Version française
+<a id="français"></a>
+
+## 🇫🇷 Français
 
 PWA soundboard pour spectacles d'improvisation théâtrale.  
-Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysage.
+Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysage et portrait.
 
 ---
 
-## 🚀 Essayer en ligne !
+### 🚀 Essayer en ligne !
 
 👉 **[Ouvrir l'application — cliquez ici !](https://cestymour.github.io/fp30-midi-soundboard/)**
 
@@ -228,26 +282,32 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 
 ---
 
-## Ce que ça fait
+### Ce que ça fait
 
 - Changer instantanément d'instrument ou d'effet sonore pendant un spectacle
 - **Instruments MIDI** — envoie des patches Bank Select + Program Change vers un piano numérique (Roland FP-30X ou tout instrument compatible GM2)
 - **Soundboard audio** — lecture de fichiers MP3 / OGG / WAV avec fondu d'entrée/sortie et barre de progression
+- **Soundboard films** — thèmes de films organisés par genre avec images de couverture
+- **Soundboard animaux** — grille 4×8 avec couleurs par catégorie d'animal
 - Organisé par univers cinématographique (classique, western, médiéval, jazz, SF, horreur, musique du monde...) et catégorie sonore (nature, animaux, véhicules, humain, effets spéciaux...)
 - Connexion automatique au Roland FP-30X au chargement de la page
 - Contrôle du volume directement depuis l'interface (MIDI CC7 et volume audio, indépendants)
+- **Arrêt d'urgence** — bouton All Notes Off pour couper le piano instantanément
+- **Wake Lock** — empêche la mise en veille de l'écran pendant le spectacle
+- **Layout responsive** — réorganisation automatique de la grille en mode portrait
+- **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
 
-## Comment ça fonctionne
+### Comment ça fonctionne
 
-### Onglets MIDI
+#### Onglets MIDI
 Cliquer sur un bouton → l'instrument ou le son est sélectionné sur le piano → jouer les touches pour produire le son.  
 **L'application ne déclenche aucun son automatiquement** — elle configure le piano, c'est le musicien qui joue.
 
-### Onglets Audio
+#### Onglets Audio
 Cliquer sur un bouton → le son se joue immédiatement depuis les haut-parleurs de l'appareil.  
 Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 
-## Notes
+### Notes
 
 - Les sons GM2 fonctionnent sur tout instrument compatible GM2.
 - Les sons spécifiques Roland (banques Roland) sont conçus pour le FP-30X et peuvent ne pas fonctionner correctement sur d'autres appareils.
@@ -255,18 +315,19 @@ Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 
 ---
 
-## Stack technique
+### Stack technique
 
 - Vanilla JavaScript — aucun framework, aucune dépendance npm
 - Web MIDI API — connexion USB filaire
 - Web Bluetooth API — connexion Bluetooth MIDI (BLE MIDI)
 - `Audio` natif — lecture audio
 - Service Worker — cache app + cache audio dynamique
+- Wake Lock API — empêche la mise en veille de l'écran
 - GitHub Actions — déploiement automatique sur GitHub Pages
 
 ---
 
-## Structure du projet
+### Structure du projet
 
 ```
 /
@@ -274,6 +335,7 @@ Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 ├── style.css                       # CSS unifié
 ├── manifest.json                   # Manifeste PWA
 ├── sw.js                           # Service Worker
+├── version.js                      # Version de l'app (APP_VERSION)
 ├── midi.config.js                  # Données instruments MIDI (MIDI_TABS)
 ├── audio.config.js                 # Données sons audio (AUDIO_TABS)
 ├── public/
@@ -287,15 +349,20 @@ Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 │   ├── audio.js                    # Logique lecture audio
 │   ├── bluetoothMIDI.js            # Classe BluetoothMIDI (BLE MIDI)
 │   └── ble-midi-parser.bundle.js   # Parser paquet BLE MIDI
+├── images/
+│   └── films/                      # Images de couverture pour le soundboard films
+│       └── *.jpg
 └── sounds/
-    └── *.mp3 / *.wav / *.ogg       # Fichiers audio
+    ├── *.mp3 / *.wav / *.ogg       # Fichiers audio
+    └── animaux/                    # Sons d'animaux
+        └── *.mp3 / *.ogg
 ```
 
 ---
 
-## Configuration
+### Configuration
 
-### Instruments MIDI — `midi.config.js`
+#### Instruments MIDI — `midi.config.js`
 
 Définit la variable `MIDI_TABS` — tableau d'onglets MIDI, chacun contenant des catégories et des instruments :
 
@@ -305,6 +372,7 @@ const MIDI_TABS = [
     label: 'Instruments',   // Nom de l'onglet
     icon: '🎹',             // Emoji affiché dans l'onglet
     accent: '#7c9cff',      // Couleur de l'onglet
+    cols: 7,                // Nombre de colonnes (optionnel, défaut : 5)
     categories: [
       {
         label: 'Classique', // Nom de la catégorie
@@ -326,9 +394,9 @@ const MIDI_TABS = [
 ];
 ```
 
-### Sons audio — `audio.config.js`
+#### Sons audio — `audio.config.js`
 
-Définit la variable `AUDIO_TABS` — même structure que `MIDI_TABS`, les items ont un champ `file` à la place des champs MIDI :
+Définit la variable `AUDIO_TABS` — même structure que `MIDI_TABS`, avec des champs spécifiques audio :
 
 ```js
 const AUDIO_TABS = [
@@ -336,6 +404,9 @@ const AUDIO_TABS = [
     label: 'Nature',
     icon: '🌿',
     accent: '#4cffaa',
+    // Options de layout optionnelles :
+    // cols: 3,              // Affichage multi-colonnes (onglet Films)
+    // gridType: 'animals',  // Grille spéciale (onglet Animaux)
     categories: [
       {
         label: 'Nature & Eau',
@@ -344,8 +415,14 @@ const AUDIO_TABS = [
         items: [
           {
             name: 'Forêt',                      // Nom affiché sur le bouton
-            icon: '🌲',                          // Emoji du bouton
-            file: 'sounds/foret-oiseau.wav'     // Chemin vers le fichier audio
+            icon: '🌲',                          // Emoji (ou chemin vers image)
+            file: 'sounds/foret-oiseau.wav',    // Chemin vers le fichier audio
+            // Champs optionnels :
+            // img: 'images/films/cover.jpg',   // Image de couverture (remplace icon)
+            // start: 12.5,                     // Temps de départ en secondes
+            // end: 45.0,                       // Temps de fin en secondes
+            // title: 'Tooltip personnalisé',   // Texte du tooltip
+            // catClass: 'animaux-ferme',       // Classe CSS pour couleur de catégorie
           },
         ]
       }
@@ -354,14 +431,34 @@ const AUDIO_TABS = [
 ];
 ```
 
+#### Types d'onglets spéciaux
+
+**Layout multi-colonnes** (ex : onglet Films) :
+```js
+{
+  label: 'Films',
+  cols: 3,  // Items répartis en 3 colonnes avec en-têtes de catégorie
+  // ...
+}
+```
+
+**Grille animaux** (4×8 fixe en paysage / 8×4 en portrait) :
+```js
+{
+  label: 'Animaux',
+  gridType: 'animals',  // Active la grille spéciale animaux
+  // ...
+}
+```
+
 ---
 
-## Prérequis
+### Prérequis
 
 - Un navigateur supportant la Web MIDI API — **Chrome ou Edge recommandé**
 - Un Roland FP-30X (ou tout instrument compatible GM2) connecté en USB ou Bluetooth
 
-## Compatibilité navigateurs
+### Compatibilité navigateurs
 
 | Fonctionnalité | Navigateur requis |
 |---|---|
@@ -369,14 +466,15 @@ const AUDIO_TABS = [
 | Web Bluetooth (BLE MIDI) | Chrome Android, Chrome Desktop |
 | Audio (MP3 / OGG / WAV) | Tous navigateurs modernes |
 | PWA / Service Worker | Chrome, Edge, Safari 16.4+ |
+| Wake Lock API | Chrome, Edge |
 
 > ⚠️ Optimisée pour **Chrome sur Android**. Les fonctionnalités MIDI ne sont pas disponibles sur Firefox et Safari.
 
 ---
 
-## Déploiement
+### Déploiement
 
-### GitHub Pages (automatique)
+#### GitHub Pages (automatique)
 
 Le déploiement est géré par GitHub Actions (`.github/workflows/deploy.yml`).  
 À chaque push sur la branche `main`, le site est automatiquement mis à jour.
@@ -386,7 +484,7 @@ Le déploiement est géré par GitHub Actions (`.github/workflows/deploy.yml`).
 2. Source : sélectionner **GitHub Actions**
 3. Pousser sur `main` → le déploiement se déclenche automatiquement
 
-### En local
+#### En local
 
 Aucun serveur requis pour le développement de base.  
 Ouvrir `index.html` directement dans Chrome.
@@ -401,7 +499,7 @@ Ouvrir `index.html` directement dans Chrome.
 
 ---
 
-## Mise à jour du cache PWA
+### Mise à jour du cache PWA
 
 Quand tu modifies les fichiers app (HTML, CSS, JS), incrémenter les versions de cache dans `sw.js` :
 
@@ -412,7 +510,7 @@ const AUDIO_CACHE = 'impro-audio-v2';  // ← incrémenter si les sons ont chang
 
 ---
 
-## Matériel testé
+### Matériel testé
 
 - **Piano** : Roland FP-30X
 - **Connexion USB** : câble USB-B → USB-A
@@ -421,6 +519,6 @@ const AUDIO_CACHE = 'impro-audio-v2';  // ← incrémenter si les sons ont chang
 
 ---
 
-## Licence
+### Licence
 
 MIT
