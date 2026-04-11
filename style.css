@@ -46,19 +46,6 @@
     touch-action: manipulation;
   }
   
-  /* Scanlines subtiles */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent 0px, transparent 3px,
-      rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
-    );
-    pointer-events: none;
-    z-index: 200;
-  }
-  
   #app {
     display: flex;
     flex-direction: column;
@@ -277,15 +264,6 @@
   
   .tab-icon  { font-size: 15px; line-height: 1; }
   .tab-label { font-size: 12px; }
-  
-  /* Séparateur MIDI / Audio */
-  .tab-separator {
-    width: 1px;
-    background: var(--border-glow);
-    margin: 8px 0;
-    flex-shrink: 0;
-    opacity: 0.6;
-  }
   
   /* ═══════════════════════════════════════════════════════
      PANELS

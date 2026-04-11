@@ -203,13 +203,6 @@ function buildUI() {
 
   allTabs.forEach((tab, idx) => {
 
-    // Séparateur visuel avant le 1er onglet Audio
-    if (idx === firstAudioIdx) {
-      const sep = document.createElement('div');
-      sep.className = 'tab-separator';
-      tabNav.appendChild(sep);
-    }
-
     // ── Onglet ──
     const btn = document.createElement('button');
     btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
