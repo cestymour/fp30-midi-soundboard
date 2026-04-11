@@ -20,6 +20,22 @@ function syncAudioSliders(pct) {
 // FONDU
 // ═══════════════════════════════════════════════════════
 
+/** Timer du fade en cours — permet de l'annuler si un nouveau son arrive */
+let _fadeTimer = null;
+let _fadingAudio = null;
+
+function cancelFade() {
+  if (_fadeTimer) {
+    clearInterval(_fadeTimer);
+    _fadeTimer = null;
+  }
+  if (_fadingAudio) {
+    _fadingAudio.pause();
+    _fadingAudio.currentTime = 0;
+    _fadingAudio = null;
+  }
+}
+
 function fadeAudio(audio, from, to, ms, onDone) {
   if (from === to || ms <= 0) {
     audio.volume = Math.min(1, Math.max(0, to));
@@ -31,15 +47,18 @@ function fadeAudio(audio, from, to, ms, onDone) {
   const interval = ms / steps;
   const delta    = (to - from) / steps;
   let current    = from;
-  const timer    = setInterval(() => {
+  _fadeTimer = setInterval(() => {
     current += delta;
     audio.volume = Math.min(1, Math.max(0, current));
     if ((delta < 0 && current <= to) || (delta > 0 && current >= to)) {
-      clearInterval(timer);
+      clearInterval(_fadeTimer);
+      _fadeTimer = null;
+      _fadingAudio = null;
       onDone?.();
     }
   }, interval);
-  return timer;
+  _fadingAudio = audio;
+  return _fadeTimer;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -53,7 +72,6 @@ function startProgressLoop(audio, btn, startOffset, endOffset) {
   const effectiveEnd     = endOffset !== null ? endOffset : (dur && isFinite(dur) ? dur : null);
   const playableDuration = effectiveEnd !== null ? effectiveEnd - startOffset : null;
 
-  // Transition adaptative pour sons courts
   if (playableDuration !== null) {
     if (playableDuration < 3)       btn.style.setProperty('--progress-transition', '0.05s');
     else if (playableDuration < 10) btn.style.setProperty('--progress-transition', '0.15s');
@@ -63,7 +81,6 @@ function startProgressLoop(audio, btn, startOffset, endOffset) {
   function tick() {
     if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
 
-    // Arrêt anticipé si on a dépassé endOffset
     if (endOffset !== null && audio.currentTime >= endOffset) {
       stopSound(false);
       return;
@@ -75,8 +92,6 @@ function startProgressLoop(audio, btn, startOffset, endOffset) {
       : '0%';
 
     btn.style.setProperty('--progress', pct);
-
-    // Mise à jour du transport
     updateTransportUI();
 
     STATE.progressRAF = requestAnimationFrame(tick);
@@ -97,6 +112,8 @@ function stopProgressLoop() {
 // ═══════════════════════════════════════════════════════
 
 function stopSound(fade = false) {
+  // Annuler tout fade précédent
+  cancelFade();
   stopProgressLoop();
 
   if (STATE.currentSoundBtn) {
@@ -124,6 +141,28 @@ function stopSound(fade = false) {
   }
 }
 
+/** Arrêt d'urgence — coupure immédiate, pas de fade, depuis n'importe quel onglet */
+function emergencyStopAudio() {
+  cancelFade();
+  stopProgressLoop();
+
+  if (STATE.currentSoundBtn) {
+    STATE.currentSoundBtn.classList.remove('playing', 'paused');
+    STATE.currentSoundBtn.style.setProperty('--progress', '0%');
+    STATE.currentSoundBtn = null;
+  }
+
+  STATE.isPaused = false;
+
+  if (STATE.currentAudio) {
+    STATE.currentAudio.pause();
+    STATE.currentAudio.currentTime = 0;
+    STATE.currentAudio = null;
+  }
+
+  updateTransportUI();
+}
+
 // ═══════════════════════════════════════════════════════
 // PLAY
 // ═══════════════════════════════════════════════════════
@@ -131,6 +170,15 @@ function stopSound(fade = false) {
 function playSound(btn) {
   const src = btn.dataset.audio;
   if (!src) return;
+
+  // Annuler tout fade/son précédent immédiatement (évite les doublons)
+  cancelFade();
+
+  if (STATE.currentAudio) {
+    STATE.currentAudio.pause();
+    STATE.currentAudio.currentTime = 0;
+    STATE.currentAudio = null;
+  }
 
   const startOffset = parseFloat(btn.dataset.start || '0') || 0;
   const endRaw      = btn.dataset.end;
@@ -140,9 +188,15 @@ function playSound(btn) {
   audio.volume = 0;
 
   audio.addEventListener('canplaythrough', () => {
+    // Vérifier que ce son est toujours celui qu'on veut jouer
+    if (STATE.currentAudio !== audio) {
+      audio.pause();
+      return;
+    }
     if (startOffset > 0) audio.currentTime = startOffset;
     audio.play()
       .then(() => {
+        if (STATE.currentAudio !== audio) { audio.pause(); return; }
         fadeAudio(audio, 0, STATE.audioVolume, 300, null);
         startProgressLoop(audio, btn, startOffset, endOffset);
       })

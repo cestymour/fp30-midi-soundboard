@@ -28,7 +28,7 @@ function sendVolume(val) {
   sendMidi([0xB0 | STATE.MIDI_CHANNEL, 0x07, val]);
 }
 
-function sendEmergencyStop() {
+function sendEmergencyStopMidi() {
   for (let ch = 0; ch < 16; ch++) {
     sendMidi([0xB0 | ch, 123, 0]); // All Notes Off
     sendMidi([0xB0 | ch, 121, 0]); // Reset All Controllers

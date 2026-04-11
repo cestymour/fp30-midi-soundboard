@@ -37,6 +37,35 @@ const panelsEl = document.getElementById('panels');
 // UTILITAIRES DOM — blocs réutilisables
 // ═══════════════════════════════════════════════════════
 
+/** Crée un bouton d'arrêt d'urgence avec SVG hazard */
+function buildEmergencyStopBtn(extraClass) {
+  const uid = Math.random().toString(36).substring(2, 11);
+  const btn = document.createElement('button');
+  btn.className = 'emergency-stop-btn' + (extraClass ? ' ' + extraClass : '');
+  btn.title = 'Stop';
+  btn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+      <circle cx="14" cy="14" r="13" fill="none" stroke-width="0"/>
+      <clipPath id="ring-clip-${uid}">
+        <path d="M14 14 m-13 0 a13 13 0 1 1 26 0 a13 13 0 1 1 -26 0
+                M14 14 m-9 0 a9 9 0 1 0 18 0 a9 9 0 1 0 -18 0" 
+              clip-rule="evenodd"/>
+      </clipPath>
+      <rect x="0" y="0" width="28" height="28" fill="url(#hazard-${uid})" clip-path="url(#ring-clip-${uid})"/>
+      <defs>
+        <pattern id="hazard-${uid}" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="4" height="8" fill="#f5c400"/>
+          <rect x="4" width="4" height="8" fill="#111111"/>
+        </pattern>
+      </defs>
+      <circle cx="14" cy="14" r="9" fill="#cc0000"/>
+      <circle cx="11" cy="11" r="3.5" fill="rgba(255,255,255,0.18)"/>
+    </svg>
+    STOP
+  `;
+  return btn;
+}
+
 /** Détecte si une chaîne est un chemin vers une image */
 function isImagePath(str) {
   return str && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(str);
@@ -341,6 +370,12 @@ function togglePlayPause() {
   }
 }
 
+/** Arrêt d'urgence total — coupe MIDI + Audio */
+function emergencyStopAll() {
+  emergencyStopAudio();
+  sendEmergencyStopMidi();
+}
+
 // ═══════════════════════════════════════════════════════
 // CONSTRUCTION DU DOM
 // ═══════════════════════════════════════════════════════
@@ -406,7 +441,6 @@ function buildMidiControls() {
   const wrap = document.createElement('div');
   wrap.className = 'panel-controls';
   
-  const uid = Math.random().toString(36).substring(2, 11);
   const volPct = (STATE.midiVolume / 127 * 100).toFixed(1);
 
   wrap.innerHTML = `
@@ -423,27 +457,11 @@ function buildMidiControls() {
              style="--vol-pct:${volPct}%" />
       <span class="vol-value">${STATE.midiVolume}</span>
     </div>
-    <button class="emergency-stop-btn" title="All Notes Off">
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-        <circle cx="14" cy="14" r="13" fill="none" stroke-width="0"/>
-        <clipPath id="ring-clip-${uid}">
-          <path d="M14 14 m-13 0 a13 13 0 1 1 26 0 a13 13 0 1 1 -26 0
-                  M14 14 m-9 0 a9 9 0 1 0 18 0 a9 9 0 1 0 -18 0" 
-                clip-rule="evenodd"/>
-        </clipPath>
-        <rect x="0" y="0" width="28" height="28" fill="url(#hazard-${uid})" clip-path="url(#ring-clip-${uid})"/>
-        <defs>
-          <pattern id="hazard-${uid}" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <rect width="4" height="8" fill="#f5c400"/>
-            <rect x="4" width="4" height="8" fill="#111111"/>
-          </pattern>
-        </defs>
-        <circle cx="14" cy="14" r="9" fill="#cc0000"/>
-        <circle cx="11" cy="11" r="3.5" fill="rgba(255,255,255,0.18)"/>
-      </svg>
-      STOP
-    </button>
   `;
+
+  const stopBtn = buildEmergencyStopBtn();
+  stopBtn.addEventListener('click', () => emergencyStopAll());
+  wrap.appendChild(stopBtn);
 
   const slider = wrap.querySelector('.midi-vol');
   const valEl  = wrap.querySelector('.vol-value');
@@ -458,10 +476,6 @@ function buildMidiControls() {
     sendVolume(STATE.midiVolume);
     syncMidiSliders(STATE.midiVolume);
   });
-
-  wrap.querySelector('.emergency-stop-btn').addEventListener('click', () => {
-    sendEmergencyStop();
-  });  
 
   return wrap;
 }
@@ -489,6 +503,10 @@ function buildAudioControls() {
       <span class="vol-value">${pct}%</span>
     </div>
   `;
+
+  const stopBtn = buildEmergencyStopBtn('audio-stop-btn');
+  stopBtn.addEventListener('click', () => emergencyStopAll());
+  wrap.appendChild(stopBtn);
 
   const slider = wrap.querySelector('.audio-vol');
   const valEl  = wrap.querySelector('.vol-value');

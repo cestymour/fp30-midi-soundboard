@@ -869,11 +869,11 @@
   ════════════════════════════════════════════════════════ */
   .emergency-stop-btn {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    right: calc(min(340px, 35%) + 24px);
     top: 6px;
     bottom: 6px;
-    right: auto;
+    left: auto;
+    transform: none;
     background: transparent;
     border: 1px solid var(--color-danger);
     border-radius: var(--radius);
@@ -893,7 +893,7 @@
     justify-content: center;
     gap: 7px;
     line-height: 1;
-  }  
+  }
   
   .emergency-stop-btn:hover {
     background: color-mix(in srgb, var(--color-danger) 15%, transparent);
@@ -903,6 +903,13 @@
   .emergency-stop-btn:active {
     background: color-mix(in srgb, var(--color-danger) 30%, transparent);
     transform: scale(0.93);
+  }
+  
+  .panel-audio .volume-wrap {
+    position: absolute;
+    right: 12px;
+    left: auto;
+    transform: none;
   }
   
   /* ═══════════════════════════════════════════════════════
@@ -1103,6 +1110,7 @@
     :root { --gap: 10px; --header-h: 48px; --controls-h: 52px; }
     .tab-label { font-size: 13px; }
     .volume-wrap { width: min(400px, 35%); }
+    .emergency-stop-btn { right: calc(min(400px, 35%) + 24px); }
   }
   
   /* ── Tablette portrait ── */
@@ -1151,9 +1159,7 @@
       flex: 1;
       max-width: 100%;
       min-width: 0;
-      align-self: stretch;
-      display: flex;
-      align-items: center;
+      order: 1;
     }
   
     .emergency-stop-btn {
@@ -1165,8 +1171,23 @@
       right: unset;
       align-self: stretch;
       height: auto;
+      min-height: 44px;
       padding: 0 12px;
       flex-shrink: 0;
+    }
+
+    .audio-stop-btn {
+      position: static;
+      left: unset;
+      transform: none;
+      top: unset;
+      bottom: unset;
+      right: unset;
+      align-self: stretch;
+      height: auto;
+      padding: 0 12px;
+      flex-shrink: 0;
+      order: 2;
     }
   
     .volume-wrap {
@@ -1181,7 +1202,20 @@
       align-items: center;
       gap: 8px;
     }
-  
+
+    .panel-audio .volume-wrap {
+      position: static;
+      transform: none;
+      left: unset;
+      right: unset;
+      width: 100%;
+      order: 10;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .vol-slider {
       height: 44px;
       flex: 1;
