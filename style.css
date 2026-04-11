@@ -1210,7 +1210,7 @@
       grid-auto-flow: column;
     }
   
-    .audio-cat-grid {
+    .audio-grid:not(.audio-grid-cols) .audio-cat-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
