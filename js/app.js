@@ -269,7 +269,8 @@ function equalizeMidiButtons() {
     const gridH  = grid.clientHeight;
     if (!gridH) return;  // panneau pas encore visible, on ignore
 
-    const gapPx  = parseInt(getComputedStyle(grid).gap) || 8;
+    const gapPx    = parseInt(getComputedStyle(grid).gap) || 8;
+    const gapInner = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap-inner')) || 5;
 
     grid.querySelectorAll('.midi-col').forEach(col => {
       let totalRows = 0;
@@ -277,13 +278,17 @@ function equalizeMidiButtons() {
         totalRows += Math.ceil(btnGrid.children.length / 2);
       });
 
-      const catCount     = col.querySelectorAll('.cat-block').length;
-      const titleH       = 20;  // hauteur approx d'un cat-title en px
-      const usedByTitles = catCount * (titleH + 5); // 5 = gap interne cat-block
+      const catBlocks    = col.querySelectorAll('.cat-block');
+      const catCount     = catBlocks.length;
+
+      const firstTitle   = col.querySelector('.cat-title');
+      const titleH       = firstTitle ? firstTitle.offsetHeight : 20;
+
+      const usedByTitles = catCount * (titleH + gapInner);
       const usedByGaps   = (catCount - 1) * gapPx;
       const available    = gridH - usedByTitles - usedByGaps;
 
-      const gapsInGrid   = (totalRows - 1) * 5; // 5 = gap btn-grid
+      const gapsInGrid   = (totalRows - 1) * gapInner;
       const btnH         = Math.floor((available - gapsInGrid) / totalRows);
 
       col.style.setProperty('--btn-h', btnH + 'px');
@@ -300,7 +305,8 @@ function equalizeAudioButtons() {
     const gridH = grid.clientHeight;
     if (!gridH) return;
 
-    const gapPx = parseInt(getComputedStyle(grid).gap) || 8;
+    const gapPx    = parseInt(getComputedStyle(grid).gap) || 8;
+    const gapInner = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap-inner')) || 5;
 
     grid.querySelectorAll('.audio-col').forEach(col => {
       let totalRows = 0;
@@ -308,18 +314,48 @@ function equalizeAudioButtons() {
         totalRows += Math.ceil(btnGrid.children.length / 3); // 3 boutons par ligne
       });
 
-      const catCount = col.querySelectorAll('.audio-cat-block').length;
-      const titleH = 20;
-      const usedByTitles = catCount * (titleH + 5);
-      const usedByGaps = (catCount - 1) * gapPx;
-      const available = gridH - usedByTitles - usedByGaps;
+      const catBlocks = col.querySelectorAll('.audio-cat-block');
+      const catCount  = catBlocks.length;
 
-      const gapsInGrid = (totalRows - 1) * 5;
-      const btnH = Math.floor((available - gapsInGrid) / totalRows);
+      const firstTitle = col.querySelector('.cat-title');
+      const titleH     = firstTitle ? firstTitle.offsetHeight : 20;
+
+      const usedByTitles = catCount * (titleH + gapInner);
+      const usedByGaps   = (catCount - 1) * gapPx;
+      const available    = gridH - usedByTitles - usedByGaps;
+
+      const gapsInGrid = (totalRows - 1) * gapInner;
+      const btnH       = Math.floor((available - gapsInGrid) / totalRows);
 
       col.style.setProperty('--btn-h', btnH + 'px');
     });
   });
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILITAIRE — Détecte si une icône est une image
+// ═══════════════════════════════════════════════════════
+// Extraction de la logique de détection d'image
+function isImagePath(str) {
+  return str && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(str);
+}
+
+// Génère le HTML d'icône (image ou emoji) et indique si c'est une image
+function buildIconHTML(item) {
+  let hasImage = false;
+  let html;
+
+  if (item.img) {
+    hasImage = true;
+    html = `<span class="btn-icon"><img src="${item.img}" alt="${item.name}" /></span>`;
+  } else if (isImagePath(item.icon)) {
+    hasImage = true;
+    html = `<span class="btn-icon"><img src="${item.icon}" alt="${item.name}" /></span>`;
+  } else {
+    html = `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
+  }
+
+  return { html, hasImage };
 }
 
 // ── Grille Audio ──
@@ -346,8 +382,10 @@ function buildAudioGrid(tab) {
         btn.classList.add(item.catClass);
       }
 
-      const iconHTML = `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
-      btn.innerHTML = `${iconHTML}<span class="btn-label">${item.name}</span>`;
+      const icon = buildIconHTML(item);
+      if (icon.hasImage) btn.classList.add('sound-btn--img');
+
+      btn.innerHTML = `${icon.html}<span class="btn-label">${item.name}</span>`;
       btn.title = item.title ?? item.name;
 
       btn.addEventListener('click', () => {
@@ -364,10 +402,7 @@ function buildAudioGrid(tab) {
 
   // ── CAS : Mode colonnes (Films) ──
   if (tab.cols && tab.cols > 1) {
-    grid.style.display = 'flex';
-    grid.style.flexDirection = 'row';
-    grid.style.gap = 'var(--gap)';
-    grid.style.overflow = 'hidden';
+    grid.classList.add('audio-grid-cols');
 
     const colCount = tab.cols;
     const blocksPerCol = Math.ceil(tab.categories.length / colCount);
@@ -377,11 +412,6 @@ function buildAudioGrid(tab) {
     for (let i = 0; i < colCount; i++) {
       const col = document.createElement('div');
       col.className = 'audio-col';
-      col.style.flex = '1';
-      col.style.display = 'flex';
-      col.style.flexDirection = 'column';
-      col.style.gap = 'var(--gap)';
-      col.style.minWidth = '0';
       grid.appendChild(col);
       cols.push(col);
     }
@@ -392,9 +422,6 @@ function buildAudioGrid(tab) {
 
       const block = document.createElement('div');
       block.className = 'audio-cat-block';
-      block.style.display = 'flex';
-      block.style.flexDirection = 'column';
-      block.style.gap = '5px';
 
       const title = document.createElement('div');
       title.className = 'cat-title';
@@ -404,9 +431,6 @@ function buildAudioGrid(tab) {
 
       const btnGrid = document.createElement('div');
       btnGrid.className = 'audio-cat-grid';
-      btnGrid.style.display = 'grid';
-      btnGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      btnGrid.style.gap = '5px';
 
       cat.items.forEach(item => {
         const btn = document.createElement('button');
@@ -417,18 +441,10 @@ function buildAudioGrid(tab) {
         btn.dataset.end   = item.end   ?? '';
         btn.style.setProperty('--progress', '0%');
 
-        // Gestion image OU icône
-        let iconHTML;
-        if (item.img) {
-          iconHTML = `<span class="btn-icon"><img src="${item.img}" alt="${item.name}" /></span>`;
-        } else {
-          const isImage = item.icon && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(item.icon);
-          iconHTML = isImage
-            ? `<span class="btn-icon"><img src="${item.icon}" alt="${item.name}" /></span>`
-            : `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
-        }
+        const icon = buildIconHTML(item);
+        if (icon.hasImage) btn.classList.add('sound-btn--img');
 
-        btn.innerHTML = `${iconHTML}<span class="btn-label">${item.name}</span>`;
+        btn.innerHTML = `${icon.html}<span class="btn-label">${item.name}</span>`;
         btn.title = item.title ?? item.name;
 
         btn.addEventListener('click', () => {
@@ -456,12 +472,10 @@ function buildAudioGrid(tab) {
         btn.dataset.end   = item.end   ?? '';
         btn.style.setProperty('--progress', '0%');
 
-        const isImage = item.icon && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(item.icon);
-        const iconHTML = isImage
-          ? `<span class="btn-icon"><img src="${item.icon}" alt="${item.name}" /></span>`
-          : `<span class="btn-icon">${item.icon ?? '▶'}</span>`;
+        const icon = buildIconHTML(item);
+        if (icon.hasImage) btn.classList.add('sound-btn--img');
 
-        btn.innerHTML = `${iconHTML}<span class="btn-label">${item.name}</span>`;
+        btn.innerHTML = `${icon.html}<span class="btn-label">${item.name}</span>`;
         btn.addEventListener('click', () => {
           btn === STATE.currentSoundBtn
             ? stopSound(true)
@@ -667,7 +681,7 @@ function init() {
   if (typeof MIDI_TABS === 'undefined' || typeof AUDIO_TABS === 'undefined') {
     panelsEl.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;
-        height:100%;color:#ff3d71;font-family:'IBM Plex Mono',monospace;
+        height:100%;color:var(--color-danger);font-family:'IBM Plex Mono',monospace;
         font-size:13px;text-align:center;padding:20px;">
         ⚠️ <strong>MIDI_TABS</strong> ou <strong>AUDIO_TABS</strong> introuvable.<br>
         Vérifiez que <strong>midi.config.js</strong> et
@@ -682,6 +696,9 @@ function init() {
   initWebMidi();                    // dans midi.js
   initLogoInteraction();
   initWakeLock();
+
+  // Temp : on ouvre sur l'onglet films
+  activateTab(7);
 }
 
 init();
