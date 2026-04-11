@@ -247,11 +247,75 @@
     white-space: nowrap;
   }
   .tab-btn:last-child { border-right: none; }
-  .tab-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+
+  /* ── États par défaut (Audio et fallback) ── */
+  .tab-btn:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.14);
+  }
   .tab-btn.active {
     color: var(--text-primary);
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.18);
   }
+
+  /* ── Onglets MIDI — hachures piano haut + fond clair bas ── */
+  .tab-btn[data-type="midi"] {
+    background:
+      repeating-linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.08) 0px,
+        rgba(255, 255, 255, 0.08) 8px,
+        rgba(0, 0, 0, 0.12) 8px,
+        rgba(0, 0, 0, 0.12) 13px
+      )
+      top / 100% 50% no-repeat,
+      linear-gradient(
+        to top,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent 50%
+      );
+    color: var(--text-secondary);
+  }
+
+  .tab-btn[data-type="midi"]:hover {
+    background:
+      repeating-linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.14) 0px,
+        rgba(255, 255, 255, 0.14) 8px,
+        rgba(0, 0, 0, 0.08) 8px,
+        rgba(0, 0, 0, 0.08) 13px
+      )
+      top / 100% 50% no-repeat,
+      linear-gradient(
+        to top,
+        rgba(255, 255, 255, 0.14) 0%,
+        rgba(255, 255, 255, 0.14) 50%,
+        transparent 50%
+      );
+    color: var(--text-primary);
+  }
+
+  .tab-btn[data-type="midi"].active {
+    background:
+      repeating-linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.18) 0px,
+        rgba(255, 255, 255, 0.18) 8px,
+        rgba(0, 0, 0, 0.06) 8px,
+        rgba(0, 0, 0, 0.06) 13px
+      )
+      top / 100% 50% no-repeat,
+      linear-gradient(
+        to top,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.18) 50%,
+        transparent 50%
+      );
+    color: var(--text-primary);
+  }
+
   /* Barre colorée en bas de l'onglet actif */
   .tab-btn.active::after {
     content: '';
