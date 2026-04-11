@@ -454,6 +454,60 @@
     color: var(--text-secondary);
   }
   
+  /* ── Icônes Play/Pause en CSS pur (évite les emojis Android) ── */
+  .icon-play,
+  .icon-pause {
+    display: block;
+    width: 16px;
+    height: 16px;
+    position: relative;
+  }
+
+  /* Triangle play */
+  .icon-play::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 0 8px 14px;
+    border-color: transparent transparent transparent currentColor;
+  }
+
+  /* Deux barres pause */
+  .icon-pause::before,
+  .icon-pause::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 4px;
+    height: 16px;
+    background: currentColor;
+    border-radius: 1px;
+  }
+  .icon-pause::before { left: 1px; }
+  .icon-pause::after  { right: 1px; }
+
+  /* Carré stop */
+  .icon-stop {
+    display: block;
+    width: 16px;
+    height: 16px;
+    position: relative;
+  }
+  .icon-stop::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 14px;
+    height: 14px;
+    background: currentColor;
+    border-radius: 2px;
+  }
+
   /* ── Barre de Seek ── */
   .transport-seek {
     flex: 1;
@@ -799,17 +853,20 @@
   }
   
   .sound-btn--img.playing .btn-icon::after {
-    content: '■';
+    content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: clamp(24px, 3vw, 36px);
-    color: var(--panel-accent);
-    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8),
-                 0 0 16px var(--panel-accent);
+    width: clamp(22px, 3vw, 32px);
+    height: clamp(22px, 3vw, 32px);
+    background: var(--panel-accent);
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.8),
+                0 0 16px var(--panel-accent);
     z-index: 3;
-  }
+    font-size: 0;
+  }  
   
   /* ── État PAUSE sur bouton image ── */
   .sound-btn--img.paused {
@@ -964,9 +1021,12 @@
   
   .sound-btn.playing .btn-icon { font-size: 0; }
   .sound-btn.playing .btn-icon::after {
-    content: '■';
-    font-size: clamp(20px, 2.2vw, 28px);
+    content: '';
     display: block;
+    width: clamp(18px, 2.2vw, 24px);
+    height: clamp(18px, 2.2vw, 24px);
+    background: currentColor;
+    border-radius: 2px;
   }
   
   /* ── État PAUSE sur bouton sans image ── */

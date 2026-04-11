@@ -251,16 +251,16 @@ function updateTransportUI() {
 
   document.querySelectorAll('.transport-play-pause').forEach(b => {
     if (!audio || !btn) {
-      b.textContent = '▶';
+      b.innerHTML = '<span class="icon-play"></span>';
       b.disabled = true;
       b.classList.remove('is-playing', 'is-paused');
     } else if (STATE.isPaused) {
-      b.textContent = '▶';
+      b.innerHTML = '<span class="icon-play"></span>';
       b.disabled = false;
       b.classList.remove('is-playing');
       b.classList.add('is-paused');
     } else {
-      b.textContent = '⏸';
+      b.innerHTML = '<span class="icon-pause"></span>';
       b.disabled = false;
       b.classList.add('is-playing');
       b.classList.remove('is-paused');
@@ -488,7 +488,7 @@ function buildAudioControls() {
 
   wrap.innerHTML = `
     <div class="transport-bar">
-      <button class="transport-play-pause" disabled>▶</button>
+      <button class="transport-play-pause" disabled><span class="icon-play"></span></button>
       <div class="transport-seek">
         <div class="transport-seek-fill"></div>
         <div class="transport-seek-handle"></div>
