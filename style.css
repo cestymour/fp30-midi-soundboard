@@ -235,7 +235,7 @@
     border: none;
     border-right: 1px solid var(--border);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-family: var(--font-display);
     font-size: 13px;
     font-weight: 700;
@@ -261,9 +261,9 @@
       repeating-linear-gradient(
         to right,
         rgba(255, 255, 255, 0.08) 0px,
-        rgba(255, 255, 255, 0.08) 8px,
-        rgba(0, 0, 0, 0.12) 8px,
-        rgba(0, 0, 0, 0.12) 13px
+        rgba(255, 255, 255, 0.08) 15px,
+        rgba(0, 0, 0, 0.12) 15px,
+        rgba(0, 0, 0, 0.12) 26px
       )
       top / 100% 50% no-repeat,
       linear-gradient(
@@ -280,9 +280,9 @@
       repeating-linear-gradient(
         to right,
         rgba(255, 255, 255, 0.14) 0px,
-        rgba(255, 255, 255, 0.14) 8px,
-        rgba(0, 0, 0, 0.08) 8px,
-        rgba(0, 0, 0, 0.08) 13px
+        rgba(255, 255, 255, 0.14) 15px,
+        rgba(0, 0, 0, 0.08) 15px,
+        rgba(0, 0, 0, 0.08) 26px
       )
       top / 100% 50% no-repeat,
       linear-gradient(
@@ -299,9 +299,9 @@
       repeating-linear-gradient(
         to right,
         rgba(255, 255, 255, 0.18) 0px,
-        rgba(255, 255, 255, 0.18) 8px,
-        rgba(0, 0, 0, 0.06) 8px,
-        rgba(0, 0, 0, 0.06) 13px
+        rgba(255, 255, 255, 0.18) 15px,
+        rgba(0, 0, 0, 0.06) 15px,
+        rgba(0, 0, 0, 0.06) 26px
       )
       top / 100% 50% no-repeat,
       linear-gradient(
@@ -874,7 +874,7 @@
     bottom: 6px;
     left: auto;
     transform: none;
-    background: transparent;
+    background: color-mix(in srgb, var(--color-danger) 8%, var(--bg-card));
     border: 1px solid var(--color-danger);
     border-radius: var(--radius);
     color: var(--color-danger);
