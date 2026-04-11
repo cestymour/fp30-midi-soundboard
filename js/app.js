@@ -120,6 +120,15 @@ function buildSoundBtn(item) {
   return btn;
 }
 
+/** Met à jour l'emoji de volume selon le pourcentage */
+function updateVolIcon(el, val, max) {
+  const pct = val / max * 100;
+  if (pct === 0)     el.textContent = '🔇';
+  else if (pct < 35) el.textContent = '🔈';
+  else if (pct < 70) el.textContent = '🔉';
+  else               el.textContent = '🔊';
+}
+
 /**
  * Calcule et applique une hauteur uniforme aux boutons d'un panneau en colonnes.
  * Factorise equalizeMidiButtons et equalizeAudioButtons.
@@ -254,7 +263,7 @@ function buildMidiControls() {
   const wrap = document.createElement('div');
   wrap.className = 'panel-controls';
   
-  const uid = Math.random().toString(36).substr(2, 9);
+  const uid = Math.random().toString(36).substring(2, 11);
   const volPct = (STATE.midiVolume / 127 * 100).toFixed(1);
 
   wrap.innerHTML = `
@@ -488,7 +497,7 @@ function buildAboutPopup() {
       const registrations = await navigator.serviceWorker.getRegistrations();
       for (const reg of registrations) await reg.unregister();
     }
-    location.reload(true);
+    location.reload();
   });
 }
 
@@ -527,7 +536,7 @@ function closeAbout() {
 
 function initLogoInteraction() {
   const btn = document.getElementById('settings-btn');
-  btn.addEventListener('click', () => openAbout());
+  btn.addEventListener('click', openAbout);
   btn.addEventListener('contextmenu', e => e.preventDefault());
 }
 
@@ -613,11 +622,12 @@ function init() {
   }
 
   buildUI();
-  initAudioTouchFeedback(panelsEl); // dans audio.js
-  initBluetooth();                  // dans midi.js
-  initWebMidi();                    // dans midi.js
   initLogoInteraction();
   initWakeLock();
+
+  // MIDI : non-critique, ne doit pas bloquer le reste de l'app
+  try { initBluetooth(); } catch (e) { console.warn('[BT] Init échoué :', e); }
+  try { initWebMidi();   } catch (e) { console.warn('[MIDI] Init échoué :', e); }
 }
 
 init();

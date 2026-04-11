@@ -7,14 +7,6 @@
 // UTILITAIRES
 // ═══════════════════════════════════════════════════════
 
-function updateVolIcon(el, val, max) {
-  const pct = val / max * 100;
-  if (pct === 0)     el.textContent = '🔇';
-  else if (pct < 35) el.textContent = '🔈';
-  else if (pct < 70) el.textContent = '🔉';
-  else               el.textContent = '🔊';
-}
-
 function syncAudioSliders(pct) {
   document.querySelectorAll('.audio-vol').forEach(s => {
     if (parseInt(s.value) === pct) return;
@@ -34,6 +26,13 @@ function updateNowPlaying(text) {
 // ═══════════════════════════════════════════════════════
 
 function fadeAudio(audio, from, to, ms, onDone) {
+  // Guard : rien à faire si même valeur ou durée nulle
+  if (from === to || ms <= 0) {
+    audio.volume = Math.min(1, Math.max(0, to));
+    onDone?.();
+    return null;
+  }
+
   const steps    = 20;
   const interval = ms / steps;
   const delta    = (to - from) / steps;
@@ -54,6 +53,19 @@ function fadeAudio(audio, from, to, ms, onDone) {
 // ═══════════════════════════════════════════════════════
 
 function startProgressLoop(audio, btn, startOffset, endOffset) {
+  if (STATE.progressRAF) cancelAnimationFrame(STATE.progressRAF);
+
+  const dur              = audio.duration;
+  const effectiveEnd     = endOffset !== null ? endOffset : (dur && isFinite(dur) ? dur : null);
+  const playableDuration = effectiveEnd !== null ? effectiveEnd - startOffset : null;
+
+  // Transition adaptative pour sons courts
+  if (playableDuration !== null) {
+    if (playableDuration < 3)       btn.style.setProperty('--progress-transition', '0.05s');
+    else if (playableDuration < 10) btn.style.setProperty('--progress-transition', '0.15s');
+    else                            btn.style.setProperty('--progress-transition', '0.30s');
+  }
+
   function tick() {
     if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
 
@@ -63,30 +75,13 @@ function startProgressLoop(audio, btn, startOffset, endOffset) {
       return;
     }
 
-    const dur            = audio.duration;
-    const effectiveEnd   = endOffset !== null ? endOffset : (dur && isFinite(dur) ? dur : null);
-    const playableDuration = effectiveEnd !== null ? effectiveEnd - startOffset : null;
-    const elapsed          = audio.currentTime - startOffset;
-
+    const elapsed = audio.currentTime - startOffset;
     const pct = (playableDuration && playableDuration > 0)
       ? Math.min(100, (elapsed / playableDuration) * 100).toFixed(1) + '%'
       : '0%';
 
     btn.style.setProperty('--progress', pct);
     STATE.progressRAF = requestAnimationFrame(tick);
-  }
-
-  if (STATE.progressRAF) cancelAnimationFrame(STATE.progressRAF);
-
-  // ── Gestion transition adaptative pour sons courts ──
-  const dur = audio.duration;
-  const effectiveEnd       = endOffset !== null ? endOffset : (dur && isFinite(dur) ? dur : null);
-  const playableDuration   = effectiveEnd !== null ? effectiveEnd - startOffset : null;
-
-  if (playableDuration !== null) {
-    if (playableDuration < 3)       btn.style.setProperty('--progress-transition', '0.05s');
-    else if (playableDuration < 10) btn.style.setProperty('--progress-transition', '0.15s');
-    else                            btn.style.setProperty('--progress-transition', '0.30s');
   }
 
   STATE.progressRAF = requestAnimationFrame(tick);
@@ -141,7 +136,7 @@ function playSound(btn) {
 
   const startOffset = parseFloat(btn.dataset.start || '0') || 0;
   const endRaw      = btn.dataset.end;
-  const endOffset   = (endRaw !== '' && endRaw !== undefined) ? parseFloat(endRaw) : null;
+  const endOffset   = endRaw ? parseFloat(endRaw) : null;
 
   const audio = new Audio(src);
   audio.volume = 0;
@@ -173,17 +168,4 @@ function playSound(btn) {
   updateNowPlaying('▶ ' + (btn.dataset.label || 'EN LECTURE'));
 
   audio.load();
-}
-
-// ═══════════════════════════════════════════════════════
-// RETOUR TACTILE
-// ═══════════════════════════════════════════════════════
-
-function initAudioTouchFeedback(panelsEl) {
-  panelsEl.addEventListener('touchstart', e => {
-    const btn = e.target.closest('.sound-btn, .inst-btn');
-    if (!btn || btn.classList.contains('missing')) return;
-    btn.style.transform = 'scale(0.93)';
-    setTimeout(() => { btn.style.transform = ''; }, 120);
-  }, { passive: true });
 }
