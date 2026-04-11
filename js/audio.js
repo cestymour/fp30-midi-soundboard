@@ -16,17 +16,11 @@ function syncAudioSliders(pct) {
   });
 }
 
-function updateNowPlaying(text) {
-  document.querySelectorAll('.panel-audio .now-playing-label')
-    .forEach(el => el.textContent = text);
-}
-
 // ═══════════════════════════════════════════════════════
 // FONDU
 // ═══════════════════════════════════════════════════════
 
 function fadeAudio(audio, from, to, ms, onDone) {
-  // Guard : rien à faire si même valeur ou durée nulle
   if (from === to || ms <= 0) {
     audio.volume = Math.min(1, Math.max(0, to));
     onDone?.();
@@ -81,6 +75,10 @@ function startProgressLoop(audio, btn, startOffset, endOffset) {
       : '0%';
 
     btn.style.setProperty('--progress', pct);
+
+    // Mise à jour du transport
+    updateTransportUI();
+
     STATE.progressRAF = requestAnimationFrame(tick);
   }
 
@@ -102,13 +100,13 @@ function stopSound(fade = false) {
   stopProgressLoop();
 
   if (STATE.currentSoundBtn) {
-    STATE.currentSoundBtn.classList.remove('playing');
+    STATE.currentSoundBtn.classList.remove('playing', 'paused');
     STATE.currentSoundBtn.style.setProperty('--progress', '0%');
     STATE.currentSoundBtn = null;
   }
 
-  document.querySelectorAll('.panel-audio').forEach(p => p.classList.remove('is-playing'));
-  updateNowPlaying('NO SOUND PLAYING');
+  STATE.isPaused = false;
+  updateTransportUI();
 
   if (!STATE.currentAudio) return;
 
@@ -161,11 +159,12 @@ function playSound(btn) {
 
   STATE.currentAudio    = audio;
   STATE.currentSoundBtn = btn;
+  STATE.isPaused        = false;
+  btn.classList.remove('paused');
   btn.classList.add('playing');
   btn.style.setProperty('--progress', '0%');
 
-  btn.closest('.panel-audio')?.classList.add('is-playing');
-  updateNowPlaying('▶ ' + (btn.dataset.label || 'EN LECTURE'));
+  updateTransportUI();
 
   audio.load();
 }

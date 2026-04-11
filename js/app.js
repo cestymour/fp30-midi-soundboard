@@ -24,6 +24,7 @@ const STATE = {
   currentSoundBtn:       null,
   progressRAF:           null,
   audioVolume:           1,
+  isPaused:              false,
 };
 
 // ═══════════════════════════════════════════════════════
@@ -93,6 +94,14 @@ function createColumns(container, count, className) {
   return cols;
 }
 
+/** Formate des secondes en M:SS */
+function formatTime(sec) {
+  if (!isFinite(sec) || sec < 0) return '–:––';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 /** Crée un bouton audio (sound-btn) avec tous ses attributs et son listener */
 function buildSoundBtn(item) {
   const btn = document.createElement('button');
@@ -112,9 +121,21 @@ function buildSoundBtn(item) {
   btn.title = item.title ?? item.name;
 
   btn.addEventListener('click', () => {
-    btn === STATE.currentSoundBtn
-      ? stopSound(true)
-      : (stopSound(true), playSound(btn));
+    if (btn === STATE.currentSoundBtn) {
+      // Ce bouton est actif → stop (ou restart si en pause)
+      if (STATE.isPaused) {
+        // En pause → restart depuis le début
+        stopSound(false);
+        playSound(btn);
+      } else {
+        // En lecture → stop
+        stopSound(true);
+      }
+    } else {
+      // Autre bouton → stop l'ancien, play le nouveau
+      stopSound(true);
+      playSound(btn);
+    }
   });
 
   return btn;
@@ -131,7 +152,6 @@ function updateVolIcon(el, val, max) {
 
 /**
  * Calcule et applique une hauteur uniforme aux boutons d'un panneau en colonnes.
- * Factorise equalizeMidiButtons et equalizeAudioButtons.
  */
 function equalizeColumnButtons(cfg) {
   document.querySelectorAll(cfg.panelSelector).forEach(panel => {
@@ -189,6 +209,136 @@ function equalizeAudioButtons() {
     catBlockSelector: '.audio-cat-block',
     colsPerRow:       3,
   });
+}
+
+// ═══════════════════════════════════════════════════════
+// TRANSPORT BAR — Play/Pause + Seek + Time
+// ═══════════════════════════════════════════════════════
+
+/** Met à jour tous les transports (play/pause btn, time, seek bar) */
+function updateTransportUI() {
+  const audio = STATE.currentAudio;
+  const btn   = STATE.currentSoundBtn;
+
+  document.querySelectorAll('.transport-play-pause').forEach(b => {
+    if (!audio || !btn) {
+      b.textContent = '▶';
+      b.disabled = true;
+      b.classList.remove('is-playing', 'is-paused');
+    } else if (STATE.isPaused) {
+      b.textContent = '▶';
+      b.disabled = false;
+      b.classList.remove('is-playing');
+      b.classList.add('is-paused');
+    } else {
+      b.textContent = '⏸';
+      b.disabled = false;
+      b.classList.add('is-playing');
+      b.classList.remove('is-paused');
+    }
+  });
+
+  const startOffset = btn ? (parseFloat(btn.dataset.start) || 0) : 0;
+  const endRaw      = btn ? btn.dataset.end : '';
+  const endOffset   = endRaw ? parseFloat(endRaw) : null;
+
+  document.querySelectorAll('.transport-time').forEach(el => {
+    if (!audio || !btn) {
+      el.textContent = '–:–– / –:––';
+      return;
+    }
+    const dur = audio.duration;
+    const effectiveEnd = endOffset ?? (isFinite(dur) ? dur : 0);
+    const totalDuration = effectiveEnd - startOffset;
+    const elapsed = Math.max(0, audio.currentTime - startOffset);
+    el.textContent = `${formatTime(elapsed)} / ${formatTime(totalDuration)}`;
+  });
+
+  document.querySelectorAll('.transport-seek').forEach(bar => {
+    const fill   = bar.querySelector('.transport-seek-fill');
+    const handle = bar.querySelector('.transport-seek-handle');
+    if (!audio || !btn) {
+      fill.style.width = '0%';
+      handle.style.left = '0%';
+      handle.classList.remove('pulsing');
+      return;
+    }
+    const dur = audio.duration;
+    const effectiveEnd = endOffset ?? (isFinite(dur) ? dur : 0);
+    const totalDuration = effectiveEnd - startOffset;
+    const elapsed = Math.max(0, audio.currentTime - startOffset);
+    const pct = totalDuration > 0 ? Math.min(100, (elapsed / totalDuration) * 100) : 0;
+    fill.style.width = pct + '%';
+    handle.style.left = pct + '%';
+
+    if (STATE.isPaused) {
+      handle.classList.remove('pulsing');
+    } else {
+      handle.classList.add('pulsing');
+    }
+  });
+
+  // État du panneau audio
+  document.querySelectorAll('.panel-audio').forEach(p => {
+    if (!audio || !btn) {
+      p.classList.remove('is-playing', 'is-paused');
+    } else if (STATE.isPaused) {
+      p.classList.remove('is-playing');
+      p.classList.add('is-paused');
+    } else {
+      p.classList.add('is-playing');
+      p.classList.remove('is-paused');
+    }
+  });
+}
+
+/** Gère le clic sur la barre de seek */
+function handleSeekClick(e, bar) {
+  if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
+
+  const rect  = bar.getBoundingClientRect();
+  const pct   = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+
+  const btn         = STATE.currentSoundBtn;
+  const startOffset = parseFloat(btn.dataset.start) || 0;
+  const endRaw      = btn.dataset.end;
+  const endOffset   = endRaw ? parseFloat(endRaw) : null;
+  const dur         = STATE.currentAudio.duration;
+  const effectiveEnd = endOffset ?? (isFinite(dur) ? dur : 0);
+  const totalDuration = effectiveEnd - startOffset;
+
+  const newTime = startOffset + pct * totalDuration;
+  STATE.currentAudio.currentTime = Math.max(startOffset, Math.min(newTime, effectiveEnd));
+  updateTransportUI();
+}
+
+/** Toggle play/pause */
+function togglePlayPause() {
+  if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
+
+  if (STATE.isPaused) {
+    // Resume
+    STATE.currentAudio.play().then(() => {
+      STATE.isPaused = false;
+      STATE.currentSoundBtn.classList.remove('paused');
+      STATE.currentSoundBtn.classList.add('playing');
+      startProgressLoop(
+        STATE.currentAudio,
+        STATE.currentSoundBtn,
+        parseFloat(STATE.currentSoundBtn.dataset.start) || 0,
+        STATE.currentSoundBtn.dataset.end ? parseFloat(STATE.currentSoundBtn.dataset.end) : null
+      );
+      updateTransportUI();
+    });
+  } else {
+    // Pause
+    STATE.currentAudio.pause();
+    STATE.isPaused = true;
+    stopProgressLoop();
+    STATE.currentSoundBtn.classList.remove('playing');
+    STATE.currentSoundBtn.classList.add('paused');
+    updateTransportUI();
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -323,9 +473,13 @@ function buildAudioControls() {
   const pct = Math.round(STATE.audioVolume * 100);
 
   wrap.innerHTML = `
-    <div class="now-playing">
-      <span class="now-playing-label">NO SOUND PLAYING</span>
-      <span class="now-playing-dot"></span>
+    <div class="transport-bar">
+      <button class="transport-play-pause" disabled>▶</button>
+      <div class="transport-seek">
+        <div class="transport-seek-fill"></div>
+        <div class="transport-seek-handle"></div>
+      </div>
+      <span class="transport-time">–:–– / –:––</span>
     </div>
     <div class="volume-wrap">
       <span class="vol-icon">🔊</span>
@@ -349,6 +503,13 @@ function buildAudioControls() {
     if (STATE.currentAudio) STATE.currentAudio.volume = STATE.audioVolume;
     syncAudioSliders(p);
   });
+
+  // Play/Pause
+  wrap.querySelector('.transport-play-pause').addEventListener('click', togglePlayPause);
+
+  // Seek
+  const seekBar = wrap.querySelector('.transport-seek');
+  seekBar.addEventListener('click', (e) => handleSeekClick(e, seekBar));
 
   return wrap;
 }
@@ -389,7 +550,6 @@ function buildAudioGrid(tab) {
   const grid = document.createElement('div');
   grid.className = 'audio-grid';
 
-  // ── CAS SPÉCIAL : Grille Animaux (4×8 paysage, 8×4 portrait) ──
   if (tab.gridType === 'animals') {
     grid.classList.add('animals-grid');
     const allItems = tab.categories.flatMap(cat => cat.items);
@@ -397,7 +557,6 @@ function buildAudioGrid(tab) {
     return grid;
   }
 
-  // ── CAS : Mode colonnes (Films) ──
   if (tab.cols && tab.cols > 1) {
     grid.classList.add('audio-grid-cols');
 
@@ -414,7 +573,6 @@ function buildAudioGrid(tab) {
     });
 
   } else {
-    // Mode grille classique (Nature, Ambiances, Effets, Musique)
     tab.categories.forEach(cat => {
       cat.items.forEach(item => grid.appendChild(buildSoundBtn(item)));
     });
@@ -435,17 +593,14 @@ function rearrangeMidiGrid(panel) {
   const colCount = isPortrait ? 2 : cols.length;
   const blocksPerCol = Math.ceil(blocks.length / colCount);
 
-  // Masquer les colonnes inutilisées en portrait
   cols.forEach((col, i) => {
     col.style.display = i < colCount ? '' : 'none';
   });
 
-  // Vider les colonnes actives
   cols.slice(0, colCount).forEach(col => {
     while (col.firstChild) col.removeChild(col.firstChild);
   });
 
-  // Redistribuer les blocs par colonne
   blocks.forEach((block, i) => {
     const colIdx = Math.floor(i / blocksPerCol);
     cols[colIdx].appendChild(block);
@@ -618,7 +773,6 @@ function init() {
   initLogoInteraction();
   initWakeLock();
 
-  // MIDI : non-critique, ne doit pas bloquer le reste de l'app
   try { initBluetooth(); } catch (e) { console.warn('[BT] Init échoué :', e); }
   try { initWebMidi();   } catch (e) { console.warn('[MIDI] Init échoué :', e); }
 }
