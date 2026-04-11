@@ -195,15 +195,15 @@ const AUDIO_TABS = [
       {
         label: 'Horreur', icon: '😱', color: '#ff6666',
         items: [
-          { name: 'Piège Mortel',         img: 'images/films/saw.jpg',             file: 'sounds/films/(Saw) Theme.mp3',                                      start: 21.2, title: 'Saw' },
-          { name: 'Menace Cachée',        img: 'images/films/jaws.jpg',            file: 'sounds/films/(Les Dents De La Mer) Theme.mp3',                      start:  9.5, title: 'Les Dents de la Mer' },
-          { name: 'Tension Folie',        img: 'images/films/psycho.jpg',          file: 'sounds/films/(Psycho) Shower Scene.mp3',                            start:  0.1, title: 'Psycho (Scène Douche)' },
+          { name: 'Ambiance tendu',      img: 'images/films/saw.jpg',             file: 'sounds/films/(Saw) Theme.mp3',                                      start: 21.2, title: 'Saw' },
+          { name: 'Danger proche...',    img: 'images/films/jaws.jpg',            file: 'sounds/films/(Les Dents De La Mer) Theme.mp3',                      start:  9.5, title: 'Les Dents de la Mer' },
+          { name: 'Au secours Ahhh !',   img: 'images/films/psycho.jpg',          file: 'sounds/films/(Psycho) Shower Scene.mp3',                            start:  0.1, title: 'Psycho (Scène Douche)' },
         ]
       },
       {
         label: 'Drame', icon: '💔', color: '#8888cc',
         items: [
-          { name: 'Spirale Infernale',    img: 'images/films/requiem.jpg',         file: 'sounds/films/(Requiem for a Dream) Theme.mp3',                      start: 38.9, title: 'Requiem for a Dream' },
+          { name: 'Descente aux enfers',  img: 'images/films/requiem.jpg',         file: 'sounds/films/(Requiem for a Dream) Theme.mp3',                      start: 38.9, title: 'Requiem for a Dream' },
           { name: 'Sacrifice Guerre',     img: 'images/films/platoon.jpg',         file: 'sounds/films/(Platoon) Theme.mp3',                      end : 509,  start:285.5, title: 'Platoon' },
           { name: 'Adieu Poignant',       img: 'images/films/professionel.jpg',    file: 'sounds/films/(Le Professionnel) Chi Mai - Ennio Morricone.mp3',     start: 39.6, title: 'Le Professionnel (Chi Mai)' },
         ]
@@ -213,29 +213,29 @@ const AUDIO_TABS = [
         items: [
           { name: 'Menace Imposante',     img: 'images/films/dark-vador.jpg',      file: 'sounds/films/(Star Wars) Dark Vador Theme.mp3',                     start:  9.5, title: 'Star Wars (Thème de Dark Vador)' },
           { name: 'Combat Épique',        img: 'images/films/star-wars-duel.jpg',  file: 'sounds/films/(Star Wars) Duel of the Fates.mp3',                    start: 60.0, title: 'Star Wars (Duel of the Fates)' },
-          { name: 'Amour Tragique',       img: 'images/films/le_parrain.jpg',      file: 'sounds/films/(Le parrain) Love Theme.mp3',                          start:  0.4, title: 'Le Parrain (Love Theme)' },
+          { name: 'Mafia Respect',        img: 'images/films/le_parrain.jpg',      file: 'sounds/films/(Le parrain) Love Theme.mp3',                          start:  0.4, title: 'Le Parrain (Love Theme)' },
         ]
       },
       {
         label: 'Western', icon: '🤠', color: '#cc8844',
         items: [
-          { name: 'Duel Western',         img: 'images/films/bon-brute-truand.jpg',file: 'sounds/films/(Le Bon la Brute et le Truand) Theme.mp3',             start: 5.0, title: 'Le Bon la Brute et le Truand' },
+          { name: 'Duel ',                img: 'images/films/bon-brute-truand.jpg',file: 'sounds/films/(Le Bon la Brute et le Truand) Theme.mp3',             start: 5.0, title: 'Le Bon la Brute et le Truand' },
           { name: 'Chasse à l\'Homme',    img: 'images/films/guimbarde.jpg',       file: 'sounds/films/(Pour quelques dollars de plus) Theme.mp3',            start: 26.7, title: 'Pour quelques dollars de plus' },
-          { name: 'Vengeance Western',    img: 'images/films/harmonica.jpg',       file: 'sounds/films/(Il était une fois dans l\'ouest) L\'homme à l\'harmonica.mp3', start: 7, title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
+          { name: 'Vengeance Duel lent',  img: 'images/films/harmonica.jpg',       file: 'sounds/films/(Il était une fois dans l\'ouest) L\'homme à l\'harmonica.mp3', start: 7, title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
         ]
       },
       {
         label: 'Espionnage / Action', icon: '🕵️‍♀️', color: '#6688aa',
         items: [
-          { name: 'Infiltration Mission', img: 'images/films/mission-impossible.jpg', file: 'sounds/films/(Mission Impossible) Main Theme.mp3',                            title: 'Mission Impossible' }, // Changer de version ?
-          { name: 'Action Sophistiquée',  img: 'images/films/james-bond.jpg',      file: 'sounds/films/(James Bond) Theme.mp3',                               start:  7.0, title: 'James Bond' },
-          { name: 'Tension Virtuelle',    img: 'images/films/matrix.jpg',          file: 'sounds/films/(Matrix) Clubbed to Death.mp3',                        start:  8.25,title: 'Matrix (Clubbed to Death)' },
+          { name: 'Mission Infilration',  img: 'images/films/mission-impossible.jpg', file: 'sounds/films/(Mission Impossible) Main Theme2.mp3',              start:  2.8, title: 'Mission Impossible' },
+          { name: '007 Agent secret',     img: 'images/films/james-bond.jpg',      file: 'sounds/films/(James Bond) Theme.mp3',                               start:  7.0, title: 'James Bond' },
+          { name: 'Grave badass',         img: 'images/films/matrix.jpg',          file: 'sounds/films/(Matrix) Clubbed to Death.mp3',                        start:  8.25,title: 'Matrix (Clubbed to Death)' },
         ]
       },
       {
         label: 'Action / Poursuite', icon: '💥', color: '#ff8844',
         items: [
-          { name: 'Duel Intensité',       img: 'images/films/kill-bill.jpg',       file: 'sounds/films/(Kill Bill) Theme.mp3',                                start:  5.0, title: 'Kill Bill' }, // Attention, présence de voix de scène dans la musique TODO:: changer la musique
+          { name: 'Préparation Duel',     img: 'images/films/kill-bill.jpg',       file: 'sounds/films/(Kill Bill) Battle Without Honor Or Humanity.mp3',     start:  1.3, title: 'Kill Bill' }, // Attention, présence de voix de scène dans la musique TODO:: changer la musique
           { name: 'Vengeance Stylisée',   img: 'images/films/kill-bill-hornet.jpg',file: 'sounds/films/(Kill Bill) The Green Hornet.mp3',                     start:  0.2, title: 'Kill Bill (The Green Hornet)' },
           { name: 'Poursuite Frénétique', img: 'images/films/taxi.jpg',            file: 'sounds/films/(Taxi) Pump It.mp3',                                                title: 'Taxi (Pump It)' },
         ]
