@@ -18,6 +18,7 @@ const APP_ASSETS = [
   './index.html',
   './style.css',
   './manifest.json',
+  './version.js',
   './midi.config.js',
   './audio.config.js',
   './js/app.js',
