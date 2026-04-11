@@ -813,14 +813,15 @@
   
   /* ── État PAUSE sur bouton image ── */
   .sound-btn--img.paused {
-    border-color: var(--text-muted);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--text-muted) 25%, transparent);
+    border-color: var(--panel-accent);
+    box-shadow: none;
+    opacity: 0.9;
   }
   
   .sound-btn--img.paused .btn-label {
-    background: color-mix(in srgb, var(--text-muted) 10%, var(--bg-card));
-    color: var(--text-secondary);
-    border-top-color: var(--text-muted);
+    background: color-mix(in srgb, var(--panel-accent) 10%, var(--bg-card));
+    color: var(--panel-accent);
+    border-top-color: var(--panel-accent);
   }
   
   .sound-btn--img.paused .btn-icon::after {
@@ -832,8 +833,13 @@
     font-size: clamp(24px, 3vw, 36px);
     color: var(--panel-accent);
     -webkit-text-stroke: 2px var(--panel-accent);
-    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8),
-                 0 0 16px var(--panel-accent);
+    text-shadow:
+      -1px -1px 2px rgba(0, 0, 0, 0.7),
+       1px -1px 2px rgba(0, 0, 0, 0.7),
+      -1px  1px 2px rgba(0, 0, 0, 0.7),
+       1px  1px 2px rgba(0, 0, 0, 0.7),
+       0    0   6px rgba(0, 0, 0, 0.6),
+       0    0  12px rgba(0, 0, 0, 0.4);
     z-index: 3;
   }
   
@@ -965,14 +971,15 @@
   
   /* ── État PAUSE sur bouton sans image ── */
   .sound-btn.paused {
-    color: var(--text-secondary);
-    border-color: var(--text-muted);
+    color: var(--panel-accent);
+    border-color: var(--panel-accent);
     animation: none;
+    opacity: 0.9;
   }
-  .sound-btn.paused .btn-label { color: var(--text-secondary); }
+  .sound-btn.paused .btn-label { color: var(--panel-accent); }
   
   .sound-btn.paused::after {
-    background: color-mix(in srgb, var(--text-muted) 8%, var(--bg-card));
+    background: color-mix(in srgb, var(--panel-accent) 8%, var(--bg-card));
   }
   
   .sound-btn.paused .btn-icon { font-size: 0; }
