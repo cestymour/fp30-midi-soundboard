@@ -194,6 +194,17 @@ function equalizeColumnButtons(cfg) {
     const gapPx    = parseInt(getComputedStyle(grid).gap) || 8;
     const gapInner = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap-inner')) || 5;
 
+    // Détecter automatiquement le nombre de rangées visuelles via CSS grid
+    const gridStyle = getComputedStyle(grid);
+    const gridTemplateRows = gridStyle.gridTemplateRows;
+    let visualRowCount = 1;
+    
+    if (grid.classList.contains('audio-grid-cols') && gridTemplateRows && gridTemplateRows !== 'none') {
+      visualRowCount = gridTemplateRows.split(' ').filter(v => v && v !== '0px').length;
+    }
+    
+    const availableGridH = (gridH - (visualRowCount - 1) * gapPx) / visualRowCount;
+
     grid.querySelectorAll(cfg.colSelector).forEach(col => {
       let totalRows = 0;
       col.querySelectorAll(cfg.btnGridSelector).forEach(btnGrid => {
@@ -206,12 +217,12 @@ function equalizeColumnButtons(cfg) {
 
       const usedByTitles = catCount * (titleH + gapInner);
       const usedByGaps   = (catCount - 1) * gapPx;
-      const available    = gridH - usedByTitles - usedByGaps;
+      const available    = availableGridH - usedByTitles - usedByGaps;
 
       const gapsInGrid = (totalRows - 1) * gapInner;
       const btnH       = Math.floor((available - gapsInGrid) / totalRows);
 
-      col.style.setProperty('--btn-h', btnH + 'px');
+      col.style.setProperty('--btn-h', Math.max(40, btnH) + 'px');
     });
   });
 }

@@ -763,13 +763,14 @@
   .sound-btn:active { transform: scale(0.93); }
   
   .btn-icon {
-    font-size: clamp(20px, 2.8vw, 34px);
+    font-size: clamp(20px, 5.5vw, 44px);
     line-height: 1;
     position: relative;
     z-index: 2;
+    flex-shrink: 1;
   }
   .btn-label {
-    font-size: clamp(10px, 1.2vw, 14px);
+    font-size: clamp(8px, 2.0vw, 14px);
     font-weight: 600;
     color: var(--text-secondary);
     text-align: center;
@@ -777,6 +778,7 @@
     word-break: break-word;
     position: relative;
     z-index: 2;
+    flex-shrink: 0;
   }
   .inst-btn:hover .btn-label,
   .sound-btn:hover .btn-label { color: var(--text-primary); }
@@ -1313,6 +1315,18 @@
   
     .audio-grid:not(.audio-grid-cols) .audio-cat-grid {
       grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Onglet Films : 2 colonnes en portrait */
+    .audio-grid.audio-grid-cols {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+    }
+    
+    .audio-grid-cols .audio-col {
+      width: 100%;
+      min-height: 0;
     }
   }
   

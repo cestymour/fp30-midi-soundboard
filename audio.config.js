@@ -191,22 +191,27 @@ const AUDIO_TABS = [
     label: 'Films',
     icon: '🎬',
     accent: '#ffcc55',
-    cols: 3,
+    cols: 4,
     categories: [
       {
         label: 'Horreur', icon: '😱', color: '#ff6666',
         items: [
+          { name: 'Ambiance',      img: 'images/films/saw.jpg',             file: 'sounds/films/(Saw) Theme.mp3',                                      start: 21.2, title: 'Saw' },
+          { name: 'Danger',    img: 'images/films/jaws.jpg',            file: 'sounds/films/(Les Dents De La Mer) Theme.mp3',                      start:  9.5, title: 'Les Dents de la Mer' },
+          { name: 'Au   !',   img: 'images/films/psycho.jpg',          file: 'sounds/films/(Psycho) Shower Scene.mp3',                            start:  0.1, title: 'Psycho (Scène Douche)' },
+        /*
           { name: 'Ambiance tendu',      img: 'images/films/saw.jpg',             file: 'sounds/films/(Saw) Theme.mp3',                                      start: 21.2, title: 'Saw' },
           { name: 'Danger proche...',    img: 'images/films/jaws.jpg',            file: 'sounds/films/(Les Dents De La Mer) Theme.mp3',                      start:  9.5, title: 'Les Dents de la Mer' },
           { name: 'Au secours Ahhh !',   img: 'images/films/psycho.jpg',          file: 'sounds/films/(Psycho) Shower Scene.mp3',                            start:  0.1, title: 'Psycho (Scène Douche)' },
+        */
         ]
       },
       {
         label: 'Drame', icon: '💔', color: '#8888cc',
         items: [
-          { name: 'Descente aux enfers',  img: 'images/films/requiem.jpg',         file: 'sounds/films/(Requiem for a Dream) Theme.mp3',                      start: 38.9, title: 'Requiem for a Dream' },
-          { name: 'Sacrifice Guerre',     img: 'images/films/platoon.jpg',         file: 'sounds/films/(Platoon) Theme.mp3',                      end : 509,  start:285.5, title: 'Platoon' },
-          { name: 'Adieu Poignant',       img: 'images/films/professionel.jpg',    file: 'sounds/films/(Le Professionnel) Chi Mai - Ennio Morricone.mp3',     start: 39.6, title: 'Le Professionnel (Chi Mai)' },
+          { name: 'Descente ',  img: 'images/films/requiem.jpg',         file: 'sounds/films/(Requiem for a Dream) Theme.mp3',                      start: 38.9, title: 'Requiem for a Dream' },
+          { name: 'Sacrifi',     img: 'images/films/platoon.jpg',         file: 'sounds/films/(Platoon) Theme.mp3',                      end : 509,  start:285.5, title: 'Platoon' },
+          { name: 'Adie',       img: 'images/films/professionel.jpg',    file: 'sounds/films/(Le Professionnel) Chi Mai - Ennio Morricone.mp3',     start: 39.6, title: 'Le Professionnel (Chi Mai)' },
         ]
       },
       {
@@ -221,8 +226,8 @@ const AUDIO_TABS = [
         label: 'Western', icon: '🤠', color: '#cc8844',
         items: [
           { name: 'Duel ',                img: 'images/films/bon-brute-truand.jpg',file: 'sounds/films/(Le Bon la Brute et le Truand) Theme.mp3',             start: 5.0, title: 'Le Bon la Brute et le Truand' },
-          { name: 'Chasse à l\'Homme',    img: 'images/films/guimbarde.jpg',       file: 'sounds/films/(Pour quelques dollars de plus) Theme.mp3',            start: 26.7, title: 'Pour quelques dollars de plus' },
-          { name: 'Vengeance Duel lent',  img: 'images/films/harmonica.jpg',       file: 'sounds/films/(Il était une fois dans l\'ouest) L\'homme à l\'harmonica.mp3', start: 7, title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
+          { name: 'Chasse ',    img: 'images/films/guimbarde.jpg',       file: 'sounds/films/(Pour quelques dollars de plus) Theme.mp3',            start: 26.7, title: 'Pour quelques dollars de plus' },
+          { name: 'Vengeance',  img: 'images/films/harmonica.jpg',       file: 'sounds/films/(Il était une fois dans l\'ouest) L\'homme à l\'harmonica.mp3', start: 7, title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
         ]
       },
       {
@@ -234,11 +239,11 @@ const AUDIO_TABS = [
         ]
       },
       {
-        label: 'Action / Poursuite', icon: '💥', color: '#ff8844',
+        label: 'Policier', icon: '🔎', color: '#88aacc',
         items: [
-          { name: 'Préparation Duel',     img: 'images/films/kill-bill.jpg',       file: 'sounds/films/(Kill Bill) Battle Without Honor Or Humanity.mp3',     start:  1.3, title: 'Kill Bill' }, // Attention, présence de voix de scène dans la musique TODO:: changer la musique
-          { name: 'Course Poursuite',     img: 'images/films/kill-bill-hornet.jpg',file: 'sounds/films/(Kill Bill) The Green Hornet.mp3',                     start:  0.2, title: 'Kill Bill (The Green Hornet)' },
-          { name: 'Course Poursuite',     img: 'images/films/taxi.jpg',            file: 'sounds/films/(Taxi) Pump It.mp3',                                                title: 'Taxi (Pump It)' },
+          { name: 'Déduction Énigme',     img: 'images/films/sherlock.jpg',        file: 'sounds/films/(Sherlock Holmes) Theme.mp3',                          start: 22.2, title: 'Sherlock Holmes' },
+          { name: 'Scène Crime',          img: 'images/films/experts.jpg',         file: 'sounds/films/(Les Experts) generique.mp3',                          start:  4.0, title: 'Les Experts (Who Are You)' },
+          { name: 'Mystère Inexpliqué',   img: 'images/films/x-files.jpg',         file: 'sounds/films/(The x files) Theme.mp3',                              start:  0.1, title: 'X-Files' },
         ]
       },
       {
@@ -258,11 +263,11 @@ const AUDIO_TABS = [
         ]
       },
       {
-        label: 'Policier', icon: '🔎', color: '#88aacc',
+        label: 'Action / Poursuite', icon: '💥', color: '#ff8844',
         items: [
-          { name: 'Déduction Énigme',     img: 'images/films/sherlock.jpg',        file: 'sounds/films/(Sherlock Holmes) Theme.mp3',                          start: 22.2, title: 'Sherlock Holmes' },
-          { name: 'Scène Crime',          img: 'images/films/experts.jpg',         file: 'sounds/films/(Les Experts) generique.mp3',                          start:  4.0, title: 'Les Experts (Who Are You)' },
-          { name: 'Mystère Inexpliqué',   img: 'images/films/x-files.jpg',         file: 'sounds/films/(The x files) Theme.mp3',                              start:  0.1, title: 'X-Files' },
+          { name: 'Préparation Duel',     img: 'images/films/kill-bill.jpg',       file: 'sounds/films/(Kill Bill) Battle Without Honor Or Humanity.mp3',     start:  1.3, title: 'Kill Bill' }, // Attention, présence de voix de scène dans la musique TODO:: changer la musique
+          { name: 'Course Poursuite',     img: 'images/films/kill-bill-hornet.jpg',file: 'sounds/films/(Kill Bill) The Green Hornet.mp3',                     start:  0.2, title: 'Kill Bill (The Green Hornet)' },
+          { name: 'Course Poursuite',     img: 'images/films/taxi.jpg',            file: 'sounds/films/(Taxi) Pump It.mp3',                                                title: 'Taxi (Pump It)' },
         ]
       },
       {
