@@ -455,24 +455,31 @@ function buildMidiControls() {
   const volPct = (STATE.midiVolume / 127 * 100).toFixed(1);
 
   wrap.innerHTML = `
-    <div class="midi-connect">
-      <select class="midi-select">
-        <option value="__none__">— Connexion MIDI —</option>
-      </select>
-      <span class="midi-badge">Non connecté</span>
+    <div class="controls-left">
+      <div class="midi-connect">
+        <select class="midi-select">
+          <option value="__none__">— Connexion MIDI —</option>
+        </select>
+        <span class="midi-badge">Non connecté</span>
+      </div>
     </div>
-    <div class="volume-wrap">
-      <span class="vol-icon">🔊</span>
-      <input type="range" class="vol-slider midi-vol"
-             min="0" max="127" value="${STATE.midiVolume}"
-             style="--vol-pct:${volPct}%" />
-      <span class="vol-value">${STATE.midiVolume}</span>
+    <div class="controls-right">
+      <div class="volume-wrap">
+        <span class="vol-icon">🔊</span>
+        <input type="range" class="vol-slider midi-vol"
+               min="0" max="127" value="${STATE.midiVolume}"
+               style="--vol-pct:${volPct}%" />
+        <span class="vol-value">${STATE.midiVolume}</span>
+      </div>
     </div>
   `;
 
   const stopBtn = buildEmergencyStopBtn();
   stopBtn.addEventListener('click', () => emergencyStopAll());
-  wrap.appendChild(stopBtn);
+  // Insérer le bouton STOP avant le volume-wrap
+  const controlsRight = wrap.querySelector('.controls-right');
+  const volumeWrap = controlsRight.querySelector('.volume-wrap');
+  controlsRight.insertBefore(stopBtn, volumeWrap);
 
   const slider = wrap.querySelector('.midi-vol');
   const valEl  = wrap.querySelector('.vol-value');
@@ -498,26 +505,33 @@ function buildAudioControls() {
   const pct = Math.round(STATE.audioVolume * 100);
 
   wrap.innerHTML = `
-    <div class="transport-bar">
-      <button class="transport-play-pause" disabled><span class="icon-play"></span></button>
-      <div class="transport-seek">
-        <div class="transport-seek-fill"></div>
-        <div class="transport-seek-handle"></div>
+    <div class="controls-left">
+      <div class="transport-bar">
+        <button class="transport-play-pause" disabled><span class="icon-play"></span></button>
+        <div class="transport-seek">
+          <div class="transport-seek-fill"></div>
+          <div class="transport-seek-handle"></div>
+        </div>
+        <span class="transport-time">–:–– / –:––</span>
       </div>
-      <span class="transport-time">–:–– / –:––</span>
     </div>
-    <div class="volume-wrap">
-      <span class="vol-icon">🔊</span>
-      <input type="range" class="vol-slider audio-vol"
-             min="0" max="100" value="${pct}"
-             style="--vol-pct:${pct}%" />
-      <span class="vol-value">${pct}%</span>
+    <div class="controls-right">
+      <div class="volume-wrap">
+        <span class="vol-icon">🔊</span>
+        <input type="range" class="vol-slider audio-vol"
+               min="0" max="100" value="${pct}"
+               style="--vol-pct:${pct}%" />
+        <span class="vol-value">${pct}%</span>
+      </div>
     </div>
   `;
 
   const stopBtn = buildEmergencyStopBtn('audio-stop-btn');
   stopBtn.addEventListener('click', () => emergencyStopAll());
-  wrap.appendChild(stopBtn);
+  // Insérer le bouton STOP avant le volume-wrap
+  const controlsRight = wrap.querySelector('.controls-right');
+  const volumeWrap = controlsRight.querySelector('.volume-wrap');
+  controlsRight.insertBefore(stopBtn, volumeWrap);
 
   const slider = wrap.querySelector('.audio-vol');
   const valEl  = wrap.querySelector('.vol-value');
