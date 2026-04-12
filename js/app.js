@@ -332,25 +332,82 @@ function updateTransportUI() {
   });
 }
 
-/** Gère le clic sur la barre de seek */
-function handleSeekClick(e, bar) {
-  if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
+/** Calcule la position en secondes à partir d'un événement sur la barre de seek */
+function getSeekTimeFromEvent(e, bar) {
+  if (!STATE.currentAudio || !STATE.currentSoundBtn) return null;
 
-  const rect  = bar.getBoundingClientRect();
-  const pct   = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const rect = bar.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
 
-  const btn         = STATE.currentSoundBtn;
+  const btn = STATE.currentSoundBtn;
   const startOffset = parseFloat(btn.dataset.start) || 0;
-  const endRaw      = btn.dataset.end;
-  const endOffset   = endRaw ? parseFloat(endRaw) : null;
-  const dur         = STATE.currentAudio.duration;
+  const endRaw = btn.dataset.end;
+  const endOffset = endRaw ? parseFloat(endRaw) : null;
+  const dur = STATE.currentAudio.duration;
   const effectiveEnd = endOffset ?? (isFinite(dur) ? dur : 0);
   const totalDuration = effectiveEnd - startOffset;
 
   const newTime = startOffset + pct * totalDuration;
-  STATE.currentAudio.currentTime = Math.max(startOffset, Math.min(newTime, effectiveEnd));
-  updateTransportUI();
+  return Math.max(startOffset, Math.min(newTime, effectiveEnd));
 }
+
+/** Applique le seek */
+function applySeek(e, bar) {
+  const newTime = getSeekTimeFromEvent(e, bar);
+  if (newTime !== null) {
+    STATE.currentAudio.currentTime = newTime;
+    updateTransportUI();
+  }
+}
+
+/** Gère le clic sur la barre de seek */
+function handleSeekClick(e, bar) {
+  applySeek(e, bar);
+}
+
+/** Initialise le drag sur une barre de seek */
+function initSeekBarDrag(bar) {
+  let isDragging = false;
+
+  // ── Mouse events ──
+  bar.addEventListener('mousedown', (e) => {
+    if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
+    isDragging = true;
+    applySeek(e, bar);
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    applySeek(e, bar);
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+
+  // ── Touch events ──
+  bar.addEventListener('touchstart', (e) => {
+    if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
+    isDragging = true;
+    applySeek(e, bar);
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    applySeek(e, bar);
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    isDragging = false;
+  });
+
+  document.addEventListener('touchcancel', () => {
+    isDragging = false;
+  });
+}
+
 
 /** Toggle play/pause */
 function togglePlayPause() {
@@ -550,9 +607,9 @@ function buildAudioControls() {
   // Play/Pause
   wrap.querySelector('.transport-play-pause').addEventListener('click', togglePlayPause);
 
-  // Seek
+  // Seek (clic + drag)
   const seekBar = wrap.querySelector('.transport-seek');
-  seekBar.addEventListener('click', (e) => handleSeekClick(e, seekBar));
+  initSeekBarDrag(seekBar);
 
   return wrap;
 }
