@@ -414,11 +414,13 @@ function togglePlayPause() {
   if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
 
   if (STATE.isPaused) {
-    // Resume
+    // Resume avec fade in
+    STATE.currentAudio.volume = 0;
     STATE.currentAudio.play().then(() => {
       STATE.isPaused = false;
       STATE.currentSoundBtn.classList.remove('paused');
       STATE.currentSoundBtn.classList.add('playing');
+      fadeAudio(STATE.currentAudio, 0, STATE.audioVolume, 150, null);
       startProgressLoop(
         STATE.currentAudio,
         STATE.currentSoundBtn,
@@ -428,13 +430,16 @@ function togglePlayPause() {
       updateTransportUI();
     });
   } else {
-    // Pause
-    STATE.currentAudio.pause();
-    STATE.isPaused = true;
+    // Pause avec fade out
     stopProgressLoop();
     STATE.currentSoundBtn.classList.remove('playing');
     STATE.currentSoundBtn.classList.add('paused');
-    updateTransportUI();
+    const audio = STATE.currentAudio;
+    fadeAudio(audio, audio.volume, 0, 150, () => {
+      audio.pause();
+      STATE.isPaused = true;
+      updateTransportUI();
+    });
   }
 }
 

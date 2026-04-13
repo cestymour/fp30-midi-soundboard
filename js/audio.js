@@ -141,26 +141,8 @@ function stopSound(fade = false) {
   }
 }
 
-/** Arrêt d'urgence — coupure immédiate, pas de fade, depuis n'importe quel onglet */
 function emergencyStopAudio() {
-  cancelFade();
-  stopProgressLoop();
-
-  if (STATE.currentSoundBtn) {
-    STATE.currentSoundBtn.classList.remove('playing', 'paused');
-    STATE.currentSoundBtn.style.setProperty('--progress', '0%');
-    STATE.currentSoundBtn = null;
-  }
-
-  STATE.isPaused = false;
-
-  if (STATE.currentAudio) {
-    STATE.currentAudio.pause();
-    STATE.currentAudio.currentTime = 0;
-    STATE.currentAudio = null;
-  }
-
-  updateTransportUI();
+  stopSound(true);
 }
 
 // ═══════════════════════════════════════════════════════
