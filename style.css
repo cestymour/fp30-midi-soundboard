@@ -770,7 +770,7 @@ html, body {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  container-type: size;          /* ← AJOUT */
+  container-type: size;
 }
 
 .inst-btn:hover,
@@ -875,23 +875,6 @@ html, body {
   transition: transform 0.3s ease;
 }
 
-.sound-btn--img.playing .btn-icon::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: clamp(22px, 3vw, 32px);
-  height: clamp(22px, 3vw, 32px);
-  background: var(--panel-accent);
-  border-radius: 3px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.8),
-              0 0 16px var(--panel-accent);
-  z-index: 3;
-  font-size: 0;
-}  
-
-/* ── État PAUSE sur bouton image ── */
 .sound-btn--img.paused {
   border-color: var(--panel-accent);
   box-shadow: none;
@@ -904,24 +887,6 @@ html, body {
   border-top-color: var(--panel-accent);
 }
 
-.sound-btn--img.paused .btn-icon::after {
-  content: '↺';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: clamp(24px, 3vw, 36px);
-  color: var(--panel-accent);
-  -webkit-text-stroke: 2px var(--panel-accent);
-  text-shadow:
-    -1px -1px 2px rgba(0, 0, 0, 0.7),
-      1px -1px 2px rgba(0, 0, 0, 0.7),
-    -1px  1px 2px rgba(0, 0, 0, 0.7),
-      1px  1px 2px rgba(0, 0, 0, 0.7),
-      0    0   6px rgba(0, 0, 0, 0.6),
-      0    0  12px rgba(0, 0, 0, 0.4);
-  z-index: 3;
-}
 
 /* ═══════════════════════════════════════════════════════
     BOUTON MIDI — état actif
@@ -1016,6 +981,7 @@ html, body {
 
 .sound-btn > * { position: relative; z-index: 2; }
 
+/* Styles du bouton en état PLAYING */
 .sound-btn.playing {
   color: var(--panel-accent);
   border-color: var(--panel-accent);
@@ -1031,33 +997,52 @@ html, body {
 .sound-btn.playing .btn-icon { font-size: 0; }
 .sound-btn.playing .btn-icon::after {
   content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: block;
-  width: clamp(18px, 2.2vw, 24px);
-  height: clamp(18px, 2.2vw, 24px);
+  width: clamp(22px, 3vw, 32px);
+  height: clamp(22px, 3vw, 32px);
   background: currentColor;
-  border-radius: 2px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.8),
+              0 0 16px var(--panel-accent);
+  z-index: 3;
 }
 
-/* ── État PAUSE sur bouton sans image ── */
+
+/* ═══════════════════════════════════════════════════════
+    BOUTON AUDIO — état PAUSE
+════════════════════════════════════════════════════════ */
 .sound-btn.paused {
   color: var(--panel-accent);
   border-color: var(--panel-accent);
-  animation: none;
+  animation: none; /* Pas d'animation glow en pause */
   opacity: 0.9;
 }
 .sound-btn.paused .btn-label { color: var(--panel-accent); }
 
-.sound-btn.paused::after {
-  background: color-mix(in srgb, var(--panel-accent) 8%, var(--bg-card));
-}
-
 .sound-btn.paused .btn-icon { font-size: 0; }
 .sound-btn.paused .btn-icon::after {
   content: '↺';
-  font-size: clamp(20px, 2.2vw, 28px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 1px));
   display: block;
+  line-height: 1;
   color: var(--panel-accent);
   -webkit-text-stroke: 2px var(--panel-accent);
+  text-shadow:
+    -1px -1px 2px rgba(0, 0, 0, 0.7),
+      1px -1px 2px rgba(0, 0, 0, 0.7),
+    -1px  1px 2px rgba(0, 0, 0, 0.7),
+      1px  1px 2px rgba(0, 0, 0, 0.7),
+      0    0   6px rgba(0, 0, 0, 0.6),
+      0    0  12px rgba(0, 0, 0, 0.4);
+  z-index: 3;
+  font-size: clamp(24px, 3vw, 36px);
 }
 
 .sound-btn.missing {
