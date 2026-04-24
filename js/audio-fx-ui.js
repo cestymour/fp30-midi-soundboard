@@ -3,16 +3,6 @@
    Depend de : audio.js (AudioEngineAPI), app.js (STATE)
 ================================================================ */
 
-const AUDIO_FX_GROUPS = [
-  { key: 'eq', label: 'EQ', controls: ['bass', 'mid', 'treble'] },
-  { key: 'filters', label: 'Filtres', controls: ['lowPass', 'highPass'] },
-  { key: 'speed', label: 'Speed', controls: ['speed'] },
-  { key: 'drive', label: 'Drive', controls: ['drive'] },
-  { key: 'compressor', label: 'Comp', controls: ['compressor'] },
-  { key: 'delay', label: 'Delay', controls: ['delay'] },
-  { key: 'reverb', label: 'Reverb', controls: ['reverb'] },
-];
-
 const AUDIO_FX_CONTROLS = [
   {
     key: 'bass',
@@ -62,7 +52,8 @@ const AUDIO_FX_CONTROLS = [
     max: 20000,
     step: 100,
     neutral: 20000,
-    read: settings => settings.lowPassFrequency,
+    // Anciennes versions utilisaient 22050 Hz (affichage 22,1 kHz) : on normalise pour coller au neutre UI
+    read: settings => Math.min(20000, settings.lowPassFrequency),
     apply: value => AudioEngineAPI.setLowPassFrequency(value),
     formatValue: value => value >= 1000 ? `${(value / 1000).toFixed(1)} kHz` : `${Math.round(value)} Hz`,
   },
@@ -71,13 +62,16 @@ const AUDIO_FX_CONTROLS = [
     label: 'HPF',
     shortLabel: 'High-pass',
     group: 'filters',
-    min: 20,
+    min: 0,
     max: 5000,
     step: 10,
-    neutral: 20,
+    neutral: 0,
     read: settings => settings.highPassFrequency,
     apply: value => AudioEngineAPI.setHighPassFrequency(value),
-    formatValue: value => value >= 1000 ? `${(value / 1000).toFixed(1)} kHz` : `${Math.round(value)} Hz`,
+    formatValue: value => {
+      if (value <= 0) return '0 Hz';
+      return value >= 1000 ? `${(value / 1000).toFixed(1)} kHz` : `${Math.round(value)} Hz`;
+    },
   },
   {
     key: 'speed',
@@ -91,32 +85,6 @@ const AUDIO_FX_CONTROLS = [
     read: settings => Math.round(settings.playbackRate * 100),
     apply: value => AudioEngineAPI.setPlaybackRate(value / 100),
     formatValue: value => `${(value / 100).toFixed(2)}x`,
-  },
-  {
-    key: 'drive',
-    label: 'DRV',
-    shortLabel: 'Drive',
-    group: 'drive',
-    min: 0,
-    max: 100,
-    step: 1,
-    neutral: 0,
-    read: settings => settings.distortionAmount,
-    apply: value => AudioEngineAPI.setDistortionAmount(value),
-    formatValue: value => `${Math.round(value)}%`,
-  },
-  {
-    key: 'compressor',
-    label: 'COMP',
-    shortLabel: 'Comp',
-    group: 'compressor',
-    min: 1,
-    max: 20,
-    step: 0.5,
-    neutral: 1,
-    read: settings => settings.compressorRatio,
-    apply: value => AudioEngineAPI.setCompressor({ ratio: value }),
-    formatValue: value => `${Number(value).toFixed(1)}:1`,
   },
   {
     key: 'delay',
@@ -153,14 +121,30 @@ const AUDIO_FX_CONTROLS = [
   },
 ];
 
+const AUDIO_FX_PRESETS = [
+  { key: 'reset', label: '🔄 Reset', values: null },
+  { key: 'bass', label: '🔊 Bass', values: { bass: 15, mid: -10, treble: -15, lowPass: 9000 } },
+  { key: 'mid', label: '🎚️ Mid', values: { bass: -15, mid: 15, treble: -12, lowPass: 20000, highPass: 0 } },
+  { key: 'high', label: '✨ High', values: { bass: -15, mid: -10, treble: 15, highPass: 350, lowPass: 20000 } },
+  { key: 'telephone', label: '📞 Téléphone', values: { lowPass: 2800, highPass: 1000, bass: -15, treble: -12, mid: 2 } },
+  { key: 'ambient', label: '🌫️ Vapeur', values: { lowPass: 4500, highPass: 150, reverb: 100, delay: 35, bass: 6, treble: -4 } },
+  { key: 'cave', label: '🕳️ Cave', values: { reverb: 100, delay: 55, lowPass: 4000, bass: 10, treble: -6, highPass: 0 } },
+  { key: 'drown', label: '🌊 Noyade', values: { lowPass: 700, highPass: 200, reverb: 100, delay: 70, bass: 12, treble: -10 } },
+  { key: 'rush', label: '⚡ Frac', values: { speed: 150, reverb: 20, treble: 6, highPass: 0, lowPass: 20000, delay: 0 } },
+  { key: 'drag', label: '🐌 Lourd', values: { speed: 60, reverb: 80, lowPass: 5000, delay: 40, bass: 5, treble: -3 } },
+  { key: 'turbine', label: '📻 Turbine', values: { highPass: 2000, lowPass: 5000, bass: -15, treble: 8, reverb: 5 } },
+  { key: 'siren', label: '🚨 Sirène', values: { reverb: 0, delay: 100, speed: 110, highPass: 0, lowPass: 20000, bass: -2, treble: 2 } },
+];
+
 const AUDIO_FX_UI = {
   overlay: null,
   trackEl: null,
-  subtitleEl: null,
-  groupButtons: new Map(),
+  presetButtons: new Map(),
   sliderInputs: new Map(),
   valueLabels: new Map(),
-  groupMemory: new Map(),
+  controlCards: new Map(),
+  activePresetKey: null,
+  presetAnimationFrame: null,
 };
 
 function buildAudioFXPopup() {
@@ -170,8 +154,8 @@ function buildAudioFXPopup() {
   overlay.id = 'audio-fx-overlay';
   overlay.setAttribute('aria-hidden', 'true');
 
-  const groupButtonsHTML = AUDIO_FX_GROUPS.map(group => `
-    <button class="audio-fx-group-btn" type="button" data-group="${group.key}">${group.label}</button>
+  const presetButtonsHTML = AUDIO_FX_PRESETS.map(preset => `
+    <button class="audio-fx-preset-btn" type="button" data-preset="${preset.key}">${preset.label}</button>
   `).join('');
 
   const controlsHTML = AUDIO_FX_CONTROLS.map(control => `
@@ -202,20 +186,22 @@ function buildAudioFXPopup() {
     <section class="audio-fx-popup" role="dialog" aria-modal="true" aria-labelledby="audio-fx-title">
       <header class="audio-fx-popup__header">
         <div class="audio-fx-popup__titles">
-          <div class="audio-fx-popup__eyebrow">Audio Mixer</div>
-          <h2 id="audio-fx-title">Popup FX</h2>
-          <p class="audio-fx-popup__subtitle">Réglages temps réel sur la piste courante</p>
+          <div class="audio-fx-popup__eyebrow">Sound Design</div>
+          <h2 id="audio-fx-title">Effets en direct</h2>
         </div>
-        <div class="audio-fx-popup__meta">
+        <div class="audio-fx-popup__head-row">
           <div class="audio-fx-track">
             <span class="audio-fx-track__label">Track</span>
             <strong class="audio-fx-track__name">Aucune lecture</strong>
           </div>
-          <button class="audio-fx-top-btn is-close" id="audio-fx-close-btn" type="button">Fermer</button>
+          <button class="audio-fx-top-btn is-close" id="audio-fx-close-btn" type="button" title="Fermer">
+            <span class="audio-fx-close-btn__x" aria-hidden="true">✕</span>
+            <span class="audio-fx-close-btn__label">Fermer</span>
+          </button>
         </div>
       </header>
 
-      <div class="audio-fx-groups">${groupButtonsHTML}</div>
+      <div class="audio-fx-presets">${presetButtonsHTML}</div>
 
       <div class="audio-fx-popup__body">
         <div class="audio-fx-grid">${controlsHTML}</div>
@@ -227,7 +213,6 @@ function buildAudioFXPopup() {
 
   AUDIO_FX_UI.overlay = overlay;
   AUDIO_FX_UI.trackEl = overlay.querySelector('.audio-fx-track__name');
-  AUDIO_FX_UI.subtitleEl = overlay.querySelector('.audio-fx-popup__subtitle');
 
   overlay.querySelector('.audio-fx-overlay__backdrop').addEventListener('click', closeAudioFXPopup);
   overlay.querySelector('#audio-fx-close-btn').addEventListener('click', closeAudioFXPopup);
@@ -244,25 +229,29 @@ function buildAudioFXPopup() {
     }
   });
 
-  AUDIO_FX_GROUPS.forEach(group => {
-    const button = overlay.querySelector(`[data-group="${group.key}"]`);
-    AUDIO_FX_UI.groupButtons.set(group.key, button);
-    button.addEventListener('click', () => toggleAudioFXGroup(group.key));
+  AUDIO_FX_PRESETS.forEach(preset => {
+    const button = overlay.querySelector(`[data-preset="${preset.key}"]`);
+    AUDIO_FX_UI.presetButtons.set(preset.key, button);
+    button.addEventListener('click', () => applyAudioFXPreset(preset.key));
   });
 
   AUDIO_FX_CONTROLS.forEach(control => {
     const input = overlay.querySelector(`[data-slider-for="${control.key}"]`);
     const valueLabel = overlay.querySelector(`[data-value-for="${control.key}"]`);
+    const card = overlay.querySelector(`[data-control="${control.key}"]`);
 
     AUDIO_FX_UI.sliderInputs.set(control.key, input);
     AUDIO_FX_UI.valueLabels.set(control.key, valueLabel);
+    AUDIO_FX_UI.controlCards.set(control.key, card);
 
     input.addEventListener('input', () => {
       const value = parseFloat(input.value);
       control.apply(value);
       updateAudioFXValueLabel(control.key, value);
       updateAudioFXSliderVisual(control.key, value);
-      refreshAudioFXGroupButtons();
+      updateAudioFXControlState(control.key, value);
+      AUDIO_FX_UI.activePresetKey = null;
+      refreshAudioFXPresetButtons();
       refreshAudioFXToolbarButtons();
     });
   });
@@ -321,14 +310,17 @@ function syncAudioFXPopupFromEngine() {
     input.value = value;
     updateAudioFXValueLabel(control.key, value);
     updateAudioFXSliderVisual(control.key, value);
+    updateAudioFXControlState(control.key, value);
   });
 
-  AUDIO_FX_UI.trackEl.textContent = STATE.currentSoundBtn?.dataset.label || 'Aucune lecture';
-  AUDIO_FX_UI.subtitleEl.textContent = STATE.currentSoundBtn
-    ? 'Réglages temps réel sur la piste en cours'
-    : 'Prépare les effets avant lecture ou ajuste pendant le morceau';
+  if (settings.lowPassFrequency > 20000) {
+    setAudioFXControlValue('lowPass', 20000, true);
+  }
 
-  refreshAudioFXGroupButtons();
+  AUDIO_FX_UI.trackEl.textContent = STATE.currentSoundBtn?.title || 'Aucune lecture';
+
+  AUDIO_FX_UI.activePresetKey = null;
+  refreshAudioFXPresetButtons();
   refreshAudioFXToolbarButtons();
 }
 
@@ -347,6 +339,17 @@ function updateAudioFXSliderVisual(controlKey, value) {
   const range = control.max - control.min;
   const pct = range <= 0 ? 0 : ((value - control.min) / range) * 100;
   input.style.setProperty('--vol-pct', `${Math.max(0, Math.min(100, pct))}%`);
+}
+
+function updateAudioFXControlState(controlKey, value) {
+  const control = AUDIO_FX_CONTROLS.find(item => item.key === controlKey);
+  const card = AUDIO_FX_UI.controlCards.get(controlKey);
+  const input = AUDIO_FX_UI.sliderInputs.get(controlKey);
+  if (!control || !card || !input) return;
+
+  const isModified = Math.abs(value - control.neutral) > 0.0001;
+  card.classList.toggle('is-modified', isModified);
+  input.classList.toggle('is-modified', isModified);
 }
 
 function getAudioFXControlValue(controlKey) {
@@ -374,65 +377,92 @@ function setAudioFXControlValue(controlKey, value, apply = true) {
   }
 }
 
-function captureAudioFXGroupValues(groupKey) {
-  const group = AUDIO_FX_GROUPS.find(item => item.key === groupKey);
-  const snapshot = {};
-  if (!group) return snapshot;
-  group.controls.forEach(controlKey => {
-    snapshot[controlKey] = getAudioFXControlValue(controlKey);
-  });
-  return snapshot;
-}
-
-function restoreAudioFXGroupValues(groupKey, snapshot) {
-  const group = AUDIO_FX_GROUPS.find(item => item.key === groupKey);
-  if (!group || !snapshot) return;
-  group.controls.forEach(controlKey => {
-    if (typeof snapshot[controlKey] === 'number') {
-      setAudioFXControlValue(controlKey, snapshot[controlKey], true);
-    }
+function refreshAudioFXPresetButtons() {
+  AUDIO_FX_PRESETS.forEach(preset => {
+    const button = AUDIO_FX_UI.presetButtons.get(preset.key);
+    if (!button) return;
+    button.classList.toggle('is-active', preset.key === AUDIO_FX_UI.activePresetKey);
   });
 }
 
-function setAudioFXGroupToNeutral(groupKey) {
-  const group = AUDIO_FX_GROUPS.find(item => item.key === groupKey);
-  if (!group) return;
-
-  group.controls.forEach(controlKey => {
-    const control = AUDIO_FX_CONTROLS.find(item => item.key === controlKey);
-    if (control) {
-      setAudioFXControlValue(controlKey, control.neutral, true);
-    }
-  });
+function clampAudioFXValue(control, value) {
+  const clamped = Math.max(control.min, Math.min(control.max, value));
+  const step = Number(control.step) || 1;
+  const stepped = Math.round((clamped - control.min) / step) * step + control.min;
+  return Math.max(control.min, Math.min(control.max, stepped));
 }
 
-function toggleAudioFXGroup(groupKey) {
-  const group = AUDIO_FX_GROUPS.find(item => item.key === groupKey);
-  if (!group) return;
+function buildPresetTargetValues(preset) {
+  const targetValues = {};
+  const values = preset.values == null ? {} : preset.values;
+  AUDIO_FX_CONTROLS.forEach(control => {
+    const rawValue = Object.prototype.hasOwnProperty.call(values, control.key)
+      ? values[control.key]
+      : control.neutral;
+    targetValues[control.key] = clampAudioFXValue(control, rawValue);
+  });
+  return targetValues;
+}
 
-  const isActive = group.controls.some(controlKey => !isAudioFXControlNeutral(controlKey));
-  if (isActive) {
-    AUDIO_FX_UI.groupMemory.set(groupKey, captureAudioFXGroupValues(groupKey));
-    setAudioFXGroupToNeutral(groupKey);
-  } else {
-    restoreAudioFXGroupValues(groupKey, AUDIO_FX_UI.groupMemory.get(groupKey));
+function animateAudioFXToValues(targetValues, durationMs = 300) {
+  if (AUDIO_FX_UI.presetAnimationFrame) {
+    cancelAnimationFrame(AUDIO_FX_UI.presetAnimationFrame);
+    AUDIO_FX_UI.presetAnimationFrame = null;
   }
 
-  refreshAudioFXGroupButtons();
-  refreshAudioFXToolbarButtons();
+  const startValues = {};
+  AUDIO_FX_CONTROLS.forEach(control => {
+    startValues[control.key] = getAudioFXControlValue(control.key);
+  });
+
+  const startTime = performance.now();
+  const animate = now => {
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / durationMs);
+    const eased = 1 - Math.pow(1 - t, 3);
+
+    AUDIO_FX_CONTROLS.forEach(control => {
+      const start = startValues[control.key] ?? control.neutral;
+      const end = targetValues[control.key];
+      const interpolated = start + (end - start) * eased;
+      const stepped = clampAudioFXValue(control, interpolated);
+      setAudioFXControlValue(control.key, stepped, true);
+      updateAudioFXControlState(control.key, stepped);
+    });
+
+    if (t < 1) {
+      AUDIO_FX_UI.presetAnimationFrame = requestAnimationFrame(animate);
+      return;
+    }
+
+    AUDIO_FX_UI.presetAnimationFrame = null;
+    refreshAudioFXToolbarButtons();
+  };
+
+  AUDIO_FX_UI.presetAnimationFrame = requestAnimationFrame(animate);
 }
 
-function refreshAudioFXGroupButtons() {
-  AUDIO_FX_GROUPS.forEach(group => {
-    const button = AUDIO_FX_UI.groupButtons.get(group.key);
-    if (!button) return;
-    const isActive = group.controls.some(controlKey => !isAudioFXControlNeutral(controlKey));
-    button.classList.toggle('is-active', isActive);
-  });
+function applyAudioFXPreset(presetKey) {
+  if (presetKey === 'reset') {
+    resetAudioFXEffects();
+    return;
+  }
+
+  const preset = AUDIO_FX_PRESETS.find(item => item.key === presetKey);
+  if (!preset) return;
+  const targetValues = buildPresetTargetValues(preset);
+  AUDIO_FX_UI.activePresetKey = presetKey;
+  refreshAudioFXPresetButtons();
+  animateAudioFXToValues(targetValues, 320);
+}
+
+function isAudioFXAnyControlModified() {
+  return AUDIO_FX_CONTROLS.some(control => !isAudioFXControlNeutral(control.key));
 }
 
 function refreshAudioFXToolbarButtons() {
-  const hasEffects = typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects();
+  const hasEffects = isAudioFXAnyControlModified() ||
+    (typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects());
 
   document.querySelectorAll('.audio-fx-reset-btn').forEach(button => {
     button.classList.toggle('is-active', hasEffects);
@@ -445,8 +475,9 @@ function refreshAudioFXToolbarButtons() {
 
 function resetAudioFXEffects() {
   if (typeof AudioEngineAPI === 'undefined') return;
-  AUDIO_FX_UI.groupMemory.clear();
   AudioEngineAPI.resetEffects();
   syncAudioFXPopupFromEngine();
+  AUDIO_FX_UI.activePresetKey = 'reset';
+  refreshAudioFXPresetButtons();
   refreshAudioFXToolbarButtons();
 }

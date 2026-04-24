@@ -616,7 +616,7 @@ function buildAudioControls() {
   const fxResetBtn = buildPanelUtilityBtn({
     className: 'audio-fx-reset-btn',
     title: 'Réinitialiser les effets audio',
-    icon: '↺',
+    icon: '🔄',
     label: 'Reset',
   });
   controlsRight.insertBefore(fxResetBtn, volumeWrap);

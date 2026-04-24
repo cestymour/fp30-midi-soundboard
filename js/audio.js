@@ -27,7 +27,9 @@ class AudioEngine {
       bassGain: 0,
       midGain: 0,
       trebleGain: 0,
-      lowPassFrequency: 22050,
+      // Aligné sur la popup FX : “plein pot” = 20 kHz (transparent pour l’oreille) ; curseur 20 kHz = neutre
+      lowPassFrequency: 20000,
+      // 0 = pas de filtrage haut (équivalent “large bande”)
       highPassFrequency: 0,
       playbackRate: 1,
       distortionAmount: 0,
@@ -193,7 +195,7 @@ class AudioEngine {
   getReverbWetGain(mix) {
     const normalizedMix = Math.max(0, Math.min(1, mix));
     if (normalizedMix === 0) return 0;
-    return Math.pow(normalizedMix, 0.72) * 1.65;
+    return Math.pow(normalizedMix, 0.72) * 1.78;
   }
 
   applyState() {
@@ -234,8 +236,10 @@ class AudioEngine {
   }
 
   setLowPassFrequency(value) {
-    this.state.lowPassFrequency = value;
-    if (this.lowPass) this.lowPass.frequency.value = Math.max(10, value);
+    // Plage alignée sur l’UI (min 10 Hz côté Web Audio, max 20 kHz dans la popup)
+    const v = Math.max(10, Math.min(20000, value));
+    this.state.lowPassFrequency = v;
+    if (this.lowPass) this.lowPass.frequency.value = v;
   }
 
   setHighPassFrequency(value) {
