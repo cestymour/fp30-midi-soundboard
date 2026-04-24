@@ -36,6 +36,7 @@ class AudioEngine {
       compressorRatio: 1,
       compressorAttack: 0.003,
       compressorRelease: 0.25,
+      compressorMakeup: 1,
       delayTime: 0.25,
       delayFeedback: 0.25,
       delayMix: 0,
@@ -50,10 +51,15 @@ class AudioEngine {
     this.lowPass = null;
     this.highPass = null;
     this.compressor = null;
+    this.compressorMakeup = null;
     this.distortion = null;
+    this.distortionDryGain = null;
+    this.distortionWetGain = null;
+    this.postEffectsInput = null;
     this.delayNode = null;
     this.delayFeedback = null;
     this.delayWet = null;
+    this.reverbPreDelay = null;
     this.reverb = null;
     this.reverbWet = null;
     this.dryGain = null;
@@ -80,10 +86,15 @@ class AudioEngine {
     this.lowPass = ctx.createBiquadFilter();
     this.highPass = ctx.createBiquadFilter();
     this.compressor = ctx.createDynamicsCompressor();
+    this.compressorMakeup = ctx.createGain();
     this.distortion = ctx.createWaveShaper();
+    this.distortionDryGain = ctx.createGain();
+    this.distortionWetGain = ctx.createGain();
+    this.postEffectsInput = ctx.createGain();
     this.delayNode = ctx.createDelay(5);
     this.delayFeedback = ctx.createGain();
     this.delayWet = ctx.createGain();
+    this.reverbPreDelay = ctx.createDelay(1);
     this.reverb = ctx.createConvolver();
     this.reverbWet = ctx.createGain();
     this.dryGain = ctx.createGain();
@@ -104,23 +115,31 @@ class AudioEngine {
     this.trebleFilter.connect(this.lowPass);
     this.lowPass.connect(this.highPass);
     this.highPass.connect(this.compressor);
-    this.compressor.connect(this.distortion);
+    this.compressor.connect(this.compressorMakeup);
+    this.compressorMakeup.connect(this.distortionDryGain);
+    this.compressorMakeup.connect(this.distortion);
+    this.distortion.connect(this.distortionWetGain);
 
-    this.distortion.connect(this.dryGain);
+    this.distortionDryGain.connect(this.postEffectsInput);
+    this.distortionWetGain.connect(this.postEffectsInput);
+
+    this.postEffectsInput.connect(this.dryGain);
     this.dryGain.connect(this.masterGain);
 
-    this.distortion.connect(this.delayNode);
+    this.postEffectsInput.connect(this.delayNode);
     this.delayNode.connect(this.delayFeedback);
     this.delayFeedback.connect(this.delayNode);
     this.delayNode.connect(this.delayWet);
     this.delayWet.connect(this.masterGain);
 
-    this.distortion.connect(this.reverb);
+    this.postEffectsInput.connect(this.reverbPreDelay);
+    this.reverbPreDelay.connect(this.reverb);
     this.reverb.connect(this.reverbWet);
     this.reverbWet.connect(this.masterGain);
 
     this.masterGain.connect(ctx.destination);
-    this.reverb.buffer = this.createImpulseResponse(ctx, 2.2, 2.6);
+    this.reverb.buffer = this.createImpulseResponse(ctx, 4.8, 3.8);
+    this.reverbPreDelay.delayTime.value = 0.035;
 
     this.applyState();
     return ctx;
@@ -151,17 +170,30 @@ class AudioEngine {
   makeDistortionCurve(amount) {
     const samples = 44100;
     const curve = new Float32Array(samples);
-    const deg = Math.PI / 180;
-    const normalizedAmount = Math.max(0, amount);
+    const normalizedAmount = Math.max(0, Math.min(100, amount)) / 100;
+    const drive = 1 + normalizedAmount * 12;
+    const normalizer = Math.tanh(drive);
 
     for (let i = 0; i < samples; i++) {
       const x = (i * 2) / samples - 1;
       curve[i] = normalizedAmount === 0
         ? x
-        : ((3 + normalizedAmount) * x * 20 * deg) / (Math.PI + normalizedAmount * Math.abs(x));
+        : Math.tanh(drive * x) / normalizer;
     }
 
     return curve;
+  }
+
+  getDistortionMix(amount) {
+    const normalizedAmount = Math.max(0, Math.min(100, amount)) / 100;
+    if (normalizedAmount <= 0) return 0;
+    return Math.min(0.68, 0.08 + normalizedAmount * 0.6);
+  }
+
+  getReverbWetGain(mix) {
+    const normalizedMix = Math.max(0, Math.min(1, mix));
+    if (normalizedMix === 0) return 0;
+    return Math.pow(normalizedMix, 0.72) * 1.65;
   }
 
   applyState() {
@@ -178,11 +210,14 @@ class AudioEngine {
     this.compressor.ratio.value = this.state.compressorRatio;
     this.compressor.attack.value = this.state.compressorAttack;
     this.compressor.release.value = this.state.compressorRelease;
+    this.compressorMakeup.gain.value = this.state.compressorMakeup;
     this.distortion.curve = this.makeDistortionCurve(this.state.distortionAmount);
+    this.distortionDryGain.gain.value = 1 - this.getDistortionMix(this.state.distortionAmount);
+    this.distortionWetGain.gain.value = this.getDistortionMix(this.state.distortionAmount);
     this.delayNode.delayTime.value = Math.max(0, this.state.delayTime);
     this.delayFeedback.gain.value = Math.max(0, Math.min(0.95, this.state.delayFeedback));
     this.delayWet.gain.value = Math.max(0, Math.min(1, this.state.delayMix));
-    this.reverbWet.gain.value = Math.max(0, Math.min(1, this.state.reverbMix));
+    this.reverbWet.gain.value = this.getReverbWetGain(this.state.reverbMix);
     this.dryGain.gain.value = 1;
   }
 
@@ -246,10 +281,21 @@ class AudioEngine {
     this.state.distortionAmount = Math.max(0, value);
     if (this.distortion) {
       this.distortion.curve = this.makeDistortionCurve(this.state.distortionAmount);
+      this.distortionDryGain.gain.value = 1 - this.getDistortionMix(this.state.distortionAmount);
+      this.distortionWetGain.gain.value = this.getDistortionMix(this.state.distortionAmount);
     }
   }
 
   setCompressor({ threshold, knee, ratio, attack, release } = {}) {
+    if (typeof ratio === 'number') {
+      this.state.compressorRatio = ratio;
+      const normalizedRatio = Math.max(0, Math.min(1, (ratio - 1) / 19));
+      this.state.compressorThreshold = -12 - normalizedRatio * 24;
+      this.state.compressorKnee = 18 + normalizedRatio * 12;
+      this.state.compressorAttack = 0.003 + normalizedRatio * 0.009;
+      this.state.compressorRelease = 0.16 + normalizedRatio * 0.24;
+      this.state.compressorMakeup = 1 + normalizedRatio * 0.75;
+    }
     if (typeof threshold === 'number') {
       this.state.compressorThreshold = threshold;
       if (this.compressor) this.compressor.threshold.value = threshold;
@@ -259,7 +305,6 @@ class AudioEngine {
       if (this.compressor) this.compressor.knee.value = knee;
     }
     if (typeof ratio === 'number') {
-      this.state.compressorRatio = ratio;
       if (this.compressor) this.compressor.ratio.value = ratio;
     }
     if (typeof attack === 'number') {
@@ -269,6 +314,16 @@ class AudioEngine {
     if (typeof release === 'number') {
       this.state.compressorRelease = release;
       if (this.compressor) this.compressor.release.value = release;
+    }
+    if (this.compressor) {
+      this.compressor.threshold.value = this.state.compressorThreshold;
+      this.compressor.knee.value = this.state.compressorKnee;
+      this.compressor.ratio.value = this.state.compressorRatio;
+      this.compressor.attack.value = this.state.compressorAttack;
+      this.compressor.release.value = this.state.compressorRelease;
+    }
+    if (this.compressorMakeup) {
+      this.compressorMakeup.gain.value = this.state.compressorMakeup;
     }
   }
 
@@ -289,7 +344,7 @@ class AudioEngine {
 
   setReverbMix(value) {
     this.state.reverbMix = value;
-    if (this.reverbWet) this.reverbWet.gain.value = Math.max(0, Math.min(1, value));
+    if (this.reverbWet) this.reverbWet.gain.value = this.getReverbWetGain(value);
   }
 
   getCurrentSettings() {
@@ -298,6 +353,17 @@ class AudioEngine {
 
   getDefaultSettings() {
     return { ...this.defaultState };
+  }
+
+  getEffectSettings() {
+    const { volume, ...effectSettings } = this.state;
+    return { ...effectSettings };
+  }
+
+  hasActiveEffects() {
+    const effectSettings = this.getEffectSettings();
+    const { volume, ...defaultEffects } = this.defaultState;
+    return Object.keys(defaultEffects).some(key => Math.abs(effectSettings[key] - defaultEffects[key]) > 0.0001);
   }
 
   resetSettings() {
@@ -309,6 +375,48 @@ class AudioEngine {
       track.audio.volume = this.state.volume;
       track.playbackRate = this.state.playbackRate;
     });
+  }
+
+  resetEffects() {
+    const currentVolume = this.state.volume;
+    this.state = { ...this.defaultState, volume: currentVolume };
+    if (this.context) {
+      this.applyState();
+    }
+    this.tracks.forEach(track => {
+      track.audio.volume = currentVolume;
+      track.playbackRate = this.state.playbackRate;
+    });
+  }
+
+  restoreEffectSettings(settings) {
+    if (!settings) return;
+    this.setEQ({
+      bass: settings.bassGain ?? this.defaultState.bassGain,
+      mid: settings.midGain ?? this.defaultState.midGain,
+      treble: settings.trebleGain ?? this.defaultState.trebleGain,
+    });
+    this.setLowPassFrequency(settings.lowPassFrequency ?? this.defaultState.lowPassFrequency);
+    this.setHighPassFrequency(settings.highPassFrequency ?? this.defaultState.highPassFrequency);
+    this.setPlaybackRate(settings.playbackRate ?? this.defaultState.playbackRate);
+    this.setDistortionAmount(settings.distortionAmount ?? this.defaultState.distortionAmount);
+    this.setCompressor({
+      threshold: settings.compressorThreshold ?? this.defaultState.compressorThreshold,
+      knee: settings.compressorKnee ?? this.defaultState.compressorKnee,
+      ratio: settings.compressorRatio ?? this.defaultState.compressorRatio,
+      attack: settings.compressorAttack ?? this.defaultState.compressorAttack,
+      release: settings.compressorRelease ?? this.defaultState.compressorRelease,
+    });
+    this.state.compressorMakeup = settings.compressorMakeup ?? this.defaultState.compressorMakeup;
+    if (this.compressorMakeup) {
+      this.compressorMakeup.gain.value = this.state.compressorMakeup;
+    }
+    this.setDelay({
+      time: settings.delayTime ?? this.defaultState.delayTime,
+      feedback: settings.delayFeedback ?? this.defaultState.delayFeedback,
+      mix: settings.delayMix ?? this.defaultState.delayMix,
+    });
+    this.setReverbMix(settings.reverbMix ?? this.defaultState.reverbMix);
   }
 
   createTrack(src) {
@@ -508,7 +616,11 @@ window.AudioEngineAPI = {
   setReverbMix: (value) => AUDIO_ENGINE.setReverbMix(value),
   getCurrentSettings: () => AUDIO_ENGINE.getCurrentSettings(),
   getDefaultSettings: () => AUDIO_ENGINE.getDefaultSettings(),
+  getEffectSettings: () => AUDIO_ENGINE.getEffectSettings(),
+  hasActiveEffects: () => AUDIO_ENGINE.hasActiveEffects(),
   resetSettings: () => AUDIO_ENGINE.resetSettings(),
+  resetEffects: () => AUDIO_ENGINE.resetEffects(),
+  restoreEffectSettings: (settings) => AUDIO_ENGINE.restoreEffectSettings(settings),
 };
 
 // ================================================================

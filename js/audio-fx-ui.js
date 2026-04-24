@@ -15,30 +15,12 @@ const AUDIO_FX_GROUPS = [
 
 const AUDIO_FX_CONTROLS = [
   {
-    key: 'volume',
-    label: 'VOL',
-    shortLabel: 'Volume',
-    group: 'global',
-    min: 0,
-    max: 100,
-    step: 1,
-    neutral: 100,
-    read: settings => Math.round(settings.volume * 100),
-    apply: value => {
-      const normalized = value / 100;
-      STATE.audioVolume = normalized;
-      AudioEngineAPI.setMasterVolume(normalized);
-      syncAudioSliders(Math.round(value));
-    },
-    formatValue: value => `${Math.round(value)}%`,
-  },
-  {
     key: 'bass',
     label: 'BASS',
     shortLabel: 'Bass',
     group: 'eq',
-    min: -20,
-    max: 20,
+    min: -15,
+    max: 15,
     step: 1,
     neutral: 0,
     read: settings => settings.bassGain,
@@ -50,8 +32,8 @@ const AUDIO_FX_CONTROLS = [
     label: 'MID',
     shortLabel: 'Mid',
     group: 'eq',
-    min: -20,
-    max: 20,
+    min: -15,
+    max: 15,
     step: 1,
     neutral: 0,
     read: settings => settings.midGain,
@@ -63,8 +45,8 @@ const AUDIO_FX_CONTROLS = [
     label: 'HIGH',
     shortLabel: 'Treble',
     group: 'eq',
-    min: -20,
-    max: 20,
+    min: -15,
+    max: 15,
     step: 1,
     neutral: 0,
     read: settings => settings.trebleGain,
@@ -76,7 +58,7 @@ const AUDIO_FX_CONTROLS = [
     label: 'LPF',
     shortLabel: 'Low-pass',
     group: 'filters',
-    min: 200,
+    min: 400,
     max: 20000,
     step: 100,
     neutral: 20000,
@@ -121,7 +103,7 @@ const AUDIO_FX_CONTROLS = [
     neutral: 0,
     read: settings => settings.distortionAmount,
     apply: value => AudioEngineAPI.setDistortionAmount(value),
-    formatValue: value => `${Math.round(value)}`,
+    formatValue: value => `${Math.round(value)}%`,
   },
   {
     key: 'compressor',
@@ -179,8 +161,6 @@ const AUDIO_FX_UI = {
   sliderInputs: new Map(),
   valueLabels: new Map(),
   groupMemory: new Map(),
-  bypassActive: false,
-  bypassSnapshot: null,
 };
 
 function buildAudioFXPopup() {
@@ -201,15 +181,17 @@ function buildAudioFXPopup() {
         <span class="audio-fx-control__value" data-value-for="${control.key}">--</span>
       </div>
       <div class="audio-fx-slider-wrap">
-        <input
-          class="audio-fx-slider"
-          data-slider-for="${control.key}"
-          type="range"
-          min="${control.min}"
-          max="${control.max}"
-          step="${control.step}"
-          value="${control.neutral}"
-        />
+        <div class="audio-fx-slider-rail">
+          <input
+            class="vol-slider audio-fx-slider"
+            data-slider-for="${control.key}"
+            type="range"
+            min="${control.min}"
+            max="${control.max}"
+            step="${control.step}"
+            value="${control.neutral}"
+          />
+        </div>
       </div>
       <div class="audio-fx-control__foot">${control.shortLabel}</div>
     </div>
@@ -220,8 +202,8 @@ function buildAudioFXPopup() {
     <section class="audio-fx-popup" role="dialog" aria-modal="true" aria-labelledby="audio-fx-title">
       <header class="audio-fx-popup__header">
         <div class="audio-fx-popup__titles">
-          <div class="audio-fx-popup__eyebrow">Audio Lab</div>
-          <h2 id="audio-fx-title">Effets audio</h2>
+          <div class="audio-fx-popup__eyebrow">Audio Mixer</div>
+          <h2 id="audio-fx-title">Popup FX</h2>
           <p class="audio-fx-popup__subtitle">Réglages temps réel sur la piste courante</p>
         </div>
         <div class="audio-fx-popup__meta">
@@ -229,11 +211,7 @@ function buildAudioFXPopup() {
             <span class="audio-fx-track__label">Track</span>
             <strong class="audio-fx-track__name">Aucune lecture</strong>
           </div>
-          <div class="audio-fx-popup__actions">
-            <button class="audio-fx-top-btn" id="audio-fx-bypass-btn" type="button">Bypass all</button>
-            <button class="audio-fx-top-btn" id="audio-fx-reset-btn" type="button">Reset</button>
-            <button class="audio-fx-top-btn is-close" id="audio-fx-close-btn" type="button">Fermer</button>
-          </div>
+          <button class="audio-fx-top-btn is-close" id="audio-fx-close-btn" type="button">Fermer</button>
         </div>
       </header>
 
@@ -242,11 +220,6 @@ function buildAudioFXPopup() {
       <div class="audio-fx-popup__body">
         <div class="audio-fx-grid">${controlsHTML}</div>
       </div>
-
-      <footer class="audio-fx-popup__footer">
-        <div class="audio-fx-note">Popup indépendante du layout principal : aucun scroll ajouté, aucune grille compressée.</div>
-        <div class="audio-fx-note">Les boutons EQ, Filtres, Delay ou Reverb servent à couper puis restaurer rapidement chaque groupe.</div>
-      </footer>
     </section>
   `;
 
@@ -258,8 +231,6 @@ function buildAudioFXPopup() {
 
   overlay.querySelector('.audio-fx-overlay__backdrop').addEventListener('click', closeAudioFXPopup);
   overlay.querySelector('#audio-fx-close-btn').addEventListener('click', closeAudioFXPopup);
-  overlay.querySelector('#audio-fx-reset-btn').addEventListener('click', resetAudioFXPopup);
-  overlay.querySelector('#audio-fx-bypass-btn').addEventListener('click', toggleAudioFXBypass);
 
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && STATE.audioFxPopupOpen) {
@@ -267,10 +238,16 @@ function buildAudioFXPopup() {
     }
   });
 
+  window.addEventListener('resize', () => {
+    if (STATE.audioFxPopupOpen) {
+      updateAudioFXPopupLayout();
+    }
+  });
+
   AUDIO_FX_GROUPS.forEach(group => {
-    const btn = overlay.querySelector(`[data-group="${group.key}"]`);
-    AUDIO_FX_UI.groupButtons.set(group.key, btn);
-    btn.addEventListener('click', () => toggleAudioFXGroup(group.key));
+    const button = overlay.querySelector(`[data-group="${group.key}"]`);
+    AUDIO_FX_UI.groupButtons.set(group.key, button);
+    button.addEventListener('click', () => toggleAudioFXGroup(group.key));
   });
 
   AUDIO_FX_CONTROLS.forEach(control => {
@@ -284,25 +261,45 @@ function buildAudioFXPopup() {
       const value = parseFloat(input.value);
       control.apply(value);
       updateAudioFXValueLabel(control.key, value);
+      updateAudioFXSliderVisual(control.key, value);
       refreshAudioFXGroupButtons();
-
-      if (AUDIO_FX_UI.bypassActive) {
-        AUDIO_FX_UI.bypassActive = false;
-        AUDIO_FX_UI.bypassSnapshot = null;
-        refreshAudioFXBypassButton();
-      }
+      refreshAudioFXToolbarButtons();
     });
   });
 
   syncAudioFXPopupFromEngine();
 }
 
+function updateAudioFXPopupLayout() {
+  if (!AUDIO_FX_UI.overlay) return;
+
+  const activePanel = document.querySelector('.panel.panel-audio.active');
+  const grid = activePanel?.querySelector('.audio-grid');
+  if (!grid) {
+    closeAudioFXPopup();
+    return;
+  }
+
+  const rect = grid.getBoundingClientRect();
+  AUDIO_FX_UI.overlay.style.top = `${rect.top}px`;
+  AUDIO_FX_UI.overlay.style.left = `${rect.left}px`;
+  AUDIO_FX_UI.overlay.style.width = `${rect.width}px`;
+  AUDIO_FX_UI.overlay.style.height = `${rect.height}px`;
+}
+
 function openAudioFXPopup() {
   if (!AUDIO_FX_UI.overlay) return;
+  if (STATE.audioFxPopupOpen) {
+    closeAudioFXPopup();
+    return;
+  }
+
   syncAudioFXPopupFromEngine();
+  updateAudioFXPopupLayout();
   STATE.audioFxPopupOpen = true;
   AUDIO_FX_UI.overlay.classList.add('is-open');
   AUDIO_FX_UI.overlay.setAttribute('aria-hidden', 'false');
+  refreshAudioFXToolbarButtons();
 }
 
 function closeAudioFXPopup() {
@@ -310,6 +307,7 @@ function closeAudioFXPopup() {
   STATE.audioFxPopupOpen = false;
   AUDIO_FX_UI.overlay.classList.remove('is-open');
   AUDIO_FX_UI.overlay.setAttribute('aria-hidden', 'true');
+  refreshAudioFXToolbarButtons();
 }
 
 function syncAudioFXPopupFromEngine() {
@@ -322,15 +320,16 @@ function syncAudioFXPopupFromEngine() {
     if (!input) return;
     input.value = value;
     updateAudioFXValueLabel(control.key, value);
+    updateAudioFXSliderVisual(control.key, value);
   });
 
   AUDIO_FX_UI.trackEl.textContent = STATE.currentSoundBtn?.dataset.label || 'Aucune lecture';
   AUDIO_FX_UI.subtitleEl.textContent = STATE.currentSoundBtn
     ? 'Réglages temps réel sur la piste en cours'
-    : 'Prépare les réglages avant lecture ou ajuste pendant le morceau';
+    : 'Prépare les effets avant lecture ou ajuste pendant le morceau';
 
   refreshAudioFXGroupButtons();
-  refreshAudioFXBypassButton();
+  refreshAudioFXToolbarButtons();
 }
 
 function updateAudioFXValueLabel(controlKey, value) {
@@ -338,6 +337,16 @@ function updateAudioFXValueLabel(controlKey, value) {
   const label = AUDIO_FX_UI.valueLabels.get(controlKey);
   if (!control || !label) return;
   label.textContent = control.formatValue(value);
+}
+
+function updateAudioFXSliderVisual(controlKey, value) {
+  const control = AUDIO_FX_CONTROLS.find(item => item.key === controlKey);
+  const input = AUDIO_FX_UI.sliderInputs.get(controlKey);
+  if (!control || !input) return;
+
+  const range = control.max - control.min;
+  const pct = range <= 0 ? 0 : ((value - control.min) / range) * 100;
+  input.style.setProperty('--vol-pct', `${Math.max(0, Math.min(100, pct))}%`);
 }
 
 function getAudioFXControlValue(controlKey) {
@@ -359,7 +368,10 @@ function setAudioFXControlValue(controlKey, value, apply = true) {
 
   input.value = value;
   updateAudioFXValueLabel(controlKey, value);
-  if (apply) control.apply(parseFloat(value));
+  updateAudioFXSliderVisual(controlKey, value);
+  if (apply) {
+    control.apply(parseFloat(value));
+  }
 }
 
 function captureAudioFXGroupValues(groupKey) {
@@ -385,6 +397,7 @@ function restoreAudioFXGroupValues(groupKey, snapshot) {
 function setAudioFXGroupToNeutral(groupKey) {
   const group = AUDIO_FX_GROUPS.find(item => item.key === groupKey);
   if (!group) return;
+
   group.controls.forEach(controlKey => {
     const control = AUDIO_FX_CONTROLS.find(item => item.key === controlKey);
     if (control) {
@@ -406,6 +419,7 @@ function toggleAudioFXGroup(groupKey) {
   }
 
   refreshAudioFXGroupButtons();
+  refreshAudioFXToolbarButtons();
 }
 
 function refreshAudioFXGroupButtons() {
@@ -417,61 +431,22 @@ function refreshAudioFXGroupButtons() {
   });
 }
 
-function resetAudioFXPopup() {
-  AudioEngineAPI.resetSettings();
-  STATE.audioVolume = AudioEngineAPI.getCurrentSettings().volume;
-  syncAudioSliders(Math.round(STATE.audioVolume * 100));
-  AUDIO_FX_UI.bypassActive = false;
-  AUDIO_FX_UI.bypassSnapshot = null;
-  syncAudioFXPopupFromEngine();
+function refreshAudioFXToolbarButtons() {
+  const hasEffects = typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects();
+
+  document.querySelectorAll('.audio-fx-reset-btn').forEach(button => {
+    button.classList.toggle('is-active', hasEffects);
+  });
+
+  document.querySelectorAll('.audio-fx-open-btn').forEach(button => {
+    button.classList.toggle('is-active', STATE.audioFxPopupOpen);
+  });
 }
 
-function toggleAudioFXBypass() {
-  if (!AUDIO_FX_UI.bypassActive) {
-    AUDIO_FX_UI.bypassSnapshot = AudioEngineAPI.getCurrentSettings();
-    AudioEngineAPI.resetSettings();
-    STATE.audioVolume = AudioEngineAPI.getCurrentSettings().volume;
-    syncAudioSliders(Math.round(STATE.audioVolume * 100));
-    AUDIO_FX_UI.bypassActive = true;
-  } else {
-    const snapshot = AUDIO_FX_UI.bypassSnapshot;
-    if (snapshot) {
-      AudioEngineAPI.setMasterVolume(snapshot.volume);
-      AudioEngineAPI.setEQ({
-        bass: snapshot.bassGain,
-        mid: snapshot.midGain,
-        treble: snapshot.trebleGain,
-      });
-      AudioEngineAPI.setLowPassFrequency(snapshot.lowPassFrequency);
-      AudioEngineAPI.setHighPassFrequency(snapshot.highPassFrequency);
-      AudioEngineAPI.setPlaybackRate(snapshot.playbackRate);
-      AudioEngineAPI.setDistortionAmount(snapshot.distortionAmount);
-      AudioEngineAPI.setCompressor({
-        threshold: snapshot.compressorThreshold,
-        knee: snapshot.compressorKnee,
-        ratio: snapshot.compressorRatio,
-        attack: snapshot.compressorAttack,
-        release: snapshot.compressorRelease,
-      });
-      AudioEngineAPI.setDelay({
-        time: snapshot.delayTime,
-        feedback: snapshot.delayFeedback,
-        mix: snapshot.delayMix,
-      });
-      AudioEngineAPI.setReverbMix(snapshot.reverbMix);
-      STATE.audioVolume = snapshot.volume;
-      syncAudioSliders(Math.round(snapshot.volume * 100));
-    }
-    AUDIO_FX_UI.bypassActive = false;
-    AUDIO_FX_UI.bypassSnapshot = null;
-  }
-
+function resetAudioFXEffects() {
+  if (typeof AudioEngineAPI === 'undefined') return;
+  AUDIO_FX_UI.groupMemory.clear();
+  AudioEngineAPI.resetEffects();
   syncAudioFXPopupFromEngine();
-}
-
-function refreshAudioFXBypassButton() {
-  const button = document.getElementById('audio-fx-bypass-btn');
-  if (!button) return;
-  button.classList.toggle('is-active', AUDIO_FX_UI.bypassActive);
-  button.textContent = AUDIO_FX_UI.bypassActive ? 'Restore FX' : 'Bypass all';
+  refreshAudioFXToolbarButtons();
 }

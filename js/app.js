@@ -67,6 +67,18 @@ function buildEmergencyStopBtn(extraClass) {
   return btn;
 }
 
+function buildPanelUtilityBtn({ className, title, icon, label }) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = className;
+  btn.title = title;
+  btn.innerHTML = `
+    <span class="${className}__icon">${icon}</span>
+    <span class="${className}__label">${label}</span>
+  `;
+  return btn;
+}
+
 /** Détecte si une chaîne est un chemin vers une image */
 function isImagePath(str) {
   return str && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(str);
@@ -580,10 +592,6 @@ function buildAudioControls() {
       </div>
     </div>
     <div class="controls-right">
-      <button class="audio-fx-open-btn" type="button" title="Effets audio">
-        <span class="audio-fx-open-btn__icon">FX</span>
-        <span class="audio-fx-open-btn__label">Effets</span>
-      </button>
       <div class="volume-wrap">
         <span class="vol-icon">🔊</span>
         <input type="range" class="vol-slider audio-vol"
@@ -599,6 +607,20 @@ function buildAudioControls() {
   // Insérer le bouton STOP avant le volume-wrap
   const controlsRight = wrap.querySelector('.controls-right');
   const volumeWrap = controlsRight.querySelector('.volume-wrap');
+  const fxOpenBtn = buildPanelUtilityBtn({
+    className: 'audio-fx-open-btn',
+    title: 'Mixer audio',
+    icon: '🎛️',
+    label: 'Mixer',
+  });
+  const fxResetBtn = buildPanelUtilityBtn({
+    className: 'audio-fx-reset-btn',
+    title: 'Réinitialiser les effets audio',
+    icon: '↺',
+    label: 'Reset',
+  });
+  controlsRight.insertBefore(fxResetBtn, volumeWrap);
+  controlsRight.insertBefore(fxOpenBtn, fxResetBtn);
   controlsRight.insertBefore(stopBtn, volumeWrap);
 
   const slider = wrap.querySelector('.audio-vol');
@@ -618,7 +640,8 @@ function buildAudioControls() {
 
   // Play/Pause
   wrap.querySelector('.transport-play-pause').addEventListener('click', togglePlayPause);
-  wrap.querySelector('.audio-fx-open-btn').addEventListener('click', openAudioFXPopup);
+  fxOpenBtn.addEventListener('click', openAudioFXPopup);
+  fxResetBtn.addEventListener('click', resetAudioFXEffects);
 
   // Seek (clic + drag)
   const seekBar = wrap.querySelector('.transport-seek');
@@ -805,6 +828,10 @@ function initLogoInteraction() {
 // NAVIGATION ONGLETS
 // ═══════════════════════════════════════════════════════
 function activateTab(idx) {
+  if (STATE.audioFxPopupOpen) {
+    closeAudioFXPopup();
+  }
+
   document.querySelectorAll('.tab-btn').forEach((b, i) =>
     b.classList.toggle('active', i === idx));
   document.querySelectorAll('.panel').forEach((p, i) =>
