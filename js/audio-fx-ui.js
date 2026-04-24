@@ -149,6 +149,7 @@ const AUDIO_FX_UI = {
   controlCards: new Map(),
   activePresetKey: null,
   presetAnimationFrame: null,
+  railResizeObserver: null,
 };
 
 function buildAudioFXPopup() {
@@ -183,7 +184,16 @@ function buildAudioFXPopup() {
           />
         </div>
       </div>
-      <div class="audio-fx-control__foot">${control.shortLabel}</div>
+      <div class="audio-fx-control__foot">
+        <span class="audio-fx-control__name">${control.shortLabel}</span>
+        <button
+          type="button"
+          class="audio-fx-one-reset"
+          data-audio-fx-reset-one="${control.key}"
+          title="Valeur par défaut (${control.shortLabel})"
+          aria-label="Remettre ${control.shortLabel} à la valeur par défaut"
+        >↺</button>
+      </div>
     </div>
   `).join('');
 
@@ -261,9 +271,33 @@ function buildAudioFXPopup() {
       refreshAudioFXPresetButtons();
       refreshAudioFXToolbarButtons();
     });
+
+    const oneReset = card.querySelector(`[data-audio-fx-reset-one="${control.key}"]`);
+    if (oneReset) {
+      oneReset.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        animateAudioFXControlToNeutral(control.key);
+      });
+    }
+  });
+
+  if (!AUDIO_FX_UI.railResizeObserver) {
+    AUDIO_FX_UI.railResizeObserver = new ResizeObserver(() => {
+      if (!AUDIO_FX_UI.overlay) return;
+      AUDIO_FX_CONTROLS.forEach(c => updateAudioFXNeutralRailMarks(c.key));
+    });
+  }
+  AUDIO_FX_UI.sliderRails.forEach(rail => {
+    if (rail) AUDIO_FX_UI.railResizeObserver.observe(rail);
   });
 
   syncAudioFXPopupFromEngine();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      AUDIO_FX_CONTROLS.forEach(c => updateAudioFXNeutralRailMarks(c.key));
+    });
+  });
 }
 
 function updateAudioFXPopupLayout() {
@@ -281,6 +315,10 @@ function updateAudioFXPopupLayout() {
   AUDIO_FX_UI.overlay.style.left = `${rect.left}px`;
   AUDIO_FX_UI.overlay.style.width = `${rect.width}px`;
   AUDIO_FX_UI.overlay.style.height = `${rect.height}px`;
+
+  requestAnimationFrame(() => {
+    AUDIO_FX_CONTROLS.forEach(c => updateAudioFXNeutralRailMarks(c.key));
+  });
 }
 
 function openAudioFXPopup() {
@@ -296,6 +334,11 @@ function openAudioFXPopup() {
   AUDIO_FX_UI.overlay.classList.add('is-open');
   AUDIO_FX_UI.overlay.setAttribute('aria-hidden', 'false');
   refreshAudioFXToolbarButtons();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      AUDIO_FX_CONTROLS.forEach(c => updateAudioFXNeutralRailMarks(c.key));
+    });
+  });
 }
 
 function closeAudioFXPopup() {
@@ -349,16 +392,32 @@ function updateAudioFXSliderVisual(controlKey, value) {
   input.style.setProperty('--vol-pct', `${Math.max(0, Math.min(100, pct))}%`);
 }
 
-/** Repère visuel de la valeur neutre (curseur vertical : min en bas, max en haut). */
+/**
+ * Repère de la valeur neutre : aligné sur la géométrie du <input type="range"> tourné à -90°.
+ * Dans ce layout, la valeur min (côté gauche du range) correspond au bas du rail visible, le max en haut.
+ */
 function updateAudioFXNeutralRailMarks(controlKey) {
   const control = AUDIO_FX_CONTROLS.find(item => item.key === controlKey);
   const rail = AUDIO_FX_UI.sliderRails.get(controlKey);
-  if (!control || !rail) return;
+  const input = AUDIO_FX_UI.sliderInputs.get(controlKey);
+  if (!control || !rail || !input) return;
 
   const range = control.max - control.min;
-  const neutralPct = range <= 0 ? 50 : ((control.neutral - control.min) / range) * 100;
-  const clamped = Math.max(0, Math.min(100, neutralPct));
-  rail.style.setProperty('--neutral-pct', `${clamped}%`);
+  const t = range <= 0 ? 0.5 : (control.neutral - control.min) / range;
+  const tClamped = Math.max(0, Math.min(1, t));
+
+  const H = rail.clientHeight;
+  const L = input.offsetWidth || parseFloat(getComputedStyle(input).width) || 210;
+  if (H <= 0) {
+    rail.style.setProperty('--neutral-from-top-pct', '50%');
+    return;
+  }
+
+  const yTrackTop = (H - L) / 2;
+  const yFromTop = yTrackTop + (1 - tClamped) * L;
+  const yInRail = Math.max(0, Math.min(H, yFromTop));
+  const pctTop = (yInRail / H) * 100;
+  rail.style.setProperty('--neutral-from-top-pct', `${pctTop}%`);
 }
 
 function updateAudioFXControlState(controlKey, value) {
@@ -370,6 +429,12 @@ function updateAudioFXControlState(controlKey, value) {
   const isModified = Math.abs(value - control.neutral) > 0.0001;
   card.classList.toggle('is-modified', isModified);
   input.classList.toggle('is-modified', isModified);
+
+  const oneReset = card.querySelector('[data-audio-fx-reset-one]');
+  if (oneReset) {
+    oneReset.disabled = !isModified;
+    oneReset.classList.toggle('is-disabled', !isModified);
+  }
 }
 
 function getAudioFXControlValue(controlKey) {
@@ -423,6 +488,23 @@ function buildPresetTargetValues(preset) {
     targetValues[control.key] = clampAudioFXValue(control, rawValue);
   });
   return targetValues;
+}
+
+function animateAudioFXControlToNeutral(controlKey) {
+  const control = AUDIO_FX_CONTROLS.find(item => item.key === controlKey);
+  if (!control) return;
+  if (isAudioFXControlNeutral(controlKey)) return;
+
+  const targetValues = {};
+  AUDIO_FX_CONTROLS.forEach(c => {
+    const v = getAudioFXControlValue(c.key);
+    targetValues[c.key] = v === null || Number.isNaN(v) ? c.neutral : v;
+  });
+  targetValues[controlKey] = clampAudioFXValue(control, control.neutral);
+
+  AUDIO_FX_UI.activePresetKey = null;
+  refreshAudioFXPresetButtons();
+  animateAudioFXToValues(targetValues, 320);
 }
 
 function animateAudioFXToValues(targetValues, durationMs = 300) {
