@@ -24,22 +24,35 @@ class AudioEngine {
   constructor() {
     this.context = null;
     this.masterGain = null;
+    this.bassFilter = null;
+    this.midFilter = null;
+    this.trebleFilter = null;
     this.lowPass = null;
     this.highPass = null;
-    this.eq = null;
+    this.compressor = null;
+    this.distortion = null;
     this.delayNode = null;
     this.delayFeedback = null;
     this.delayWet = null;
     this.reverb = null;
     this.reverbWet = null;
     this.dryGain = null;
+    this.tracks = new Set();
 
     this.state = {
       volume: 1,
+      bassGain: 0,
+      midGain: 0,
+      trebleGain: 0,
       lowPassFrequency: 22050,
       highPassFrequency: 0,
-      eqFrequency: 1200,
-      eqGain: 0,
+      playbackRate: 1,
+      distortionAmount: 0,
+      compressorThreshold: -24,
+      compressorKnee: 30,
+      compressorRatio: 1,
+      compressorAttack: 0.003,
+      compressorRelease: 0.25,
       delayTime: 0.25,
       delayFeedback: 0.25,
       delayMix: 0,
@@ -59,9 +72,13 @@ class AudioEngine {
     this.context = ctx;
 
     this.masterGain = ctx.createGain();
+    this.bassFilter = ctx.createBiquadFilter();
+    this.midFilter = ctx.createBiquadFilter();
+    this.trebleFilter = ctx.createBiquadFilter();
     this.lowPass = ctx.createBiquadFilter();
     this.highPass = ctx.createBiquadFilter();
-    this.eq = ctx.createBiquadFilter();
+    this.compressor = ctx.createDynamicsCompressor();
+    this.distortion = ctx.createWaveShaper();
     this.delayNode = ctx.createDelay(5);
     this.delayFeedback = ctx.createGain();
     this.delayWet = ctx.createGain();
@@ -69,23 +86,34 @@ class AudioEngine {
     this.reverbWet = ctx.createGain();
     this.dryGain = ctx.createGain();
 
+    this.bassFilter.type = 'lowshelf';
+    this.bassFilter.frequency.value = 200;
+    this.midFilter.type = 'peaking';
+    this.midFilter.frequency.value = 1000;
+    this.midFilter.Q.value = 1;
+    this.trebleFilter.type = 'highshelf';
+    this.trebleFilter.frequency.value = 3000;
     this.lowPass.type = 'lowpass';
     this.highPass.type = 'highpass';
-    this.eq.type = 'peaking';
+    this.distortion.oversample = '4x';
 
+    this.bassFilter.connect(this.midFilter);
+    this.midFilter.connect(this.trebleFilter);
+    this.trebleFilter.connect(this.lowPass);
     this.lowPass.connect(this.highPass);
-    this.highPass.connect(this.eq);
+    this.highPass.connect(this.compressor);
+    this.compressor.connect(this.distortion);
 
-    this.eq.connect(this.dryGain);
+    this.distortion.connect(this.dryGain);
     this.dryGain.connect(this.masterGain);
 
-    this.eq.connect(this.delayNode);
+    this.distortion.connect(this.delayNode);
     this.delayNode.connect(this.delayFeedback);
     this.delayFeedback.connect(this.delayNode);
     this.delayNode.connect(this.delayWet);
     this.delayWet.connect(this.masterGain);
 
-    this.eq.connect(this.reverb);
+    this.distortion.connect(this.reverb);
     this.reverb.connect(this.reverbWet);
     this.reverbWet.connect(this.masterGain);
 
@@ -118,14 +146,37 @@ class AudioEngine {
     return buffer;
   }
 
+  makeDistortionCurve(amount) {
+    const samples = 44100;
+    const curve = new Float32Array(samples);
+    const deg = Math.PI / 180;
+    const normalizedAmount = Math.max(0, amount);
+
+    for (let i = 0; i < samples; i++) {
+      const x = (i * 2) / samples - 1;
+      curve[i] = normalizedAmount === 0
+        ? x
+        : ((3 + normalizedAmount) * x * 20 * deg) / (Math.PI + normalizedAmount * Math.abs(x));
+    }
+
+    return curve;
+  }
+
   applyState() {
     if (!this.context) return;
 
     this.masterGain.gain.value = this.state.volume;
+    this.bassFilter.gain.value = this.state.bassGain;
+    this.midFilter.gain.value = this.state.midGain;
+    this.trebleFilter.gain.value = this.state.trebleGain;
     this.lowPass.frequency.value = Math.max(10, this.state.lowPassFrequency);
     this.highPass.frequency.value = Math.max(0, this.state.highPassFrequency);
-    this.eq.frequency.value = Math.max(10, this.state.eqFrequency);
-    this.eq.gain.value = this.state.eqGain;
+    this.compressor.threshold.value = this.state.compressorThreshold;
+    this.compressor.knee.value = this.state.compressorKnee;
+    this.compressor.ratio.value = this.state.compressorRatio;
+    this.compressor.attack.value = this.state.compressorAttack;
+    this.compressor.release.value = this.state.compressorRelease;
+    this.distortion.curve = this.makeDistortionCurve(this.state.distortionAmount);
     this.delayNode.delayTime.value = Math.max(0, this.state.delayTime);
     this.delayFeedback.gain.value = Math.max(0, Math.min(0.95, this.state.delayFeedback));
     this.delayWet.gain.value = Math.max(0, Math.min(1, this.state.delayMix));
@@ -140,6 +191,9 @@ class AudioEngine {
       this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, this.context.currentTime);
       this.masterGain.gain.linearRampToValueAtTime(this.state.volume, this.context.currentTime + 0.02);
     }
+    this.tracks.forEach(track => {
+      track.audio.volume = this.state.volume;
+    });
   }
 
   setLowPassFrequency(value) {
@@ -152,14 +206,67 @@ class AudioEngine {
     if (this.highPass) this.highPass.frequency.value = Math.max(0, value);
   }
 
-  setEQ({ frequency, gain } = {}) {
-    if (typeof frequency === 'number') {
-      this.state.eqFrequency = frequency;
-      if (this.eq) this.eq.frequency.value = Math.max(10, frequency);
+  setEQ({ bass, mid, treble } = {}) {
+    if (typeof bass === 'number') {
+      this.state.bassGain = bass;
+      if (this.bassFilter) this.bassFilter.gain.value = bass;
     }
-    if (typeof gain === 'number') {
-      this.state.eqGain = gain;
-      if (this.eq) this.eq.gain.value = gain;
+    if (typeof mid === 'number') {
+      this.state.midGain = mid;
+      if (this.midFilter) this.midFilter.gain.value = mid;
+    }
+    if (typeof treble === 'number') {
+      this.state.trebleGain = treble;
+      if (this.trebleFilter) this.trebleFilter.gain.value = treble;
+    }
+  }
+
+  setBassGain(value) {
+    this.setEQ({ bass: value });
+  }
+
+  setMidGain(value) {
+    this.setEQ({ mid: value });
+  }
+
+  setTrebleGain(value) {
+    this.setEQ({ treble: value });
+  }
+
+  setPlaybackRate(value) {
+    this.state.playbackRate = Math.max(0.25, Math.min(4, value));
+    this.tracks.forEach(track => {
+      track.playbackRate = this.state.playbackRate;
+    });
+  }
+
+  setDistortionAmount(value) {
+    this.state.distortionAmount = Math.max(0, value);
+    if (this.distortion) {
+      this.distortion.curve = this.makeDistortionCurve(this.state.distortionAmount);
+    }
+  }
+
+  setCompressor({ threshold, knee, ratio, attack, release } = {}) {
+    if (typeof threshold === 'number') {
+      this.state.compressorThreshold = threshold;
+      if (this.compressor) this.compressor.threshold.value = threshold;
+    }
+    if (typeof knee === 'number') {
+      this.state.compressorKnee = knee;
+      if (this.compressor) this.compressor.knee.value = knee;
+    }
+    if (typeof ratio === 'number') {
+      this.state.compressorRatio = ratio;
+      if (this.compressor) this.compressor.ratio.value = ratio;
+    }
+    if (typeof attack === 'number') {
+      this.state.compressorAttack = attack;
+      if (this.compressor) this.compressor.attack.value = attack;
+    }
+    if (typeof release === 'number') {
+      this.state.compressorRelease = release;
+      if (this.compressor) this.compressor.release.value = release;
     }
   }
 
@@ -189,7 +296,13 @@ class AudioEngine {
 
   createTrack(src) {
     this.ensureContext();
-    return new MediaElementTrack(this, src);
+    const track = new MediaElementTrack(this, src);
+    this.tracks.add(track);
+    return track;
+  }
+
+  unregisterTrack(track) {
+    this.tracks.delete(track);
   }
 }
 
@@ -244,8 +357,19 @@ class MediaElementTrack {
     this.audio.volume = clamped;
   }
 
+  get playbackRate() {
+    return this.audio.playbackRate;
+  }
+
+  set playbackRate(value) {
+    const clamped = Math.max(0.25, Math.min(4, value));
+    this.audio.playbackRate = clamped;
+    this.audio.defaultPlaybackRate = clamped;
+  }
+
   async load() {
     this.connectNodes();
+    this.playbackRate = this.engine.state.playbackRate;
 
     if (this._loadPromise) return this._loadPromise;
     if (this.audio.readyState >= 1) return this;
@@ -313,13 +437,28 @@ class MediaElementTrack {
     this.audio.currentTime = 0;
   }
 
+  dispose() {
+    this.stop();
+    this.audio.removeEventListener('ended', this.handleEnded);
+    this.audio.removeEventListener('error', this.handleError);
+    if (this.outputGain) {
+      try { this.outputGain.disconnect(); } catch (_) {}
+      this.outputGain = null;
+    }
+    if (this.sourceNode) {
+      try { this.sourceNode.disconnect(); } catch (_) {}
+      this.sourceNode = null;
+    }
+    this.engine.unregisterTrack(this);
+  }
+
   connectNodes() {
     if (!this.engine.canUseMediaElementSource || this.sourceNode) return;
 
     this.sourceNode = this.engine.context.createMediaElementSource(this.audio);
     this.outputGain = this.engine.context.createGain();
     this.sourceNode.connect(this.outputGain);
-    this.outputGain.connect(this.engine.lowPass);
+    this.outputGain.connect(this.engine.bassFilter);
   }
 
   handleEnded() {
@@ -339,9 +478,15 @@ window.AudioEngineAPI = {
   load: (src) => AUDIO_ENGINE.createTrack(src).load(),
   createTrack: (src) => AUDIO_ENGINE.createTrack(src),
   setMasterVolume: (value) => AUDIO_ENGINE.setMasterVolume(value),
+  setBassGain: (value) => AUDIO_ENGINE.setBassGain(value),
+  setMidGain: (value) => AUDIO_ENGINE.setMidGain(value),
+  setTrebleGain: (value) => AUDIO_ENGINE.setTrebleGain(value),
   setLowPassFrequency: (value) => AUDIO_ENGINE.setLowPassFrequency(value),
   setHighPassFrequency: (value) => AUDIO_ENGINE.setHighPassFrequency(value),
   setEQ: (options) => AUDIO_ENGINE.setEQ(options),
+  setPlaybackRate: (value) => AUDIO_ENGINE.setPlaybackRate(value),
+  setDistortionAmount: (value) => AUDIO_ENGINE.setDistortionAmount(value),
+  setCompressor: (options) => AUDIO_ENGINE.setCompressor(options),
   setDelay: (options) => AUDIO_ENGINE.setDelay(options),
   setReverbMix: (value) => AUDIO_ENGINE.setReverbMix(value),
   getCurrentSettings: () => AUDIO_ENGINE.getCurrentSettings(),
@@ -463,11 +608,11 @@ function stopSound(fade = false) {
     const audio = STATE.currentAudio;
     STATE.currentAudio = null;
     fadeAudio(audio, audio.volume, 0, 400, () => {
-      audio.stop();
+      audio.dispose();
       audio.volume = STATE.audioVolume;
     });
   } else {
-    STATE.currentAudio.stop();
+    STATE.currentAudio.dispose();
     STATE.currentAudio = null;
   }
 }
@@ -491,7 +636,7 @@ async function playSound(btn) {
   cancelFade();
 
   if (STATE.currentAudio) {
-    STATE.currentAudio.stop();
+    STATE.currentAudio.dispose();
     STATE.currentAudio = null;
   }
 
@@ -527,7 +672,7 @@ async function playSound(btn) {
     await audio.play();
 
     if (_playRequestId !== requestId || STATE.currentAudio !== audio) {
-      audio.stop();
+      audio.dispose();
       return;
     }
 
