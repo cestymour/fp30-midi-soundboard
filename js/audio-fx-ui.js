@@ -126,17 +126,19 @@ const AUDIO_FX_PRESETS = [
   { key: 'bass', label: '🔊 Bass', values: { bass: 15, mid: -10, treble: -15, lowPass: 9000 } },
   { key: 'mid', label: '🎚️ Mid', values: { bass: -15, mid: 10, treble: -12, lowPass: 20000, highPass: 0 } },
   { key: 'high', label: '✨ High', values: { bass: -15, mid: -10, treble: 15, highPass: 350, lowPass: 20000 } },
+  { key: 'radio', label: '📻 Radio', values: { highPass: 2000, lowPass: 5000, bass: -15, treble: 8, reverb: 5 } },
   { key: 'telephone', label: '📞 Téléphone', values: { lowPass: 2800, highPass: 1000, bass: -15, treble: -12, mid: 2 } },
-  { key: 'ambient', label: '🌫️ Vapeur', values: { lowPass: 4500, highPass: 150, reverb: 88, delay: 35, bass: 6, treble: -4 } },
+  //{ key: 'ambient', label: '🌫️ Vapeur', values: { lowPass: 4500, highPass: 150, reverb: 88, delay: 35, bass: 6, treble: -4 } },
   { key: 'cave', label: '🕳️ Cave', values: { reverb: 88, delay: 55, lowPass: 4000, bass: 10, treble: -6, highPass: 0 } },
-  { key: 'drown', label: '🌊 Noyade', values: { lowPass: 700, highPass: 200, reverb: 88, delay: 70, bass: 12, treble: -10 } },
-  { key: 'rush', label: '⚡ Frac', values: { reverb: 25, treble: 8, highPass: 0, lowPass: 20000, delay: 18, bass: -2 } },
+  { key: 'drown', label: '🌊 Sous l\'eau', values: { lowPass: 700, highPass: 200, reverb: 88, delay: 70, bass: 12, treble: -10 } },
+  { key: 'rush', label: '⚡ Rush', values: { reverb: 25, treble: 8, highPass: 0, lowPass: 20000, delay: 18, bass: -2 } },
   { key: 'drag', label: '🐌 Lourd', values: { reverb: 75, lowPass: 5000, delay: 40, bass: 8, treble: -3, highPass: 0 } },
-  { key: 'turbine', label: '📻 Turbine', values: { highPass: 2000, lowPass: 5000, bass: -15, treble: 8, reverb: 5 } },
   { key: 'siren', label: '🚨 Sirène', values: { reverb: 0, delay: 100, highPass: 0, lowPass: 20000, bass: -2, treble: 2 } },
+  /*
   { key: 'rush-speed', label: '⚡ Frac (vitesse +)', values: { speed: 150, reverb: 15, treble: 5, delay: 8, bass: -1 } },
   { key: 'drag-speed', label: '🐌 Lent (vitesse −)', values: { speed: 60, reverb: 70, lowPass: 5200, delay: 35, bass: 6, treble: -2 } },
   { key: 'siren-speed', label: '🚨 Sirène (vitesse +)', values: { speed: 110, reverb: 0, delay: 100, highPass: 0, lowPass: 20000, bass: -2, treble: 2 } },
+  */
 ];
 
 const AUDIO_FX_UI = {
