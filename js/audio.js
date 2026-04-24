@@ -1,26 +1,356 @@
 /* ================================================================
-   audio.js — Gestion lecture audio (MP3 / OGG / WAV)
-   Variables globales lues/écrites : STATE (défini dans app.js)
+   audio.js - Moteur audio Web Audio API (MP3 / OGG / WAV)
+   Variables globales lues/ecrites : STATE (defini dans app.js)
 ================================================================ */
 
-// ═══════════════════════════════════════════════════════
+// ================================================================
 // UTILITAIRES
-// ═══════════════════════════════════════════════════════
+// ================================================================
 
 function syncAudioSliders(pct) {
   document.querySelectorAll('.audio-vol').forEach(s => {
-    if (parseInt(s.value) === pct) return;
+    if (parseInt(s.value, 10) === pct) return;
     s.value = pct;
     s.style.setProperty('--vol-pct', pct + '%');
     s.closest('.panel-controls').querySelector('.vol-value').textContent = pct + '%';
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// FONDU
-// ═══════════════════════════════════════════════════════
+// ================================================================
+// MOTEUR WEB AUDIO
+// ================================================================
 
-/** Timer du fade en cours — permet de l'annuler si un nouveau son arrive */
+class AudioEngine {
+  constructor() {
+    this.context = null;
+    this.masterGain = null;
+    this.lowPass = null;
+    this.highPass = null;
+    this.eq = null;
+    this.delayNode = null;
+    this.delayFeedback = null;
+    this.delayWet = null;
+    this.reverb = null;
+    this.reverbWet = null;
+    this.dryGain = null;
+
+    this.state = {
+      volume: 1,
+      lowPassFrequency: 22050,
+      highPassFrequency: 0,
+      eqFrequency: 1200,
+      eqGain: 0,
+      delayTime: 0.25,
+      delayFeedback: 0.25,
+      delayMix: 0,
+      reverbMix: 0,
+    };
+
+    this.canUseMediaElementSource = window.location.protocol !== 'file:';
+  }
+
+  ensureContext() {
+    if (this.context) return this.context;
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) throw new Error('Web Audio API non supportee.');
+
+    const ctx = new AudioCtx();
+    this.context = ctx;
+
+    this.masterGain = ctx.createGain();
+    this.lowPass = ctx.createBiquadFilter();
+    this.highPass = ctx.createBiquadFilter();
+    this.eq = ctx.createBiquadFilter();
+    this.delayNode = ctx.createDelay(5);
+    this.delayFeedback = ctx.createGain();
+    this.delayWet = ctx.createGain();
+    this.reverb = ctx.createConvolver();
+    this.reverbWet = ctx.createGain();
+    this.dryGain = ctx.createGain();
+
+    this.lowPass.type = 'lowpass';
+    this.highPass.type = 'highpass';
+    this.eq.type = 'peaking';
+
+    this.lowPass.connect(this.highPass);
+    this.highPass.connect(this.eq);
+
+    this.eq.connect(this.dryGain);
+    this.dryGain.connect(this.masterGain);
+
+    this.eq.connect(this.delayNode);
+    this.delayNode.connect(this.delayFeedback);
+    this.delayFeedback.connect(this.delayNode);
+    this.delayNode.connect(this.delayWet);
+    this.delayWet.connect(this.masterGain);
+
+    this.eq.connect(this.reverb);
+    this.reverb.connect(this.reverbWet);
+    this.reverbWet.connect(this.masterGain);
+
+    this.masterGain.connect(ctx.destination);
+    this.reverb.buffer = this.createImpulseResponse(ctx, 2.2, 2.6);
+
+    this.applyState();
+    return ctx;
+  }
+
+  async resume() {
+    const ctx = this.ensureContext();
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+  }
+
+  createImpulseResponse(ctx, duration, decay) {
+    const sampleCount = Math.max(1, Math.floor(ctx.sampleRate * duration));
+    const buffer = ctx.createBuffer(2, sampleCount, ctx.sampleRate);
+
+    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+      const data = buffer.getChannelData(channel);
+      for (let i = 0; i < sampleCount; i++) {
+        const t = i / sampleCount;
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, decay);
+      }
+    }
+
+    return buffer;
+  }
+
+  applyState() {
+    if (!this.context) return;
+
+    this.masterGain.gain.value = this.state.volume;
+    this.lowPass.frequency.value = Math.max(10, this.state.lowPassFrequency);
+    this.highPass.frequency.value = Math.max(0, this.state.highPassFrequency);
+    this.eq.frequency.value = Math.max(10, this.state.eqFrequency);
+    this.eq.gain.value = this.state.eqGain;
+    this.delayNode.delayTime.value = Math.max(0, this.state.delayTime);
+    this.delayFeedback.gain.value = Math.max(0, Math.min(0.95, this.state.delayFeedback));
+    this.delayWet.gain.value = Math.max(0, Math.min(1, this.state.delayMix));
+    this.reverbWet.gain.value = Math.max(0, Math.min(1, this.state.reverbMix));
+    this.dryGain.gain.value = 1;
+  }
+
+  setMasterVolume(value) {
+    this.state.volume = Math.max(0, Math.min(1, value));
+    if (this.canUseMediaElementSource && this.masterGain && this.context) {
+      this.masterGain.gain.cancelScheduledValues(this.context.currentTime);
+      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, this.context.currentTime);
+      this.masterGain.gain.linearRampToValueAtTime(this.state.volume, this.context.currentTime + 0.02);
+    }
+  }
+
+  setLowPassFrequency(value) {
+    this.state.lowPassFrequency = value;
+    if (this.lowPass) this.lowPass.frequency.value = Math.max(10, value);
+  }
+
+  setHighPassFrequency(value) {
+    this.state.highPassFrequency = value;
+    if (this.highPass) this.highPass.frequency.value = Math.max(0, value);
+  }
+
+  setEQ({ frequency, gain } = {}) {
+    if (typeof frequency === 'number') {
+      this.state.eqFrequency = frequency;
+      if (this.eq) this.eq.frequency.value = Math.max(10, frequency);
+    }
+    if (typeof gain === 'number') {
+      this.state.eqGain = gain;
+      if (this.eq) this.eq.gain.value = gain;
+    }
+  }
+
+  setDelay({ time, feedback, mix } = {}) {
+    if (typeof time === 'number') {
+      this.state.delayTime = time;
+      if (this.delayNode) this.delayNode.delayTime.value = Math.max(0, time);
+    }
+    if (typeof feedback === 'number') {
+      this.state.delayFeedback = feedback;
+      if (this.delayFeedback) this.delayFeedback.gain.value = Math.max(0, Math.min(0.95, feedback));
+    }
+    if (typeof mix === 'number') {
+      this.state.delayMix = mix;
+      if (this.delayWet) this.delayWet.gain.value = Math.max(0, Math.min(1, mix));
+    }
+  }
+
+  setReverbMix(value) {
+    this.state.reverbMix = value;
+    if (this.reverbWet) this.reverbWet.gain.value = Math.max(0, Math.min(1, value));
+  }
+
+  getCurrentSettings() {
+    return { ...this.state };
+  }
+
+  createTrack(src) {
+    this.ensureContext();
+    return new MediaElementTrack(this, src);
+  }
+}
+
+class MediaElementTrack {
+  constructor(engine, src) {
+    this.engine = engine;
+    this.src = src;
+    this.audio = new Audio(src);
+    this.audio.preload = 'auto';
+    this.sourceNode = null;
+    this.outputGain = null;
+    this.segmentEnd = null;
+    this.onended = null;
+    this.onerror = null;
+    this._loadPromise = null;
+
+    this.handleEnded = this.handleEnded.bind(this);
+    this.handleError = this.handleError.bind(this);
+
+    this.audio.addEventListener('ended', this.handleEnded);
+    this.audio.addEventListener('error', this.handleError);
+  }
+
+  get duration() {
+    const rawDuration = this.audio.duration;
+    if (!isFinite(rawDuration)) return NaN;
+    return this.segmentEnd !== null ? Math.min(this.segmentEnd, rawDuration) : rawDuration;
+  }
+
+  get currentTime() {
+    return this.audio.currentTime || 0;
+  }
+
+  set currentTime(value) {
+    const limit = this.duration;
+    const nextTime = Math.max(0, Math.min(value || 0, isFinite(limit) ? limit : Infinity));
+    this.audio.currentTime = nextTime;
+  }
+
+  get volume() {
+    if (this.engine.canUseMediaElementSource) {
+      return this.engine.getCurrentSettings().volume;
+    }
+    return this.audio.volume;
+  }
+
+  set volume(value) {
+    const clamped = Math.max(0, Math.min(1, value));
+    if (this.engine.canUseMediaElementSource) {
+      this.engine.setMasterVolume(clamped);
+    }
+    this.audio.volume = clamped;
+  }
+
+  async load() {
+    this.connectNodes();
+
+    if (this._loadPromise) return this._loadPromise;
+    if (this.audio.readyState >= 1) return this;
+
+    this._loadPromise = new Promise((resolve, reject) => {
+      const cleanup = () => {
+        this.audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        this.audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+        this.audio.removeEventListener('error', handleError);
+      };
+
+      const handleLoadedMetadata = () => {
+        if (this.segmentEnd === null && isFinite(this.audio.duration)) {
+          this.segmentEnd = this.audio.duration;
+        }
+      };
+
+      const handleCanPlayThrough = () => {
+        cleanup();
+        if (this.segmentEnd === null && isFinite(this.audio.duration)) {
+          this.segmentEnd = this.audio.duration;
+        }
+        this._loadPromise = null;
+        resolve(this);
+      };
+
+      const handleError = () => {
+        cleanup();
+        this._loadPromise = null;
+        reject(new Error(`Impossible de charger ${this.src}`));
+      };
+
+      this.audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      this.audio.addEventListener('canplaythrough', handleCanPlayThrough);
+      this.audio.addEventListener('error', handleError, { once: true });
+      this.audio.load();
+    });
+
+    return this;
+  }
+
+  setPlaybackRange(startOffset, endOffset) {
+    this.audio.currentTime = Math.max(0, startOffset || 0);
+    this.segmentEnd = endOffset !== null && isFinite(endOffset)
+      ? Math.max(this.audio.currentTime, endOffset)
+      : null;
+  }
+
+  async play() {
+    await this.engine.resume();
+    await this.load();
+    if (isFinite(this.duration) && this.audio.currentTime >= this.duration) {
+      this.audio.currentTime = 0;
+    }
+    await this.audio.play();
+    return this;
+  }
+
+  pause() {
+    this.audio.pause();
+  }
+
+  stop() {
+    this.audio.pause();
+    this.audio.currentTime = 0;
+  }
+
+  connectNodes() {
+    if (!this.engine.canUseMediaElementSource || this.sourceNode) return;
+
+    this.sourceNode = this.engine.context.createMediaElementSource(this.audio);
+    this.outputGain = this.engine.context.createGain();
+    this.sourceNode.connect(this.outputGain);
+    this.outputGain.connect(this.engine.lowPass);
+  }
+
+  handleEnded() {
+    this.onended?.();
+  }
+
+  handleError() {
+    this.onerror?.(new Error(`Impossible de charger ${this.src}`));
+  }
+}
+
+const AUDIO_ENGINE = new AudioEngine();
+
+window.AudioEngineAPI = {
+  init: () => AUDIO_ENGINE.ensureContext(),
+  resume: () => AUDIO_ENGINE.resume(),
+  load: (src) => AUDIO_ENGINE.createTrack(src).load(),
+  createTrack: (src) => AUDIO_ENGINE.createTrack(src),
+  setMasterVolume: (value) => AUDIO_ENGINE.setMasterVolume(value),
+  setLowPassFrequency: (value) => AUDIO_ENGINE.setLowPassFrequency(value),
+  setHighPassFrequency: (value) => AUDIO_ENGINE.setHighPassFrequency(value),
+  setEQ: (options) => AUDIO_ENGINE.setEQ(options),
+  setDelay: (options) => AUDIO_ENGINE.setDelay(options),
+  setReverbMix: (value) => AUDIO_ENGINE.setReverbMix(value),
+  getCurrentSettings: () => AUDIO_ENGINE.getCurrentSettings(),
+};
+
+// ================================================================
+// FONDU
+// ================================================================
+
 let _fadeTimer = null;
 let _fadingAudio = null;
 
@@ -43,13 +373,15 @@ function fadeAudio(audio, from, to, ms, onDone) {
     return null;
   }
 
-  const steps    = 20;
+  const steps = 20;
   const interval = ms / steps;
-  const delta    = (to - from) / steps;
-  let current    = from;
+  const delta = (to - from) / steps;
+  let current = from;
+
   _fadeTimer = setInterval(() => {
     current += delta;
     audio.volume = Math.min(1, Math.max(0, current));
+
     if ((delta < 0 && current <= to) || (delta > 0 && current >= to)) {
       clearInterval(_fadeTimer);
       _fadeTimer = null;
@@ -57,19 +389,20 @@ function fadeAudio(audio, from, to, ms, onDone) {
       onDone?.();
     }
   }, interval);
+
   _fadingAudio = audio;
   return _fadeTimer;
 }
 
-// ═══════════════════════════════════════════════════════
+// ================================================================
 // PROGRESSION
-// ═══════════════════════════════════════════════════════
+// ================================================================
 
 function startProgressLoop(audio, btn, startOffset, endOffset) {
   if (STATE.progressRAF) cancelAnimationFrame(STATE.progressRAF);
 
-  const dur              = audio.duration;
-  const effectiveEnd     = endOffset !== null ? endOffset : (dur && isFinite(dur) ? dur : null);
+  const dur = audio.duration;
+  const effectiveEnd = endOffset !== null ? endOffset : (dur && isFinite(dur) ? dur : null);
   const playableDuration = effectiveEnd !== null ? effectiveEnd - startOffset : null;
 
   if (playableDuration !== null) {
@@ -107,12 +440,11 @@ function stopProgressLoop() {
   }
 }
 
-// ═══════════════════════════════════════════════════════
+// ================================================================
 // STOP
-// ═══════════════════════════════════════════════════════
+// ================================================================
 
 function stopSound(fade = false) {
-  // Annuler tout fade précédent
   cancelFade();
   stopProgressLoop();
 
@@ -131,12 +463,11 @@ function stopSound(fade = false) {
     const audio = STATE.currentAudio;
     STATE.currentAudio = null;
     fadeAudio(audio, audio.volume, 0, 400, () => {
-      audio.pause();
-      audio.currentTime = 0;
+      audio.stop();
+      audio.volume = STATE.audioVolume;
     });
   } else {
-    STATE.currentAudio.pause();
-    STATE.currentAudio.currentTime = 0;
+    STATE.currentAudio.stop();
     STATE.currentAudio = null;
   }
 }
@@ -145,62 +476,68 @@ function emergencyStopAudio() {
   stopSound(true);
 }
 
-// ═══════════════════════════════════════════════════════
+// ================================================================
 // PLAY
-// ═══════════════════════════════════════════════════════
+// ================================================================
 
-function playSound(btn) {
+let _playRequestId = 0;
+
+async function playSound(btn) {
   const src = btn.dataset.audio;
   if (!src) return;
 
-  // Annuler tout fade/son précédent immédiatement (évite les doublons)
+  const requestId = ++_playRequestId;
+
   cancelFade();
 
   if (STATE.currentAudio) {
-    STATE.currentAudio.pause();
-    STATE.currentAudio.currentTime = 0;
+    STATE.currentAudio.stop();
     STATE.currentAudio = null;
   }
 
   const startOffset = parseFloat(btn.dataset.start || '0') || 0;
-  const endRaw      = btn.dataset.end;
-  const endOffset   = endRaw ? parseFloat(endRaw) : null;
+  const endRaw = btn.dataset.end;
+  const endOffset = endRaw ? parseFloat(endRaw) : null;
 
-  const audio = new Audio(src);
+  const audio = AUDIO_ENGINE.createTrack(src);
+  audio.setPlaybackRange(startOffset, endOffset);
   audio.volume = 0;
 
-  audio.addEventListener('canplaythrough', () => {
-    // Vérifier que ce son est toujours celui qu'on veut jouer
-    if (STATE.currentAudio !== audio) {
-      audio.pause();
-      return;
-    }
-    if (startOffset > 0) audio.currentTime = startOffset;
-    audio.play()
-      .then(() => {
-        if (STATE.currentAudio !== audio) { audio.pause(); return; }
-        fadeAudio(audio, 0, STATE.audioVolume, 300, null);
-        startProgressLoop(audio, btn, startOffset, endOffset);
-      })
-      .catch(() => stopSound());
-  }, { once: true });
-
-  audio.addEventListener('ended', () => stopSound(false), { once: true });
-
-  audio.addEventListener('error', () => {
-    console.warn('Fichier introuvable :', src);
-    btn.classList.add('missing');
-    stopSound();
-  }, { once: true });
-
-  STATE.currentAudio    = audio;
+  STATE.currentAudio = audio;
   STATE.currentSoundBtn = btn;
-  STATE.isPaused        = false;
-  btn.classList.remove('paused');
+  STATE.isPaused = false;
+
+  btn.classList.remove('paused', 'missing');
   btn.classList.add('playing');
   btn.style.setProperty('--progress', '0%');
 
   updateTransportUI();
 
-  audio.load();
+  audio.onended = () => {
+    if (STATE.currentAudio === audio) {
+      stopSound(false);
+    }
+  };
+
+  try {
+    await audio.load();
+
+    if (_playRequestId !== requestId || STATE.currentAudio !== audio) return;
+
+    await audio.play();
+
+    if (_playRequestId !== requestId || STATE.currentAudio !== audio) {
+      audio.stop();
+      return;
+    }
+
+    fadeAudio(audio, 0, STATE.audioVolume, 300, null);
+    startProgressLoop(audio, btn, startOffset, endOffset);
+  } catch (err) {
+    console.warn('Fichier introuvable ou illisible :', src, err);
+    btn.classList.add('missing');
+    if (STATE.currentAudio === audio) {
+      stopSound();
+    }
+  }
 }
