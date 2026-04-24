@@ -25,6 +25,7 @@ const STATE = {
   progressRAF:           null,
   audioVolume:           1,
   isPaused:              false,
+  audioFxPopupOpen:      false,
 };
 
 // ═══════════════════════════════════════════════════════
@@ -507,6 +508,7 @@ function buildUI() {
   });
 
   buildAboutPopup();
+  buildAudioFXPopup();
 }
 
 // ── Contrôles MIDI ──
@@ -578,6 +580,10 @@ function buildAudioControls() {
       </div>
     </div>
     <div class="controls-right">
+      <button class="audio-fx-open-btn" type="button" title="Effets audio">
+        <span class="audio-fx-open-btn__icon">FX</span>
+        <span class="audio-fx-open-btn__label">Effets</span>
+      </button>
       <div class="volume-wrap">
         <span class="vol-icon">🔊</span>
         <input type="range" class="vol-slider audio-vol"
@@ -607,10 +613,12 @@ function buildAudioControls() {
     updateVolIcon(iconEl, p, 100);
     if (STATE.currentAudio) STATE.currentAudio.volume = STATE.audioVolume;
     syncAudioSliders(p);
+    if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
   });
 
   // Play/Pause
   wrap.querySelector('.transport-play-pause').addEventListener('click', togglePlayPause);
+  wrap.querySelector('.audio-fx-open-btn').addEventListener('click', openAudioFXPopup);
 
   // Seek (clic + drag)
   const seekBar = wrap.querySelector('.transport-seek');

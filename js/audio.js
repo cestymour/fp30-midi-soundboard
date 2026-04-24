@@ -22,24 +22,7 @@ function syncAudioSliders(pct) {
 
 class AudioEngine {
   constructor() {
-    this.context = null;
-    this.masterGain = null;
-    this.bassFilter = null;
-    this.midFilter = null;
-    this.trebleFilter = null;
-    this.lowPass = null;
-    this.highPass = null;
-    this.compressor = null;
-    this.distortion = null;
-    this.delayNode = null;
-    this.delayFeedback = null;
-    this.delayWet = null;
-    this.reverb = null;
-    this.reverbWet = null;
-    this.dryGain = null;
-    this.tracks = new Set();
-
-    this.state = {
+    this.defaultState = {
       volume: 1,
       bassGain: 0,
       midGain: 0,
@@ -58,6 +41,25 @@ class AudioEngine {
       delayMix: 0,
       reverbMix: 0,
     };
+
+    this.context = null;
+    this.masterGain = null;
+    this.bassFilter = null;
+    this.midFilter = null;
+    this.trebleFilter = null;
+    this.lowPass = null;
+    this.highPass = null;
+    this.compressor = null;
+    this.distortion = null;
+    this.delayNode = null;
+    this.delayFeedback = null;
+    this.delayWet = null;
+    this.reverb = null;
+    this.reverbWet = null;
+    this.dryGain = null;
+    this.tracks = new Set();
+
+    this.state = { ...this.defaultState };
 
     this.canUseMediaElementSource = window.location.protocol !== 'file:';
   }
@@ -294,6 +296,21 @@ class AudioEngine {
     return { ...this.state };
   }
 
+  getDefaultSettings() {
+    return { ...this.defaultState };
+  }
+
+  resetSettings() {
+    this.state = { ...this.defaultState };
+    if (this.context) {
+      this.applyState();
+    }
+    this.tracks.forEach(track => {
+      track.audio.volume = this.state.volume;
+      track.playbackRate = this.state.playbackRate;
+    });
+  }
+
   createTrack(src) {
     this.ensureContext();
     const track = new MediaElementTrack(this, src);
@@ -490,6 +507,8 @@ window.AudioEngineAPI = {
   setDelay: (options) => AUDIO_ENGINE.setDelay(options),
   setReverbMix: (value) => AUDIO_ENGINE.setReverbMix(value),
   getCurrentSettings: () => AUDIO_ENGINE.getCurrentSettings(),
+  getDefaultSettings: () => AUDIO_ENGINE.getDefaultSettings(),
+  resetSettings: () => AUDIO_ENGINE.resetSettings(),
 };
 
 // ================================================================
@@ -610,10 +629,12 @@ function stopSound(fade = false) {
     fadeAudio(audio, audio.volume, 0, 400, () => {
       audio.dispose();
       audio.volume = STATE.audioVolume;
+      if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
     });
   } else {
     STATE.currentAudio.dispose();
     STATE.currentAudio = null;
+    if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
   }
 }
 
@@ -657,6 +678,7 @@ async function playSound(btn) {
   btn.style.setProperty('--progress', '0%');
 
   updateTransportUI();
+  if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
 
   audio.onended = () => {
     if (STATE.currentAudio === audio) {
