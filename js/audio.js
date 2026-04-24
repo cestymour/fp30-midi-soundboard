@@ -195,7 +195,8 @@ class AudioEngine {
   getReverbWetGain(mix) {
     const normalizedMix = Math.max(0, Math.min(1, mix));
     if (normalizedMix === 0) return 0;
-    return Math.pow(normalizedMix, 0.72) * 1.78;
+    // Courbe un peu plus douce en haut pour limiter grésillements / surcharge à 100 %
+    return Math.pow(normalizedMix, 0.78) * 1.38;
   }
 
   applyState() {

@@ -74,17 +74,17 @@ const AUDIO_FX_CONTROLS = [
     },
   },
   {
-    key: 'speed',
-    label: 'SPD',
-    shortLabel: 'Speed',
-    group: 'speed',
-    min: 50,
-    max: 200,
-    step: 5,
-    neutral: 100,
-    read: settings => Math.round(settings.playbackRate * 100),
-    apply: value => AudioEngineAPI.setPlaybackRate(value / 100),
-    formatValue: value => `${(value / 100).toFixed(2)}x`,
+    key: 'reverb',
+    label: 'REV',
+    shortLabel: 'Reverb',
+    group: 'reverb',
+    min: 0,
+    max: 100,
+    step: 1,
+    neutral: 0,
+    read: settings => Math.round(settings.reverbMix * 100),
+    apply: value => AudioEngineAPI.setReverbMix(value / 100),
+    formatValue: value => `${Math.round(value)}%`,
   },
   {
     key: 'delay',
@@ -107,33 +107,36 @@ const AUDIO_FX_CONTROLS = [
     formatValue: value => `${Math.round(value)}%`,
   },
   {
-    key: 'reverb',
-    label: 'REV',
-    shortLabel: 'Reverb',
-    group: 'reverb',
-    min: 0,
-    max: 100,
-    step: 1,
-    neutral: 0,
-    read: settings => Math.round(settings.reverbMix * 100),
-    apply: value => AudioEngineAPI.setReverbMix(value / 100),
-    formatValue: value => `${Math.round(value)}%`,
+    key: 'speed',
+    label: 'SPD',
+    shortLabel: 'Speed',
+    group: 'speed',
+    min: 50,
+    max: 200,
+    step: 5,
+    neutral: 100,
+    read: settings => Math.round(settings.playbackRate * 100),
+    apply: value => AudioEngineAPI.setPlaybackRate(value / 100),
+    formatValue: value => `${(value / 100).toFixed(2)}x`,
   },
 ];
 
 const AUDIO_FX_PRESETS = [
   { key: 'reset', label: '🔄 Reset', values: null },
   { key: 'bass', label: '🔊 Bass', values: { bass: 15, mid: -10, treble: -15, lowPass: 9000 } },
-  { key: 'mid', label: '🎚️ Mid', values: { bass: -15, mid: 15, treble: -12, lowPass: 20000, highPass: 0 } },
+  { key: 'mid', label: '🎚️ Mid', values: { bass: -15, mid: 10, treble: -12, lowPass: 20000, highPass: 0 } },
   { key: 'high', label: '✨ High', values: { bass: -15, mid: -10, treble: 15, highPass: 350, lowPass: 20000 } },
   { key: 'telephone', label: '📞 Téléphone', values: { lowPass: 2800, highPass: 1000, bass: -15, treble: -12, mid: 2 } },
-  { key: 'ambient', label: '🌫️ Vapeur', values: { lowPass: 4500, highPass: 150, reverb: 100, delay: 35, bass: 6, treble: -4 } },
-  { key: 'cave', label: '🕳️ Cave', values: { reverb: 100, delay: 55, lowPass: 4000, bass: 10, treble: -6, highPass: 0 } },
-  { key: 'drown', label: '🌊 Noyade', values: { lowPass: 700, highPass: 200, reverb: 100, delay: 70, bass: 12, treble: -10 } },
-  { key: 'rush', label: '⚡ Frac', values: { speed: 150, reverb: 20, treble: 6, highPass: 0, lowPass: 20000, delay: 0 } },
-  { key: 'drag', label: '🐌 Lourd', values: { speed: 60, reverb: 80, lowPass: 5000, delay: 40, bass: 5, treble: -3 } },
+  { key: 'ambient', label: '🌫️ Vapeur', values: { lowPass: 4500, highPass: 150, reverb: 88, delay: 35, bass: 6, treble: -4 } },
+  { key: 'cave', label: '🕳️ Cave', values: { reverb: 88, delay: 55, lowPass: 4000, bass: 10, treble: -6, highPass: 0 } },
+  { key: 'drown', label: '🌊 Noyade', values: { lowPass: 700, highPass: 200, reverb: 88, delay: 70, bass: 12, treble: -10 } },
+  { key: 'rush', label: '⚡ Frac', values: { reverb: 25, treble: 8, highPass: 0, lowPass: 20000, delay: 18, bass: -2 } },
+  { key: 'drag', label: '🐌 Lourd', values: { reverb: 75, lowPass: 5000, delay: 40, bass: 8, treble: -3, highPass: 0 } },
   { key: 'turbine', label: '📻 Turbine', values: { highPass: 2000, lowPass: 5000, bass: -15, treble: 8, reverb: 5 } },
-  { key: 'siren', label: '🚨 Sirène', values: { reverb: 0, delay: 100, speed: 110, highPass: 0, lowPass: 20000, bass: -2, treble: 2 } },
+  { key: 'siren', label: '🚨 Sirène', values: { reverb: 0, delay: 100, highPass: 0, lowPass: 20000, bass: -2, treble: 2 } },
+  { key: 'rush-speed', label: '⚡ Frac (vitesse +)', values: { speed: 150, reverb: 15, treble: 5, delay: 8, bass: -1 } },
+  { key: 'drag-speed', label: '🐌 Lent (vitesse −)', values: { speed: 60, reverb: 70, lowPass: 5200, delay: 35, bass: 6, treble: -2 } },
+  { key: 'siren-speed', label: '🚨 Sirène (vitesse +)', values: { speed: 110, reverb: 0, delay: 100, highPass: 0, lowPass: 20000, bass: -2, treble: 2 } },
 ];
 
 const AUDIO_FX_UI = {
@@ -141,6 +144,7 @@ const AUDIO_FX_UI = {
   trackEl: null,
   presetButtons: new Map(),
   sliderInputs: new Map(),
+  sliderRails: new Map(),
   valueLabels: new Map(),
   controlCards: new Map(),
   activePresetKey: null,
@@ -165,7 +169,9 @@ function buildAudioFXPopup() {
         <span class="audio-fx-control__value" data-value-for="${control.key}">--</span>
       </div>
       <div class="audio-fx-slider-wrap">
-        <div class="audio-fx-slider-rail">
+        <div class="audio-fx-slider-rail" data-rail-for="${control.key}">
+          <span class="audio-fx-neutral-tick audio-fx-neutral-tick--left" aria-hidden="true"></span>
+          <span class="audio-fx-neutral-tick audio-fx-neutral-tick--right" aria-hidden="true"></span>
           <input
             class="vol-slider audio-fx-slider"
             data-slider-for="${control.key}"
@@ -189,16 +195,14 @@ function buildAudioFXPopup() {
           <div class="audio-fx-popup__eyebrow">Sound Design</div>
           <h2 id="audio-fx-title">Effets en direct</h2>
         </div>
-        <div class="audio-fx-popup__head-row">
-          <div class="audio-fx-track">
-            <span class="audio-fx-track__label">Track</span>
-            <strong class="audio-fx-track__name">Aucune lecture</strong>
-          </div>
-          <button class="audio-fx-top-btn is-close" id="audio-fx-close-btn" type="button" title="Fermer">
-            <span class="audio-fx-close-btn__x" aria-hidden="true">✕</span>
-            <span class="audio-fx-close-btn__label">Fermer</span>
-          </button>
+        <div class="audio-fx-track">
+          <span class="audio-fx-track__label">Track</span>
+          <strong class="audio-fx-track__name">Aucune lecture</strong>
         </div>
+        <button class="audio-fx-top-btn is-close" id="audio-fx-close-btn" type="button" title="Fermer">
+          <span class="audio-fx-close-btn__x" aria-hidden="true">✕</span>
+          <span class="audio-fx-close-btn__label">Fermer</span>
+        </button>
       </header>
 
       <div class="audio-fx-presets">${presetButtonsHTML}</div>
@@ -237,10 +241,12 @@ function buildAudioFXPopup() {
 
   AUDIO_FX_CONTROLS.forEach(control => {
     const input = overlay.querySelector(`[data-slider-for="${control.key}"]`);
+    const rail = overlay.querySelector(`[data-rail-for="${control.key}"]`);
     const valueLabel = overlay.querySelector(`[data-value-for="${control.key}"]`);
     const card = overlay.querySelector(`[data-control="${control.key}"]`);
 
     AUDIO_FX_UI.sliderInputs.set(control.key, input);
+    AUDIO_FX_UI.sliderRails.set(control.key, rail);
     AUDIO_FX_UI.valueLabels.set(control.key, valueLabel);
     AUDIO_FX_UI.controlCards.set(control.key, card);
 
@@ -249,6 +255,7 @@ function buildAudioFXPopup() {
       control.apply(value);
       updateAudioFXValueLabel(control.key, value);
       updateAudioFXSliderVisual(control.key, value);
+      updateAudioFXNeutralRailMarks(control.key);
       updateAudioFXControlState(control.key, value);
       AUDIO_FX_UI.activePresetKey = null;
       refreshAudioFXPresetButtons();
@@ -310,6 +317,7 @@ function syncAudioFXPopupFromEngine() {
     input.value = value;
     updateAudioFXValueLabel(control.key, value);
     updateAudioFXSliderVisual(control.key, value);
+    updateAudioFXNeutralRailMarks(control.key);
     updateAudioFXControlState(control.key, value);
   });
 
@@ -339,6 +347,18 @@ function updateAudioFXSliderVisual(controlKey, value) {
   const range = control.max - control.min;
   const pct = range <= 0 ? 0 : ((value - control.min) / range) * 100;
   input.style.setProperty('--vol-pct', `${Math.max(0, Math.min(100, pct))}%`);
+}
+
+/** Repère visuel de la valeur neutre (curseur vertical : min en bas, max en haut). */
+function updateAudioFXNeutralRailMarks(controlKey) {
+  const control = AUDIO_FX_CONTROLS.find(item => item.key === controlKey);
+  const rail = AUDIO_FX_UI.sliderRails.get(controlKey);
+  if (!control || !rail) return;
+
+  const range = control.max - control.min;
+  const neutralPct = range <= 0 ? 50 : ((control.neutral - control.min) / range) * 100;
+  const clamped = Math.max(0, Math.min(100, neutralPct));
+  rail.style.setProperty('--neutral-pct', `${clamped}%`);
 }
 
 function updateAudioFXControlState(controlKey, value) {
@@ -372,6 +392,7 @@ function setAudioFXControlValue(controlKey, value, apply = true) {
   input.value = value;
   updateAudioFXValueLabel(controlKey, value);
   updateAudioFXSliderVisual(controlKey, value);
+  updateAudioFXNeutralRailMarks(controlKey);
   if (apply) {
     control.apply(parseFloat(value));
   }
