@@ -196,22 +196,17 @@ const AUDIO_TABS = [
       {
         label: 'Horreur', icon: '😱', color: '#ff6666',
         items: [
-          { name: 'Ambiance',      img: 'images/films/saw.jpg',             file: 'sounds/films/(Saw) Theme.mp3',                                      start: 21.2, title: 'Saw' },
-          { name: 'Danger',    img: 'images/films/jaws.jpg',            file: 'sounds/films/(Les Dents De La Mer) Theme.mp3',                      start:  9.5, title: 'Les Dents de la Mer' },
-          { name: 'Au   !',   img: 'images/films/psycho.jpg',          file: 'sounds/films/(Psycho) Shower Scene.mp3',                            start:  0.1, title: 'Psycho (Scène Douche)' },
-        /*
           { name: 'Ambiance tendu',      img: 'images/films/saw.jpg',             file: 'sounds/films/(Saw) Theme.mp3',                                      start: 21.2, title: 'Saw' },
-          { name: 'Danger proche...',    img: 'images/films/jaws.jpg',            file: 'sounds/films/(Les Dents De La Mer) Theme.mp3',                      start:  9.5, title: 'Les Dents de la Mer' },
+          { name: 'Danger proche',       img: 'images/films/jaws.jpg',            file: 'sounds/films/(Les Dents De La Mer) Theme.mp3',                      start:  9.5, title: 'Les Dents de la Mer' },
           { name: 'Au secours Ahhh !',   img: 'images/films/psycho.jpg',          file: 'sounds/films/(Psycho) Shower Scene.mp3',                            start:  0.1, title: 'Psycho (Scène Douche)' },
-        */
         ]
       },
       {
         label: 'Drame', icon: '💔', color: '#8888cc',
         items: [
-          { name: 'Descente ',  img: 'images/films/requiem.jpg',         file: 'sounds/films/(Requiem for a Dream) Theme.mp3',                      start: 38.9, title: 'Requiem for a Dream' },
-          { name: 'Sacrifi',     img: 'images/films/platoon.jpg',         file: 'sounds/films/(Platoon) Theme.mp3',                      end : 509,  start:285.5, title: 'Platoon' },
-          { name: 'Adie',       img: 'images/films/professionel.jpg',    file: 'sounds/films/(Le Professionnel) Chi Mai - Ennio Morricone.mp3',     start: 39.6, title: 'Le Professionnel (Chi Mai)' },
+          { name: 'Descente enfer',      img: 'images/films/requiem.jpg',         file: 'sounds/films/(Requiem for a Dream) Theme.mp3',                      start: 38.9, title: 'Requiem for a Dream' },
+          { name: 'Sacrifice Guerre',     img: 'images/films/platoon.jpg',         file: 'sounds/films/(Platoon) Theme.mp3',                      end : 509,  start:285.5, title: 'Platoon' },
+          { name: 'Adieu Poignant',       img: 'images/films/professionel.jpg',    file: 'sounds/films/(Le Professionnel) Chi Mai - Ennio Morricone.mp3',     start: 39.6, title: 'Le Professionnel (Chi Mai)' },
         ]
       },
       {
@@ -226,8 +221,8 @@ const AUDIO_TABS = [
         label: 'Western', icon: '🤠', color: '#cc8844',
         items: [
           { name: 'Duel ',                img: 'images/films/bon-brute-truand.jpg',file: 'sounds/films/(Le Bon la Brute et le Truand) Theme.mp3',             start: 5.0, title: 'Le Bon la Brute et le Truand' },
-          { name: 'Chasse ',    img: 'images/films/guimbarde.jpg',       file: 'sounds/films/(Pour quelques dollars de plus) Theme.mp3',            start: 26.7, title: 'Pour quelques dollars de plus' },
-          { name: 'Vengeance',  img: 'images/films/harmonica.jpg',       file: 'sounds/films/(Il était une fois dans l\'ouest) L\'homme à l\'harmonica.mp3', start: 7, title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
+          { name: 'Chasse à l\'homme',    img: 'images/films/guimbarde.jpg',       file: 'sounds/films/(Pour quelques dollars de plus) Theme.mp3',            start: 26.7, title: 'Pour quelques dollars de plus' },
+          { name: 'Vengeance Duel Lent',  img: 'images/films/harmonica.jpg',       file: 'sounds/films/(Il était une fois dans l\'ouest) L\'homme à l\'harmonica.mp3', start: 7, title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
         ]
       },
       {
@@ -275,7 +270,7 @@ const AUDIO_TABS = [
         items: [
           { name: 'Motivation Combat',    img: 'images/films/rocky-eye-tiger.jpg', file: 'sounds/films/(Rocky) Eye Of The Tiger - Survivor.mp3',              start:  0.2, title: 'Rocky (Eye of the Tiger)' },
           { name: 'Victoire Triomphe',    img: 'images/films/rocky-fly-now.jpg',   file: 'sounds/films/(Rocky) Gonna Fly Now - Bill Conti.mp3',               start:  1.2, title: 'Rocky (Gonna Fly Now)' },
-          { name: 'Ralenti Dépassement',     img: 'images/films/chariots-de-feu.jpg', file: 'sounds/films/(Les chariots de feu) Vangelis.mp3',                   start: 28.5, title: 'Les Chariots de Feu' }, // TODO:: Changer, prendre cette vidéo à la palce : https://www.youtube.com/watch?v=1eYGl8PNjlU&list=RD1eYGl8PNjlU
+          { name: 'Ralenti Dépassement',  img: 'images/films/chariots-de-feu.jpg', file: 'sounds/films/(Les chariots de feu) Vangelis.mp3',                   start: 28.5, title: 'Les Chariots de Feu' }, // TODO:: Changer, prendre cette vidéo à la palce : https://www.youtube.com/watch?v=1eYGl8PNjlU&list=RD1eYGl8PNjlU
         ]
       },
       {

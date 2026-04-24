@@ -35,6 +35,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Wake Lock** — prevents screen sleep during a performance
 - **Responsive layout** — automatic grid reorganization in portrait mode
 - **About popup** — shows Service Worker and Wake Lock status, cache reset button
+- **Live audio FX mixer** — full overlay on the audio panel to shape the sound in real time (EQ, filters, tempo, delay, reverb) while a clip plays or before the next one; presets with smooth transitions, global reset, and quick per-control recall
 
 ### How it works
 
@@ -45,6 +46,8 @@ Click a button → the instrument or sound is selected on the piano → play the
 #### Audio tabs
 Click a button → the sound plays immediately from the device speakers.  
 Click again → the sound fades out and stops.
+
+Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `js/audio.js`; the overlay UI lives in `js/audio-fx-ui.js` and `style.audio-fx.css`.
 
 ### Notes
 
@@ -72,6 +75,7 @@ Click again → the sound fades out and stops.
 /
 ├── index.html                      # Entry point
 ├── style.css                       # Unified stylesheet
+├── style.audio-fx.css              # Audio FX overlay (mixer popup)
 ├── manifest.json                   # PWA manifest
 ├── sw.js                           # Service Worker
 ├── version.js                      # App version constant (APP_VERSION)
@@ -85,7 +89,8 @@ Click again → the sound fades out and stops.
 ├── js/
 │   ├── app.js                      # Orchestrator: DOM, navigation, global state
 │   ├── midi.js                     # MIDI logic (USB + Bluetooth)
-│   ├── audio.js                    # Audio playback logic
+│   ├── audio.js                    # Audio playback + Web Audio effects engine
+│   ├── audio-fx-ui.js              # Audio FX overlay (mixer UI, presets)
 │   ├── bluetoothMIDI.js            # BluetoothMIDI class (BLE MIDI)
 │   └── ble-midi-parser.bundle.js   # BLE MIDI packet parser
 ├── images/
@@ -296,6 +301,7 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 - **Wake Lock** — empêche la mise en veille de l'écran pendant le spectacle
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
 - **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
+- **Mixeur d’effets audio en direct** — grande popup sur le panneau audio pour façonner le son en temps réel (égalisation, filtres, tempo, delay, reverb) pendant la lecture ou avant le morceau suivant ; presets avec transitions en douceur, reset global et rappel rapide par curseur
 
 ### Comment ça fonctionne
 
@@ -306,6 +312,8 @@ Cliquer sur un bouton → l'instrument ou le son est sélectionné sur le piano 
 #### Onglets Audio
 Cliquer sur un bouton → le son se joue immédiatement depuis les haut-parleurs de l'appareil.  
 Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
+
+Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `js/audio.js` ; l’interface de la popup est dans `js/audio-fx-ui.js` et `style.audio-fx.css`.
 
 ### Notes
 
@@ -333,6 +341,7 @@ Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 /
 ├── index.html                      # Point d'entrée
 ├── style.css                       # CSS unifié
+├── style.audio-fx.css              # Popup mixeur / effets audio
 ├── manifest.json                   # Manifeste PWA
 ├── sw.js                           # Service Worker
 ├── version.js                      # Version de l'app (APP_VERSION)
@@ -346,7 +355,8 @@ Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 ├── js/
 │   ├── app.js                      # Chef d'orchestre : DOM, navigation, état global
 │   ├── midi.js                     # Logique MIDI (USB + Bluetooth)
-│   ├── audio.js                    # Logique lecture audio
+│   ├── audio.js                    # Lecture audio + moteur Web Audio (effets)
+│   ├── audio-fx-ui.js              # Popup mixeur effets (UI, presets)
 │   ├── bluetoothMIDI.js            # Classe BluetoothMIDI (BLE MIDI)
 │   └── ble-midi-parser.bundle.js   # Parser paquet BLE MIDI
 ├── images/
