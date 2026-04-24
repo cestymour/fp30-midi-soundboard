@@ -611,7 +611,7 @@ function buildAudioControls() {
     className: 'audio-fx-open-btn',
     title: 'Mixer audio',
     icon: '🎛️',
-    label: 'Mixer',
+    label: 'Effets',
   });
   const fxResetBtn = buildPanelUtilityBtn({
     className: 'audio-fx-reset-btn',
