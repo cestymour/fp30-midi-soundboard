@@ -47,7 +47,7 @@ Click a button → the instrument or sound is selected on the piano → play the
 Click a button → the sound plays immediately from the device speakers.  
 Click again → the sound fades out and stops.
 
-Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `js/audio.js`; the overlay UI lives in `js/audio-fx-ui.js` and `style.audio-fx.css`.
+Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `js/audio.js`; the overlay UI lives in `js/audio-fx-ui.js` and `css/style.fx.css`.
 
 ### Notes
 
@@ -74,13 +74,14 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 ```
 /
 ├── index.html                      # Entry point
-├── style.css                       # Unified stylesheet
-├── style.audio-fx.css              # Audio FX overlay (mixer popup)
 ├── manifest.json                   # PWA manifest
 ├── sw.js                           # Service Worker
 ├── version.js                      # App version constant (APP_VERSION)
 ├── midi.config.js                  # MIDI instrument data (MIDI_TABS)
 ├── audio.config.js                 # Audio sound data (AUDIO_TABS)
+├── css/
+│   ├── style.css                   # Unified stylesheet
+│   ├── style.fx.css                # FX overlay (mixer popup)
 ├── public/
 │   ├── favicon.ico
 │   ├── apple-touch-icon.png
@@ -313,7 +314,7 @@ Cliquer sur un bouton → l'instrument ou le son est sélectionné sur le piano 
 Cliquer sur un bouton → le son se joue immédiatement depuis les haut-parleurs de l'appareil.  
 Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 
-Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `js/audio.js` ; l’interface de la popup est dans `js/audio-fx-ui.js` et `style.audio-fx.css`.
+Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `js/audio.js` ; l’interface de la popup est dans `js/audio-fx-ui.js` et `css/style.fx.css`.
 
 ### Notes
 
@@ -340,13 +341,14 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 ```
 /
 ├── index.html                      # Point d'entrée
-├── style.css                       # CSS unifié
-├── style.audio-fx.css              # Popup mixeur / effets audio
 ├── manifest.json                   # Manifeste PWA
 ├── sw.js                           # Service Worker
 ├── version.js                      # Version de l'app (APP_VERSION)
 ├── midi.config.js                  # Données instruments MIDI (MIDI_TABS)
 ├── audio.config.js                 # Données sons audio (AUDIO_TABS)
+├── css/
+│   ├── style.css                   # CSS unifié
+│   ├── style.fx.css                # Popup mixeur / effets
 ├── public/
 │   ├── favicon.ico
 │   ├── apple-touch-icon.png

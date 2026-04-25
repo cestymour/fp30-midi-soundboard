@@ -16,11 +16,12 @@ const AUDIO_CACHE = `impro-audio-${APP_VERSION}`;
 // ── Fichiers app à précacher dès l'installation ──
 const APP_ASSETS = [
   './index.html',
-  './style.css',
   './manifest.json',
   './version.js',
   './midi.config.js',
   './audio.config.js',
+  './css/style.css',
+  './css/style.fx.css',
   './js/app.js',
   './js/midi.js',
   './js/audio.js',
