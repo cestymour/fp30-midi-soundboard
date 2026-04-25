@@ -25,6 +25,7 @@ const STATE = {
   progressRAF:           null,
   audioVolume:           1,
   isPaused:              false,
+  midiFxPopupOpen:       false,
   audioFxPopupOpen:      false,
 };
 
@@ -520,6 +521,7 @@ function buildUI() {
   });
 
   buildAboutPopup();
+  buildMidiFXPopup();
   buildAudioFXPopup();
 }
 
@@ -552,10 +554,28 @@ function buildMidiControls() {
 
   const stopBtn = buildEmergencyStopBtn();
   stopBtn.addEventListener('click', () => emergencyStopAll());
-  // Insérer le bouton STOP avant le volume-wrap
+
+  const midiFxOpenBtn = buildPanelUtilityBtn({
+    className: 'midi-fx-open-btn',
+    title: 'Effets piano',
+    icon: '🎹',
+    label: 'Effets',
+  });
+  const midiFxResetBtn = buildPanelUtilityBtn({
+    className: 'midi-fx-reset-btn',
+    title: 'Réinitialiser les effets piano',
+    icon: '🔄',
+    label: 'Reset',
+  });
+
   const controlsRight = wrap.querySelector('.controls-right');
   const volumeWrap = controlsRight.querySelector('.volume-wrap');
+  controlsRight.insertBefore(midiFxResetBtn, volumeWrap);
+  controlsRight.insertBefore(midiFxOpenBtn, midiFxResetBtn);
   controlsRight.insertBefore(stopBtn, volumeWrap);
+
+  midiFxOpenBtn.addEventListener('click', openMidiFXPopup);
+  midiFxResetBtn.addEventListener('click', resetMidiFXEffects);
 
   const slider = wrap.querySelector('.midi-vol');
   const valEl  = wrap.querySelector('.vol-value');
@@ -828,9 +848,8 @@ function initLogoInteraction() {
 // NAVIGATION ONGLETS
 // ═══════════════════════════════════════════════════════
 function activateTab(idx) {
-  if (STATE.audioFxPopupOpen) {
-    closeAudioFXPopup();
-  }
+  if (STATE.midiFxPopupOpen)  closeMidiFXPopup();
+  if (STATE.audioFxPopupOpen) closeAudioFXPopup();
 
   document.querySelectorAll('.tab-btn').forEach((b, i) =>
     b.classList.toggle('active', i === idx));

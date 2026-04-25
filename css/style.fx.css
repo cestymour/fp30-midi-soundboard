@@ -4,6 +4,8 @@
 
 .audio-fx-open-btn,
 .audio-fx-reset-btn,
+.midi-fx-open-btn,
+.midi-fx-reset-btn,
 .audio-fx-top-btn,
 .audio-fx-preset-btn {
   display: inline-flex;
@@ -23,6 +25,8 @@
 
 .audio-fx-open-btn:hover,
 .audio-fx-reset-btn:hover,
+.midi-fx-open-btn:hover,
+.midi-fx-reset-btn:hover,
 .audio-fx-top-btn:hover,
 .audio-fx-preset-btn:hover {
   color: var(--text-primary);
@@ -31,24 +35,37 @@
 
 .audio-fx-open-btn:active,
 .audio-fx-reset-btn:active,
+.midi-fx-open-btn:active,
+.midi-fx-reset-btn:active,
 .audio-fx-top-btn:active,
 .audio-fx-preset-btn:active {
   transform: scale(0.96);
 }
 
 .audio-fx-open-btn__icon,
-.audio-fx-reset-btn__icon {
+.audio-fx-reset-btn__icon,
+.midi-fx-open-btn__icon,
+.midi-fx-reset-btn__icon {
   font-size: 18px;
   line-height: 1;
 }
 
 .audio-fx-open-btn__label,
-.audio-fx-reset-btn__label {
+.audio-fx-reset-btn__label,
+.midi-fx-open-btn__label,
+.midi-fx-reset-btn__label {
   font-size: 13px;
   letter-spacing: 0.04em;
 }
 
 .audio-fx-open-btn.is-active {
+  color: var(--text-primary);
+  border-color: var(--panel-accent);
+  background: color-mix(in srgb, var(--panel-accent) 14%, var(--bg-card));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--panel-accent) 24%, transparent);
+}
+
+.midi-fx-open-btn.is-active {
   color: var(--text-primary);
   border-color: var(--panel-accent);
   background: color-mix(in srgb, var(--panel-accent) 14%, var(--bg-card));
@@ -62,8 +79,17 @@
   box-shadow: 0 0 12px color-mix(in srgb, #ffcc66 26%, transparent);
 }
 
+.midi-fx-reset-btn.is-active {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, #ffcc66 70%, var(--border));
+  background: color-mix(in srgb, #ffcc66 16%, var(--bg-card));
+  box-shadow: 0 0 12px color-mix(in srgb, #ffcc66 26%, transparent);
+}
+
 .audio-fx-open-btn:focus-visible,
 .audio-fx-reset-btn:focus-visible,
+.midi-fx-open-btn:focus-visible,
+.midi-fx-reset-btn:focus-visible,
 .audio-fx-top-btn:focus-visible,
 .audio-fx-preset-btn:focus-visible,
 .audio-fx-one-reset:focus-visible,
@@ -72,13 +98,15 @@
   outline-offset: 2px;
 }
 
-#audio-fx-overlay {
+#audio-fx-overlay,
+#midi-fx-overlay {
   position: fixed;
   z-index: 120;
   display: none;
 }
 
-#audio-fx-overlay.is-open {
+#audio-fx-overlay.is-open,
+#midi-fx-overlay.is-open {
   display: block;
 }
 
@@ -485,12 +513,16 @@
   }
 
   .audio-fx-open-btn__label,
-  .audio-fx-reset-btn__label {
+  .audio-fx-reset-btn__label,
+  .midi-fx-open-btn__label,
+  .midi-fx-reset-btn__label {
     display: none;
   }
 
   .audio-fx-open-btn,
-  .audio-fx-reset-btn {
+  .audio-fx-reset-btn,
+  .midi-fx-open-btn,
+  .midi-fx-reset-btn {
     min-width: 44px;
     padding: 0 8px;
   }
