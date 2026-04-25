@@ -111,7 +111,6 @@ const MIDI_FX_PRESETS = [
 ];
 
 // ─── État interne de la popup piano ───────────────────────────────
-// Miroir exact de AUDIO_FX_UI dans audio-fx-ui.js
 const MIDI_FX_UI = {
   overlay:              null,
   channelEl:            null,
@@ -126,7 +125,6 @@ const MIDI_FX_UI = {
 };
 
 // ─── État courant des CC piano (source de vérité côté JS) ─────────
-// Le piano ne renvoie pas ses valeurs CC → on les mémorise ici.
 const MIDI_FX_STATE = {
   reverb:    0,
   chorus:    0,
@@ -149,21 +147,21 @@ function buildMidiFXPopup() {
   overlay.setAttribute('aria-hidden', 'true');
 
   const presetButtonsHTML = MIDI_FX_PRESETS.map(preset => `
-    <button class="audio-fx-preset-btn" type="button" data-midi-preset="${preset.key}">${preset.label}</button>
+    <button class="fx-preset-btn" type="button" data-midi-preset="${preset.key}">${preset.label}</button>
   `).join('');
 
   const controlsHTML = MIDI_FX_CONTROLS.map(control => `
-    <div class="audio-fx-control" data-midi-control="${control.key}">
-      <div class="audio-fx-control__head">
-        <span class="audio-fx-control__tag">${control.label}</span>
-        <span class="audio-fx-control__value" data-midi-value-for="${control.key}">--</span>
+    <div class="fx-control" data-midi-control="${control.key}">
+      <div class="fx-control__head">
+        <span class="fx-control__tag">${control.label}</span>
+        <span class="fx-control__value" data-midi-value-for="${control.key}">--</span>
       </div>
-      <div class="audio-fx-slider-wrap">
-        <div class="audio-fx-slider-rail" data-midi-rail-for="${control.key}">
-          <span class="audio-fx-neutral-tick audio-fx-neutral-tick--left"  aria-hidden="true"></span>
-          <span class="audio-fx-neutral-tick audio-fx-neutral-tick--right" aria-hidden="true"></span>
+      <div class="fx-slider-wrap">
+        <div class="fx-slider-rail" data-midi-rail-for="${control.key}">
+          <span class="fx-neutral-tick fx-neutral-tick--left"  aria-hidden="true"></span>
+          <span class="fx-neutral-tick fx-neutral-tick--right" aria-hidden="true"></span>
           <input
-            class="vol-slider audio-fx-slider"
+            class="vol-slider fx-slider"
             data-midi-slider-for="${control.key}"
             type="range"
             min="${control.min}"
@@ -173,11 +171,11 @@ function buildMidiFXPopup() {
           />
         </div>
       </div>
-      <div class="audio-fx-control__foot">
-        <span class="audio-fx-control__name">${control.shortLabel}</span>
+      <div class="fx-control__foot">
+        <span class="fx-control__name">${control.shortLabel}</span>
         <button
           type="button"
-          class="audio-fx-one-reset"
+          class="fx-one-reset"
           data-midi-fx-reset-one="${control.key}"
           title="Valeur par défaut (${control.shortLabel})"
           aria-label="Remettre ${control.shortLabel} à la valeur par défaut"
@@ -187,37 +185,37 @@ function buildMidiFXPopup() {
   `).join('');
 
   overlay.innerHTML = `
-    <div class="audio-fx-overlay__backdrop"></div>
-    <section class="audio-fx-popup" role="dialog" aria-modal="true" aria-labelledby="midi-fx-title">
-      <header class="audio-fx-popup__header">
-        <div class="audio-fx-popup__titles">
-          <div class="audio-fx-popup__eyebrow">Piano FX</div>
+    <div class="fx-overlay__backdrop"></div>
+    <section class="fx-popup" role="dialog" aria-modal="true" aria-labelledby="midi-fx-title">
+      <header class="fx-popup__header">
+        <div class="fx-popup__titles">
+          <div class="fx-popup__eyebrow">Piano FX</div>
           <h2 id="midi-fx-title">Effets piano</h2>
         </div>
-        <div class="audio-fx-track">
-          <span class="audio-fx-track__label">CC → Roland FP-30X</span>
-          <strong class="audio-fx-track__name">Canal ${STATE.MIDI_CHANNEL + 1}</strong>
+        <div class="fx-track">
+          <span class="fx-track__label">CC → Roland FP-30X</span>
+          <strong class="fx-track__name">Canal ${STATE.MIDI_CHANNEL + 1}</strong>
         </div>
-        <button class="audio-fx-top-btn is-close" id="midi-fx-close-btn" type="button" title="Fermer">
-          <span class="audio-fx-close-btn__x" aria-hidden="true">✕</span>
-          <span class="audio-fx-close-btn__label">Fermer</span>
+        <button class="fx-top-btn is-close" id="midi-fx-close-btn" type="button" title="Fermer">
+          <span class="fx-close-btn__x" aria-hidden="true">✕</span>
+          <span class="fx-close-btn__label">Fermer</span>
         </button>
       </header>
 
-      <div class="audio-fx-presets">${presetButtonsHTML}</div>
+      <div class="fx-presets">${presetButtonsHTML}</div>
 
-      <div class="audio-fx-popup__body">
-        <div class="audio-fx-grid">${controlsHTML}</div>
+      <div class="fx-popup__body">
+        <div class="fx-grid">${controlsHTML}</div>
       </div>
     </section>
   `;
 
   document.getElementById('app').appendChild(overlay);
-  MIDI_FX_UI.overlay = overlay;
-  MIDI_FX_UI.channelEl = overlay.querySelector('.audio-fx-track__name');
+  MIDI_FX_UI.overlay   = overlay;
+  MIDI_FX_UI.channelEl = overlay.querySelector('.fx-track__name');
 
   // ── Fermeture ──
-  overlay.querySelector('.audio-fx-overlay__backdrop').addEventListener('click', closeMidiFXPopup);
+  overlay.querySelector('.fx-overlay__backdrop').addEventListener('click', closeMidiFXPopup);
   overlay.querySelector('#midi-fx-close-btn').addEventListener('click', closeMidiFXPopup);
 
   document.addEventListener('keydown', event => {
@@ -290,7 +288,7 @@ function buildMidiFXPopup() {
 }
 
 // ================================================================
-// LAYOUT — ancrage sur midi-grid (miroir de updateAudioFXPopupLayout)
+// LAYOUT
 // ================================================================
 
 function updateMidiFXPopupLayout() {
@@ -348,7 +346,7 @@ function closeMidiFXPopup() {
 }
 
 // ================================================================
-// SYNC — lit MIDI_FX_STATE (pas d'AudioEngine ici)
+// SYNC
 // ================================================================
 
 function syncMidiFXPopupFromState() {
@@ -375,7 +373,7 @@ function syncMidiFXPopupFromState() {
 }
 
 // ================================================================
-// HELPERS UI — valeur / visuel / état
+// HELPERS UI
 // ================================================================
 
 function updateMidiFXValueLabel(controlKey, value) {
@@ -437,7 +435,7 @@ function updateMidiFXControlState(controlKey, value) {
 }
 
 // ================================================================
-// VALEURS — lecture / écriture
+// VALEURS
 // ================================================================
 
 function getMidiFXControlValue(controlKey) {
@@ -583,7 +581,6 @@ function isMidiFXAnyControlModified() {
 }
 
 function resetMidiFXEffects() {
-  // Envoyer les CC de reset au piano
   MIDI_FX_CONTROLS.forEach(control => {
     MIDI_FX_STATE[control.key] = control.neutral;
     control.apply(control.neutral);
