@@ -63,7 +63,7 @@ function buildEmergencyStopBtn(extraClass) {
       <circle cx="14" cy="14" r="9" fill="#cc0000"/>
       <circle cx="11" cy="11" r="3.5" fill="rgba(255,255,255,0.18)"/>
     </svg>
-    STOP
+    <span class="emergency-stop-btn__label">STOP</span>
   `;
   return btn;
 }
@@ -564,7 +564,7 @@ function buildMidiControls() {
   const midiFxResetBtn = buildPanelUtilityBtn({
     className: 'midi-fx-reset-btn',
     title: 'Réinitialiser les effets piano',
-    icon: '🔄',
+    icon: '\u21BA',
     label: 'Reset',
   });
 
@@ -636,7 +636,7 @@ function buildAudioControls() {
   const fxResetBtn = buildPanelUtilityBtn({
     className: 'audio-fx-reset-btn',
     title: 'Réinitialiser les effets audio',
-    icon: '🔄',
+    icon: '\u21BA',
     label: 'Reset',
   });
   controlsRight.insertBefore(fxResetBtn, volumeWrap);

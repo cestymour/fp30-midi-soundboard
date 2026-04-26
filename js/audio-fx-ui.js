@@ -122,17 +122,17 @@ const AUDIO_FX_CONTROLS = [
 ];
 
 const AUDIO_FX_PRESETS = [
-  { key: 'reset', label: '🔄 Reset', values: null },
-  { key: 'bass', label: '🔊 Bass', values: { bass: 15, mid: -10, treble: -15, lowPass: 9000 } },
-  { key: 'mid', label: '🎚️ Mid', values: { bass: -15, mid: 10, treble: -12, lowPass: 20000, highPass: 0 } },
-  { key: 'high', label: '✨ High', values: { bass: -15, mid: -10, treble: 15, highPass: 350, lowPass: 20000 } },
-  { key: 'radio', label: '📻 Radio', values: { highPass: 2000, lowPass: 5000, bass: -15, treble: 8, reverb: 5 } },
-  { key: 'telephone', label: '📞 Téléphone', values: { lowPass: 2800, highPass: 1000, bass: -15, treble: -12, mid: 2 } },
-  { key: 'cave', label: '🕳️ Cave', values: { reverb: 88, delay: 55, lowPass: 4000, bass: 10, treble: -6, highPass: 0 } },
-  { key: 'drown', label: '🌊 Sous l\'eau', values: { lowPass: 700, highPass: 200, reverb: 88, delay: 70, bass: 12, treble: -10 } },
-  { key: 'rush', label: '⚡ Rush', values: { reverb: 25, treble: 8, highPass: 0, lowPass: 20000, delay: 18, bass: -2 } },
-  { key: 'drag', label: '🐌 Lourd', values: { reverb: 75, lowPass: 5000, delay: 40, bass: 8, treble: -3, highPass: 0 } },
-  { key: 'siren', label: '🚨 Sirène', values: { reverb: 0, delay: 100, highPass: 0, lowPass: 20000, bass: -2, treble: 2 } },
+  { key: 'reset', icon: '\u21BA', text: 'Reset', values: null },
+  { key: 'bass', icon: '🔊', text: 'Bass', values: { bass: 15, mid: -10, treble: -15, lowPass: 9000 } },
+  { key: 'mid', icon: '🎚️', text: 'Mid', values: { bass: -15, mid: 10, treble: -12, lowPass: 20000, highPass: 0 } },
+  { key: 'high', icon: '✨', text: 'High', values: { bass: -15, mid: -10, treble: 15, highPass: 350, lowPass: 20000 } },
+  { key: 'radio', icon: '📻', text: 'Radio', values: { highPass: 2000, lowPass: 5000, bass: -15, treble: 8, reverb: 5 } },
+  { key: 'telephone', icon: '📞', text: 'Téléphone', values: { lowPass: 2800, highPass: 1000, bass: -15, treble: -12, mid: 2 } },
+  { key: 'cave', icon: '🕳️', text: 'Cave', values: { reverb: 88, delay: 55, lowPass: 4000, bass: 10, treble: -6, highPass: 0 } },
+  { key: 'drown', icon: '🌊', text: 'Sous l\'eau', values: { lowPass: 700, highPass: 200, reverb: 88, delay: 70, bass: 12, treble: -10 } },
+  { key: 'rush', icon: '⚡', text: 'Rush', values: { reverb: 25, treble: 8, highPass: 0, lowPass: 20000, delay: 18, bass: -2 } },
+  { key: 'drag', icon: '🐌', text: 'Lourd', values: { reverb: 75, lowPass: 5000, delay: 40, bass: 8, treble: -3, highPass: 0 } },
+  { key: 'siren', icon: '🚨', text: 'Sirène', values: { reverb: 0, delay: 100, highPass: 0, lowPass: 20000, bass: -2, treble: 2 } },
 ];
 
 const AUDIO_FX_UI = {
@@ -159,9 +159,15 @@ function buildAudioFXPopup() {
   overlay.id = 'audio-fx-overlay';
   overlay.setAttribute('aria-hidden', 'true');
 
-  const presetButtonsHTML = AUDIO_FX_PRESETS.map(preset => `
-    <button class="fx-preset-btn" type="button" data-preset="${preset.key}">${preset.label}</button>
-  `).join('');
+  const presetButtonsHTML = AUDIO_FX_PRESETS.map(preset => {
+    const resetCls = preset.key === 'reset' ? ' fx-preset-btn--reset' : '';
+    const iconHtml = preset.icon
+      ? `<span class="fx-preset-btn__icon" aria-hidden="true">${preset.icon}</span>`
+      : '';
+    return `
+    <button class="fx-preset-btn${resetCls}" type="button" data-preset="${preset.key}">${iconHtml}<span class="fx-preset-btn__text">${preset.text}</span></button>
+  `;
+  }).join('');
 
   const controlsHTML = AUDIO_FX_CONTROLS.map(control => `
     <div class="fx-control" data-control="${control.key}">
@@ -199,23 +205,19 @@ function buildAudioFXPopup() {
 
   overlay.innerHTML = `
     <div class="fx-overlay__backdrop"></div>
-    <section class="fx-popup" role="dialog" aria-modal="true" aria-labelledby="audio-fx-title">
+    <section class="fx-popup" role="dialog" aria-modal="true" aria-label="Effets audio">
       <header class="fx-popup__header">
-        <div class="fx-popup__titles">
-          <div class="fx-popup__eyebrow">Sound Design</div>
-          <h2 id="audio-fx-title">Effets en direct</h2>
-        </div>
+        <!-- Piste / morceau : réactiver si besoin (voir syncAudioFXPopupFromEngine + .fx-track dans style.fx.css)
         <div class="fx-track">
           <span class="fx-track__label">Track</span>
           <strong class="fx-track__name">Aucune lecture</strong>
         </div>
-        <button class="fx-top-btn is-close" id="audio-fx-close-btn" type="button" title="Fermer">
+        -->
+        <div class="fx-presets">${presetButtonsHTML}</div>
+        <button class="fx-top-btn is-close" id="audio-fx-close-btn" type="button" title="Fermer" aria-label="Fermer">
           <span class="fx-close-btn__x" aria-hidden="true">✕</span>
-          <span class="fx-close-btn__label">Fermer</span>
         </button>
       </header>
-
-      <div class="fx-presets">${presetButtonsHTML}</div>
 
       <div class="fx-popup__body">
         <div class="fx-grid">${controlsHTML}</div>
@@ -381,7 +383,9 @@ function syncAudioFXPopupFromEngine() {
     setAudioFXControlValue('lowPass', 20000, true);
   }
 
-  AUDIO_FX_UI.trackEl.textContent = STATE.currentSoundBtn?.title || 'Aucune lecture';
+  if (AUDIO_FX_UI.trackEl) {
+    AUDIO_FX_UI.trackEl.textContent = STATE.currentSoundBtn?.title || 'Aucune lecture';
+  }
 
   AUDIO_FX_UI.activePresetKey = null;
   refreshAudioFXPresetButtons();

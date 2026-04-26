@@ -99,15 +99,15 @@ const MIDI_FX_CONTROLS = [
 ];
 
 const MIDI_FX_PRESETS = [
-  { key: 'reset',     label: '🔄 Reset',      values: null },
-  { key: 'hall',      label: '🏛️ Salle',      values: { reverb: 80, chorus: 0, cutoff: 74, resonance: 60, attack: 64, release: 90, decay: 64 } },
-  { key: 'cathedral', label: '⛪ Cathédrale',  values: { reverb: 120, chorus: 20, cutoff: 80, resonance: 55, attack: 64, release: 115, decay: 64 } },
-  { key: 'studio',    label: '🎙️ Studio',     values: { reverb: 15, chorus: 0, cutoff: 64, resonance: 64, attack: 64, release: 55, decay: 64 } },
-  { key: 'bright',    label: '✨ Brillant',    values: { reverb: 30, chorus: 0, cutoff: 90, resonance: 70, attack: 50, release: 64, decay: 60 } },
-  { key: 'dark',      label: '🌑 Sombre',      values: { reverb: 40, chorus: 0, cutoff: 35, resonance: 55, attack: 75, release: 80, decay: 70 } },
-  { key: 'pad',       label: '🌊 Pad',         values: { reverb: 95, chorus: 45, cutoff: 72, resonance: 58, attack: 100, release: 110, decay: 64 } },
-  { key: 'pluck',     label: '🎸 Pluck',       values: { reverb: 20, chorus: 0, cutoff: 85, resonance: 75, attack: 30, release: 35, decay: 40 } },
-  { key: 'vintage',   label: '📻 Vintage',     values: { reverb: 50, chorus: 60, cutoff: 55, resonance: 60, attack: 64, release: 75, decay: 64 } },
+  { key: 'reset',     icon: '\u21BA', text: 'Reset',         values: null },
+  { key: 'hall',      icon: '🏛️', text: 'Salle',      values: { reverb: 80, chorus: 0, cutoff: 74, resonance: 60, attack: 64, release: 90, decay: 64 } },
+  { key: 'cathedral', icon: '⛪', text: 'Cathédrale',  values: { reverb: 120, chorus: 20, cutoff: 80, resonance: 55, attack: 64, release: 115, decay: 64 } },
+  { key: 'studio',    icon: '🎙️', text: 'Studio',     values: { reverb: 15, chorus: 0, cutoff: 64, resonance: 64, attack: 64, release: 55, decay: 64 } },
+  { key: 'bright',    icon: '✨', text: 'Brillant',    values: { reverb: 30, chorus: 0, cutoff: 90, resonance: 70, attack: 50, release: 64, decay: 60 } },
+  { key: 'dark',      icon: '🌑', text: 'Sombre',      values: { reverb: 40, chorus: 0, cutoff: 35, resonance: 55, attack: 75, release: 80, decay: 70 } },
+  { key: 'pad',       icon: '🌊', text: 'Pad',         values: { reverb: 95, chorus: 45, cutoff: 72, resonance: 58, attack: 100, release: 110, decay: 64 } },
+  { key: 'pluck',     icon: '🎸', text: 'Pluck',       values: { reverb: 20, chorus: 0, cutoff: 85, resonance: 75, attack: 30, release: 35, decay: 40 } },
+  { key: 'vintage',   icon: '📻', text: 'Vintage',     values: { reverb: 50, chorus: 60, cutoff: 55, resonance: 60, attack: 64, release: 75, decay: 64 } },
 ];
 
 // ─── État interne de la popup piano ───────────────────────────────
@@ -146,9 +146,15 @@ function buildMidiFXPopup() {
   overlay.id = 'midi-fx-overlay';
   overlay.setAttribute('aria-hidden', 'true');
 
-  const presetButtonsHTML = MIDI_FX_PRESETS.map(preset => `
-    <button class="fx-preset-btn" type="button" data-midi-preset="${preset.key}">${preset.label}</button>
-  `).join('');
+  const presetButtonsHTML = MIDI_FX_PRESETS.map(preset => {
+    const resetCls = preset.key === 'reset' ? ' fx-preset-btn--reset' : '';
+    const iconHtml = preset.icon
+      ? `<span class="fx-preset-btn__icon" aria-hidden="true">${preset.icon}</span>`
+      : '';
+    return `
+    <button class="fx-preset-btn${resetCls}" type="button" data-midi-preset="${preset.key}">${iconHtml}<span class="fx-preset-btn__text">${preset.text}</span></button>
+  `;
+  }).join('');
 
   const controlsHTML = MIDI_FX_CONTROLS.map(control => `
     <div class="fx-control" data-midi-control="${control.key}">
@@ -186,23 +192,19 @@ function buildMidiFXPopup() {
 
   overlay.innerHTML = `
     <div class="fx-overlay__backdrop"></div>
-    <section class="fx-popup" role="dialog" aria-modal="true" aria-labelledby="midi-fx-title">
+    <section class="fx-popup" role="dialog" aria-modal="true" aria-label="Effets piano MIDI">
       <header class="fx-popup__header">
-        <div class="fx-popup__titles">
-          <div class="fx-popup__eyebrow">Piano FX</div>
-          <h2 id="midi-fx-title">Effets piano</h2>
-        </div>
+        <!-- Canal / contexte : réactiver si besoin (voir syncMidiFXPopupFromState + .fx-track dans style.fx.css)
         <div class="fx-track">
           <span class="fx-track__label">CC → Roland FP-30X</span>
           <strong class="fx-track__name">Canal ${STATE.MIDI_CHANNEL + 1}</strong>
         </div>
-        <button class="fx-top-btn is-close" id="midi-fx-close-btn" type="button" title="Fermer">
+        -->
+        <div class="fx-presets">${presetButtonsHTML}</div>
+        <button class="fx-top-btn is-close" id="midi-fx-close-btn" type="button" title="Fermer" aria-label="Fermer">
           <span class="fx-close-btn__x" aria-hidden="true">✕</span>
-          <span class="fx-close-btn__label">Fermer</span>
         </button>
       </header>
-
-      <div class="fx-presets">${presetButtonsHTML}</div>
 
       <div class="fx-popup__body">
         <div class="fx-grid">${controlsHTML}</div>

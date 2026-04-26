@@ -923,6 +923,8 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 7px;
+  box-sizing: border-box;
+  min-height: 44px;
   background: color-mix(in srgb, var(--color-danger) 8%, var(--bg-card));
   border: 1px solid var(--color-danger);
   border-radius: var(--radius);
@@ -947,6 +949,26 @@ html, body {
 .emergency-stop-btn:active {
   background: color-mix(in srgb, var(--color-danger) 30%, transparent);
   transform: scale(0.93);
+}
+
+.emergency-stop-btn__label {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+/* Même logique que Effets / Reset : masquer le libellé STOP si peu de largeur */
+@media (orientation: portrait), (max-width: 900px) {
+  .emergency-stop-btn__label {
+    display: none;
+  }
+
+  .emergency-stop-btn {
+    padding: 0 10px;
+    min-width: 44px;
+    min-height: 44px;
+    height: 44px;
+    box-sizing: border-box;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1257,9 +1279,10 @@ html, body {
   }
 
   .emergency-stop-btn {
-    height: auto;
     min-height: 44px;
-    padding: 0 12px;
+    height: 44px;
+    padding: 0 10px;
+    box-sizing: border-box;
   }
 
   .vol-slider {
