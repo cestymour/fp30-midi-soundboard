@@ -18,18 +18,11 @@ if not errorlevel 1 (
   goto open_browser
 )
 
-where node >nul 2>nul
-if not errorlevel 1 (
-  start "%TITLE%" /D "%ROOT%" cmd /k node "%ROOT%scripts\serve-local.js" %PORT% .
-  goto open_browser
-)
-
 echo.
 echo Impossible de lancer le serveur local automatiquement.
 echo.
-echo Installe Python ou Node.js, puis relance ce fichier :
+echo Installe Python, puis relance ce fichier :
 echo   - Python : https://www.python.org/downloads/
-echo   - Node.js : https://nodejs.org/
 echo.
 pause
 exit /b 1
