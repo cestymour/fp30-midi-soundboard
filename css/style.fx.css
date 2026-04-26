@@ -268,7 +268,8 @@
 
 .fx-grid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(72px, 1fr));
+  /* 8 columns; narrow/portrait media query switches to 4 (no 5-6 column step) */
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 8px;
   height: 100%;
 }
@@ -461,10 +462,6 @@
 /* ── Responsive ─────────────────────────────────────────────── */
 
 @media (max-width: 1200px) {
-  .fx-grid {
-    grid-template-columns: repeat(5, minmax(70px, 1fr));
-  }
-
   .fx-slider-rail {
     min-height: 150px;
   }
@@ -542,10 +539,7 @@
 }
 
 @media (max-width: 600px) {
-  .fx-grid {
-    grid-template-columns: repeat(3, minmax(60px, 1fr));
-  }
-
+  /* Same 4-column grid as above; slider sizing only */
   .fx-slider-rail {
     min-height: 118px;
   }
