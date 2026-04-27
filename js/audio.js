@@ -699,14 +699,9 @@ function startProgressLoop(audio, btn, startOffset, endOffset) {
       stopSound(false);
       return;
     }
-
-    const elapsed = audio.currentTime - startOffset;
-    const pct = (playableDuration && playableDuration > 0)
-      ? Math.min(100, (elapsed / playableDuration) * 100).toFixed(1) + '%'
-      : '0%';
-
-    btn.style.setProperty('--progress', pct);
-    updateTransportUI();
+    
+    // Appel de la fonction légère de mise à jour de l'UI
+    updateSeekUI();
 
     STATE.progressRAF = requestAnimationFrame(tick);
   }
@@ -731,28 +726,27 @@ function stopSound(fade = false) {
 
   if (STATE.currentSoundBtn) {
     STATE.currentSoundBtn.classList.remove('playing', 'paused');
-    STATE.currentSoundBtn.style.setProperty('--progress', '0%');
     STATE.currentSoundBtn = null;
   }
 
   STATE.isPaused = false;
-  updateTransportUI();
-
-  if (!STATE.currentAudio) return;
-
-  if (fade) {
-    const audio = STATE.currentAudio;
-    STATE.currentAudio = null;
-    fadeAudio(audio, audio.volume, 0, 400, () => {
-      audio.dispose();
-      audio.volume = STATE.audioVolume;
-      if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
-    });
-  } else {
-    STATE.currentAudio.dispose();
-    STATE.currentAudio = null;
-    if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
+  
+  if (STATE.currentAudio) {
+    if (fade) {
+      const audioToFade = STATE.currentAudio;
+      STATE.currentAudio = null;
+      fadeAudio(audioToFade, audioToFade.volume, 0, 400, () => {
+        audioToFade.dispose();
+      });
+    } else {
+      STATE.currentAudio.dispose();
+      STATE.currentAudio = null;
+    }
   }
+
+  // Mise à jour de l'UI lourde après avoir tout arrêté
+  updateTransportUI();
+  if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
 }
 
 function emergencyStopAudio() {
@@ -792,8 +786,8 @@ async function playSound(btn) {
 
   btn.classList.remove('paused', 'missing');
   btn.classList.add('playing');
-  btn.style.setProperty('--progress', '0%');
 
+  // Appel de l'UI "lourde" une seule fois au lancement
   updateTransportUI();
   if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
 

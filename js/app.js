@@ -269,11 +269,48 @@ function equalizeAudioButtons() {
 // TRANSPORT BAR — Play/Pause + Seek + Time
 // ═══════════════════════════════════════════════════════
 
-/** Met à jour tous les transports (play/pause btn, time, seek bar) */
+/**
+ * Mise à jour légère — appelée dans la boucle RAF (60fps).
+ * Met à jour le temps, la barre de seek et la progression du bouton.
+ */
+function updateSeekUI() {
+  const audio = STATE.currentAudio;
+  const btn   = STATE.currentSoundBtn;
+  if (!audio || !btn) return;
+
+  const startOffset   = parseFloat(btn.dataset.start) || 0;
+  const endRaw        = btn.dataset.end;
+  const endOffset     = endRaw ? parseFloat(endRaw) : null;
+  const dur           = audio.duration;
+  const effectiveEnd  = endOffset ?? (isFinite(dur) ? dur : 0);
+  const totalDuration = effectiveEnd - startOffset;
+  const elapsed       = Math.max(0, audio.currentTime - startOffset);
+  const pct           = totalDuration > 0 ? Math.min(100, (elapsed / totalDuration) * 100) : 0;
+  
+  // Met à jour la barre de progression sur le bouton lui-même
+  btn.style.setProperty('--progress', pct.toFixed(2) + '%');
+
+  // Met à jour toutes les barres de transport
+  document.querySelectorAll('.transport-seek').forEach(bar => {
+    bar.querySelector('.transport-seek-fill').style.width  = pct + '%';
+    bar.querySelector('.transport-seek-handle').style.left = pct + '%';
+  });
+
+  // Met à jour les affichages de temps
+  document.querySelectorAll('.transport-time').forEach(el => {
+    el.textContent = `${formatTime(elapsed)} / ${formatTime(totalDuration)}`;
+  });
+}
+
+/**
+ * Mise à jour complète de l'UI — appelée uniquement sur changement d'état
+ * (play, stop, pause, emergency stop).
+ */
 function updateTransportUI() {
   const audio = STATE.currentAudio;
   const btn   = STATE.currentSoundBtn;
 
+  // ── Bouton play/pause et état du "handle" ──
   document.querySelectorAll('.transport-play-pause').forEach(b => {
     if (!audio || !btn) {
       b.innerHTML = '<span class="icon-play"></span>';
@@ -292,56 +329,33 @@ function updateTransportUI() {
     }
   });
 
-  const startOffset = btn ? (parseFloat(btn.dataset.start) || 0) : 0;
-  const endRaw      = btn ? btn.dataset.end : '';
-  const endOffset   = endRaw ? parseFloat(endRaw) : null;
+  document.querySelectorAll('.transport-seek-handle').forEach(handle => {
+    handle.classList.toggle('pulsing', !!(audio && btn && !STATE.isPaused));
+  });
 
-  document.querySelectorAll('.transport-time').forEach(el => {
-    if (!audio || !btn) {
+  // ── Reset des barres et temps si rien ne joue ──
+  if (!audio || !btn) {
+    document.querySelectorAll('.transport-seek').forEach(bar => {
+      bar.querySelector('.transport-seek-fill').style.width = '0%';
+      bar.querySelector('.transport-seek-handle').style.left = '0%';
+    });
+    document.querySelectorAll('.transport-time').forEach(el => {
       el.textContent = '–:–– / –:––';
-      return;
-    }
-    const dur = audio.duration;
-    const effectiveEnd = endOffset ?? (isFinite(dur) ? dur : 0);
-    const totalDuration = effectiveEnd - startOffset;
-    const elapsed = Math.max(0, audio.currentTime - startOffset);
-    el.textContent = `${formatTime(elapsed)} / ${formatTime(totalDuration)}`;
-  });
+    });
+    // S'assure que le bouton qui jouait est bien remis à zéro
+    const playingBtn = document.querySelector('.sound-btn.playing, .sound-btn.paused');
+    if (playingBtn) playingBtn.style.setProperty('--progress', '0%');
+  }
 
-  document.querySelectorAll('.transport-seek').forEach(bar => {
-    const fill   = bar.querySelector('.transport-seek-fill');
-    const handle = bar.querySelector('.transport-seek-handle');
-    if (!audio || !btn) {
-      fill.style.width = '0%';
-      handle.style.left = '0%';
-      handle.classList.remove('pulsing');
-      return;
-    }
-    const dur = audio.duration;
-    const effectiveEnd = endOffset ?? (isFinite(dur) ? dur : 0);
-    const totalDuration = effectiveEnd - startOffset;
-    const elapsed = Math.max(0, audio.currentTime - startOffset);
-    const pct = totalDuration > 0 ? Math.min(100, (elapsed / totalDuration) * 100) : 0;
-    fill.style.width = pct + '%';
-    handle.style.left = pct + '%';
-
-    if (STATE.isPaused) {
-      handle.classList.remove('pulsing');
-    } else {
-      handle.classList.add('pulsing');
-    }
-  });
-
-  // État du panneau audio
+  // ── État global du panneau audio ──
   document.querySelectorAll('.panel-audio').forEach(p => {
-    if (!audio || !btn) {
-      p.classList.remove('is-playing', 'is-paused');
-    } else if (STATE.isPaused) {
-      p.classList.remove('is-playing');
-      p.classList.add('is-paused');
-    } else {
-      p.classList.add('is-playing');
-      p.classList.remove('is-paused');
+    p.classList.remove('is-playing', 'is-paused');
+    if (audio && btn) {
+      if (STATE.isPaused) {
+        p.classList.add('is-paused');
+      } else {
+        p.classList.add('is-playing');
+      }
     }
   });
 }
@@ -371,55 +385,43 @@ function applySeek(e, bar) {
   const newTime = getSeekTimeFromEvent(e, bar);
   if (newTime !== null) {
     STATE.currentAudio.currentTime = newTime;
-    updateTransportUI();
+    updateSeekUI(); // Mise à jour immédiate et légère
   }
-}
-
-/** Gère le clic sur la barre de seek */
-function handleSeekClick(e, bar) {
-  applySeek(e, bar);
 }
 
 /** Initialise le drag sur une barre de seek */
 function initSeekBarDrag(bar) {
   let isDragging = false;
 
-  // ── Mouse events ──
-  bar.addEventListener('mousedown', (e) => {
+  const startDrag = (e) => {
     if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
     isDragging = true;
+    document.body.classList.add('is-seeking');
     applySeek(e, bar);
     e.preventDefault();
-  });
+  };
 
-  document.addEventListener('mousemove', (e) => {
+  const doDrag = (e) => {
     if (!isDragging) return;
     applySeek(e, bar);
-  });
+  };
 
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-  });
-
-  // ── Touch events ──
-  bar.addEventListener('touchstart', (e) => {
-    if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
-    isDragging = true;
-    applySeek(e, bar);
-  }, { passive: true });
-
-  document.addEventListener('touchmove', (e) => {
+  const endDrag = () => {
     if (!isDragging) return;
-    applySeek(e, bar);
-  }, { passive: true });
-
-  document.addEventListener('touchend', () => {
     isDragging = false;
-  });
+    document.body.classList.remove('is-seeking');
+  };
 
-  document.addEventListener('touchcancel', () => {
-    isDragging = false;
-  });
+  // -- Mouse events --
+  bar.addEventListener('mousedown', startDrag);
+  document.addEventListener('mousemove', doDrag);
+  document.addEventListener('mouseup', endDrag);
+
+  // -- Touch events --
+  bar.addEventListener('touchstart', startDrag, { passive: false });
+  document.addEventListener('touchmove', doDrag, { passive: true });
+  document.addEventListener('touchend', endDrag);
+  document.addEventListener('touchcancel', endDrag);
 }
 
 
@@ -432,8 +434,6 @@ function togglePlayPause() {
     STATE.currentAudio.volume = 0;
     STATE.currentAudio.play().then(() => {
       STATE.isPaused = false;
-      STATE.currentSoundBtn.classList.remove('paused');
-      STATE.currentSoundBtn.classList.add('playing');
       fadeAudio(STATE.currentAudio, 0, STATE.audioVolume, 150, null);
       startProgressLoop(
         STATE.currentAudio,
@@ -446,8 +446,6 @@ function togglePlayPause() {
   } else {
     // Pause avec fade out
     stopProgressLoop();
-    STATE.currentSoundBtn.classList.remove('playing');
-    STATE.currentSoundBtn.classList.add('paused');
     const audio = STATE.currentAudio;
     fadeAudio(audio, audio.volume, 0, 150, () => {
       audio.pause();
@@ -937,3 +935,4 @@ function init() {
 }
 
 init();
+
