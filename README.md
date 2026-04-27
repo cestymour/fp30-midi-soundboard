@@ -36,6 +36,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Responsive layout** — automatic grid reorganization in portrait mode
 - **About popup** — shows Service Worker and Wake Lock status, cache reset button
 - **Live audio FX mixer** — full overlay on the audio panel to shape the sound in real time (EQ, filters, tempo, delay, reverb) while a clip plays or before the next one; presets with smooth transitions, global reset, and quick per-control recall
+- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs to the connected piano (reverb, chorus, cutoff, resonance, attack, release, decay) via `sendMidi()` in `js/midi.js`. The UI lives in `js/midi-fx-ui.js` and shares styles with the audio FX popup in `css/style.fx.css`. Slider positions reflect what the app last sent, not a read-back from the instrument.
 
 ### How it works
 
@@ -43,16 +44,19 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 Click a button → the instrument or sound is selected on the piano → play the keys to produce the sound.  
 **No sound is triggered automatically by the app** — the app configures the piano, the musician plays.
 
+Use **Effets** / **Reset** in the MIDI panel header to open the piano FX overlay or reset those CCs to their default values.
+
 #### Audio tabs
 Click a button → the sound plays immediately from the device speakers.  
 Click again → the sound fades out and stops.
 
-Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `js/audio.js`; the overlay UI lives in `js/audio-fx-ui.js` and `style.audio-fx.css`.
+Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `js/audio.js`; the overlay UI lives in `js/audio-fx-ui.js` and `css/style.fx.css`.
 
 ### Notes
 
 - GM2 sounds will work on any GM2-compatible instrument.
 - Roland-specific sounds (Roland sound banks) are designed for the FP-30X and may not work as expected on other devices.
+- MIDI piano FX use common CC numbers (e.g. 91 reverb, 93 chorus, 74 brightness/cutoff); interpretation depends on the connected instrument (tuned for Roland FP-30X).
 - Audio files are cached dynamically on first play. Before a show, play each sound once with an internet connection to ensure offline availability.
 
 ---
@@ -74,13 +78,14 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 ```
 /
 ├── index.html                      # Entry point
-├── style.css                       # Unified stylesheet
-├── style.audio-fx.css              # Audio FX overlay (mixer popup)
 ├── manifest.json                   # PWA manifest
 ├── sw.js                           # Service Worker
 ├── version.js                      # App version constant (APP_VERSION)
 ├── midi.config.js                  # MIDI instrument data (MIDI_TABS)
 ├── audio.config.js                 # Audio sound data (AUDIO_TABS)
+├── css/
+│   ├── style.css                   # Unified stylesheet
+│   ├── style.fx.css                # FX overlay (mixer popup)
 ├── public/
 │   ├── favicon.ico
 │   ├── apple-touch-icon.png
@@ -89,6 +94,7 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 ├── js/
 │   ├── app.js                      # Orchestrator: DOM, navigation, global state
 │   ├── midi.js                     # MIDI logic (USB + Bluetooth)
+│   ├── midi-fx-ui.js               # MIDI piano FX overlay (CC sliders, presets)
 │   ├── audio.js                    # Audio playback + Web Audio effects engine
 │   ├── audio-fx-ui.js              # Audio FX overlay (mixer UI, presets)
 │   ├── bluetoothMIDI.js            # BluetoothMIDI class (BLE MIDI)
@@ -302,6 +308,7 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
 - **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
 - **Mixeur d’effets audio en direct** — grande popup sur le panneau audio pour façonner le son en temps réel (égalisation, filtres, tempo, delay, reverb) pendant la lecture ou avant le morceau suivant ; presets avec transitions en douceur, reset global et rappel rapide par curseur
+- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards vers le piano connecté (reverb, chorus, cutoff, résonance, attaque, relâchement, decay) via `sendMidi()` dans `js/midi.js`. L’interface est dans `js/midi-fx-ui.js` et partage les styles de la popup audio dans `css/style.fx.css`. Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
 
 ### Comment ça fonctionne
 
@@ -309,16 +316,19 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 Cliquer sur un bouton → l'instrument ou le son est sélectionné sur le piano → jouer les touches pour produire le son.  
 **L'application ne déclenche aucun son automatiquement** — elle configure le piano, c'est le musicien qui joue.
 
+Les boutons **Effets** / **Reset** de la barre du panneau MIDI ouvrent la popup d’effets piano ou rétablissent les CC concernés à leurs valeurs par défaut.
+
 #### Onglets Audio
 Cliquer sur un bouton → le son se joue immédiatement depuis les haut-parleurs de l'appareil.  
 Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 
-Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `js/audio.js` ; l’interface de la popup est dans `js/audio-fx-ui.js` et `style.audio-fx.css`.
+Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `js/audio.js` ; l’interface de la popup est dans `js/audio-fx-ui.js` et `css/style.fx.css`.
 
 ### Notes
 
 - Les sons GM2 fonctionnent sur tout instrument compatible GM2.
 - Les sons spécifiques Roland (banques Roland) sont conçus pour le FP-30X et peuvent ne pas fonctionner correctement sur d'autres appareils.
+- Les effets piano MIDI utilisent des numéros de CC courants (ex. 91 reverb, 93 chorus, 74 cutoff / brilliance) ; l’effet réel dépend de l’instrument connecté (réglages pensés pour le Roland FP-30X).
 - Les fichiers audio sont mis en cache dynamiquement au premier clic. Avant un spectacle, jouer chaque son une fois avec une connexion internet pour garantir le fonctionnement hors ligne.
 
 ---
@@ -340,13 +350,14 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 ```
 /
 ├── index.html                      # Point d'entrée
-├── style.css                       # CSS unifié
-├── style.audio-fx.css              # Popup mixeur / effets audio
 ├── manifest.json                   # Manifeste PWA
 ├── sw.js                           # Service Worker
 ├── version.js                      # Version de l'app (APP_VERSION)
 ├── midi.config.js                  # Données instruments MIDI (MIDI_TABS)
 ├── audio.config.js                 # Données sons audio (AUDIO_TABS)
+├── css/
+│   ├── style.css                   # CSS unifié
+│   ├── style.fx.css                # Popup mixeur / effets
 ├── public/
 │   ├── favicon.ico
 │   ├── apple-touch-icon.png
@@ -355,6 +366,7 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 ├── js/
 │   ├── app.js                      # Chef d'orchestre : DOM, navigation, état global
 │   ├── midi.js                     # Logique MIDI (USB + Bluetooth)
+│   ├── midi-fx-ui.js               # Popup effets piano MIDI (curseurs CC, presets)
 │   ├── audio.js                    # Lecture audio + moteur Web Audio (effets)
 │   ├── audio-fx-ui.js              # Popup mixeur effets (UI, presets)
 │   ├── bluetoothMIDI.js            # Classe BluetoothMIDI (BLE MIDI)

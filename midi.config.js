@@ -13,7 +13,8 @@ const MIDI_TABS = [
       {
         label: 'Romantique / Amour', icon: '🌹', color: '#ff8fab',
         items: [
-          { name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:68,  title: 'Roland => Concert Piano(GP1)' },
+          // { name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:68,  title: 'Roland => Concert Piano(GP1)' },
+          { name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:0,   title: 'GM2 => Acoustic Grand Piano' },
           { name: 'Harpe',            icon: '🪉', pc:47,  msb:121, lsb:0,   title: 'GM2 => Harp' },
           // { name: 'Violons',          icon: '🎻', pc:49,  msb:16,  lsb:64,  title: 'Roland => Chamber Str' },
           { name: 'Violon solo',      icon: '🎻', pc:41,  msb:121, lsb:0,   title: 'GM2 => Violin' },
