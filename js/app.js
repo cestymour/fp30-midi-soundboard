@@ -398,7 +398,7 @@ function initSeekBarDrag(bar) {
     isDragging = true;
     document.body.classList.add('is-seeking');
     applySeek(e, bar);
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
   };
 
   const doDrag = (e) => {
