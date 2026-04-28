@@ -201,9 +201,6 @@ function buildAudioFXPopup() {
         </div>
         -->
         <div class="fx-presets">${presetButtonsHTML}</div>
-        <button class="fx-top-btn is-close" id="audio-fx-close-btn" type="button" title="Fermer" aria-label="Fermer">
-          <span class="fx-close-btn__x" aria-hidden="true">✕</span>
-        </button>
       </header>
 
       <div class="fx-popup__body">
@@ -219,8 +216,6 @@ function buildAudioFXPopup() {
 
   // ── Fermeture ──
   overlay.querySelector('.fx-overlay__backdrop').addEventListener('click', closeAudioFXPopup);
-  overlay.querySelector('#audio-fx-close-btn').addEventListener('click', closeAudioFXPopup);
-
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && STATE.audioFxPopupOpen) closeAudioFXPopup();
   });

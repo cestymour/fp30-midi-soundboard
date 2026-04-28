@@ -190,9 +190,6 @@ function buildMidiFXPopup() {
         </div>
         -->
         <div class="fx-presets">${presetButtonsHTML}</div>
-        <button class="fx-top-btn is-close" id="midi-fx-close-btn" type="button" title="Fermer" aria-label="Fermer">
-          <span class="fx-close-btn__x" aria-hidden="true">✕</span>
-        </button>
       </header>
 
       <div class="fx-popup__body">
@@ -207,8 +204,6 @@ function buildMidiFXPopup() {
 
   // ── Fermeture ──
   overlay.querySelector('.fx-overlay__backdrop').addEventListener('click', closeMidiFXPopup);
-  overlay.querySelector('#midi-fx-close-btn').addEventListener('click', closeMidiFXPopup);
-
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && STATE.midiFxPopupOpen) closeMidiFXPopup();
   });
