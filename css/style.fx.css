@@ -175,11 +175,9 @@
 .fx-presets {
   min-width: 0;
   max-width: 100%;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
   align-content: flex-start;
-  align-items: stretch;
   gap: 8px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -195,9 +193,8 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  flex: 0 0 88px;
-  width: 88px;
-  min-width: 88px;
+  width: 100%;
+  min-width: 0;
   min-height: 56px;
   height: auto;
   margin: 0;
@@ -556,19 +553,7 @@
   }
 
   .fx-presets {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
-    gap: 8px;
     max-height: 120px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding-bottom: 4px;
-  }
-
-  .fx-presets .fx-preset-btn {
-    flex: none;
-    width: 100%;
-    min-width: 0;
   }
 
   .fx-slider-rail {
@@ -611,8 +596,28 @@
   }
 }
 
+/* En portrait, la toolbar peut se mettre sur plusieurs lignes : on réaffiche les libellés */
+@media (orientation: portrait) {
+  .audio-fx-open-btn__label,
+  .audio-fx-reset-btn__label,
+  .midi-fx-open-btn__label,
+  .midi-fx-reset-btn__label {
+    display: inline;
+  }
+
+  .audio-fx-open-btn,
+  .audio-fx-reset-btn,
+  .midi-fx-open-btn,
+  .midi-fx-reset-btn {
+    min-width: unset;
+    padding: 0 12px;
+  }
+}
+
 @media (max-width: 600px) {
-  /* Sliders : rail un peu plus étroit + pouce réduit pour limiter débordement WebKit / mobile */
+  .fx-presets {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  }
   .fx-slider-rail {
     min-height: 72px;
     width: 44px;

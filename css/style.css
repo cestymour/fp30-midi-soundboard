@@ -956,7 +956,7 @@ html, body {
   letter-spacing: 0.1em;
 }
 
-/* Même logique que Effets / Reset : masquer le libellé STOP si peu de largeur */
+/* Masquer le libellé STOP si peu de largeur (paysage étroit) */
 @media (orientation: portrait), (max-width: 900px) {
   .emergency-stop-btn__label {
     display: none;
@@ -968,6 +968,18 @@ html, body {
     min-height: 44px;
     height: 44px;
     box-sizing: border-box;
+  }
+}
+
+/* En portrait, la toolbar peut wrapper : on réaffiche le libellé STOP */
+@media (orientation: portrait) {
+  .emergency-stop-btn__label {
+    display: inline;
+  }
+
+  .emergency-stop-btn {
+    min-width: unset;
+    padding: 8px 14px;
   }
 }
 
