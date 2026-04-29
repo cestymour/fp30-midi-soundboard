@@ -351,12 +351,13 @@ html, body {
   align-items: center;
   height: var(--controls-h);
   min-height: var(--controls-h);
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel-accent, var(--current-accent)) 5%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--panel-accent, var(--current-accent)) 20%, var(--border));
   border-radius: var(--radius);
   padding: 0 12px;
   flex-shrink: 0;
   gap: 12px;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--panel-accent, var(--current-accent)) 14%, transparent);
 }
 
 /* ── Zone gauche (max 50%) ── */
