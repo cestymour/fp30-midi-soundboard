@@ -6,7 +6,7 @@ const MIDI_TABS = [
   {
     label: 'Instruments',
     icon: '🎹',
-    accent: '#7c9cff',
+    accent: '#d946ef',
     cols: 6,
     categories: [
 
@@ -143,7 +143,7 @@ const MIDI_TABS = [
   {
     label: 'Sons MIDI',
     icon: '🔊',
-    accent: '#ffaa55',
+    accent: '#a855f7',
     cols: 5,
     categories: [
 

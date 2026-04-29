@@ -40,7 +40,7 @@ const AUDIO_TABS = [
   {
     label: 'Animaux',
     icon: '🐾',
-    accent: '#88ccff',
+    accent: '#4ade80',
     gridType: 'animals',
     categories: [
       {
@@ -190,7 +190,7 @@ const AUDIO_TABS = [
   {
     label: 'Films',
     icon: '🎬',
-    accent: '#ffcc55',
+    accent: '#00bbaa',
     cols: 4,
     categories: [
       {
