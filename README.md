@@ -81,8 +81,11 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 ├── manifest.json                   # PWA manifest
 ├── sw.js                           # Service Worker
 ├── version.js                      # App version constant (APP_VERSION)
-├── midi.config.js                  # MIDI instrument data (MIDI_TABS)
-├── audio.config.js                 # Audio sound data (AUDIO_TABS)
+├── config/                         # Data + FX presets (loaded before app scripts)
+│   ├── midi.config.js              # MIDI instrument data (MIDI_TABS)
+│   ├── audio.config.js             # Audio sound data (AUDIO_TABS)
+│   ├── midi-fx.config.js           # MIDI FX overlay presets (MIDI_FX_PRESETS)
+│   └── audio-fx.config.js          # Audio FX overlay presets (AUDIO_FX_PRESETS)
 ├── css/
 │   ├── style.css                   # Unified stylesheet
 │   ├── style.fx.css                # FX overlay (mixer popup)
@@ -112,7 +115,9 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 
 ### Configuration
 
-#### MIDI instruments — `midi.config.js`
+All tab data and FX preset strips live under **`config/`**. `index.html` loads `version.js`, then the four config scripts in order, then MIDI/audio libraries and `js/app.js`.
+
+#### MIDI instruments — `config/midi.config.js`
 
 Defines the `MIDI_TABS` variable — array of MIDI tabs, each containing categories and instruments:
 
@@ -144,7 +149,7 @@ const MIDI_TABS = [
 ];
 ```
 
-#### Audio sounds — `audio.config.js`
+#### Audio sounds — `config/audio.config.js`
 
 Defines the `AUDIO_TABS` variable — same structure as `MIDI_TABS`, with audio-specific fields:
 
@@ -180,6 +185,10 @@ const AUDIO_TABS = [
   }
 ];
 ```
+
+#### FX preset strips — `config/midi-fx.config.js` and `config/audio-fx.config.js`
+
+Preset buttons for the MIDI and audio FX overlays. Each file defines a global array — `MIDI_FX_PRESETS` and `AUDIO_FX_PRESETS` — of objects `{ key, icon, text, values }`. Use `values: null` for the reset row; otherwise `values` maps control keys to numbers (MIDI: e.g. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay`; audio: e.g. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Any control **not** listed in `values` uses that control’s **neutral** default from `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` in the corresponding `*-fx-ui.js` file (not the slider’s current position).
 
 #### Special tab types
 
@@ -251,7 +260,7 @@ Open `index.html` directly in Chrome.
 
 ### Updating the PWA cache
 
-When you modify app files (HTML, CSS, JS), increment the cache versions in `sw.js`:
+When you modify app files (HTML, CSS, JS, or files under `config/`), increment the cache versions in `sw.js`:
 
 ```js
 const APP_CACHE   = 'impro-app-v2';    // ← increment
@@ -353,8 +362,11 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 ├── manifest.json                   # Manifeste PWA
 ├── sw.js                           # Service Worker
 ├── version.js                      # Version de l'app (APP_VERSION)
-├── midi.config.js                  # Données instruments MIDI (MIDI_TABS)
-├── audio.config.js                 # Données sons audio (AUDIO_TABS)
+├── config/                         # Données + presets FX (chargés avant les scripts app)
+│   ├── midi.config.js              # Données instruments MIDI (MIDI_TABS)
+│   ├── audio.config.js             # Données sons audio (AUDIO_TABS)
+│   ├── midi-fx.config.js           # Presets popup effets MIDI (MIDI_FX_PRESETS)
+│   └── audio-fx.config.js          # Presets popup effets audio (AUDIO_FX_PRESETS)
 ├── css/
 │   ├── style.css                   # CSS unifié
 │   ├── style.fx.css                # Popup mixeur / effets
@@ -384,7 +396,9 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 
 ### Configuration
 
-#### Instruments MIDI — `midi.config.js`
+Les données d’onglets et les bandeaux de presets FX sont dans **`config/`**. `index.html` charge `version.js`, puis les quatre scripts de config dans l’ordre, puis les bibliothèques MIDI et `js/app.js`.
+
+#### Instruments MIDI — `config/midi.config.js`
 
 Définit la variable `MIDI_TABS` — tableau d'onglets MIDI, chacun contenant des catégories et des instruments :
 
@@ -416,7 +430,7 @@ const MIDI_TABS = [
 ];
 ```
 
-#### Sons audio — `audio.config.js`
+#### Sons audio — `config/audio.config.js`
 
 Définit la variable `AUDIO_TABS` — même structure que `MIDI_TABS`, avec des champs spécifiques audio :
 
@@ -452,6 +466,10 @@ const AUDIO_TABS = [
   }
 ];
 ```
+
+#### Bandeaux de presets FX — `config/midi-fx.config.js` et `config/audio-fx.config.js`
+
+Boutons de preset des popups d’effets MIDI et audio. Chaque fichier expose un tableau global — `MIDI_FX_PRESETS` et `AUDIO_FX_PRESETS` — d’objets `{ key, icon, text, values }`. `values: null` correspond à la ligne Reset ; sinon `values` associe chaque clé de contrôle à un nombre (MIDI : ex. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay` ; audio : ex. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Tout contrôle **absent** de `values` prend la valeur **neutre** définie dans `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` du fichier `*-fx-ui.js` correspondant (pas la position actuelle du curseur).
 
 #### Types d'onglets spéciaux
 
@@ -523,7 +541,7 @@ Ouvrir `index.html` directement dans Chrome.
 
 ### Mise à jour du cache PWA
 
-Quand tu modifies les fichiers app (HTML, CSS, JS), incrémenter les versions de cache dans `sw.js` :
+Quand tu modifies les fichiers app (HTML, CSS, JS ou les fichiers dans `config/`), incrémenter les versions de cache dans `sw.js` :
 
 ```js
 const APP_CACHE   = 'impro-app-v2';    // ← incrémenter
