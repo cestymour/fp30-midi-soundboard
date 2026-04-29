@@ -742,7 +742,8 @@
 
 @media (orientation: landscape) {
   .fx-presets {
-    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
   }
 
   .fx-preset-btn__text {
@@ -765,6 +766,6 @@
 
 @media (orientation: landscape) and (max-width: 520px) {
   .fx-presets {
-    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
   }
 }
