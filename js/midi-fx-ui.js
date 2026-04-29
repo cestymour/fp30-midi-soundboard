@@ -583,10 +583,12 @@ function resetMidiFXEffects() {
 // ================================================================
 
 function refreshMidiFXToolbarButtons() {
-  const hasEffects = isMidiFXAnyControlModified();
+  const hasMidi = isMidiFXAnyControlModified();
+  const hasAudio = (typeof isAudioFXAnyControlModified === 'function' && isAudioFXAnyControlModified()) ||
+    (typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects());
 
   document.querySelectorAll('.midi-fx-reset-btn').forEach(button => {
-    button.classList.toggle('is-active', hasEffects);
+    button.classList.toggle('is-active', hasMidi || hasAudio);
   });
 
   document.querySelectorAll('.midi-fx-open-btn').forEach(button => {

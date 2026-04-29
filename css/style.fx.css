@@ -6,6 +6,37 @@
      .midi-fx-open-btn  / .midi-fx-reset-btn
 ============================================================ */
 
+/* ── Split button : cadre Effets qui englobe Reset ──────────── */
+
+.fx-btn-group {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+/* Hover sur l'une ou l'autre zone → bordure du groupe s'allume */
+.fx-btn-group:has(> *:hover) {
+  border-color: var(--current-accent);
+}
+
+/* Actif : popup Effets ouverte → bordure accent panel */
+.fx-btn-group:has(.audio-fx-open-btn.is-active),
+.fx-btn-group:has(.midi-fx-open-btn.is-active) {
+  border-color: var(--panel-accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--panel-accent) 24%, transparent);
+}
+
+/* Actif : effets modifiés → bordure jaune */
+.fx-btn-group:has(.audio-fx-reset-btn.is-active),
+.fx-btn-group:has(.midi-fx-reset-btn.is-active) {
+  border-color: color-mix(in srgb, #ffcc66 70%, var(--border));
+  box-shadow: 0 0 12px color-mix(in srgb, #ffcc66 26%, transparent);
+}
+
 /* ── Boutons toolbar & preset ───────────────────────────────── */
 
 .audio-fx-open-btn,
@@ -27,12 +58,38 @@
   transition: transform 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s, color 0.15s;
 }
 
+/* À l'intérieur du groupe : le cadre visuel vient du groupe, pas des boutons */
+.fx-btn-group > .audio-fx-open-btn,
+.fx-btn-group > .audio-fx-reset-btn,
+.fx-btn-group > .midi-fx-open-btn,
+.fx-btn-group > .midi-fx-reset-btn {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Divider interne entre Effets et Reset */
+.fx-btn-group > *:last-child {
+  border-left: 1px solid var(--border);
+}
+
 .audio-fx-open-btn:hover,
 .audio-fx-reset-btn:hover,
 .midi-fx-open-btn:hover,
 .midi-fx-reset-btn:hover {
   color: var(--text-primary);
   border-color: var(--current-accent);
+}
+
+/* Hover dans le groupe : juste colorer le texte + légère teinte de fond */
+.fx-btn-group > .audio-fx-open-btn:hover,
+.fx-btn-group > .audio-fx-reset-btn:hover,
+.fx-btn-group > .midi-fx-open-btn:hover,
+.fx-btn-group > .midi-fx-reset-btn:hover {
+  color: var(--text-primary);
+  border-color: transparent;
+  background: color-mix(in srgb, var(--current-accent) 8%, transparent);
 }
 
 .audio-fx-open-btn:active,
@@ -67,6 +124,14 @@
   box-shadow: 0 0 12px color-mix(in srgb, var(--panel-accent) 24%, transparent);
 }
 
+/* Dans le groupe : le fond actif vient du bouton, mais sans border/shadow (géré par le groupe) */
+.fx-btn-group > .audio-fx-open-btn.is-active,
+.fx-btn-group > .midi-fx-open-btn.is-active {
+  background: color-mix(in srgb, var(--panel-accent) 14%, transparent);
+  box-shadow: none;
+  border-color: transparent;
+}
+
 /* États actifs toolbar — reset (jaune) */
 .audio-fx-reset-btn.is-active,
 .midi-fx-reset-btn.is-active {
@@ -74,6 +139,14 @@
   border-color: color-mix(in srgb, #ffcc66 70%, var(--border));
   background: color-mix(in srgb, #ffcc66 16%, var(--bg-card));
   box-shadow: 0 0 12px color-mix(in srgb, #ffcc66 26%, transparent);
+}
+
+/* Dans le groupe : le fond actif jaune vient du bouton, mais sans border/shadow */
+.fx-btn-group > .audio-fx-reset-btn.is-active,
+.fx-btn-group > .midi-fx-reset-btn.is-active {
+  background: color-mix(in srgb, #ffcc66 16%, transparent);
+  box-shadow: none;
+  border-color: transparent;
 }
 
 /* ── Focus visible ──────────────────────────────────────────── */

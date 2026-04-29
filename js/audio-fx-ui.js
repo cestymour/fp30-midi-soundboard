@@ -592,11 +592,12 @@ function resetAudioFXEffects() {
 // ================================================================
 
 function refreshAudioFXToolbarButtons() {
-  const hasEffects = isAudioFXAnyControlModified() ||
+  const hasAudio = isAudioFXAnyControlModified() ||
     (typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects());
+  const hasMidi = typeof isMidiFXAnyControlModified === 'function' && isMidiFXAnyControlModified();
 
   document.querySelectorAll('.audio-fx-reset-btn').forEach(button => {
-    button.classList.toggle('is-active', hasEffects);
+    button.classList.toggle('is-active', hasAudio || hasMidi);
   });
 
   document.querySelectorAll('.audio-fx-open-btn').forEach(button => {

@@ -461,6 +461,12 @@ function emergencyStopAll() {
   sendEmergencyStopMidi();
 }
 
+/** Reset total des effets — MIDI + Audio */
+function resetAllFXEffects() {
+  resetMidiFXEffects();
+  resetAudioFXEffects();
+}
+
 // ═══════════════════════════════════════════════════════
 // CONSTRUCTION DU DOM
 // ═══════════════════════════════════════════════════════
@@ -568,12 +574,15 @@ function buildMidiControls() {
 
   const controlsRight = wrap.querySelector('.controls-right');
   const volumeWrap = controlsRight.querySelector('.volume-wrap');
-  controlsRight.insertBefore(midiFxResetBtn, volumeWrap);
-  controlsRight.insertBefore(midiFxOpenBtn, midiFxResetBtn);
+  const midiFxBtnGroup = document.createElement('div');
+  midiFxBtnGroup.className = 'fx-btn-group';
+  midiFxBtnGroup.appendChild(midiFxOpenBtn);
+  midiFxBtnGroup.appendChild(midiFxResetBtn);
+  controlsRight.insertBefore(midiFxBtnGroup, volumeWrap);
   controlsRight.insertBefore(stopBtn, volumeWrap);
 
   midiFxOpenBtn.addEventListener('click', openMidiFXPopup);
-  midiFxResetBtn.addEventListener('click', resetMidiFXEffects);
+  midiFxResetBtn.addEventListener('click', resetAllFXEffects);
 
   const slider = wrap.querySelector('.midi-vol');
   const valEl  = wrap.querySelector('.vol-value');
@@ -637,8 +646,11 @@ function buildAudioControls() {
     icon: '\u21BA',
     label: 'Reset',
   });
-  controlsRight.insertBefore(fxResetBtn, volumeWrap);
-  controlsRight.insertBefore(fxOpenBtn, fxResetBtn);
+  const fxBtnGroup = document.createElement('div');
+  fxBtnGroup.className = 'fx-btn-group';
+  fxBtnGroup.appendChild(fxOpenBtn);
+  fxBtnGroup.appendChild(fxResetBtn);
+  controlsRight.insertBefore(fxBtnGroup, volumeWrap);
   controlsRight.insertBefore(stopBtn, volumeWrap);
 
   const slider = wrap.querySelector('.audio-vol');
@@ -659,7 +671,7 @@ function buildAudioControls() {
   // Play/Pause
   wrap.querySelector('.transport-play-pause').addEventListener('click', togglePlayPause);
   fxOpenBtn.addEventListener('click', openAudioFXPopup);
-  fxResetBtn.addEventListener('click', resetAudioFXEffects);
+  fxResetBtn.addEventListener('click', resetAllFXEffects);
 
   // Seek (clic + drag)
   const seekBar = wrap.querySelector('.transport-seek');
