@@ -293,6 +293,13 @@ function updateMidiFXPopupLayout() {
   MIDI_FX_UI.overlay.style.width  = `${rect.width}px`;
   MIDI_FX_UI.overlay.style.height = `${rect.height}px`;
 
+  const accent = activePanel.style.getPropertyValue('--panel-accent').trim();
+  if (accent) {
+    MIDI_FX_UI.overlay.style.setProperty('--panel-accent', accent);
+  } else {
+    MIDI_FX_UI.overlay.style.removeProperty('--panel-accent');
+  }
+
   requestAnimationFrame(() => {
     MIDI_FX_CONTROLS.forEach(c => updateMidiFXNeutralRailMarks(c.key));
   });
@@ -581,12 +588,17 @@ function refreshMidiFXToolbarButtons() {
   const hasMidi = isMidiFXAnyControlModified();
   const hasAudio = (typeof isAudioFXAnyControlModified === 'function' && isAudioFXAnyControlModified()) ||
     (typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects());
+  const anyFx = hasMidi || hasAudio;
 
   document.querySelectorAll('.midi-fx-reset-btn').forEach(button => {
-    button.classList.toggle('is-active', hasMidi || hasAudio);
+    button.classList.toggle('is-active', anyFx);
   });
 
   document.querySelectorAll('.midi-fx-open-btn').forEach(button => {
     button.classList.toggle('is-active', STATE.midiFxPopupOpen);
+  });
+
+  document.querySelectorAll('.audio-fx-reset-btn').forEach(button => {
+    button.classList.toggle('is-active', anyFx);
   });
 }

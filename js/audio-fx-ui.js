@@ -304,6 +304,13 @@ function updateAudioFXPopupLayout() {
   AUDIO_FX_UI.overlay.style.width  = `${rect.width}px`;
   AUDIO_FX_UI.overlay.style.height = `${rect.height}px`;
 
+  const accent = activePanel.style.getPropertyValue('--panel-accent').trim();
+  if (accent) {
+    AUDIO_FX_UI.overlay.style.setProperty('--panel-accent', accent);
+  } else {
+    AUDIO_FX_UI.overlay.style.removeProperty('--panel-accent');
+  }
+
   requestAnimationFrame(() => {
     AUDIO_FX_CONTROLS.forEach(c => updateAudioFXNeutralRailMarks(c.key));
   });
@@ -594,12 +601,17 @@ function refreshAudioFXToolbarButtons() {
   const hasAudio = isAudioFXAnyControlModified() ||
     (typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects());
   const hasMidi = typeof isMidiFXAnyControlModified === 'function' && isMidiFXAnyControlModified();
+  const anyFx = hasAudio || hasMidi;
 
   document.querySelectorAll('.audio-fx-reset-btn').forEach(button => {
-    button.classList.toggle('is-active', hasAudio || hasMidi);
+    button.classList.toggle('is-active', anyFx);
   });
 
   document.querySelectorAll('.audio-fx-open-btn').forEach(button => {
     button.classList.toggle('is-active', STATE.audioFxPopupOpen);
+  });
+
+  document.querySelectorAll('.midi-fx-reset-btn').forEach(button => {
+    button.classList.toggle('is-active', anyFx);
   });
 }

@@ -866,6 +866,9 @@ function activateTab(idx) {
   document.querySelectorAll('.panel').forEach((p, i) =>
     p.classList.toggle('active', i === idx));
 
+  if (typeof refreshMidiFXToolbarButtons === 'function') refreshMidiFXToolbarButtons();
+  if (typeof refreshAudioFXToolbarButtons === 'function') refreshAudioFXToolbarButtons();
+
   requestAnimationFrame(() => {
     const activePanel = document.querySelector('.panel.active');
     if (activePanel && activePanel.dataset.type === 'midi') {
