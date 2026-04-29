@@ -239,8 +239,7 @@ function buildMidiFXPopup() {
       updateMidiFXSliderVisual(control.key, value);
       updateMidiFXNeutralRailMarks(control.key);
       updateMidiFXControlState(control.key, value);
-      MIDI_FX_UI.activePresetKey = null;
-      refreshMidiFXPresetButtons();
+      refreshMidiFXPresetHighlightFromControls();
       refreshMidiFXToolbarButtons();
     });
 
@@ -360,8 +359,7 @@ function syncMidiFXPopupFromState() {
     updateMidiFXControlState(control.key, value);
   });
 
-  MIDI_FX_UI.activePresetKey = null;
-  refreshMidiFXPresetButtons();
+  refreshMidiFXPresetHighlightFromControls();
   refreshMidiFXToolbarButtons();
 }
 
@@ -472,6 +470,30 @@ function refreshMidiFXPresetButtons() {
   });
 }
 
+function midiFxTargetsMatchCurrent(targetValues) {
+  for (const c of MIDI_FX_CONTROLS) {
+    const cur = getMidiFXControlValue(c.key);
+    const tgt = targetValues[c.key];
+    if (cur === null || Number.isNaN(cur)) return false;
+    if (Math.abs(clampMidiFXValue(c, cur) - tgt) > 1e-5) return false;
+  }
+  return true;
+}
+
+function inferActiveMidiFXPresetKey() {
+  for (let i = 0; i < MIDI_FX_PRESETS.length; i++) {
+    const preset = MIDI_FX_PRESETS[i];
+    const targetValues = buildMidiFXPresetTargetValues(preset);
+    if (midiFxTargetsMatchCurrent(targetValues)) return preset.key;
+  }
+  return null;
+}
+
+function refreshMidiFXPresetHighlightFromControls() {
+  MIDI_FX_UI.activePresetKey = inferActiveMidiFXPresetKey();
+  refreshMidiFXPresetButtons();
+}
+
 function clampMidiFXValue(control, value) {
   const clamped = Math.max(control.min, Math.min(control.max, value));
   const step    = Number(control.step) || 1;
@@ -503,7 +525,7 @@ function applyMidiFXPreset(presetKey) {
   const targetValues = buildMidiFXPresetTargetValues(preset);
   MIDI_FX_UI.activePresetKey = presetKey;
   refreshMidiFXPresetButtons();
-  animateMidiFXToValues(targetValues, 320);
+  animateMidiFXToValues(targetValues, 320, { inferPresetAtEnd: true });
 }
 
 // ================================================================
@@ -523,10 +545,12 @@ function animateMidiFXControlToNeutral(controlKey) {
 
   MIDI_FX_UI.activePresetKey = null;
   refreshMidiFXPresetButtons();
-  animateMidiFXToValues(targetValues, 320);
+  animateMidiFXToValues(targetValues, 320, { inferPresetAtEnd: true });
 }
 
-function animateMidiFXToValues(targetValues, durationMs = 300) {
+function animateMidiFXToValues(targetValues, durationMs = 300, options = {}) {
+  const { inferPresetAtEnd = false } = options;
+
   if (MIDI_FX_UI.presetAnimationFrame) {
     cancelAnimationFrame(MIDI_FX_UI.presetAnimationFrame);
     MIDI_FX_UI.presetAnimationFrame = null;
@@ -559,6 +583,7 @@ function animateMidiFXToValues(targetValues, durationMs = 300) {
     }
 
     MIDI_FX_UI.presetAnimationFrame = null;
+    if (inferPresetAtEnd) refreshMidiFXPresetHighlightFromControls();
     refreshMidiFXToolbarButtons();
   };
 
@@ -577,7 +602,7 @@ function resetMidiFXEffects() {
   const targetValues = buildMidiFXPresetTargetValues({ values: {} });
   MIDI_FX_UI.activePresetKey = 'reset';
   refreshMidiFXPresetButtons();
-  animateMidiFXToValues(targetValues, 320);
+  animateMidiFXToValues(targetValues, 320, { inferPresetAtEnd: true });
 }
 
 // ================================================================

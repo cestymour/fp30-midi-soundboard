@@ -250,8 +250,7 @@ function buildAudioFXPopup() {
       updateAudioFXSliderVisual(control.key, value);
       updateAudioFXNeutralRailMarks(control.key);
       updateAudioFXControlState(control.key, value);
-      AUDIO_FX_UI.activePresetKey = null;
-      refreshAudioFXPresetButtons();
+      refreshAudioFXPresetHighlightFromControls();
       refreshAudioFXToolbarButtons();
     });
 
@@ -376,8 +375,7 @@ function syncAudioFXPopupFromEngine() {
     AUDIO_FX_UI.trackEl.textContent = STATE.currentSoundBtn?.title || 'Aucune lecture';
   }
 
-  AUDIO_FX_UI.activePresetKey = null;
-  refreshAudioFXPresetButtons();
+  refreshAudioFXPresetHighlightFromControls();
   refreshAudioFXToolbarButtons();
 }
 
@@ -485,6 +483,30 @@ function refreshAudioFXPresetButtons() {
   });
 }
 
+function audioFxTargetsMatchCurrent(targetValues) {
+  for (const c of AUDIO_FX_CONTROLS) {
+    const cur = getAudioFXControlValue(c.key);
+    const tgt = targetValues[c.key];
+    if (cur === null || Number.isNaN(cur)) return false;
+    if (Math.abs(clampAudioFXValue(c, cur) - tgt) > 1e-5) return false;
+  }
+  return true;
+}
+
+function inferActiveAudioFxPresetKey() {
+  for (let i = 0; i < AUDIO_FX_PRESETS.length; i++) {
+    const preset = AUDIO_FX_PRESETS[i];
+    const targetValues = buildPresetTargetValues(preset);
+    if (audioFxTargetsMatchCurrent(targetValues)) return preset.key;
+  }
+  return null;
+}
+
+function refreshAudioFXPresetHighlightFromControls() {
+  AUDIO_FX_UI.activePresetKey = inferActiveAudioFxPresetKey();
+  refreshAudioFXPresetButtons();
+}
+
 function clampAudioFXValue(control, value) {
   const clamped = Math.max(control.min, Math.min(control.max, value));
   const step    = Number(control.step) || 1;
@@ -515,7 +537,7 @@ function applyAudioFXPreset(presetKey) {
   const targetValues = buildPresetTargetValues(preset);
   AUDIO_FX_UI.activePresetKey = presetKey;
   refreshAudioFXPresetButtons();
-  animateAudioFXToValues(targetValues, 320);
+  animateAudioFXToValues(targetValues, 320, { inferPresetAtEnd: true });
 }
 
 // ================================================================
@@ -535,10 +557,12 @@ function animateAudioFXControlToNeutral(controlKey) {
 
   AUDIO_FX_UI.activePresetKey = null;
   refreshAudioFXPresetButtons();
-  animateAudioFXToValues(targetValues, 320);
+  animateAudioFXToValues(targetValues, 320, { inferPresetAtEnd: true });
 }
 
-function animateAudioFXToValues(targetValues, durationMs = 300) {
+function animateAudioFXToValues(targetValues, durationMs = 300, options = {}) {
+  const { inferPresetAtEnd = false } = options;
+
   if (AUDIO_FX_UI.presetAnimationFrame) {
     cancelAnimationFrame(AUDIO_FX_UI.presetAnimationFrame);
     AUDIO_FX_UI.presetAnimationFrame = null;
@@ -571,6 +595,7 @@ function animateAudioFXToValues(targetValues, durationMs = 300) {
     }
 
     AUDIO_FX_UI.presetAnimationFrame = null;
+    if (inferPresetAtEnd) refreshAudioFXPresetHighlightFromControls();
     refreshAudioFXToolbarButtons();
   };
 
@@ -590,7 +615,7 @@ function resetAudioFXEffects() {
   const targetValues = buildPresetTargetValues({ values: {} });
   AUDIO_FX_UI.activePresetKey = 'reset';
   refreshAudioFXPresetButtons();
-  animateAudioFXToValues(targetValues, 320);
+  animateAudioFXToValues(targetValues, 320, { inferPresetAtEnd: true });
 }
 
 // ================================================================
