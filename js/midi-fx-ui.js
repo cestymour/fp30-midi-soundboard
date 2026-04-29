@@ -567,15 +567,10 @@ function isMidiFXAnyControlModified() {
 }
 
 function resetMidiFXEffects() {
-  MIDI_FX_CONTROLS.forEach(control => {
-    MIDI_FX_STATE[control.key] = control.neutral;
-    control.apply(control.neutral);
-  });
-
-  syncMidiFXPopupFromState();
+  const targetValues = buildMidiFXPresetTargetValues({ values: {} });
   MIDI_FX_UI.activePresetKey = 'reset';
   refreshMidiFXPresetButtons();
-  refreshMidiFXToolbarButtons();
+  animateMidiFXToValues(targetValues, 320);
 }
 
 // ================================================================

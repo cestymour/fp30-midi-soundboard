@@ -580,11 +580,10 @@ function isAudioFXAnyControlModified() {
 
 function resetAudioFXEffects() {
   if (typeof AudioEngineAPI === 'undefined') return;
-  AudioEngineAPI.resetEffects();
-  syncAudioFXPopupFromEngine();
+  const targetValues = buildPresetTargetValues({ values: {} });
   AUDIO_FX_UI.activePresetKey = 'reset';
   refreshAudioFXPresetButtons();
-  refreshAudioFXToolbarButtons();
+  animateAudioFXToValues(targetValues, 320);
 }
 
 // ================================================================

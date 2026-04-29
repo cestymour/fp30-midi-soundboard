@@ -562,7 +562,7 @@ function buildMidiControls() {
   const midiFxOpenBtn = buildPanelUtilityBtn({
     className: 'midi-fx-open-btn',
     title: 'Effets piano',
-    icon: '🎹',
+    icon: '🎚️',
     label: 'Effets',
   });
   const midiFxResetBtn = buildPanelUtilityBtn({
@@ -637,7 +637,7 @@ function buildAudioControls() {
   const fxOpenBtn = buildPanelUtilityBtn({
     className: 'audio-fx-open-btn',
     title: 'Mixer audio',
-    icon: '🎛️',
+    icon: '🎚️',
     label: 'Effets',
   });
   const fxResetBtn = buildPanelUtilityBtn({
