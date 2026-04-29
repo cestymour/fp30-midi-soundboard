@@ -13,20 +13,24 @@ importScripts('version.js'); // expose APP_VERSION
 const APP_CACHE   = `impro-app-${APP_VERSION}`;
 const AUDIO_CACHE = `impro-audio-${APP_VERSION}`;
 
-// ── Fichiers app à précacher dès l'installation ──
+// ── Fichiers app à précacher dès l'installation (aligné sur index.html) ──
 const APP_ASSETS = [
   './index.html',
   './manifest.json',
   './version.js',
-  './midi.config.js',
-  './audio.config.js',
+  './config/midi.config.js',
+  './config/audio.config.js',
+  './config/midi-fx.config.js',
+  './config/audio-fx.config.js',
   './css/style.css',
   './css/style.fx.css',
-  './js/app.js',
+  './js/ble-midi-parser.bundle.js',
+  './js/bluetoothMIDI.js',
   './js/midi.js',
   './js/audio.js',
-  './js/bluetoothMIDI.js',
-  './js/ble-midi-parser.bundle.js',
+  './js/midi-fx-ui.js',
+  './js/audio-fx-ui.js',
+  './js/app.js',
   './public/pwa-192x192.png',
   './public/pwa-512x512.png',
   './public/apple-touch-icon.png',
