@@ -41,15 +41,26 @@ Entry point: `index.html` loads `src/main.ts`, which imports the CSS and calls `
 - `src/types.ts`: shared types: config schema (`MidiTab`, `MidiItem`, `AudioTab`, `AudioItem`, `Category`), FX controls and presets (`FxControl`, `FxPreset`, `MidiFxKey`, `AudioFxKey`).
 - `src/state.ts`: the shared mutable `STATE` object (typed `AppState`).
 - `src/config/*.config.ts`: pure data exports (`MIDI_TABS`, `AUDIO_TABS`, `MIDI_FX_PRESETS`, `AUDIO_FX_PRESETS`). `config.test.ts` checks that every `id` is unique among its siblings.
-- `src/midi/ble-midi-parser.ts`: BLE MIDI packet parser, an ES port of the `packets` part of skratchdot's `ble-midi` (the npm package itself is a Node CLI with native deps and is unusable in the browser).
-- `src/midi/bluetoothMIDI.ts`: the `BluetoothMIDI` class (a GATT write queue, plus a loopback of incoming notes to the piano).
-- `src/midi/midi.ts`: `sendMidi()` (routes to the USB `STATE.midiOutput` when present, otherwise to BLE `STATE.bt`), patch/volume/all-notes-off sending, and USB/BT connection handling.
-- `src/audio/audio.ts`: the `AudioEngine` class (a single Web Audio graph: EQ → filters → compressor → distortion → delay/reverb → master), exported as `AudioEngineAPI`, plus playback, fades and the progress loop (`playSound`, `stopSound`).
-- `src/fx/midi-fx-ui.ts`, `src/fx/audio-fx-ui.ts`: FX overlay popups.
-- `src/app.ts`: builds all tabs and panels from the config data, handles tab navigation, transport and seek, the About popup and Wake Lock.
-- `src/css/style.css`, `src/css/style.fx.css`: global styles.
+- `src/events.ts`: `createEmitter()`, the small typed event emitter the engines use to notify the UI.
 
-Some modules import each other in a cycle (`app.ts` ↔ `audio/audio.ts` ↔ `fx/*`). That is fine as long as no module touches another module's exports at the top level, only inside functions. Keep it that way.
+Engines (`src/midi/`, `src/audio/`, `src/fx/`) never touch the DOM and never import `src/ui/` or `src/app.ts`; the UI subscribes to their events. Keep it that way (the remaining browser APIs there are Web MIDI, Web Bluetooth, Web Audio, the `<audio>` element used for playback, and `requestAnimationFrame`).
+
+- `src/midi/midi.ts`: sending only. `sendMidi()` routes to the USB `STATE.midiOutput` when present, otherwise to BLE `STATE.bt`; `buildInstrumentPatchMessages()` (`pc` 1-based → 0-based), patch, volume, all-notes-off.
+- `src/midi/connection.ts`: USB (Web MIDI) and BLE connection handling, `selectMidiConnection()`, `midiConnectionEvents` (`status`, `selection`, `outputs`).
+- `src/midi/bluetoothMIDI.ts`: the `BluetoothMIDI` class (a GATT write queue, plus a loopback of incoming notes to the piano).
+- `src/midi/ble-midi-parser.ts`: BLE MIDI packet parser, an ES port of the `packets` part of skratchdot's `ble-midi` (the npm package itself is a Node CLI with native deps and is unusable in the browser).
+- `src/audio/audio-engine.ts`: the `AudioEngine` class (a single Web Audio graph: EQ → filters → compressor → distortion → delay/reverb → master) and `MediaElementTrack`, exported as `AudioEngineAPI`.
+- `src/audio/playback.ts`: `playSound(item)`, `stopSound`, `togglePlayPause`, `seekToRatio`, `setAudioVolume`, fades and the progress loop; `playbackEvents` (`play`, `stop`, `pause`, `resume`, `progress-start`, `progress`, `missing`). The current sound is `STATE.currentSoundItem` (an `AudioItem`, not a button).
+- `src/audio/timing.ts`: pure time helpers (playback range from `start`/`end`, progress, seek time, `formatTime`).
+- `src/fx/fx-presets.ts`: the single, pure preset logic shared by both FX popups (target values, clamp, active preset inference, neutral checks, interpolation). `src/fx/fx-animation.ts` animates values towards targets.
+- `src/fx/midi-fx.ts`, `src/fx/audio-fx.ts`: the `*_FX_CONTROLS` arrays, `MIDI_FX_STATE`, and how a value is applied.
+- `src/ui/fx-overlay.ts`: the single generic FX popup (`FxOverlay` class). `src/ui/fx-overlays.ts` instantiates it for MIDI and audio with only what differs (ids, data attributes, settings source, audio low-pass fix-up), plus the shared Effets/Reset toolbar refresh.
+- `src/ui/transport.ts`: sound buttons state, transport bar, seek drag, audio volume sliders; listens to `playbackEvents`.
+- `src/ui/midi-ui.ts`: connection badges and selects, MIDI volume sliders, active instrument button; listens to `midiConnectionEvents`.
+- `src/app.ts`: builds all tabs and panels from the config data, tab navigation, layout (button heights, portrait MIDI grid), the About popup and Wake Lock.
+- `src/css/style.css`, `src/css/style.fx.css`: global styles.
+- Tests: `*.test.ts` next to the code (presets, MIDI bytes, timing, BLE parser, config ids).
+- `tools/regression/`: automated comparison against `v1-vanilla` in headless Chromium (screenshots, a 23-step interaction scenario, Service Worker update and offline). See its README. Run it after each phase.
 
 ### Tabs
 
@@ -57,12 +68,12 @@ The DOM is generated entirely from `MIDI_TABS` / `AUDIO_TABS`: tab → categorie
 
 ### FX overlays
 
-`midi-fx-ui.ts` and `audio-fx-ui.ts` are deliberately parallel implementations with the same function shape (`build…Popup`, `apply…Preset`, `animate…ToValues`, `infer…PresetKey`, `reset…Effects`) and shared styles in `src/css/style.fx.css`. A change to one usually needs the mirror change in the other.
+Both popups (MIDI and audio) are the same `FxOverlay` class driven by a config, with shared styles in `src/css/style.fx.css`. Only `src/ui/fx-overlays.ts` holds what differs.
 
-- Each overlay is driven by a `*_FX_CONTROLS` array. Each control has `key`, `min`/`max`/`step`, `neutral`, `read(settings)`, `apply(value)` and `formatValue`.
+- Each popup is driven by a `*_FX_CONTROLS` array. Each control has `key`, `min`/`max`/`step`, `neutral`, `read(settings)`, `apply(value)` and `formatValue`.
 - A preset's `values` only lists the controls it changes. Every other control falls back to its `neutral` value, not to the slider's current position. `values: null` is the reset preset.
-- The active preset is inferred from the current slider values (`infer…PresetKey`), so the highlight comes back after a tab switch or after the popup is closed and reopened.
-- MIDI FX state is whatever the app last sent. It is never read back from the piano. Audio FX state is read from `AudioEngineAPI.getCurrentSettings()`.
+- The active preset is inferred from the current slider values (`inferActiveFxPresetKey`), so the highlight comes back after a tab switch or after the popup is closed and reopened.
+- MIDI FX state is whatever the app last sent (`MIDI_FX_STATE`). It is never read back from the piano. Audio FX state is read from `AudioEngineAPI.getCurrentSettings()`.
 
 ### Layout
 

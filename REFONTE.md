@@ -235,7 +235,12 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
   - Vitest 5 installé dès cette phase pour le test d'unicité des `id` (Vitest 3 remontait des alertes `npm audit` critiques via tinypool).
   - Bugs constatés (non corrigés) : voir `docs/bugs.md` n° 2 et 3.
   - Vérifié en Chromium headless : captures identiques à `v1-vanilla` (aux variations d'animation près, présentes aussi entre deux captures de la v1), scénario SW/hors ligne de la phase 2 toujours OK.
-- [ ] Phase 4 : moteurs séparés, FX unifiés, tests
+- [x] Phase 4 : moteurs séparés, FX unifiés, tests (2026-10-13, `f0e2fcd` + `429acce` + doc), tag `refonte-phase-4`
+  - `midi/`, `audio/`, `fx/` sans DOM ni import de l'interface : l'interface suit les moteurs par événements (`midiConnectionEvents`, `playbackEvents`, `src/events.ts`). Restent dans `audio/` les API navigateur de lecture (`AudioContext`, élément `<audio>` non attaché au document, `window.location`).
+  - Une seule logique de presets (`fx/fx-presets.ts`, pure et testée) et une seule popup (`ui/fx-overlay.ts`, classe `FxOverlay`), instanciée pour le MIDI et l'audio dans `ui/fx-overlays.ts` avec seulement ce qui diffère. Les attributs `data-*` d'origine sont conservés. Supprimé : le bloc HTML commenté « canal / piste » des en-têtes de popup et son code mort (`channelEl`, `trackEl`, jamais affichés).
+  - `STATE` ne contient plus d'élément DOM : `currentSoundBtn` → `currentSoundItem` (l'`AudioItem`), `activeInstBtn` et les drapeaux d'ouverture des popups passent dans l'interface.
+  - 46 tests Vitest (presets, inférence, clamp, octets MIDI d'un patch et routage USB/BT, arrêt d'urgence, temps de lecture et seek, parseur BLE, validité des presets et patchs de la config).
+  - Scripts de non-régression automatique versionnés dans `tools/regression/` (captures, scénario de 23 étapes comparé au DOM de la v1, mise à jour du SW et hors ligne) : tout identique à `v1-vanilla` en paysage et en portrait.
 - [ ] **Jalon 2 fusionné dans `main`**
 - [ ] Phase 5 : Svelte 5
 - [ ] Phase 6 : finitions

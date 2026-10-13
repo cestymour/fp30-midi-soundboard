@@ -36,7 +36,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Responsive layout** — automatic grid reorganization in portrait mode
 - **About popup** — shows Service Worker and Wake Lock status, cache reset button
 - **Live audio FX mixer** — full overlay on the audio panel to shape the sound in real time (EQ, filters, tempo, delay, reverb) while a clip plays or before the next one; presets with smooth transitions, global reset, and quick per-control recall
-- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs to the connected piano (reverb, chorus, cutoff, resonance, attack, release, decay) via `sendMidi()` in `src/midi/midi.ts`. The UI lives in `src/fx/midi-fx-ui.ts` and shares styles with the audio FX popup in `src/css/style.fx.css`. Slider positions reflect what the app last sent, not a read-back from the instrument.
+- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs to the connected piano (reverb, chorus, cutoff, resonance, attack, release, decay) via `sendMidi()` in `src/midi/midi.ts`. Both FX popups share one implementation (`src/ui/fx-overlay.ts`, preset logic in `src/fx/fx-presets.ts`) and the styles in `src/css/style.fx.css`. Slider positions reflect what the app last sent, not a read-back from the instrument.
 
 ### How it works
 
@@ -50,7 +50,7 @@ Use **Effets** / **Reset** in the MIDI panel header to open the piano FX overlay
 Click a button → the sound plays immediately from the device speakers.  
 Click again → the sound fades out and stops.
 
-Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `src/audio/audio.ts`; the overlay UI lives in `src/fx/audio-fx-ui.ts` and `src/css/style.fx.css`.
+Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `src/audio/audio-engine.ts`; the overlay is the shared FX popup (`src/ui/fx-overlay.ts`).
 
 ### Notes
 
@@ -81,26 +81,38 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 ├── index.html                      # Entry point (loads src/main.ts)
 ├── vite.config.ts                  # Vite + PWA configuration
 ├── package.json                    # Scripts, dependencies, app version
+├── tools/regression/               # Automated comparison with v1 (headless Chromium, see its README)
 ├── src/
 │   ├── main.ts                     # Entry: styles, init(), Service Worker registration
-│   ├── app.ts                      # Orchestrator: DOM, navigation, transport
+│   ├── app.ts                      # Builds tabs and panels, navigation, layout, About, Wake Lock
 │   ├── state.ts                    # Shared state (STATE)
 │   ├── types.ts                    # Shared types (config schema, FX controls and presets)
+│   ├── events.ts                   # Small typed event emitter (engines → UI)
 │   ├── sw.ts                       # Service Worker (Workbox)
 │   ├── config/                     # Data + FX presets
 │   │   ├── midi.config.ts          # MIDI instrument data (MIDI_TABS)
 │   │   ├── audio.config.ts         # Audio sound data (AUDIO_TABS)
 │   │   ├── midi-fx.config.ts       # MIDI FX overlay presets (MIDI_FX_PRESETS)
 │   │   └── audio-fx.config.ts      # Audio FX overlay presets (AUDIO_FX_PRESETS)
-│   ├── midi/
-│   │   ├── midi.ts                 # MIDI logic (USB + Bluetooth)
+│   ├── midi/                       # MIDI engine (no DOM)
+│   │   ├── midi.ts                 # Sending: USB/BT routing, patch, volume, all notes off
+│   │   ├── connection.ts           # USB (Web MIDI) and Bluetooth connection
 │   │   ├── bluetoothMIDI.ts        # BluetoothMIDI class (BLE MIDI)
 │   │   └── ble-midi-parser.ts      # BLE MIDI packet parser
-│   ├── audio/
-│   │   └── audio.ts                # Audio playback + Web Audio effects engine
-│   ├── fx/
-│   │   ├── midi-fx-ui.ts           # MIDI piano FX overlay (CC sliders, presets)
-│   │   └── audio-fx-ui.ts          # Audio FX overlay (mixer UI, presets)
+│   ├── audio/                      # Audio engine (no DOM)
+│   │   ├── audio-engine.ts         # Web Audio effects chain
+│   │   ├── playback.ts             # Play, stop, pause, seek, fades, progress
+│   │   └── timing.ts               # Time helpers (range, progress, M:SS)
+│   ├── fx/                         # FX logic (no DOM)
+│   │   ├── fx-presets.ts           # Shared preset logic (targets, active preset, clamp)
+│   │   ├── fx-animation.ts         # Slider animation towards targets
+│   │   ├── midi-fx.ts              # MIDI FX controls (CC)
+│   │   └── audio-fx.ts             # Audio FX controls
+│   ├── ui/                         # DOM
+│   │   ├── fx-overlay.ts           # Generic FX popup
+│   │   ├── fx-overlays.ts          # MIDI and audio FX popups, toolbar buttons
+│   │   ├── transport.ts            # Sound buttons, transport bar, seek
+│   │   └── midi-ui.ts              # MIDI connection badges and selects, volume
 │   └── css/
 │       ├── style.css               # Unified stylesheet
 │       └── style.fx.css            # FX overlay (mixer popup)
@@ -198,7 +210,7 @@ Every tab, category and item has a required `id`: a short, readable slug (`'natu
 
 #### FX preset strips — `src/config/midi-fx.config.ts` and `src/config/audio-fx.config.ts`
 
-Preset buttons for the MIDI and audio FX overlays. Each file exports an array — `MIDI_FX_PRESETS` and `AUDIO_FX_PRESETS` — of objects `{ key, icon, text, values }`. Use `values: null` for the reset row; otherwise `values` maps control keys to numbers (MIDI: e.g. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay`; audio: e.g. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Any control **not** listed in `values` uses that control’s **neutral** default from `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` in the corresponding `src/fx/*-fx-ui.ts` file (not the slider’s current position).
+Preset buttons for the MIDI and audio FX overlays. Each file exports an array — `MIDI_FX_PRESETS` and `AUDIO_FX_PRESETS` — of objects `{ key, icon, text, values }`. Use `values: null` for the reset row; otherwise `values` maps control keys to numbers (MIDI: e.g. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay`; audio: e.g. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Any control **not** listed in `values` uses that control’s **neutral** default from `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` in `src/fx/midi-fx.ts` / `src/fx/audio-fx.ts` (not the slider’s current position).
 
 #### Special tab types
 
@@ -326,7 +338,7 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
 - **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
 - **Mixeur d’effets audio en direct** — grande popup sur le panneau audio pour façonner le son en temps réel (égalisation, filtres, tempo, delay, reverb) pendant la lecture ou avant le morceau suivant ; presets avec transitions en douceur, reset global et rappel rapide par curseur
-- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards vers le piano connecté (reverb, chorus, cutoff, résonance, attaque, relâchement, decay) via `sendMidi()` dans `src/midi/midi.ts`. L’interface est dans `src/fx/midi-fx-ui.ts` et partage les styles de la popup audio dans `src/css/style.fx.css`. Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
+- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards vers le piano connecté (reverb, chorus, cutoff, résonance, attaque, relâchement, decay) via `sendMidi()` dans `src/midi/midi.ts`. Les deux popups d’effets partagent une seule implémentation (`src/ui/fx-overlay.ts`, logique des presets dans `src/fx/fx-presets.ts`) et les styles de `src/css/style.fx.css`. Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
 
 ### Comment ça fonctionne
 
@@ -340,7 +352,7 @@ Les boutons **Effets** / **Reset** de la barre du panneau MIDI ouvrent la popup 
 Cliquer sur un bouton → le son se joue immédiatement depuis les haut-parleurs de l'appareil.  
 Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 
-Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `src/audio/audio.ts` ; l’interface de la popup est dans `src/fx/audio-fx-ui.ts` et `src/css/style.fx.css`.
+Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `src/audio/audio-engine.ts` ; la popup est la popup d’effets commune (`src/ui/fx-overlay.ts`).
 
 ### Notes
 
@@ -371,26 +383,38 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 ├── index.html                      # Point d'entrée (charge src/main.ts)
 ├── vite.config.ts                  # Configuration Vite + PWA
 ├── package.json                    # Scripts, dépendances, version de l'app
+├── tools/regression/               # Comparaison automatique avec la v1 (Chromium headless, voir son README)
 ├── src/
 │   ├── main.ts                     # Entrée : styles, init(), enregistrement du Service Worker
-│   ├── app.ts                      # Chef d'orchestre : DOM, navigation, transport
+│   ├── app.ts                      # Construction des onglets et panneaux, navigation, mise en page, À propos, Wake Lock
 │   ├── state.ts                    # État partagé (STATE)
 │   ├── types.ts                    # Types partagés (schéma de config, contrôles et presets FX)
+│   ├── events.ts                   # Petit émetteur d'événements typé (moteurs → interface)
 │   ├── sw.ts                       # Service Worker (Workbox)
 │   ├── config/                     # Données + presets FX
 │   │   ├── midi.config.ts          # Données instruments MIDI (MIDI_TABS)
 │   │   ├── audio.config.ts         # Données sons audio (AUDIO_TABS)
 │   │   ├── midi-fx.config.ts       # Presets popup effets MIDI (MIDI_FX_PRESETS)
 │   │   └── audio-fx.config.ts      # Presets popup effets audio (AUDIO_FX_PRESETS)
-│   ├── midi/
-│   │   ├── midi.ts                 # Logique MIDI (USB + Bluetooth)
+│   ├── midi/                       # Moteur MIDI (sans DOM)
+│   │   ├── midi.ts                 # Envoi : routage USB/BT, patch, volume, all notes off
+│   │   ├── connection.ts           # Connexion USB (Web MIDI) et Bluetooth
 │   │   ├── bluetoothMIDI.ts        # Classe BluetoothMIDI (BLE MIDI)
 │   │   └── ble-midi-parser.ts      # Parser paquet BLE MIDI
-│   ├── audio/
-│   │   └── audio.ts                # Lecture audio + moteur Web Audio (effets)
-│   ├── fx/
-│   │   ├── midi-fx-ui.ts           # Popup effets piano MIDI (curseurs CC, presets)
-│   │   └── audio-fx-ui.ts          # Popup mixeur effets (UI, presets)
+│   ├── audio/                      # Moteur audio (sans DOM)
+│   │   ├── audio-engine.ts         # Chaîne d'effets Web Audio
+│   │   ├── playback.ts             # Lecture, stop, pause, seek, fondus, progression
+│   │   └── timing.ts               # Calculs de temps (plage, progression, M:SS)
+│   ├── fx/                         # Logique des effets (sans DOM)
+│   │   ├── fx-presets.ts           # Logique commune des presets (cibles, preset actif, clamp)
+│   │   ├── fx-animation.ts         # Animation des curseurs vers les cibles
+│   │   ├── midi-fx.ts              # Contrôles effets MIDI (CC)
+│   │   └── audio-fx.ts             # Contrôles effets audio
+│   ├── ui/                         # DOM
+│   │   ├── fx-overlay.ts           # Popup d'effets générique
+│   │   ├── fx-overlays.ts          # Popups effets MIDI et audio, boutons de barre
+│   │   ├── transport.ts            # Boutons de sons, barre de transport, seek
+│   │   └── midi-ui.ts              # Badges et listes de connexion MIDI, volume
 │   └── css/
 │       ├── style.css               # CSS unifié
 │       └── style.fx.css            # Popup mixeur / effets
@@ -488,7 +512,7 @@ Chaque onglet, catégorie et tuile a un `id` obligatoire : un slug court et lisi
 
 #### Bandeaux de presets FX — `src/config/midi-fx.config.ts` et `src/config/audio-fx.config.ts`
 
-Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un tableau — `MIDI_FX_PRESETS` et `AUDIO_FX_PRESETS` — d’objets `{ key, icon, text, values }`. `values: null` correspond à la ligne Reset ; sinon `values` associe chaque clé de contrôle à un nombre (MIDI : ex. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay` ; audio : ex. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Tout contrôle **absent** de `values` prend la valeur **neutre** définie dans `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` du fichier `src/fx/*-fx-ui.ts` correspondant (pas la position actuelle du curseur).
+Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un tableau — `MIDI_FX_PRESETS` et `AUDIO_FX_PRESETS` — d’objets `{ key, icon, text, values }`. `values: null` correspond à la ligne Reset ; sinon `values` associe chaque clé de contrôle à un nombre (MIDI : ex. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay` ; audio : ex. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Tout contrôle **absent** de `values` prend la valeur **neutre** définie dans `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` de `src/fx/midi-fx.ts` / `src/fx/audio-fx.ts` (pas la position actuelle du curseur).
 
 #### Types d'onglets spéciaux
 
