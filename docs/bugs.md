@@ -4,7 +4,7 @@ La refonte ne change aucun comportement (voir `REFONTE.md`, règle 1) : les bugs
 
 Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé** (correctif ciblé après la fusion, daté), **corrigé par la refonte** (le nouveau code se comporte autrement par construction, sans correctif ciblé).
 
-**Décision de l'utilisateur (2026-10-13, phase 6)** : corriger les n° 1, 2, 3, 5 et 6, **après** la fusion de la refonte dans `main`, un commit par bug. Le n° 5 est bien un bug (pas un repère « déjà joué » à garder).
+**Décision de l'utilisateur (2026-10-13, phase 6)** : corriger les n° 1, 2, 3, 5 et 6, **après** la fusion de la refonte dans `main`, un commit par bug. Le n° 5 est bien un bug (pas un repère « déjà joué » à garder). Fait le 2026-10-14.
 
 ---
 
@@ -36,7 +36,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé** (co
 ## 3. L'auto-connexion USB au piano au chargement ne se fait pas
 
 - **Statut** : corrigé (2026-10-14) : au premier accès Web MIDI, `autoConnectUsbPiano()` (`src/midi/connection.ts`) appelle `selectMidiConnection()` sur la première sortie dont le nom contient « piano » (le FP-30X se présente comme « Roland Digital Piano »), si aucune connexion n'est active. Toutes les listes affichent le piano et le badge passe à « ● USB »
-- **Constaté** : phase 3 (2026-10-13), à la lecture du code ; **à confirmer sur la tablette** avec le piano branché en USB avant d'ouvrir l'app
+- **Constaté** : phase 3 (2026-10-13), à la lecture du code ; correctif vérifié le 2026-10-14 dans Edge sous Windows, piano branché en USB avant le chargement
 - **Où** : v1 : `js/midi.js`, `populateMidiSelects(true)`, et l'écouteur `change` délégué sur `#panels` dans `js/app.js` (`initMidiSelectDelegation`) ; refonte : `src/ui/midi-ui.svelte.ts`, `populateMidiSelects(true)`, qui reproduit le comportement (piano affiché dans la liste, sans connexion)
 - **Diagnostic** : au premier chargement, si une sortie MIDI dont le nom contient « piano » existe, le code la sélectionne dans la liste puis fait `sel.dispatchEvent(new Event('change'))`. Cet événement est créé **sans `bubbles: true`** : il ne remonte pas jusqu'à `#panels`, où se trouve le seul écouteur. `handleMidiSelectChange()` n'est donc jamais appelé.
 - **Symptôme attendu** : la liste affiche le piano mais le badge reste « Non connecté », et les boutons d'instruments n'ont aucun effet (« Pas de connexion MIDI active » dans la console) tant qu'on ne resélectionne pas le piano à la main.
