@@ -15,7 +15,7 @@ import { audioFxOverlay } from './fx-overlays.svelte.ts';
 // ═══════════════════════════════════════════════════════
 
 export class SoundButtonState {
-  /** Variable CSS --progress (non remise à zéro à l'arrêt : voir docs/bugs.md n° 5) */
+  /** Variable CSS --progress (remise à zéro à l'arrêt du son) */
   progress   = $state('0%');
   /** Variable CSS --progress-transition, selon la durée du son */
   transition = $state<string | undefined>(undefined);
@@ -88,6 +88,7 @@ export function bindPlaybackUI(): void {
         if (audioFxOverlay.isOpen) audioFxOverlay.sync();
         break;
       case 'stop':
+        if (event.item) getSoundButtonState(event.item).progress = '0%';
         resetTransportIfIdle();
         if (audioFxOverlay.isOpen) audioFxOverlay.sync();
         break;

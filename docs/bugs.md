@@ -53,7 +53,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé** (co
 
 ## 5. La barre de progression d'un bouton de son reste affichée après l'arrêt
 
-- **Statut** : ouvert, à corriger après la fusion
+- **Statut** : corrigé (2026-10-14) : `bindPlaybackUI()` remet `progress` à `'0%'` sur l'événement `stop`, pour le son arrêté (la barre se vide avec la transition CSS)
 - **Constaté** : phase 5 (2026-10-13), à la lecture du code, confirmé par le scénario de `tools/regression` sur `v1-vanilla`
 - **Où** : v1 : `updateTransportUI()` (`js/app.js`) ; refonte : `SoundButtonState.progress` dans `src/ui/transport.svelte.ts`
 - **Diagnostic** : la progression est dessinée par le pseudo-élément `.sound-btn::before`, de largeur `var(--progress)`, visible quel que soit l'état du bouton. À l'arrêt, le code prévu pour la remettre à zéro cherche `.sound-btn.playing, .sound-btn.paused`, mais `stopSound()` a déjà retiré ces classes : il ne trouve rien, et `--progress` garde sa dernière valeur (la classe `paused` n'est d'ailleurs jamais posée).
