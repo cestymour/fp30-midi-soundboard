@@ -3,7 +3,7 @@
 ================================================================ */
 
 import { STATE } from '../state.js';
-import { AUDIO_FX_PRESETS } from '../config/audio-fx.config.js';
+import { AUDIO_FX_PRESETS } from '../config/audio-fx.config.ts';
 import { AudioEngineAPI } from '../audio/audio.js';
 import { isMidiFXAnyControlModified } from './midi-fx-ui.js';
 

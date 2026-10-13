@@ -4,7 +4,7 @@
 ================================================================ */
 
 import { STATE } from '../state.js';
-import { MIDI_FX_PRESETS } from '../config/midi-fx.config.js';
+import { MIDI_FX_PRESETS } from '../config/midi-fx.config.ts';
 import { sendMidi } from '../midi/midi.js';
 import { AudioEngineAPI } from '../audio/audio.js';
 import { isAudioFXAnyControlModified } from './audio-fx-ui.js';

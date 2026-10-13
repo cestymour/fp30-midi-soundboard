@@ -1,4 +1,6 @@
-export const MIDI_FX_PRESETS = [
+import type { FxPreset, MidiFxKey } from '../types.ts';
+
+export const MIDI_FX_PRESETS: FxPreset<MidiFxKey>[] = [
   { key: 'reset',     icon: '\u21BA', text: 'Reset',       values: null },
   { key: 'hall',      icon: '🏛️',   text: 'Salle',       values: { reverb: 80,  chorus: 0,  cutoff: 74, resonance: 60, attack:  64, release:  90, decay: 64 } },
   { key: 'cathedral', icon: '⛪',    text: 'Cathédrale',  values: { reverb: 120, chorus: 20, cutoff: 80, resonance: 55, attack:  64, release: 115, decay: 64 } },

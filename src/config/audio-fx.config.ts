@@ -1,4 +1,6 @@
-export const AUDIO_FX_PRESETS = [
+import type { AudioFxKey, FxPreset } from '../types.ts';
+
+export const AUDIO_FX_PRESETS: FxPreset<AudioFxKey>[] = [
   { key: 'reset',      icon: '\u21BA', text: 'Reset',            values: null },
   { key: 'crystal',    icon: '✨',    text: 'Clarté Studio',     values: { bass:   4, mid:  -2, treble:   6, lowPass: 20000, highPass:   30, reverb:  12, delay:   0 } },
   //{ key: 'bass',       icon: '↘️',    text: 'Bass',              values: { bass:  15, mid: -10, treble: -15, lowPass:  9000 } },

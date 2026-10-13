@@ -4,8 +4,8 @@
 ================================================================ */
 
 import { STATE } from './state.js';
-import { MIDI_TABS } from './config/midi.config.js';
-import { AUDIO_TABS } from './config/audio.config.js';
+import { MIDI_TABS } from './config/midi.config.ts';
+import { AUDIO_TABS } from './config/audio.config.ts';
 import {
   sendVolume, sendEmergencyStopMidi, selectInstrument, syncMidiSliders,
   initBluetooth, initWebMidi, handleMidiSelectChange,
