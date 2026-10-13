@@ -1,0 +1,69 @@
+<!--
+  AboutPopup.svelte — Popup « À propos » : version, état du Service Worker
+  et du Wake Lock, rechargement sans cache
+-->
+<script lang="ts">
+  import { STATE } from '../../state.svelte.ts';
+
+  let isOpen  = $state(false);
+  /** Affichage en ligne : absent avant la première ouverture (masqué par le CSS) */
+  let display = $state<string | undefined>(undefined);
+  let swStatus = $state('Service Worker : vérification...');
+  let wlStatus = $state('Wake Lock : vérification...');
+
+  export function open(): void {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      swStatus = 'Service Worker : actif ✓';
+    } else {
+      swStatus = 'Service Worker : inactif';
+    }
+
+    if (!('wakeLock' in navigator)) {
+      wlStatus = 'Wake Lock : non supporté';
+    } else if (STATE.wakeLock) {
+      wlStatus = 'Wake Lock : actif ✓';
+    } else {
+      wlStatus = 'Wake Lock : inactif';
+    }
+
+    isOpen  = true;
+    display = 'flex';
+  }
+
+  function close(): void {
+    isOpen  = false;
+    display = 'none';
+  }
+
+  async function reloadWithoutCache(): Promise<void> {
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) await reg.unregister();
+    }
+    location.reload();
+  }
+</script>
+
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions (fermeture par le bouton Fermer) -->
+<div
+  id="about-overlay"
+  aria-hidden={isOpen ? 'false' : 'true'}
+  style:display
+  onclick={event => { if (event.target === event.currentTarget) close(); }}
+>
+  <div id="about-card">
+    <div id="about-title">[IMPRO] Soundboard</div>
+    <div id="about-work">Work with 🎹 Piano Roland FP30X</div>
+    <div id="about-version">v{__APP_VERSION__}</div>
+    <div id="about-info">
+      <span id="about-sw-status">{swStatus}</span>
+      <br>
+      <span id="about-wl-status">{wlStatus}</span>
+    </div>
+    <div id="about-credit">by cestymour</div>
+    <div id="about-actions">
+      <button id="about-reload-btn" onclick={reloadWithoutCache}>⟳ Vider le cache et recharger</button>
+      <button id="about-close-btn" onclick={close}>Fermer</button>
+    </div>
+  </div>
+</div>

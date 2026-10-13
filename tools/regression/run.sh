@@ -4,6 +4,7 @@
 set -u
 cd "$(dirname "$0")/../.."
 REPO=$PWD
+[ -f dist/index.html ] || { echo "dist/ absent : lancer npm run build d'abord" >&2; exit 1; }
 TOOLS=$REPO/tools/regression
 WORK=${REGRESSION_WORK:-/tmp/fp30-regression}
 V1_DIR=$WORK/v1
@@ -15,6 +16,8 @@ cp -r dist "$WORK/site/fp30-midi-soundboard"
 
 node "$TOOLS/server.mjs" "$V1_DIR" 8090 & PID_V1=$!
 node "$TOOLS/server.mjs" "$WORK/site" 8091 & PID_NEW=$!
+# Nettoyage même en cas d'erreur ou d'interruption
+trap 'kill $PID_V1 $PID_NEW $(cat "$WORK/server.pid" 2>/dev/null) 2>/dev/null; git worktree remove --force "$V1_DIR" 2>/dev/null' EXIT
 sleep 1
 V1_URL=http://localhost:8090/
 NEW_URL=http://localhost:8091/fp30-midi-soundboard/
@@ -32,13 +35,10 @@ for size in "1280 800" "800 1280"; do
   node "$TOOLS/compare-behavior.mjs" "$OUT/behavior-v1-$1.json" "$OUT/behavior-new-$1.json"
 done
 
-kill $PID_V1 $PID_NEW
-
 echo "== Service Worker : mise à jour depuis la v1, hors ligne"
 node "$TOOLS/server.mjs" "$WORK/site2" 8095 & echo $! > "$WORK/server.pid"
 sleep 1
 SITE2="$WORK/site2/fp30-midi-soundboard" SERVER_PID_FILE="$WORK/server.pid" V1_DIR="$V1_DIR" NEW_BUILD="$REPO/dist" \
   node "$TOOLS/migration.mjs" 2>&1 | grep -v WakeLock
 
-git worktree remove --force "$V1_DIR"
 echo "Résultats : $OUT"

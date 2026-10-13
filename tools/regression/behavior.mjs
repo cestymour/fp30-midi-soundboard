@@ -25,7 +25,7 @@ const snap = async (label) => {
       tabs: cls('.tab-btn'), panels: cls('.panel'),
       midiFx: ov('midi-fx-overlay'), audioFx: ov('audio-fx-overlay'),
       toolbar: cls('.midi-fx-open-btn, .midi-fx-reset-btn, .audio-fx-open-btn, .audio-fx-reset-btn'),
-      playPause: [...document.querySelectorAll('.transport-play-pause')].map(b => b.className + '|' + b.disabled + '|' + b.innerHTML),
+      playPause: [...document.querySelectorAll('.transport-play-pause')].map(b => b.className + '|' + b.disabled + '|' + b.innerHTML.replace(/<!--[^]*?-->/g, '')),
       handles: cls('.transport-seek-handle'),
       timeKnown: [...document.querySelectorAll('.transport-time')].map(t => /^\d+:\d\d \/ \d+:\d\d$/.test(t.textContent) ? 'temps' : t.textContent),
       soundBtns: [...document.querySelectorAll('.sound-btn')].filter(b => b.className !== 'sound-btn' && !/^sound-btn( sound-btn--img| animaux-\w+)*$/.test(b.className)).map(b => b.title + ':' + b.className),

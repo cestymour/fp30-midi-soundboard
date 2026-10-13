@@ -1,13 +1,27 @@
 /* ================================================================
-   main.ts — Point d'entrée : styles, initialisation de l'app
-             et enregistrement du Service Worker
+   main.ts — Point d'entrée : styles, interface (Svelte), moteurs,
+             Wake Lock et enregistrement du Service Worker
 ================================================================ */
 
 import './css/style.css';
 import './css/style.fx.css';
-import { init } from './app.ts';
+import { mount } from 'svelte';
+import App from './App.svelte';
+import { initBluetooth, initWebMidi } from './midi/connection.ts';
+import { bindMidiConnectionUI } from './ui/midi-ui.svelte.ts';
+import { bindPlaybackUI } from './ui/transport.svelte.ts';
+import { initWakeLock } from './wake-lock.ts';
 
-init();
+// L'interface suit les moteurs MIDI et audio
+bindMidiConnectionUI();
+bindPlaybackUI();
+
+mount(App, { target: document.getElementById('app')! });
+
+initWakeLock();
+
+try { initBluetooth(); } catch (e) { console.warn('[BT] Init échoué :', e); }
+try { initWebMidi();   } catch (e) { console.warn('[MIDI] Init échoué :', e); }
 
 // Service Worker : uniquement sur la version construite (pas en dev)
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
