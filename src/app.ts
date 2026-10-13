@@ -7,22 +7,12 @@ import type { AudioItem, AudioTab, Category, MidiTab } from './types.ts';
 import { STATE } from './state.ts';
 import { MIDI_TABS } from './config/midi.config.ts';
 import { AUDIO_TABS } from './config/audio.config.ts';
-import {
-  sendVolume, sendEmergencyStopMidi, selectInstrument, syncMidiSliders,
-  initBluetooth, initWebMidi, handleMidiSelectChange,
-} from './midi/midi.ts';
-import {
-  syncAudioSliders, fadeAudio, startProgressLoop, stopProgressLoop,
-  stopSound, emergencyStopAudio, playSound,
-} from './audio/audio.ts';
-import {
-  buildMidiFXPopup, openMidiFXPopup, closeMidiFXPopup,
-  resetMidiFXEffects, refreshMidiFXToolbarButtons,
-} from './fx/midi-fx-ui.ts';
-import {
-  buildAudioFXPopup, openAudioFXPopup, closeAudioFXPopup,
-  syncAudioFXPopupFromEngine, resetAudioFXEffects, refreshAudioFXToolbarButtons,
-} from './fx/audio-fx-ui.ts';
+import { sendEmergencyStopMidi, setMidiVolume } from './midi/midi.ts';
+import { initBluetooth, initWebMidi, selectMidiConnection } from './midi/connection.ts';
+import { emergencyStopAudio, playSound, setAudioVolume, stopSound, togglePlayPause } from './audio/playback.ts';
+import { bindMidiConnectionUI, selectInstrument, syncMidiSliders } from './ui/midi-ui.ts';
+import { bindPlaybackUI, initSeekBarDrag, registerSoundButton, syncAudioSliders } from './ui/transport.ts';
+import { audioFxOverlay, midiFxOverlay, refreshFxToolbarButtons, resetAllFXEffects } from './ui/fx-overlays.ts';
 
 // ═══════════════════════════════════════════════════════
 // RÉFÉRENCES DOM
@@ -137,14 +127,6 @@ function createColumns(container: HTMLElement, count: number, className: string)
   return cols;
 }
 
-/** Formate des secondes en M:SS */
-function formatTime(sec: number): string {
-  if (!isFinite(sec) || sec < 0) return '–:––';
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
 /** Crée un bouton audio (sound-btn) avec tous ses attributs et son listener */
 function buildSoundBtn(item: AudioItem): HTMLButtonElement {
   const btn = document.createElement('button');
@@ -164,12 +146,12 @@ function buildSoundBtn(item: AudioItem): HTMLButtonElement {
   btn.title = item.title ?? item.name;
 
   btn.addEventListener('click', () => {
-    if (btn === STATE.currentSoundBtn) {
+    if (item === STATE.currentSoundItem) {
       // Ce bouton est actif → stop (ou restart si en pause)
       if (STATE.isPaused) {
         // En pause → restart depuis le début
         stopSound(false);
-        playSound(btn);
+        playSound(item);
       } else {
         // En lecture → stop
         stopSound(true);
@@ -177,9 +159,11 @@ function buildSoundBtn(item: AudioItem): HTMLButtonElement {
     } else {
       // Autre bouton → stop l'ancien, play le nouveau
       stopSound(true);
-      playSound(btn);
+      playSound(item);
     }
   });
+
+  registerSoundButton(item, btn);
 
   return btn;
 }
@@ -275,209 +259,10 @@ function equalizeAudioButtons(): void {
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// TRANSPORT BAR — Play/Pause + Seek + Time
-// ═══════════════════════════════════════════════════════
-
-/**
- * Mise à jour légère — appelée dans la boucle RAF (60fps).
- * Met à jour le temps, la barre de seek et la progression du bouton.
- */
-export function updateSeekUI(): void {
-  const audio = STATE.currentAudio;
-  const btn   = STATE.currentSoundBtn;
-  if (!audio || !btn) return;
-
-  const startOffset   = parseFloat(btn.dataset.start!) || 0;
-  const endRaw        = btn.dataset.end;
-  const endOffset     = endRaw ? parseFloat(endRaw) : null;
-  const dur           = audio.duration;
-  const effectiveEnd  = endOffset ?? (isFinite(dur) ? dur : 0);
-  const totalDuration = effectiveEnd - startOffset;
-  const elapsed       = Math.max(0, audio.currentTime - startOffset);
-  const pct           = totalDuration > 0 ? Math.min(100, (elapsed / totalDuration) * 100) : 0;
-  
-  // Met à jour la barre de progression sur le bouton lui-même
-  btn.style.setProperty('--progress', pct.toFixed(2) + '%');
-
-  // Met à jour toutes les barres de transport
-  document.querySelectorAll('.transport-seek').forEach(bar => {
-    bar.querySelector<HTMLElement>('.transport-seek-fill')!.style.width  = pct + '%';
-    bar.querySelector<HTMLElement>('.transport-seek-handle')!.style.left = pct + '%';
-  });
-
-  // Met à jour les affichages de temps
-  document.querySelectorAll('.transport-time').forEach(el => {
-    el.textContent = `${formatTime(elapsed)} / ${formatTime(totalDuration)}`;
-  });
-}
-
-/**
- * Mise à jour complète de l'UI — appelée uniquement sur changement d'état
- * (play, stop, pause, emergency stop).
- */
-export function updateTransportUI(): void {
-  const audio = STATE.currentAudio;
-  const btn   = STATE.currentSoundBtn;
-
-  // ── Bouton play/pause et état du "handle" ──
-  document.querySelectorAll<HTMLButtonElement>('.transport-play-pause').forEach(b => {
-    if (!audio || !btn) {
-      b.innerHTML = '<span class="icon-play"></span>';
-      b.disabled = true;
-      b.classList.remove('is-playing', 'is-paused');
-    } else if (STATE.isPaused) {
-      b.innerHTML = '<span class="icon-play"></span>';
-      b.disabled = false;
-      b.classList.remove('is-playing');
-      b.classList.add('is-paused');
-    } else {
-      b.innerHTML = '<span class="icon-pause"></span>';
-      b.disabled = false;
-      b.classList.add('is-playing');
-      b.classList.remove('is-paused');
-    }
-  });
-
-  document.querySelectorAll('.transport-seek-handle').forEach(handle => {
-    handle.classList.toggle('pulsing', !!(audio && btn && !STATE.isPaused));
-  });
-
-  // ── Reset des barres et temps si rien ne joue ──
-  if (!audio || !btn) {
-    document.querySelectorAll('.transport-seek').forEach(bar => {
-      bar.querySelector<HTMLElement>('.transport-seek-fill')!.style.width = '0%';
-      bar.querySelector<HTMLElement>('.transport-seek-handle')!.style.left = '0%';
-    });
-    document.querySelectorAll('.transport-time').forEach(el => {
-      el.textContent = '–:–– / –:––';
-    });
-    // S'assure que le bouton qui jouait est bien remis à zéro
-    const playingBtn = document.querySelector<HTMLElement>('.sound-btn.playing, .sound-btn.paused');
-    if (playingBtn) playingBtn.style.setProperty('--progress', '0%');
-  }
-
-  // ── État global du panneau audio ──
-  document.querySelectorAll('.panel-audio').forEach(p => {
-    p.classList.remove('is-playing', 'is-paused');
-    if (audio && btn) {
-      if (STATE.isPaused) {
-        p.classList.add('is-paused');
-      } else {
-        p.classList.add('is-playing');
-      }
-    }
-  });
-}
-
-/** Calcule la position en secondes à partir d'un événement sur la barre de seek */
-function getSeekTimeFromEvent(e: MouseEvent | TouchEvent, bar: HTMLElement): number | null {
-  if (!STATE.currentAudio || !STATE.currentSoundBtn) return null;
-
-  const rect = bar.getBoundingClientRect();
-  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-  const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-
-  const btn = STATE.currentSoundBtn;
-  const startOffset = parseFloat(btn.dataset.start!) || 0;
-  const endRaw = btn.dataset.end;
-  const endOffset = endRaw ? parseFloat(endRaw) : null;
-  const dur = STATE.currentAudio.duration;
-  const effectiveEnd = endOffset ?? (isFinite(dur) ? dur : 0);
-  const totalDuration = effectiveEnd - startOffset;
-
-  const newTime = startOffset + pct * totalDuration;
-  return Math.max(startOffset, Math.min(newTime, effectiveEnd));
-}
-
-/** Applique le seek */
-function applySeek(e: MouseEvent | TouchEvent, bar: HTMLElement): void {
-  const newTime = getSeekTimeFromEvent(e, bar);
-  if (newTime !== null) {
-    STATE.currentAudio!.currentTime = newTime;
-    updateSeekUI(); // Mise à jour immédiate et légère
-  }
-}
-
-/** Initialise le drag sur une barre de seek */
-function initSeekBarDrag(bar: HTMLElement): void {
-  let isDragging = false;
-
-  const startDrag = (e: MouseEvent | TouchEvent) => {
-    if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
-    isDragging = true;
-    document.body.classList.add('is-seeking');
-    applySeek(e, bar);
-    if (e.cancelable) e.preventDefault();
-  };
-
-  const doDrag = (e: MouseEvent | TouchEvent) => {
-    if (!isDragging) return;
-    applySeek(e, bar);
-  };
-
-  const endDrag = () => {
-    if (!isDragging) return;
-    isDragging = false;
-    document.body.classList.remove('is-seeking');
-  };
-
-  // -- Mouse events --
-  bar.addEventListener('mousedown', startDrag);
-  document.addEventListener('mousemove', doDrag);
-  document.addEventListener('mouseup', endDrag);
-
-  // -- Touch events --
-  bar.addEventListener('touchstart', startDrag, { passive: false });
-  document.addEventListener('touchmove', doDrag, { passive: true });
-  document.addEventListener('touchend', endDrag);
-  document.addEventListener('touchcancel', endDrag);
-}
-
-
-/** Toggle play/pause */
-function togglePlayPause(): void {
-  if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
-
-  if (STATE.isPaused) {
-    // Resume avec fade in
-    STATE.currentAudio.volume = 0;
-    STATE.currentAudio.play().then(() => {
-      // Relus après la reprise de lecture, comme dans la version d'origine
-      const audio = STATE.currentAudio!;
-      const btn   = STATE.currentSoundBtn!;
-      STATE.isPaused = false;
-      fadeAudio(audio, 0, STATE.audioVolume, 150, null);
-      startProgressLoop(
-        audio,
-        btn,
-        parseFloat(btn.dataset.start!) || 0,
-        btn.dataset.end ? parseFloat(btn.dataset.end) : null
-      );
-      updateTransportUI();
-    });
-  } else {
-    // Pause avec fade out
-    stopProgressLoop();
-    const audio = STATE.currentAudio;
-    fadeAudio(audio, audio.volume, 0, 150, () => {
-      audio.pause();
-      STATE.isPaused = true;
-      updateTransportUI();
-    });
-  }
-}
-
 /** Arrêt d'urgence total — coupe MIDI + Audio */
 function emergencyStopAll(): void {
   emergencyStopAudio();
   sendEmergencyStopMidi();
-}
-
-/** Reset total des effets — MIDI + Audio */
-function resetAllFXEffects(): void {
-  resetMidiFXEffects();
-  resetAudioFXEffects();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -487,7 +272,6 @@ type TabWithType = (MidiTab & { type: 'midi' }) | (AudioTab & { type: 'audio' })
 
 function buildUI(): void {
   const allTabs: TabWithType[] = [];
-  const firstAudioIdx = MIDI_TABS.length;
 
   MIDI_TABS.forEach(tab  => allTabs.push({ ...tab, type: 'midi'  }));
   AUDIO_TABS.forEach(tab => allTabs.push({ ...tab, type: 'audio' }));
@@ -540,8 +324,8 @@ function buildUI(): void {
   });
 
   buildAboutPopup();
-  buildMidiFXPopup();
-  buildAudioFXPopup();
+  midiFxOverlay.build();
+  audioFxOverlay.build();
 }
 
 // ── Contrôles MIDI ──
@@ -596,7 +380,7 @@ function buildMidiControls(): HTMLDivElement {
   controlsRight.insertBefore(midiFxBtnGroup, volumeWrap);
   controlsRight.insertBefore(stopBtn, volumeWrap);
 
-  midiFxOpenBtn.addEventListener('click', openMidiFXPopup);
+  midiFxOpenBtn.addEventListener('click', () => midiFxOverlay.open());
   midiFxResetBtn.addEventListener('click', resetAllFXEffects);
 
   const slider = wrap.querySelector<HTMLInputElement>('.midi-vol')!;
@@ -604,12 +388,11 @@ function buildMidiControls(): HTMLDivElement {
   const iconEl = wrap.querySelector('.vol-icon')!;
 
   slider.addEventListener('input', () => {
-    STATE.midiVolume = parseInt(slider.value, 10);
+    setMidiVolume(parseInt(slider.value, 10));
     const pct = (STATE.midiVolume / 127 * 100).toFixed(1);
     slider.style.setProperty('--vol-pct', pct + '%');
     valEl.textContent = String(STATE.midiVolume);
     updateVolIcon(iconEl, STATE.midiVolume, 127);
-    sendVolume(STATE.midiVolume);
     syncMidiSliders(STATE.midiVolume);
   });
 
@@ -673,19 +456,18 @@ function buildAudioControls(): HTMLDivElement {
   const iconEl = wrap.querySelector('.vol-icon')!;
 
   slider.addEventListener('input', () => {
-    STATE.audioVolume = parseInt(slider.value, 10) / 100;
+    setAudioVolume(parseInt(slider.value, 10) / 100);
     const p = Math.round(STATE.audioVolume * 100);
     slider.style.setProperty('--vol-pct', p + '%');
     valEl.textContent = p + '%';
     updateVolIcon(iconEl, p, 100);
-    if (STATE.currentAudio) STATE.currentAudio.volume = STATE.audioVolume;
     syncAudioSliders(p);
-    if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
+    if (audioFxOverlay.isOpen) audioFxOverlay.sync();
   });
 
   // Play/Pause
   wrap.querySelector('.transport-play-pause')!.addEventListener('click', togglePlayPause);
-  fxOpenBtn.addEventListener('click', openAudioFXPopup);
+  fxOpenBtn.addEventListener('click', () => audioFxOverlay.open());
   fxResetBtn.addEventListener('click', resetAllFXEffects);
 
   // Seek (clic + drag)
@@ -873,16 +655,15 @@ function initLogoInteraction(): void {
 // NAVIGATION ONGLETS
 // ═══════════════════════════════════════════════════════
 function activateTab(idx: number): void {
-  if (STATE.midiFxPopupOpen)  closeMidiFXPopup();
-  if (STATE.audioFxPopupOpen) closeAudioFXPopup();
+  if (midiFxOverlay.isOpen)  midiFxOverlay.close();
+  if (audioFxOverlay.isOpen) audioFxOverlay.close();
 
   document.querySelectorAll('.tab-btn').forEach((b, i) =>
     b.classList.toggle('active', i === idx));
   document.querySelectorAll('.panel').forEach((p, i) =>
     p.classList.toggle('active', i === idx));
 
-  refreshMidiFXToolbarButtons();
-  refreshAudioFXToolbarButtons();
+  refreshFxToolbarButtons();
 
   requestAnimationFrame(() => {
     const activePanel = document.querySelector<HTMLElement>('.panel.active');
@@ -910,7 +691,7 @@ function initMidiSelectDelegation(): void {
   panelsEl.addEventListener('change', async e => {
     const target = e.target as HTMLSelectElement;
     if (!target.classList.contains('midi-select')) return;
-    await handleMidiSelectChange(target.value);
+    await selectMidiConnection(target.value);
   });
 }
 
@@ -954,6 +735,8 @@ export function init(): void {
   initTabNavigation();
   initMidiSelectDelegation();
   initResizeObserver();
+  bindMidiConnectionUI();
+  bindPlaybackUI();
 
   buildUI();
   initLogoInteraction();
