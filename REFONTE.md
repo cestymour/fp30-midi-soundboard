@@ -214,7 +214,10 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
 À mettre à jour par l'IA à chaque étape terminée (date + commit).
 
 - [x] Étape 0 : tag `v1-vanilla` et branche `refonte` (2026-10-13)
-- [ ] Phase 1 : Vite + modules ES
+- [x] Phase 1 : Vite + modules ES (2026-10-13, `b03c234`), en attente de la checklist sur tablette
+  - Écart au plan : le paquet npm `ble-midi` n'est pas utilisable (CLI Node avec dépendances natives noble/bleno/midi, `npm install` échoue, `parsePacket` non exporté). Avec l'accord de l'utilisateur, le parseur est porté en module ES dans `src/midi/ble-midi-parser.js` (MIT, origine indiquée).
+  - Node 18 en local : Vite 6 (Vite 7 demande Node ≥ 20.19).
+  - Vérifié en Chromium headless (paysage 1280×800 et portrait 800×1280) : captures des 4 onglets identiques au pixel près à `v1-vanilla`, popups FX, lecture d'un son et popup « À propos » OK, aucune erreur console.
 - [ ] Phase 2 : PWA et déploiement
 - [ ] **Jalon 1 fusionné dans `main`**
 - [ ] Phase 3 : TypeScript
