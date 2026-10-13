@@ -1,40 +1,42 @@
 /* ================================================================
-   app.js — Chef d'orchestre : construction DOM,
+   app.ts — Chef d'orchestre : construction DOM,
             navigation onglets, initialisation
 ================================================================ */
 
-import { STATE } from './state.js';
+import type { AudioItem, AudioTab, Category, MidiTab } from './types.ts';
+import { STATE } from './state.ts';
 import { MIDI_TABS } from './config/midi.config.ts';
 import { AUDIO_TABS } from './config/audio.config.ts';
 import {
   sendVolume, sendEmergencyStopMidi, selectInstrument, syncMidiSliders,
   initBluetooth, initWebMidi, handleMidiSelectChange,
-} from './midi/midi.js';
+} from './midi/midi.ts';
 import {
   syncAudioSliders, fadeAudio, startProgressLoop, stopProgressLoop,
   stopSound, emergencyStopAudio, playSound,
-} from './audio/audio.js';
+} from './audio/audio.ts';
 import {
   buildMidiFXPopup, openMidiFXPopup, closeMidiFXPopup,
   resetMidiFXEffects, refreshMidiFXToolbarButtons,
-} from './fx/midi-fx-ui.js';
+} from './fx/midi-fx-ui.ts';
 import {
   buildAudioFXPopup, openAudioFXPopup, closeAudioFXPopup,
   syncAudioFXPopupFromEngine, resetAudioFXEffects, refreshAudioFXToolbarButtons,
-} from './fx/audio-fx-ui.js';
+} from './fx/audio-fx-ui.ts';
 
 // ═══════════════════════════════════════════════════════
 // RÉFÉRENCES DOM
 // ═══════════════════════════════════════════════════════
-const tabNav   = document.getElementById('tab-nav');
-const panelsEl = document.getElementById('panels');
+// Présents dans index.html
+const tabNav   = document.getElementById('tab-nav')!;
+const panelsEl = document.getElementById('panels')!;
 
 // ═══════════════════════════════════════════════════════
 // UTILITAIRES DOM — blocs réutilisables
 // ═══════════════════════════════════════════════════════
 
 /** Crée un bouton d'arrêt d'urgence avec SVG hazard */
-function buildEmergencyStopBtn(extraClass) {
+function buildEmergencyStopBtn(extraClass?: string): HTMLButtonElement {
   const uid = Math.random().toString(36).substring(2, 11);
   const btn = document.createElement('button');
   btn.className = 'emergency-stop-btn' + (extraClass ? ' ' + extraClass : '');
@@ -62,7 +64,9 @@ function buildEmergencyStopBtn(extraClass) {
   return btn;
 }
 
-function buildPanelUtilityBtn({ className, title, icon, label }) {
+function buildPanelUtilityBtn({ className, title, icon, label }: {
+  className: string; title: string; icon: string; label: string;
+}): HTMLButtonElement {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = className;
@@ -75,14 +79,14 @@ function buildPanelUtilityBtn({ className, title, icon, label }) {
 }
 
 /** Détecte si une chaîne est un chemin vers une image */
-function isImagePath(str) {
-  return str && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(str);
+function isImagePath(str: string | undefined): boolean {
+  return !!str && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(str);
 }
 
 /** Génère le HTML d'icône (image ou emoji) et indique si c'est une image */
-function buildIconHTML(item) {
+function buildIconHTML(item: { name: string; icon?: string; img?: string }): { html: string; hasImage: boolean } {
   let hasImage = false;
-  let html;
+  let html: string;
 
   if (item.img) {
     hasImage = true;
@@ -98,7 +102,7 @@ function buildIconHTML(item) {
 }
 
 /** Crée un titre de catégorie */
-function buildCatTitle(cat) {
+function buildCatTitle(cat: Category<unknown>): HTMLDivElement {
   const title = document.createElement('div');
   title.className = 'cat-title';
   title.style.setProperty('--cat-color', cat.color ?? 'var(--text-muted)');
@@ -107,7 +111,9 @@ function buildCatTitle(cat) {
 }
 
 /** Crée un bloc catégorie (titre + grille de boutons vide) */
-function buildCatBlock(cat, blockClass, gridClass) {
+function buildCatBlock(
+  cat: Category<unknown>, blockClass: string, gridClass: string,
+): { block: HTMLDivElement; btnGrid: HTMLDivElement } {
   const block = document.createElement('div');
   block.className = blockClass;
   block.appendChild(buildCatTitle(cat));
@@ -120,8 +126,8 @@ function buildCatBlock(cat, blockClass, gridClass) {
 }
 
 /** Crée N colonnes dans un conteneur et retourne le tableau */
-function createColumns(container, count, className) {
-  const cols = [];
+function createColumns(container: HTMLElement, count: number, className: string): HTMLDivElement[] {
+  const cols: HTMLDivElement[] = [];
   for (let i = 0; i < count; i++) {
     const col = document.createElement('div');
     col.className = className;
@@ -132,7 +138,7 @@ function createColumns(container, count, className) {
 }
 
 /** Formate des secondes en M:SS */
-function formatTime(sec) {
+function formatTime(sec: number): string {
   if (!isFinite(sec) || sec < 0) return '–:––';
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
@@ -140,13 +146,13 @@ function formatTime(sec) {
 }
 
 /** Crée un bouton audio (sound-btn) avec tous ses attributs et son listener */
-function buildSoundBtn(item) {
+function buildSoundBtn(item: AudioItem): HTMLButtonElement {
   const btn = document.createElement('button');
   btn.className = 'sound-btn';
   btn.dataset.audio = item.file;
   btn.dataset.label = item.name;
-  btn.dataset.start = item.start ?? 0;
-  btn.dataset.end   = item.end   ?? '';
+  btn.dataset.start = String(item.start ?? 0);
+  btn.dataset.end   = String(item.end   ?? '');
   btn.style.setProperty('--progress', '0%');
 
   if (item.catClass) btn.classList.add(item.catClass);
@@ -179,7 +185,7 @@ function buildSoundBtn(item) {
 }
 
 /** Met à jour l'emoji de volume selon le pourcentage */
-function updateVolIcon(el, val, max) {
+function updateVolIcon(el: Element, val: number, max: number): void {
   const pct = val / max * 100;
   if (pct === 0)     el.textContent = '🔇';
   else if (pct < 35) el.textContent = '🔈';
@@ -190,7 +196,17 @@ function updateVolIcon(el, val, max) {
 /**
  * Calcule et applique une hauteur uniforme aux boutons d'un panneau en colonnes.
  */
-function equalizeColumnButtons(cfg) {
+interface EqualizeConfig {
+  panelSelector:    string;
+  gridSelector:     string;
+  guardSelector:    string | null;
+  colSelector:      string;
+  btnGridSelector:  string;
+  catBlockSelector: string;
+  colsPerRow:       number;
+}
+
+function equalizeColumnButtons(cfg: EqualizeConfig): void {
   document.querySelectorAll(cfg.panelSelector).forEach(panel => {
     const grid = panel.querySelector(cfg.gridSelector);
     if (!grid) return;
@@ -213,14 +229,14 @@ function equalizeColumnButtons(cfg) {
     
     const availableGridH = (gridH - (visualRowCount - 1) * gapPx) / visualRowCount;
 
-    grid.querySelectorAll(cfg.colSelector).forEach(col => {
+    grid.querySelectorAll<HTMLElement>(cfg.colSelector).forEach(col => {
       let totalRows = 0;
       col.querySelectorAll(cfg.btnGridSelector).forEach(btnGrid => {
         totalRows += Math.ceil(btnGrid.children.length / cfg.colsPerRow);
       });
 
       const catCount   = col.querySelectorAll(cfg.catBlockSelector).length;
-      const firstTitle = col.querySelector('.cat-title');
+      const firstTitle = col.querySelector<HTMLElement>('.cat-title');
       const titleH     = firstTitle ? firstTitle.offsetHeight : 20;
 
       const usedByTitles = catCount * (titleH + gapInner);
@@ -235,7 +251,7 @@ function equalizeColumnButtons(cfg) {
   });
 }
 
-function equalizeMidiButtons() {
+function equalizeMidiButtons(): void {
   equalizeColumnButtons({
     panelSelector:    '.panel.panel-midi.active',
     gridSelector:     '.midi-grid',
@@ -247,7 +263,7 @@ function equalizeMidiButtons() {
   });
 }
 
-function equalizeAudioButtons() {
+function equalizeAudioButtons(): void {
   equalizeColumnButtons({
     panelSelector:    '.panel.panel-audio.active',
     gridSelector:     '.audio-grid',
@@ -267,12 +283,12 @@ function equalizeAudioButtons() {
  * Mise à jour légère — appelée dans la boucle RAF (60fps).
  * Met à jour le temps, la barre de seek et la progression du bouton.
  */
-export function updateSeekUI() {
+export function updateSeekUI(): void {
   const audio = STATE.currentAudio;
   const btn   = STATE.currentSoundBtn;
   if (!audio || !btn) return;
 
-  const startOffset   = parseFloat(btn.dataset.start) || 0;
+  const startOffset   = parseFloat(btn.dataset.start!) || 0;
   const endRaw        = btn.dataset.end;
   const endOffset     = endRaw ? parseFloat(endRaw) : null;
   const dur           = audio.duration;
@@ -286,8 +302,8 @@ export function updateSeekUI() {
 
   // Met à jour toutes les barres de transport
   document.querySelectorAll('.transport-seek').forEach(bar => {
-    bar.querySelector('.transport-seek-fill').style.width  = pct + '%';
-    bar.querySelector('.transport-seek-handle').style.left = pct + '%';
+    bar.querySelector<HTMLElement>('.transport-seek-fill')!.style.width  = pct + '%';
+    bar.querySelector<HTMLElement>('.transport-seek-handle')!.style.left = pct + '%';
   });
 
   // Met à jour les affichages de temps
@@ -300,12 +316,12 @@ export function updateSeekUI() {
  * Mise à jour complète de l'UI — appelée uniquement sur changement d'état
  * (play, stop, pause, emergency stop).
  */
-export function updateTransportUI() {
+export function updateTransportUI(): void {
   const audio = STATE.currentAudio;
   const btn   = STATE.currentSoundBtn;
 
   // ── Bouton play/pause et état du "handle" ──
-  document.querySelectorAll('.transport-play-pause').forEach(b => {
+  document.querySelectorAll<HTMLButtonElement>('.transport-play-pause').forEach(b => {
     if (!audio || !btn) {
       b.innerHTML = '<span class="icon-play"></span>';
       b.disabled = true;
@@ -330,14 +346,14 @@ export function updateTransportUI() {
   // ── Reset des barres et temps si rien ne joue ──
   if (!audio || !btn) {
     document.querySelectorAll('.transport-seek').forEach(bar => {
-      bar.querySelector('.transport-seek-fill').style.width = '0%';
-      bar.querySelector('.transport-seek-handle').style.left = '0%';
+      bar.querySelector<HTMLElement>('.transport-seek-fill')!.style.width = '0%';
+      bar.querySelector<HTMLElement>('.transport-seek-handle')!.style.left = '0%';
     });
     document.querySelectorAll('.transport-time').forEach(el => {
       el.textContent = '–:–– / –:––';
     });
     // S'assure que le bouton qui jouait est bien remis à zéro
-    const playingBtn = document.querySelector('.sound-btn.playing, .sound-btn.paused');
+    const playingBtn = document.querySelector<HTMLElement>('.sound-btn.playing, .sound-btn.paused');
     if (playingBtn) playingBtn.style.setProperty('--progress', '0%');
   }
 
@@ -355,15 +371,15 @@ export function updateTransportUI() {
 }
 
 /** Calcule la position en secondes à partir d'un événement sur la barre de seek */
-function getSeekTimeFromEvent(e, bar) {
+function getSeekTimeFromEvent(e: MouseEvent | TouchEvent, bar: HTMLElement): number | null {
   if (!STATE.currentAudio || !STATE.currentSoundBtn) return null;
 
   const rect = bar.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
   const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
 
   const btn = STATE.currentSoundBtn;
-  const startOffset = parseFloat(btn.dataset.start) || 0;
+  const startOffset = parseFloat(btn.dataset.start!) || 0;
   const endRaw = btn.dataset.end;
   const endOffset = endRaw ? parseFloat(endRaw) : null;
   const dur = STATE.currentAudio.duration;
@@ -375,19 +391,19 @@ function getSeekTimeFromEvent(e, bar) {
 }
 
 /** Applique le seek */
-function applySeek(e, bar) {
+function applySeek(e: MouseEvent | TouchEvent, bar: HTMLElement): void {
   const newTime = getSeekTimeFromEvent(e, bar);
   if (newTime !== null) {
-    STATE.currentAudio.currentTime = newTime;
+    STATE.currentAudio!.currentTime = newTime;
     updateSeekUI(); // Mise à jour immédiate et légère
   }
 }
 
 /** Initialise le drag sur une barre de seek */
-function initSeekBarDrag(bar) {
+function initSeekBarDrag(bar: HTMLElement): void {
   let isDragging = false;
 
-  const startDrag = (e) => {
+  const startDrag = (e: MouseEvent | TouchEvent) => {
     if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
     isDragging = true;
     document.body.classList.add('is-seeking');
@@ -395,7 +411,7 @@ function initSeekBarDrag(bar) {
     if (e.cancelable) e.preventDefault();
   };
 
-  const doDrag = (e) => {
+  const doDrag = (e: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
     applySeek(e, bar);
   };
@@ -420,20 +436,23 @@ function initSeekBarDrag(bar) {
 
 
 /** Toggle play/pause */
-function togglePlayPause() {
+function togglePlayPause(): void {
   if (!STATE.currentAudio || !STATE.currentSoundBtn) return;
 
   if (STATE.isPaused) {
     // Resume avec fade in
     STATE.currentAudio.volume = 0;
     STATE.currentAudio.play().then(() => {
+      // Relus après la reprise de lecture, comme dans la version d'origine
+      const audio = STATE.currentAudio!;
+      const btn   = STATE.currentSoundBtn!;
       STATE.isPaused = false;
-      fadeAudio(STATE.currentAudio, 0, STATE.audioVolume, 150, null);
+      fadeAudio(audio, 0, STATE.audioVolume, 150, null);
       startProgressLoop(
-        STATE.currentAudio,
-        STATE.currentSoundBtn,
-        parseFloat(STATE.currentSoundBtn.dataset.start) || 0,
-        STATE.currentSoundBtn.dataset.end ? parseFloat(STATE.currentSoundBtn.dataset.end) : null
+        audio,
+        btn,
+        parseFloat(btn.dataset.start!) || 0,
+        btn.dataset.end ? parseFloat(btn.dataset.end) : null
       );
       updateTransportUI();
     });
@@ -450,13 +469,13 @@ function togglePlayPause() {
 }
 
 /** Arrêt d'urgence total — coupe MIDI + Audio */
-function emergencyStopAll() {
+function emergencyStopAll(): void {
   emergencyStopAudio();
   sendEmergencyStopMidi();
 }
 
 /** Reset total des effets — MIDI + Audio */
-function resetAllFXEffects() {
+function resetAllFXEffects(): void {
   resetMidiFXEffects();
   resetAudioFXEffects();
 }
@@ -464,8 +483,10 @@ function resetAllFXEffects() {
 // ═══════════════════════════════════════════════════════
 // CONSTRUCTION DU DOM
 // ═══════════════════════════════════════════════════════
-function buildUI() {
-  const allTabs       = [];
+type TabWithType = (MidiTab & { type: 'midi' }) | (AudioTab & { type: 'audio' });
+
+function buildUI(): void {
+  const allTabs: TabWithType[] = [];
   const firstAudioIdx = MIDI_TABS.length;
 
   MIDI_TABS.forEach(tab  => allTabs.push({ ...tab, type: 'midi'  }));
@@ -476,7 +497,7 @@ function buildUI() {
     // ── Onglet ──
     const btn = document.createElement('button');
     btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
-    btn.dataset.tab  = idx;
+    btn.dataset.tab  = String(idx);
     btn.dataset.type = tab.type;
     btn.style.setProperty('--tab-accent', tab.accent);
     btn.innerHTML = `
@@ -488,7 +509,7 @@ function buildUI() {
     // ── Panneau ──
     const panel = document.createElement('section');
     panel.className  = `panel panel-${tab.type}` + (idx === 0 ? ' active' : '');
-    panel.dataset.panel = idx;
+    panel.dataset.panel = String(idx);
     panel.dataset.type  = tab.type;
     panel.style.setProperty('--panel-accent', tab.accent);
 
@@ -505,13 +526,13 @@ function buildUI() {
   });
 
   // Disposition initiale selon l'orientation au chargement
-  const firstMidiPanel = document.querySelector('.panel.panel-midi.active');
+  const firstMidiPanel = document.querySelector<HTMLElement>('.panel.panel-midi.active');
   if (firstMidiPanel) rearrangeMidiGrid(firstMidiPanel);
 
   // Écouter les changements d'orientation
   const orientationMQ = window.matchMedia('(orientation: portrait)');
   orientationMQ.addEventListener('change', () => {
-    const activePanel = document.querySelector('.panel.active');
+    const activePanel = document.querySelector<HTMLElement>('.panel.active');
     if (activePanel && activePanel.dataset.type === 'midi') {
       rearrangeMidiGrid(activePanel);
     }
@@ -524,7 +545,7 @@ function buildUI() {
 }
 
 // ── Contrôles MIDI ──
-function buildMidiControls() {
+function buildMidiControls(): HTMLDivElement {
   const wrap = document.createElement('div');
   wrap.className = 'panel-controls';
   
@@ -566,7 +587,7 @@ function buildMidiControls() {
     label: 'Reset',
   });
 
-  const controlsRight = wrap.querySelector('.controls-right');
+  const controlsRight = wrap.querySelector('.controls-right')!;
   const volumeWrap = controlsRight.querySelector('.volume-wrap');
   const midiFxBtnGroup = document.createElement('div');
   midiFxBtnGroup.className = 'fx-btn-group';
@@ -578,15 +599,15 @@ function buildMidiControls() {
   midiFxOpenBtn.addEventListener('click', openMidiFXPopup);
   midiFxResetBtn.addEventListener('click', resetAllFXEffects);
 
-  const slider = wrap.querySelector('.midi-vol');
-  const valEl  = wrap.querySelector('.vol-value');
-  const iconEl = wrap.querySelector('.vol-icon');
+  const slider = wrap.querySelector<HTMLInputElement>('.midi-vol')!;
+  const valEl  = wrap.querySelector('.vol-value')!;
+  const iconEl = wrap.querySelector('.vol-icon')!;
 
   slider.addEventListener('input', () => {
     STATE.midiVolume = parseInt(slider.value, 10);
     const pct = (STATE.midiVolume / 127 * 100).toFixed(1);
     slider.style.setProperty('--vol-pct', pct + '%');
-    valEl.textContent = STATE.midiVolume;
+    valEl.textContent = String(STATE.midiVolume);
     updateVolIcon(iconEl, STATE.midiVolume, 127);
     sendVolume(STATE.midiVolume);
     syncMidiSliders(STATE.midiVolume);
@@ -596,7 +617,7 @@ function buildMidiControls() {
 }
 
 // ── Contrôles Audio ──
-function buildAudioControls() {
+function buildAudioControls(): HTMLDivElement {
   const wrap = document.createElement('div');
   wrap.className = 'panel-controls';
   const pct = Math.round(STATE.audioVolume * 100);
@@ -626,7 +647,7 @@ function buildAudioControls() {
   const stopBtn = buildEmergencyStopBtn('audio-stop-btn');
   stopBtn.addEventListener('click', () => emergencyStopAll());
   // Insérer le bouton STOP avant le volume-wrap
-  const controlsRight = wrap.querySelector('.controls-right');
+  const controlsRight = wrap.querySelector('.controls-right')!;
   const volumeWrap = controlsRight.querySelector('.volume-wrap');
   const fxOpenBtn = buildPanelUtilityBtn({
     className: 'audio-fx-open-btn',
@@ -647,9 +668,9 @@ function buildAudioControls() {
   controlsRight.insertBefore(fxBtnGroup, volumeWrap);
   controlsRight.insertBefore(stopBtn, volumeWrap);
 
-  const slider = wrap.querySelector('.audio-vol');
-  const valEl  = wrap.querySelector('.vol-value');
-  const iconEl = wrap.querySelector('.vol-icon');
+  const slider = wrap.querySelector<HTMLInputElement>('.audio-vol')!;
+  const valEl  = wrap.querySelector('.vol-value')!;
+  const iconEl = wrap.querySelector('.vol-icon')!;
 
   slider.addEventListener('input', () => {
     STATE.audioVolume = parseInt(slider.value, 10) / 100;
@@ -663,19 +684,19 @@ function buildAudioControls() {
   });
 
   // Play/Pause
-  wrap.querySelector('.transport-play-pause').addEventListener('click', togglePlayPause);
+  wrap.querySelector('.transport-play-pause')!.addEventListener('click', togglePlayPause);
   fxOpenBtn.addEventListener('click', openAudioFXPopup);
   fxResetBtn.addEventListener('click', resetAllFXEffects);
 
   // Seek (clic + drag)
-  const seekBar = wrap.querySelector('.transport-seek');
+  const seekBar = wrap.querySelector<HTMLElement>('.transport-seek')!;
   initSeekBarDrag(seekBar);
 
   return wrap;
 }
 
 // ── Grille MIDI ──
-function buildMidiGrid(tab) {
+function buildMidiGrid(tab: MidiTab): HTMLDivElement {
   const grid = document.createElement('div');
   grid.className = 'midi-grid';
 
@@ -706,7 +727,7 @@ function buildMidiGrid(tab) {
 }
 
 // ── Grille Audio ──
-function buildAudioGrid(tab) {
+function buildAudioGrid(tab: AudioTab): HTMLDivElement {
   const grid = document.createElement('div');
   grid.className = 'audio-grid';
 
@@ -742,13 +763,13 @@ function buildAudioGrid(tab) {
 }
 
 // ── Réorganisation de la grille MIDI selon l'orientation ──
-function rearrangeMidiGrid(panel) {
+function rearrangeMidiGrid(panel: HTMLElement): void {
   const grid = panel.querySelector('.midi-grid');
   if (!grid) return;
 
   const isPortrait = window.matchMedia('(orientation: portrait)').matches;
   const blocks = Array.from(grid.querySelectorAll('.cat-block'));
-  const cols = Array.from(grid.querySelectorAll('.midi-col'));
+  const cols = Array.from(grid.querySelectorAll<HTMLElement>('.midi-col'));
 
   const colCount = isPortrait ? 2 : cols.length;
   const blocksPerCol = Math.ceil(blocks.length / colCount);
@@ -770,7 +791,7 @@ function rearrangeMidiGrid(panel) {
 // ═══════════════════════════════════════════════════════
 // POPUP "ABOUT"
 // ═══════════════════════════════════════════════════════
-function buildAboutPopup() {
+function buildAboutPopup(): void {
   const overlay = document.createElement('div');
   overlay.id = 'about-overlay';
   overlay.setAttribute('aria-hidden', 'true');
@@ -793,14 +814,14 @@ function buildAboutPopup() {
     </div>
   `;
 
-  document.getElementById('app').appendChild(overlay);
+  document.getElementById('app')!.appendChild(overlay);
 
   overlay.addEventListener('click', e => {
     if (e.target === overlay) closeAbout();
   });
-  overlay.querySelector('#about-close-btn').addEventListener('click', closeAbout);
+  overlay.querySelector('#about-close-btn')!.addEventListener('click', closeAbout);
 
-  overlay.querySelector('#about-reload-btn').addEventListener('click', async () => {
+  overlay.querySelector('#about-reload-btn')!.addEventListener('click', async () => {
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
       for (const reg of registrations) await reg.unregister();
@@ -809,11 +830,11 @@ function buildAboutPopup() {
   });
 }
 
-function openAbout() {
+function openAbout(): void {
   const overlay = document.getElementById('about-overlay');
   if (!overlay) return;
 
-  const swEl = overlay.querySelector('#about-sw-status');
+  const swEl = overlay.querySelector('#about-sw-status')!;
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     swEl.textContent = 'Service Worker : actif ✓';
   } else {
@@ -835,15 +856,15 @@ function openAbout() {
   overlay.style.display = 'flex';
 }
 
-function closeAbout() {
+function closeAbout(): void {
   const overlay = document.getElementById('about-overlay');
   if (!overlay) return;
   overlay.setAttribute('aria-hidden', 'true');
   overlay.style.display = 'none';
 }
 
-function initLogoInteraction() {
-  const btn = document.getElementById('settings-btn');
+function initLogoInteraction(): void {
+  const btn = document.getElementById('settings-btn')!;
   btn.addEventListener('click', openAbout);
   btn.addEventListener('contextmenu', e => e.preventDefault());
 }
@@ -851,7 +872,7 @@ function initLogoInteraction() {
 // ═══════════════════════════════════════════════════════
 // NAVIGATION ONGLETS
 // ═══════════════════════════════════════════════════════
-function activateTab(idx) {
+function activateTab(idx: number): void {
   if (STATE.midiFxPopupOpen)  closeMidiFXPopup();
   if (STATE.audioFxPopupOpen) closeAudioFXPopup();
 
@@ -864,7 +885,7 @@ function activateTab(idx) {
   refreshAudioFXToolbarButtons();
 
   requestAnimationFrame(() => {
-    const activePanel = document.querySelector('.panel.active');
+    const activePanel = document.querySelector<HTMLElement>('.panel.active');
     if (activePanel && activePanel.dataset.type === 'midi') {
       rearrangeMidiGrid(activePanel);
       equalizeMidiButtons();
@@ -874,49 +895,50 @@ function activateTab(idx) {
   });
 }
 
-function initTabNavigation() {
+function initTabNavigation(): void {
   tabNav.addEventListener('click', e => {
-    const btn = e.target.closest('.tab-btn');
+    const btn = (e.target as Element).closest<HTMLElement>('.tab-btn');
     if (!btn) return;
-    activateTab(parseInt(btn.dataset.tab, 10));
+    activateTab(parseInt(btn.dataset.tab!, 10));
   });
 }
 
 // ═══════════════════════════════════════════════════════
 // DÉLÉGATION — Changement select MIDI
 // ═══════════════════════════════════════════════════════
-function initMidiSelectDelegation() {
+function initMidiSelectDelegation(): void {
   panelsEl.addEventListener('change', async e => {
-    if (!e.target.classList.contains('midi-select')) return;
-    await handleMidiSelectChange(e.target.value);
+    const target = e.target as HTMLSelectElement;
+    if (!target.classList.contains('midi-select')) return;
+    await handleMidiSelectChange(target.value);
   });
 }
 
 // ═══════════════════════════════════════════════════════
 // RESIZE — recalcul hauteurs boutons
 // ═══════════════════════════════════════════════════════
-function initResizeObserver() {
+function initResizeObserver(): void {
   const resizeObserver = new ResizeObserver(() => {
     equalizeMidiButtons();
     equalizeAudioButtons();
   });
-  resizeObserver.observe(document.getElementById('panels'));
+  resizeObserver.observe(document.getElementById('panels')!);
 }
 
 // ═══════════════════════════════════════════════════════
 // WAKE LOCK — Empêche la mise en veille de l'écran
 // ═══════════════════════════════════════════════════════
-async function requestWakeLock() {
+async function requestWakeLock(): Promise<void> {
   if (!('wakeLock' in navigator)) return;
   try {
     STATE.wakeLock = await navigator.wakeLock.request('screen');
     console.log('[WakeLock] Actif ✅');
   } catch (err) {
-    console.warn('[WakeLock] Échec :', err.message);
+    console.warn('[WakeLock] Échec :', (err as Error).message);
   }
 }
 
-function initWakeLock() {
+function initWakeLock(): void {
   requestWakeLock();
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
@@ -928,7 +950,7 @@ function initWakeLock() {
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
-export function init() {
+export function init(): void {
   initTabNavigation();
   initMidiSelectDelegation();
   initResizeObserver();

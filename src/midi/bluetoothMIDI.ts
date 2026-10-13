@@ -1,30 +1,41 @@
-// bluetoothMIDI.js — Connexion Bluetooth MIDI (vanilla JS, sans React)
+// bluetoothMIDI.ts — Connexion Bluetooth MIDI (vanilla JS, sans React)
 
-import { parsePacket } from './ble-midi-parser.js';
+import { parsePacket } from './ble-midi-parser.ts';
+import type { BleMidiEvent, MessageMidi } from './ble-midi-parser.ts';
+
+export type BluetoothStatus = 'idle' | 'unsupported' | 'scanning' | 'connecting' | 'connected' | 'error';
+
+export interface BluetoothMIDIOptions {
+  onNoteOn?:         (note: number) => void;
+  onNoteOff?:        (note: number) => void;
+  onStatusChange?:   (status: BluetoothStatus, error: string | null) => void;
+  onError?:          (error: string | null) => void;
+  loopbackIncoming?: boolean;
+}
 
 const MIDI_SERVICE_UUID        = '03b80e5a-ede8-4b33-a751-6ce34ec4c700';
 const MIDI_CHARACTERISTIC_UUID = '7772e5db-3868-4112-a1a9-f2669d106bf3';
 const MAX_RETRIES              = 3;
 
 export class BluetoothMIDI {
-  #status        = 'idle';
-  #error         = null;
-  #device        = null;
-  #server        = null;
-  #characteristic= null;
+  #status: BluetoothStatus = 'idle';
+  #error: string | null = null;
+  #device: BluetoothDevice | null = null;
+  #server: BluetoothRemoteGATTServer | null = null;
+  #characteristic: BluetoothRemoteGATTCharacteristic | null = null;
   #attemptId     = 0;
-  #onGattDisconn = null;
-  #onCharChange  = null;
-  #onNoteOn      = null;
-  #onNoteOff     = null;
-  #onStatusChange= null;
-  #onError       = null;
+  #onGattDisconn: (() => void) | null = null;
+  #onCharChange: ((event: Event) => void) | null = null;
+  #onNoteOn: ((note: number) => void) | null = null;
+  #onNoteOff: ((note: number) => void) | null = null;
+  #onStatusChange: ((status: BluetoothStatus, error: string | null) => void) | null = null;
+  #onError: ((error: string | null) => void) | null = null;
   /** Une seule écriture GATT à la fois sur cette caractéristique (sinon « already in progress »). */
-  #writeQueue    = Promise.resolve();
+  #writeQueue: Promise<void> = Promise.resolve();
   /** Loopback : renvoyer le MIDI entrant vers le piano (comme midiOutput.send(event.data) en USB). */
   #loopbackIncoming = true;
 
-  constructor({ onNoteOn, onNoteOff, onStatusChange, onError, loopbackIncoming = true } = {}) {
+  constructor({ onNoteOn, onNoteOff, onStatusChange, onError, loopbackIncoming = true }: BluetoothMIDIOptions = {}) {
     this.#onNoteOn       = onNoteOn       ?? null;
     this.#onNoteOff      = onNoteOff      ?? null;
     this.#onStatusChange = onStatusChange ?? null;
@@ -33,18 +44,17 @@ export class BluetoothMIDI {
     if (!navigator.bluetooth) this.#setStatus('unsupported');
   }
 
-  get status() { return this.#status; }
-  get error()  { return this.#error; }
+  get status(): BluetoothStatus { return this.#status; }
+  get error(): string | null    { return this.#error; }
 
   /**
    * Envoie des octets MIDI via la caractéristique BLE.
    * Format BLE MIDI : [header, timestamp, ...midiBytes]
    * header    = 0x80 (bit7=1, bit6=1, timestamp high = 0)
    * timestamp = 0x80 (bit7=1, timestamp low = 0)
-   * @param {number[]} midiBytes
-   * @param {{ quiet?: boolean }} [opts] — quiet: pas de log (loopback notes)
+   * opts.quiet : pas de log (loopback notes)
    */
-  send(midiBytes, opts = {}) {
+  send(midiBytes: number[], opts: { quiet?: boolean } = {}): void {
     if (!this.#characteristic || this.#status !== 'connected') return;
     const packet = new Uint8Array([0x80, 0x80, ...midiBytes]);
     if (!opts.quiet) console.log('MIDI OUT (BT):', Array.from(midiBytes));
@@ -53,7 +63,7 @@ export class BluetoothMIDI {
       .then(() => {
         if (!this.#characteristic) return;
         if (typeof char.writeValueWithoutResponse === 'function') {
-          return char.writeValueWithoutResponse(packet).catch(err => {
+          return char.writeValueWithoutResponse(packet).catch((err: Error) => {
             console.warn('writeValueWithoutResponse échoué, fallback writeValueWithResponse:', err.message);
             return char.writeValueWithResponse(packet);
           });
@@ -63,13 +73,14 @@ export class BluetoothMIDI {
         if (typeof char.writeValue === 'function') return char.writeValue(packet);
         console.error('Aucune méthode write disponible sur la caractéristique BLE');
       })
-      .catch(e => console.error('MIDI OUT (BT) échoué:', e.message));
+      .catch((e: Error) => console.error('MIDI OUT (BT) échoué:', e.message));
   }
 
   /** Reconstitue les octets MIDI bruts (comme event.data Web MIDI) pour le loopback. */
-  #bytesForLoopback(ev) {
+  #bytesForLoopback(ev: BleMidiEvent): number[] | null {
     if (ev?.type === 'sysex') return null;
-    const status = ev.midiStatus, one = ev.midiOne, two = ev.midiTwo;
+    // Les champs MIDI sont absents des messages 'unknown' : écartés par les tests typeof ci-dessous
+    const { midiStatus: status, midiOne: one, midiTwo: two } = ev as Partial<MessageMidi>;
     if (typeof status !== 'number' || typeof one !== 'number') return null;
     const hi = status & 0xf0;
     if (hi === 0xc0 || hi === 0xd0) return [status, one];
@@ -82,7 +93,7 @@ export class BluetoothMIDI {
 
   // ─── Connexion ───────────────────────────────────────────────────────────
 
-  async connect() {
+  async connect(): Promise<void> {
     if (!navigator.bluetooth) {
       this.#setStatus('unsupported', 'Web Bluetooth non supporté par ce navigateur.');
       return;
@@ -112,22 +123,23 @@ export class BluetoothMIDI {
         if (attemptId !== this.#attemptId) return;
         try {
           this.#setStatus('connecting', null);
-          const server = await device.gatt.connect();
+          const server = await device.gatt!.connect();
           this.#server = server;
           const service = await server.getPrimaryService(MIDI_SERVICE_UUID);
           const characteristic = await service.getCharacteristic(MIDI_CHARACTERISTIC_UUID);
           this.#characteristic = characteristic;
           await characteristic.startNotifications();
 
-          const handler = (event) => {
-            const value = event?.target?.value;
+          const handler = (event: Event) => {
+            const value = (event?.target as BluetoothRemoteGATTCharacteristic | null)?.value;
             if (!value) return;
             const packet = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
             let info;
             try { info = parsePacket(packet); } catch { return; }
             if (!info?.events?.length) return;
             for (const ev of info.events) {
-              const status = ev.midiStatus, one = ev.midiOne, two = ev.midiTwo;
+              // Les champs MIDI sont absents des messages 'sysex' et 'unknown' : écartés par les tests typeof
+              const { midiStatus: status, midiOne: one, midiTwo: two } = ev as Partial<MessageMidi>;
               if (this.#loopbackIncoming) {
                 const lb = this.#bytesForLoopback(ev);
                 if (lb) this.send(lb, { quiet: true });
@@ -138,7 +150,7 @@ export class BluetoothMIDI {
               if (!hasTwo && msgType !== 0xc0 && msgType !== 0xd0) continue;
               console.log('MIDI IN (BT):', hasTwo ? [status, one, two] : [status, one]);
               if (hasTwo) {
-                if (msgType === 0x90 && two > 0)                              this.#onNoteOn?.(one);
+                if (msgType === 0x90 && two! > 0)                              this.#onNoteOn?.(one);
                 else if (msgType === 0x80 || (msgType === 0x90 && two === 0)) this.#onNoteOff?.(one);
               }
             }
@@ -150,7 +162,7 @@ export class BluetoothMIDI {
           break;
         } catch (err) {
           if (attemptId !== this.#attemptId) return;
-          const msg = err?.message ?? '';
+          const msg = (err as Error | undefined)?.message ?? '';
           const isGattError = msg.includes('GATT Server is disconnected')
                            || msg.includes('Cannot retrieve services')
                            || msg.includes('disconnected');
@@ -164,21 +176,22 @@ export class BluetoothMIDI {
     } catch (err) {
       // On vérifie uniquement que cette tentative est toujours la courante
       if (attemptId !== this.#attemptId) return;
-      if (err.name === 'NotFoundError') {
+      const error = err as Error;
+      if (error.name === 'NotFoundError') {
         this.#setStatus('idle', null);
       } else {
-        this.#setStatus('error', err.message || 'Erreur de connexion Bluetooth.');
+        this.#setStatus('error', error.message || 'Erreur de connexion Bluetooth.');
         this.#onError?.(this.#error);
       }
     }
   }
 
-  disconnect() {
+  disconnect(): void {
     this.#cleanup();
     this.#setStatus('idle', null);
   }
 
-  async #cleanup() {
+  async #cleanup(): Promise<void> {
     this.#writeQueue = Promise.resolve();
     if (this.#device && this.#onGattDisconn)
       this.#device.removeEventListener('gattserverdisconnected', this.#onGattDisconn);
@@ -191,13 +204,13 @@ export class BluetoothMIDI {
     this.#device = null;
   }
 
-  #removeCharListener() {
+  #removeCharListener(): void {
     if (this.#characteristic && this.#onCharChange)
       try { this.#characteristic.removeEventListener('characteristicvaluechanged', this.#onCharChange); } catch {}
     this.#onCharChange = null;
   }
 
-  #setStatus(status, error = null) {
+  #setStatus(status: BluetoothStatus, error: string | null = null): void {
     this.#status = status;
     this.#error  = error;
     this.#onStatusChange?.(status, error);

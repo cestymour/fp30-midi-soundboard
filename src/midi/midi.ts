@@ -1,15 +1,17 @@
 /* ================================================================
-   midi.js — Gestion MIDI (USB + Bluetooth)
+   midi.ts — Gestion MIDI (USB + Bluetooth)
 ================================================================ */
 
-import { STATE } from '../state.js';
-import { BluetoothMIDI } from './bluetoothMIDI.js';
+import { STATE } from '../state.ts';
+import { BluetoothMIDI } from './bluetoothMIDI.ts';
+import type { BluetoothStatus } from './bluetoothMIDI.ts';
+import type { MidiItem } from '../types.ts';
 
 // ═══════════════════════════════════════════════════════
 // ENVOI MIDI
 // ═══════════════════════════════════════════════════════
 
-export function sendMidi(bytes) {
+export function sendMidi(bytes: number[]): void {
   if (STATE.midiOutput) {
     STATE.midiOutput.send(bytes);
   } else if (STATE.bt?.status === 'connected') {
@@ -19,17 +21,17 @@ export function sendMidi(bytes) {
   }
 }
 
-export function sendInstrumentPatch(item) {
+export function sendInstrumentPatch(item: MidiItem): void {
   sendMidi([0xB0 | STATE.MIDI_CHANNEL, 0x00, item.msb]);
   sendMidi([0xB0 | STATE.MIDI_CHANNEL, 0x20, item.lsb]);
   sendMidi([0xC0 | STATE.MIDI_CHANNEL, item.pc - 1]);
 }
 
-export function sendVolume(val) {
+export function sendVolume(val: number): void {
   sendMidi([0xB0 | STATE.MIDI_CHANNEL, 0x07, val]);
 }
 
-export function sendEmergencyStopMidi() {
+export function sendEmergencyStopMidi(): void {
   for (let ch = 0; ch < 16; ch++) {
     sendMidi([0xB0 | ch, 123, 0]); // All Notes Off
     sendMidi([0xB0 | ch, 121, 0]); // Reset All Controllers
@@ -40,7 +42,7 @@ export function sendEmergencyStopMidi() {
 // SÉLECTION INSTRUMENT
 // ═══════════════════════════════════════════════════════
 
-export function selectInstrument(btn, item) {
+export function selectInstrument(btn: HTMLButtonElement, item: MidiItem): void {
   if (STATE.activeInstBtn) STATE.activeInstBtn.classList.remove('active');
   STATE.activeInstBtn = btn;
   btn.classList.add('active');
@@ -51,7 +53,7 @@ export function selectInstrument(btn, item) {
 // UI — Synchronisation badges et selects
 // ═══════════════════════════════════════════════════════
 
-function updateAllMidiBadges() {
+function updateAllMidiBadges(): void {
   document.querySelectorAll('.midi-badge').forEach(badge => {
     if (STATE.currentConnectionType === 'usb') {
       badge.textContent = '● USB';
@@ -66,16 +68,16 @@ function updateAllMidiBadges() {
   });
 }
 
-function updateAllMidiSelects(val) {
-  document.querySelectorAll('.midi-select').forEach(s => { s.value = val; });
+function updateAllMidiSelects(val: string): void {
+  document.querySelectorAll<HTMLSelectElement>('.midi-select').forEach(s => { s.value = val; });
 }
 
-export function syncMidiSliders(val) {
-  document.querySelectorAll('.midi-vol').forEach(s => {
+export function syncMidiSliders(val: number): void {
+  document.querySelectorAll<HTMLInputElement>('.midi-vol').forEach(s => {
     if (parseInt(s.value) === val) return;
-    s.value = val;
+    s.value = String(val);
     s.style.setProperty('--vol-pct', (val / 127 * 100).toFixed(1) + '%');
-    s.closest('.panel-controls').querySelector('.vol-value').textContent = val;
+    s.closest('.panel-controls')!.querySelector('.vol-value')!.textContent = String(val);
   });
 }
 
@@ -83,7 +85,7 @@ export function syncMidiSliders(val) {
 // BLUETOOTH MIDI
 // ═══════════════════════════════════════════════════════
 
-export function initBluetooth() {
+export function initBluetooth(): void {
   STATE.bt = new BluetoothMIDI({
     onStatusChange: (status) => {
       if (status === 'connected') {
@@ -112,7 +114,7 @@ export function initBluetooth() {
 // WEB MIDI (USB)
 // ═══════════════════════════════════════════════════════
 
-export function initWebMidi() {
+export function initWebMidi(): void {
   navigator.requestMIDIAccess({ sysex: false }).then(access => {
     STATE.midiAccess = access;
     populateMidiSelects(true);
@@ -123,11 +125,11 @@ export function initWebMidi() {
   });
 }
 
-function populateMidiSelects(isFirstLoad = false) {
-  const usbOutputs = [];
+function populateMidiSelects(isFirstLoad = false): void {
+  const usbOutputs: MIDIOutput[] = [];
   if (STATE.midiAccess) STATE.midiAccess.outputs.forEach(o => usbOutputs.push(o));
 
-  document.querySelectorAll('.midi-select').forEach((sel, selIdx) => {
+  document.querySelectorAll<HTMLSelectElement>('.midi-select').forEach((sel, selIdx) => {
     const prev = sel.value;
     sel.innerHTML = '';
 
@@ -159,7 +161,7 @@ function populateMidiSelects(isFirstLoad = false) {
       const pianoOpt = Array.from(sel.options).find(
         o => o.value !== '__none__'
           && o.value !== '__bluetooth__'
-          && o.textContent.toLowerCase().includes('piano')
+          && o.textContent!.toLowerCase().includes('piano')
       );
       if (pianoOpt) {
         sel.value = pianoOpt.value;
@@ -173,7 +175,7 @@ function populateMidiSelects(isFirstLoad = false) {
   });
 }
 
-function disconnectMidiInput() {
+function disconnectMidiInput(): void {
   if (STATE.midiInput) {
     STATE.midiInput.onmidimessage = null;
     STATE.midiInput = null;
@@ -184,7 +186,7 @@ function disconnectMidiInput() {
 // HANDLER — Changement de connexion (délégué depuis app.js)
 // ═══════════════════════════════════════════════════════
 
-export async function handleMidiSelectChange(val) {
+export async function handleMidiSelectChange(val: string): Promise<void> {
   updateAllMidiSelects(val);
 
   if (val === '__none__') {
@@ -200,8 +202,10 @@ export async function handleMidiSelectChange(val) {
     if (STATE.midiOutput) { disconnectMidiInput(); STATE.midiOutput = null; }
 
     if (STATE.bt?.status !== 'connected') {
-      await STATE.bt.connect();
-      if (STATE.bt?.status !== 'connected') {
+      await STATE.bt!.connect();
+      // Le statut a changé pendant connect() : relu sans le rétrécissement de type d'avant l'await
+      const statusAfterConnect = STATE.bt?.status as BluetoothStatus | undefined;
+      if (statusAfterConnect !== 'connected') {
         // Annulation utilisateur — restaurer USB si possible
         if (prevOutput && prevId) {
           STATE.midiOutput = prevOutput;
@@ -222,16 +226,16 @@ export async function handleMidiSelectChange(val) {
     disconnectMidiInput();
     STATE.midiOutput = null;
 
-    STATE.midiAccess.outputs.forEach(out => {
+    STATE.midiAccess!.outputs.forEach(out => {
       if (out.id === val) STATE.midiOutput = out;
     });
-    STATE.midiAccess.inputs.forEach(inp => {
+    STATE.midiAccess!.inputs.forEach(inp => {
       if (inp.name === STATE.midiOutput?.name) STATE.midiInput = inp;
     });
 
     if (STATE.midiInput) {
       STATE.midiInput.onmidimessage = event => {
-        if (STATE.midiOutput) STATE.midiOutput.send(event.data);
+        if (STATE.midiOutput) STATE.midiOutput.send(event.data!);
       };
     }
 

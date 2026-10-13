@@ -1,11 +1,11 @@
 /* ================================================================
-   main.js — Point d'entrée : styles, initialisation de l'app
+   main.ts — Point d'entrée : styles, initialisation de l'app
              et enregistrement du Service Worker
 ================================================================ */
 
 import './css/style.css';
 import './css/style.fx.css';
-import { init } from './app.js';
+import { init } from './app.ts';
 
 init();
 

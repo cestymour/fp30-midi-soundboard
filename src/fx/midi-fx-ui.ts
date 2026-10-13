@@ -1,15 +1,18 @@
 /* ================================================================
-   midi-fx-ui.js - Popup FX piano grand format
+   midi-fx-ui.ts - Popup FX piano grand format
    Envoie des CC MIDI standard au Roland FP-30X via sendMidi()
 ================================================================ */
 
-import { STATE } from '../state.js';
+import type { MidiFxKey, FxControl, FxPreset } from '../types.ts';
+import { STATE } from '../state.ts';
 import { MIDI_FX_PRESETS } from '../config/midi-fx.config.ts';
-import { sendMidi } from '../midi/midi.js';
-import { AudioEngineAPI } from '../audio/audio.js';
-import { isAudioFXAnyControlModified } from './audio-fx-ui.js';
+import { sendMidi } from '../midi/midi.ts';
+import { AudioEngineAPI } from '../audio/audio.ts';
+import { isAudioFXAnyControlModified } from './audio-fx-ui.ts';
 
-const MIDI_FX_CONTROLS = [
+type MidiFxControl = FxControl<MidiFxKey, Record<MidiFxKey, number>>;
+
+const MIDI_FX_CONTROLS: MidiFxControl[] = [
   {
     key: 'reverb',
     label: 'REV',
@@ -105,7 +108,20 @@ const MIDI_FX_CONTROLS = [
 
 
 // ─── État interne de la popup piano ───────────────────────────────
-const MIDI_FX_UI = {
+interface MidiFxPopupUI {
+  overlay:              HTMLDivElement | null;
+  channelEl:            Element | null;
+  presetButtons:        Map<string, HTMLButtonElement>;
+  sliderInputs:         Map<MidiFxKey, HTMLInputElement>;
+  sliderRails:          Map<MidiFxKey, HTMLElement>;
+  valueLabels:          Map<MidiFxKey, HTMLElement>;
+  controlCards:         Map<MidiFxKey, HTMLElement>;
+  activePresetKey:      string | null;
+  presetAnimationFrame: number | null;
+  railResizeObserver:   ResizeObserver | null;
+}
+
+const MIDI_FX_UI: MidiFxPopupUI = {
   overlay:              null,
   channelEl:            null,
   presetButtons:        new Map(),
@@ -133,7 +149,7 @@ const MIDI_FX_STATE = {
 // BUILD
 // ================================================================
 
-export function buildMidiFXPopup() {
+export function buildMidiFXPopup(): void {
   if (MIDI_FX_UI.overlay) return;
 
   const overlay = document.createElement('div');
@@ -203,12 +219,12 @@ export function buildMidiFXPopup() {
     </section>
   `;
 
-  document.getElementById('app').appendChild(overlay);
+  document.getElementById('app')!.appendChild(overlay);
   MIDI_FX_UI.overlay   = overlay;
   MIDI_FX_UI.channelEl = overlay.querySelector('.fx-track__name');
 
   // ── Fermeture ──
-  overlay.querySelector('.fx-overlay__backdrop').addEventListener('click', closeMidiFXPopup);
+  overlay.querySelector('.fx-overlay__backdrop')!.addEventListener('click', closeMidiFXPopup);
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && STATE.midiFxPopupOpen) closeMidiFXPopup();
   });
@@ -219,17 +235,17 @@ export function buildMidiFXPopup() {
 
   // ── Presets ──
   MIDI_FX_PRESETS.forEach(preset => {
-    const button = overlay.querySelector(`[data-midi-preset="${preset.key}"]`);
+    const button = overlay.querySelector<HTMLButtonElement>(`[data-midi-preset="${preset.key}"]`)!;
     MIDI_FX_UI.presetButtons.set(preset.key, button);
     button.addEventListener('click', () => applyMidiFXPreset(preset.key));
   });
 
   // ── Sliders ──
   MIDI_FX_CONTROLS.forEach(control => {
-    const input      = overlay.querySelector(`[data-midi-slider-for="${control.key}"]`);
-    const rail       = overlay.querySelector(`[data-midi-rail-for="${control.key}"]`);
-    const valueLabel = overlay.querySelector(`[data-midi-value-for="${control.key}"]`);
-    const card       = overlay.querySelector(`[data-midi-control="${control.key}"]`);
+    const input      = overlay.querySelector<HTMLInputElement>(`[data-midi-slider-for="${control.key}"]`)!;
+    const rail       = overlay.querySelector<HTMLElement>(`[data-midi-rail-for="${control.key}"]`)!;
+    const valueLabel = overlay.querySelector<HTMLElement>(`[data-midi-value-for="${control.key}"]`)!;
+    const card       = overlay.querySelector<HTMLElement>(`[data-midi-control="${control.key}"]`)!;
 
     MIDI_FX_UI.sliderInputs.set(control.key, input);
     MIDI_FX_UI.sliderRails.set(control.key, rail);
@@ -248,7 +264,7 @@ export function buildMidiFXPopup() {
       refreshMidiFXToolbarButtons();
     });
 
-    const oneReset = card.querySelector(`[data-midi-fx-reset-one="${control.key}"]`);
+    const oneReset = card.querySelector<HTMLButtonElement>(`[data-midi-fx-reset-one="${control.key}"]`);
     if (oneReset) {
       oneReset.addEventListener('click', event => {
         event.preventDefault();
@@ -266,7 +282,7 @@ export function buildMidiFXPopup() {
     });
   }
   MIDI_FX_UI.sliderRails.forEach(rail => {
-    if (rail) MIDI_FX_UI.railResizeObserver.observe(rail);
+    if (rail) MIDI_FX_UI.railResizeObserver!.observe(rail);
   });
 
   syncMidiFXPopupFromState();
@@ -281,10 +297,10 @@ export function buildMidiFXPopup() {
 // LAYOUT
 // ================================================================
 
-function updateMidiFXPopupLayout() {
+function updateMidiFXPopupLayout(): void {
   if (!MIDI_FX_UI.overlay) return;
 
-  const activePanel = document.querySelector('.panel.panel-midi.active');
+  const activePanel = document.querySelector<HTMLElement>('.panel.panel-midi.active');
   const grid = activePanel?.querySelector('.midi-grid');
   if (!grid) {
     closeMidiFXPopup();
@@ -292,16 +308,17 @@ function updateMidiFXPopupLayout() {
   }
 
   const rect = grid.getBoundingClientRect();
-  MIDI_FX_UI.overlay.style.top    = `${rect.top}px`;
-  MIDI_FX_UI.overlay.style.left   = `${rect.left}px`;
-  MIDI_FX_UI.overlay.style.width  = `${rect.width}px`;
-  MIDI_FX_UI.overlay.style.height = `${rect.height}px`;
+  const overlay = MIDI_FX_UI.overlay;
+  overlay.style.top    = `${rect.top}px`;
+  overlay.style.left   = `${rect.left}px`;
+  overlay.style.width  = `${rect.width}px`;
+  overlay.style.height = `${rect.height}px`;
 
-  const accent = activePanel.style.getPropertyValue('--panel-accent').trim();
+  const accent = activePanel!.style.getPropertyValue('--panel-accent').trim();
   if (accent) {
-    MIDI_FX_UI.overlay.style.setProperty('--panel-accent', accent);
+    overlay.style.setProperty('--panel-accent', accent);
   } else {
-    MIDI_FX_UI.overlay.style.removeProperty('--panel-accent');
+    overlay.style.removeProperty('--panel-accent');
   }
 
   requestAnimationFrame(() => {
@@ -313,7 +330,7 @@ function updateMidiFXPopupLayout() {
 // OPEN / CLOSE
 // ================================================================
 
-export function openMidiFXPopup() {
+export function openMidiFXPopup(): void {
   if (!MIDI_FX_UI.overlay) return;
   if (STATE.midiFxPopupOpen) {
     closeMidiFXPopup();
@@ -323,8 +340,8 @@ export function openMidiFXPopup() {
   syncMidiFXPopupFromState();
   updateMidiFXPopupLayout();
   STATE.midiFxPopupOpen = true;
-  MIDI_FX_UI.overlay.classList.add('is-open');
-  MIDI_FX_UI.overlay.setAttribute('aria-hidden', 'false');
+  MIDI_FX_UI.overlay!.classList.add('is-open');
+  MIDI_FX_UI.overlay!.setAttribute('aria-hidden', 'false');
   refreshMidiFXToolbarButtons();
 
   requestAnimationFrame(() => {
@@ -334,7 +351,7 @@ export function openMidiFXPopup() {
   });
 }
 
-export function closeMidiFXPopup() {
+export function closeMidiFXPopup(): void {
   if (!MIDI_FX_UI.overlay) return;
   STATE.midiFxPopupOpen = false;
   MIDI_FX_UI.overlay.classList.remove('is-open');
@@ -346,7 +363,7 @@ export function closeMidiFXPopup() {
 // SYNC
 // ================================================================
 
-function syncMidiFXPopupFromState() {
+function syncMidiFXPopupFromState(): void {
   if (!MIDI_FX_UI.overlay) return;
 
   if (MIDI_FX_UI.channelEl) {
@@ -357,7 +374,7 @@ function syncMidiFXPopupFromState() {
     const value = control.read(MIDI_FX_STATE);
     const input = MIDI_FX_UI.sliderInputs.get(control.key);
     if (!input) return;
-    input.value = value;
+    input.value = String(value);
     updateMidiFXValueLabel(control.key, value);
     updateMidiFXSliderVisual(control.key, value);
     updateMidiFXNeutralRailMarks(control.key);
@@ -372,14 +389,14 @@ function syncMidiFXPopupFromState() {
 // HELPERS UI
 // ================================================================
 
-function updateMidiFXValueLabel(controlKey, value) {
+function updateMidiFXValueLabel(controlKey: MidiFxKey, value: number): void {
   const control = MIDI_FX_CONTROLS.find(c => c.key === controlKey);
   const label   = MIDI_FX_UI.valueLabels.get(controlKey);
   if (!control || !label) return;
-  label.textContent = control.formatValue(value);
+  label.textContent = String(control.formatValue(value));
 }
 
-function updateMidiFXSliderVisual(controlKey, value) {
+function updateMidiFXSliderVisual(controlKey: MidiFxKey, value: number): void {
   const control = MIDI_FX_CONTROLS.find(c => c.key === controlKey);
   const input   = MIDI_FX_UI.sliderInputs.get(controlKey);
   if (!control || !input) return;
@@ -389,7 +406,7 @@ function updateMidiFXSliderVisual(controlKey, value) {
   input.style.setProperty('--vol-pct', `${Math.max(0, Math.min(100, pct))}%`);
 }
 
-function updateMidiFXNeutralRailMarks(controlKey) {
+function updateMidiFXNeutralRailMarks(controlKey: MidiFxKey): void {
   const control = MIDI_FX_CONTROLS.find(c => c.key === controlKey);
   const rail    = MIDI_FX_UI.sliderRails.get(controlKey);
   const input   = MIDI_FX_UI.sliderInputs.get(controlKey);
@@ -413,7 +430,7 @@ function updateMidiFXNeutralRailMarks(controlKey) {
   rail.style.setProperty('--neutral-from-top-pct', `${pctTop}%`);
 }
 
-function updateMidiFXControlState(controlKey, value) {
+function updateMidiFXControlState(controlKey: MidiFxKey, value: number): void {
   const control = MIDI_FX_CONTROLS.find(c => c.key === controlKey);
   const card    = MIDI_FX_UI.controlCards.get(controlKey);
   const input   = MIDI_FX_UI.sliderInputs.get(controlKey);
@@ -423,7 +440,7 @@ function updateMidiFXControlState(controlKey, value) {
   card.classList.toggle('is-modified', isModified);
   input.classList.toggle('is-modified', isModified);
 
-  const oneReset = card.querySelector('[data-midi-fx-reset-one]');
+  const oneReset = card.querySelector<HTMLButtonElement>('[data-midi-fx-reset-one]');
   if (oneReset) {
     oneReset.disabled = !isModified;
     oneReset.classList.toggle('is-disabled', !isModified);
@@ -434,30 +451,30 @@ function updateMidiFXControlState(controlKey, value) {
 // VALEURS
 // ================================================================
 
-function getMidiFXControlValue(controlKey) {
+function getMidiFXControlValue(controlKey: MidiFxKey): number | null {
   const input = MIDI_FX_UI.sliderInputs.get(controlKey);
   return input ? parseFloat(input.value) : null;
 }
 
-function isMidiFXControlNeutral(controlKey) {
+function isMidiFXControlNeutral(controlKey: MidiFxKey): boolean {
   const control = MIDI_FX_CONTROLS.find(c => c.key === controlKey);
   const value   = getMidiFXControlValue(controlKey);
   if (!control || value === null) return true;
   return Math.abs(value - control.neutral) < 0.0001;
 }
 
-function setMidiFXControlValue(controlKey, value, apply = true) {
+function setMidiFXControlValue(controlKey: MidiFxKey, value: number, apply = true): void {
   const control = MIDI_FX_CONTROLS.find(c => c.key === controlKey);
   const input   = MIDI_FX_UI.sliderInputs.get(controlKey);
   if (!control || !input) return;
 
-  input.value = value;
+  input.value = String(value);
   updateMidiFXValueLabel(controlKey, value);
   updateMidiFXSliderVisual(controlKey, value);
   updateMidiFXNeutralRailMarks(controlKey);
 
   if (apply) {
-    const rounded = Math.round(parseFloat(value));
+    const rounded = Math.round(value);
     MIDI_FX_STATE[controlKey] = rounded;
     control.apply(rounded);
   }
@@ -467,7 +484,7 @@ function setMidiFXControlValue(controlKey, value, apply = true) {
 // PRESETS
 // ================================================================
 
-function refreshMidiFXPresetButtons() {
+function refreshMidiFXPresetButtons(): void {
   MIDI_FX_PRESETS.forEach(preset => {
     const button = MIDI_FX_UI.presetButtons.get(preset.key);
     if (!button) return;
@@ -475,7 +492,7 @@ function refreshMidiFXPresetButtons() {
   });
 }
 
-function midiFxTargetsMatchCurrent(targetValues) {
+function midiFxTargetsMatchCurrent(targetValues: Record<MidiFxKey, number>): boolean {
   for (const c of MIDI_FX_CONTROLS) {
     const cur = getMidiFXControlValue(c.key);
     const tgt = targetValues[c.key];
@@ -485,7 +502,7 @@ function midiFxTargetsMatchCurrent(targetValues) {
   return true;
 }
 
-function inferActiveMidiFXPresetKey() {
+function inferActiveMidiFXPresetKey(): string | null {
   for (let i = 0; i < MIDI_FX_PRESETS.length; i++) {
     const preset = MIDI_FX_PRESETS[i];
     const targetValues = buildMidiFXPresetTargetValues(preset);
@@ -494,31 +511,31 @@ function inferActiveMidiFXPresetKey() {
   return null;
 }
 
-function refreshMidiFXPresetHighlightFromControls() {
+function refreshMidiFXPresetHighlightFromControls(): void {
   MIDI_FX_UI.activePresetKey = inferActiveMidiFXPresetKey();
   refreshMidiFXPresetButtons();
 }
 
-function clampMidiFXValue(control, value) {
+function clampMidiFXValue(control: MidiFxControl, value: number): number {
   const clamped = Math.max(control.min, Math.min(control.max, value));
   const step    = Number(control.step) || 1;
   const stepped = Math.round((clamped - control.min) / step) * step + control.min;
   return Math.max(control.min, Math.min(control.max, stepped));
 }
 
-function buildMidiFXPresetTargetValues(preset) {
-  const targetValues = {};
-  const values = preset.values == null ? {} : preset.values;
+function buildMidiFXPresetTargetValues(preset: Pick<FxPreset<MidiFxKey>, 'values'>): Record<MidiFxKey, number> {
+  const targetValues = {} as Record<MidiFxKey, number>;
+  const values: Partial<Record<MidiFxKey, number>> = preset.values == null ? {} : preset.values;
   MIDI_FX_CONTROLS.forEach(control => {
     const rawValue = Object.prototype.hasOwnProperty.call(values, control.key)
-      ? values[control.key]
+      ? values[control.key]!
       : control.neutral;
     targetValues[control.key] = clampMidiFXValue(control, rawValue);
   });
   return targetValues;
 }
 
-function applyMidiFXPreset(presetKey) {
+function applyMidiFXPreset(presetKey: string): void {
   if (presetKey === 'reset') {
     resetMidiFXEffects();
     return;
@@ -537,11 +554,11 @@ function applyMidiFXPreset(presetKey) {
 // ANIMATION
 // ================================================================
 
-function animateMidiFXControlToNeutral(controlKey) {
+function animateMidiFXControlToNeutral(controlKey: MidiFxKey): void {
   const control = MIDI_FX_CONTROLS.find(c => c.key === controlKey);
   if (!control || isMidiFXControlNeutral(controlKey)) return;
 
-  const targetValues = {};
+  const targetValues = {} as Record<MidiFxKey, number>;
   MIDI_FX_CONTROLS.forEach(c => {
     const v = getMidiFXControlValue(c.key);
     targetValues[c.key] = v === null || Number.isNaN(v) ? c.neutral : v;
@@ -553,7 +570,9 @@ function animateMidiFXControlToNeutral(controlKey) {
   animateMidiFXToValues(targetValues, 320, { inferPresetAtEnd: true });
 }
 
-function animateMidiFXToValues(targetValues, durationMs = 300, options = {}) {
+function animateMidiFXToValues(
+  targetValues: Record<MidiFxKey, number>, durationMs = 300, options: { inferPresetAtEnd?: boolean } = {},
+): void {
   const { inferPresetAtEnd = false } = options;
 
   if (MIDI_FX_UI.presetAnimationFrame) {
@@ -561,14 +580,14 @@ function animateMidiFXToValues(targetValues, durationMs = 300, options = {}) {
     MIDI_FX_UI.presetAnimationFrame = null;
   }
 
-  const startValues = {};
+  const startValues = {} as Record<MidiFxKey, number | null>;
   MIDI_FX_CONTROLS.forEach(control => {
     startValues[control.key] = getMidiFXControlValue(control.key);
   });
 
   const startTime = performance.now();
 
-  const animate = now => {
+  const animate = (now: number) => {
     const elapsed = now - startTime;
     const t       = Math.min(1, elapsed / durationMs);
     const eased   = 1 - Math.pow(1 - t, 3);
@@ -599,11 +618,11 @@ function animateMidiFXToValues(targetValues, durationMs = 300, options = {}) {
 // RESET
 // ================================================================
 
-export function isMidiFXAnyControlModified() {
+export function isMidiFXAnyControlModified(): boolean {
   return MIDI_FX_CONTROLS.some(control => !isMidiFXControlNeutral(control.key));
 }
 
-export function resetMidiFXEffects() {
+export function resetMidiFXEffects(): void {
   const targetValues = buildMidiFXPresetTargetValues({ values: {} });
   MIDI_FX_UI.activePresetKey = 'reset';
   refreshMidiFXPresetButtons();
@@ -614,7 +633,7 @@ export function resetMidiFXEffects() {
 // TOOLBAR BUTTONS
 // ================================================================
 
-export function refreshMidiFXToolbarButtons() {
+export function refreshMidiFXToolbarButtons(): void {
   const hasMidi = isMidiFXAnyControlModified();
   const hasAudio = isAudioFXAnyControlModified() || AudioEngineAPI.hasActiveEffects();
   const anyFx = hasMidi || hasAudio;

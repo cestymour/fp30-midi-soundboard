@@ -1,5 +1,5 @@
 /* ================================================================
-   sw.js — Service Worker (Workbox, construit par vite-plugin-pwa)
+   sw.ts — Service Worker (Workbox, construit par vite-plugin-pwa)
    Stratégie :
    - Fichiers app (HTML, CSS, JS, icônes, manifest) : precache
      Workbox, liste et révisions générées au build
@@ -15,6 +15,13 @@ import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { RangeRequestsPlugin } from 'workbox-range-requests';
 import { clientsClaim } from 'workbox-core';
+import type { WorkboxPlugin } from 'workbox-core/types';
+import type { PrecacheEntry } from 'workbox-precaching';
+
+declare const self: ServiceWorkerGlobalScope & {
+  /** Liste des fichiers à précacher, injectée au build par vite-plugin-pwa */
+  __WB_MANIFEST: (PrecacheEntry | string)[];
+};
 
 const AUDIO_CACHE  = 'impro-audio';
 const IMAGES_CACHE = 'impro-images';
@@ -44,7 +51,7 @@ precacheAndRoute(self.__WB_MANIFEST);
  * qui est mis en cache ; RangeRequestsPlugin découpe ensuite les plages
  * demandées dans la réponse en cache.
  */
-const fetchWholeFilePlugin = {
+const fetchWholeFilePlugin: WorkboxPlugin = {
   requestWillFetch: async ({ request }) => new Request(request.url, {
     credentials: request.credentials,
   }),
@@ -104,7 +111,7 @@ registerRoute(
  * Recopie les sons déjà en cache par l'ancien SW dans le nouveau cache
  * audio (évite de retélécharger ~100 Mo), puis supprime les anciens caches.
  */
-async function migrateLegacyCaches() {
+async function migrateLegacyCaches(): Promise<void> {
   const keys = await caches.keys();
 
   const legacyAudioCaches = keys.filter(key => key.startsWith(LEGACY_AUDIO_CACHE_PREFIX));

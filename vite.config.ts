@@ -16,7 +16,7 @@ export default defineConfig({
       // Service Worker maison (src/sw.js), publié sous le nom sw.js à la racine du site
       strategies: 'injectManifest',
       srcDir: 'src',
-      filename: 'sw.js',
+      filename: 'sw.ts',
       // Enregistrement fait à la main dans src/main.js
       injectRegister: false,
       // Manifest web : on garde public/manifest.json tel quel

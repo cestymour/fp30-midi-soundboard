@@ -1,13 +1,17 @@
 /* ================================================================
-   audio-fx-ui.js - Popup FX audio grand format
+   audio-fx-ui.ts - Popup FX audio grand format
 ================================================================ */
 
-import { STATE } from '../state.js';
+import type { AudioFxKey, FxControl, FxPreset } from '../types.ts';
+import type { AudioEngineState } from '../audio/audio.ts';
+import { STATE } from '../state.ts';
 import { AUDIO_FX_PRESETS } from '../config/audio-fx.config.ts';
-import { AudioEngineAPI } from '../audio/audio.js';
-import { isMidiFXAnyControlModified } from './midi-fx-ui.js';
+import { AudioEngineAPI } from '../audio/audio.ts';
+import { isMidiFXAnyControlModified } from './midi-fx-ui.ts';
 
-const AUDIO_FX_CONTROLS = [
+type AudioFxControl = FxControl<AudioFxKey, AudioEngineState>;
+
+const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   {
     key: 'bass',
     label: 'BASS',
@@ -126,7 +130,20 @@ const AUDIO_FX_CONTROLS = [
 ];
 
 
-const AUDIO_FX_UI = {
+interface AudioFxPopupUI {
+  overlay:              HTMLDivElement | null;
+  trackEl:              Element | null;
+  presetButtons:        Map<string, HTMLButtonElement>;
+  sliderInputs:         Map<AudioFxKey, HTMLInputElement>;
+  sliderRails:          Map<AudioFxKey, HTMLElement>;
+  valueLabels:          Map<AudioFxKey, HTMLElement>;
+  controlCards:         Map<AudioFxKey, HTMLElement>;
+  activePresetKey:      string | null;
+  presetAnimationFrame: number | null;
+  railResizeObserver:   ResizeObserver | null;
+}
+
+const AUDIO_FX_UI: AudioFxPopupUI = {
   overlay:              null,
   trackEl:              null,
   presetButtons:        new Map(),
@@ -143,7 +160,7 @@ const AUDIO_FX_UI = {
 // BUILD
 // ================================================================
 
-export function buildAudioFXPopup() {
+export function buildAudioFXPopup(): void {
   if (AUDIO_FX_UI.overlay) return;
 
   const overlay = document.createElement('div');
@@ -213,13 +230,13 @@ export function buildAudioFXPopup() {
     </section>
   `;
 
-  document.getElementById('app').appendChild(overlay);
+  document.getElementById('app')!.appendChild(overlay);
 
   AUDIO_FX_UI.overlay = overlay;
   AUDIO_FX_UI.trackEl = overlay.querySelector('.fx-track__name');
 
   // ── Fermeture ──
-  overlay.querySelector('.fx-overlay__backdrop').addEventListener('click', closeAudioFXPopup);
+  overlay.querySelector('.fx-overlay__backdrop')!.addEventListener('click', closeAudioFXPopup);
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && STATE.audioFxPopupOpen) closeAudioFXPopup();
   });
@@ -230,17 +247,17 @@ export function buildAudioFXPopup() {
 
   // ── Presets ──
   AUDIO_FX_PRESETS.forEach(preset => {
-    const button = overlay.querySelector(`[data-preset="${preset.key}"]`);
+    const button = overlay.querySelector<HTMLButtonElement>(`[data-preset="${preset.key}"]`)!;
     AUDIO_FX_UI.presetButtons.set(preset.key, button);
     button.addEventListener('click', () => applyAudioFXPreset(preset.key));
   });
 
   // ── Sliders ──
   AUDIO_FX_CONTROLS.forEach(control => {
-    const input      = overlay.querySelector(`[data-slider-for="${control.key}"]`);
-    const rail       = overlay.querySelector(`[data-rail-for="${control.key}"]`);
-    const valueLabel = overlay.querySelector(`[data-value-for="${control.key}"]`);
-    const card       = overlay.querySelector(`[data-control="${control.key}"]`);
+    const input      = overlay.querySelector<HTMLInputElement>(`[data-slider-for="${control.key}"]`)!;
+    const rail       = overlay.querySelector<HTMLElement>(`[data-rail-for="${control.key}"]`)!;
+    const valueLabel = overlay.querySelector<HTMLElement>(`[data-value-for="${control.key}"]`)!;
+    const card       = overlay.querySelector<HTMLElement>(`[data-control="${control.key}"]`)!;
 
     AUDIO_FX_UI.sliderInputs.set(control.key, input);
     AUDIO_FX_UI.sliderRails.set(control.key, rail);
@@ -258,7 +275,7 @@ export function buildAudioFXPopup() {
       refreshAudioFXToolbarButtons();
     });
 
-    const oneReset = card.querySelector(`[data-audio-fx-reset-one="${control.key}"]`);
+    const oneReset = card.querySelector<HTMLButtonElement>(`[data-audio-fx-reset-one="${control.key}"]`);
     if (oneReset) {
       oneReset.addEventListener('click', event => {
         event.preventDefault();
@@ -276,7 +293,7 @@ export function buildAudioFXPopup() {
     });
   }
   AUDIO_FX_UI.sliderRails.forEach(rail => {
-    if (rail) AUDIO_FX_UI.railResizeObserver.observe(rail);
+    if (rail) AUDIO_FX_UI.railResizeObserver!.observe(rail);
   });
 
   syncAudioFXPopupFromEngine();
@@ -291,10 +308,10 @@ export function buildAudioFXPopup() {
 // LAYOUT
 // ================================================================
 
-function updateAudioFXPopupLayout() {
+function updateAudioFXPopupLayout(): void {
   if (!AUDIO_FX_UI.overlay) return;
 
-  const activePanel = document.querySelector('.panel.panel-audio.active');
+  const activePanel = document.querySelector<HTMLElement>('.panel.panel-audio.active');
   const grid = activePanel?.querySelector('.audio-grid');
   if (!grid) {
     closeAudioFXPopup();
@@ -302,16 +319,17 @@ function updateAudioFXPopupLayout() {
   }
 
   const rect = grid.getBoundingClientRect();
-  AUDIO_FX_UI.overlay.style.top    = `${rect.top}px`;
-  AUDIO_FX_UI.overlay.style.left   = `${rect.left}px`;
-  AUDIO_FX_UI.overlay.style.width  = `${rect.width}px`;
-  AUDIO_FX_UI.overlay.style.height = `${rect.height}px`;
+  const overlay = AUDIO_FX_UI.overlay;
+  overlay.style.top    = `${rect.top}px`;
+  overlay.style.left   = `${rect.left}px`;
+  overlay.style.width  = `${rect.width}px`;
+  overlay.style.height = `${rect.height}px`;
 
-  const accent = activePanel.style.getPropertyValue('--panel-accent').trim();
+  const accent = activePanel!.style.getPropertyValue('--panel-accent').trim();
   if (accent) {
-    AUDIO_FX_UI.overlay.style.setProperty('--panel-accent', accent);
+    overlay.style.setProperty('--panel-accent', accent);
   } else {
-    AUDIO_FX_UI.overlay.style.removeProperty('--panel-accent');
+    overlay.style.removeProperty('--panel-accent');
   }
 
   requestAnimationFrame(() => {
@@ -323,7 +341,7 @@ function updateAudioFXPopupLayout() {
 // OPEN / CLOSE
 // ================================================================
 
-export function openAudioFXPopup() {
+export function openAudioFXPopup(): void {
   if (!AUDIO_FX_UI.overlay) return;
   if (STATE.audioFxPopupOpen) {
     closeAudioFXPopup();
@@ -333,8 +351,8 @@ export function openAudioFXPopup() {
   syncAudioFXPopupFromEngine();
   updateAudioFXPopupLayout();
   STATE.audioFxPopupOpen = true;
-  AUDIO_FX_UI.overlay.classList.add('is-open');
-  AUDIO_FX_UI.overlay.setAttribute('aria-hidden', 'false');
+  AUDIO_FX_UI.overlay!.classList.add('is-open');
+  AUDIO_FX_UI.overlay!.setAttribute('aria-hidden', 'false');
   refreshAudioFXToolbarButtons();
 
   requestAnimationFrame(() => {
@@ -344,7 +362,7 @@ export function openAudioFXPopup() {
   });
 }
 
-export function closeAudioFXPopup() {
+export function closeAudioFXPopup(): void {
   if (!AUDIO_FX_UI.overlay) return;
   STATE.audioFxPopupOpen = false;
   AUDIO_FX_UI.overlay.classList.remove('is-open');
@@ -356,7 +374,7 @@ export function closeAudioFXPopup() {
 // SYNC
 // ================================================================
 
-export function syncAudioFXPopupFromEngine() {
+export function syncAudioFXPopupFromEngine(): void {
   if (!AUDIO_FX_UI.overlay) return;
 
   const settings = AudioEngineAPI.getCurrentSettings();
@@ -364,7 +382,7 @@ export function syncAudioFXPopupFromEngine() {
     const value = control.read(settings);
     const input = AUDIO_FX_UI.sliderInputs.get(control.key);
     if (!input) return;
-    input.value = value;
+    input.value = String(value);
     updateAudioFXValueLabel(control.key, value);
     updateAudioFXSliderVisual(control.key, value);
     updateAudioFXNeutralRailMarks(control.key);
@@ -387,14 +405,14 @@ export function syncAudioFXPopupFromEngine() {
 // HELPERS UI
 // ================================================================
 
-function updateAudioFXValueLabel(controlKey, value) {
+function updateAudioFXValueLabel(controlKey: AudioFxKey, value: number): void {
   const control = AUDIO_FX_CONTROLS.find(c => c.key === controlKey);
   const label   = AUDIO_FX_UI.valueLabels.get(controlKey);
   if (!control || !label) return;
-  label.textContent = control.formatValue(value);
+  label.textContent = String(control.formatValue(value));
 }
 
-function updateAudioFXSliderVisual(controlKey, value) {
+function updateAudioFXSliderVisual(controlKey: AudioFxKey, value: number): void {
   const control = AUDIO_FX_CONTROLS.find(c => c.key === controlKey);
   const input   = AUDIO_FX_UI.sliderInputs.get(controlKey);
   if (!control || !input) return;
@@ -404,7 +422,7 @@ function updateAudioFXSliderVisual(controlKey, value) {
   input.style.setProperty('--vol-pct', `${Math.max(0, Math.min(100, pct))}%`);
 }
 
-function updateAudioFXNeutralRailMarks(controlKey) {
+function updateAudioFXNeutralRailMarks(controlKey: AudioFxKey): void {
   const control = AUDIO_FX_CONTROLS.find(c => c.key === controlKey);
   const rail    = AUDIO_FX_UI.sliderRails.get(controlKey);
   const input   = AUDIO_FX_UI.sliderInputs.get(controlKey);
@@ -428,7 +446,7 @@ function updateAudioFXNeutralRailMarks(controlKey) {
   rail.style.setProperty('--neutral-from-top-pct', `${pctTop}%`);
 }
 
-function updateAudioFXControlState(controlKey, value) {
+function updateAudioFXControlState(controlKey: AudioFxKey, value: number): void {
   const control = AUDIO_FX_CONTROLS.find(c => c.key === controlKey);
   const card    = AUDIO_FX_UI.controlCards.get(controlKey);
   const input   = AUDIO_FX_UI.sliderInputs.get(controlKey);
@@ -438,7 +456,7 @@ function updateAudioFXControlState(controlKey, value) {
   card.classList.toggle('is-modified', isModified);
   input.classList.toggle('is-modified', isModified);
 
-  const oneReset = card.querySelector('[data-audio-fx-reset-one]');
+  const oneReset = card.querySelector<HTMLButtonElement>('[data-audio-fx-reset-one]');
   if (oneReset) {
     oneReset.disabled = !isModified;
     oneReset.classList.toggle('is-disabled', !isModified);
@@ -449,29 +467,29 @@ function updateAudioFXControlState(controlKey, value) {
 // VALEURS
 // ================================================================
 
-function getAudioFXControlValue(controlKey) {
+function getAudioFXControlValue(controlKey: AudioFxKey): number | null {
   const input = AUDIO_FX_UI.sliderInputs.get(controlKey);
   return input ? parseFloat(input.value) : null;
 }
 
-function isAudioFXControlNeutral(controlKey) {
+function isAudioFXControlNeutral(controlKey: AudioFxKey): boolean {
   const control = AUDIO_FX_CONTROLS.find(c => c.key === controlKey);
   const value   = getAudioFXControlValue(controlKey);
   if (!control || value === null) return true;
   return Math.abs(value - control.neutral) < 0.0001;
 }
 
-function setAudioFXControlValue(controlKey, value, apply = true) {
+function setAudioFXControlValue(controlKey: AudioFxKey, value: number, apply = true): void {
   const control = AUDIO_FX_CONTROLS.find(c => c.key === controlKey);
   const input   = AUDIO_FX_UI.sliderInputs.get(controlKey);
   if (!control || !input) return;
 
-  input.value = value;
+  input.value = String(value);
   updateAudioFXValueLabel(controlKey, value);
   updateAudioFXSliderVisual(controlKey, value);
   updateAudioFXNeutralRailMarks(controlKey);
   if (apply) {
-    control.apply(parseFloat(value));
+    control.apply(value);
   }
 }
 
@@ -479,7 +497,7 @@ function setAudioFXControlValue(controlKey, value, apply = true) {
 // PRESETS
 // ================================================================
 
-function refreshAudioFXPresetButtons() {
+function refreshAudioFXPresetButtons(): void {
   AUDIO_FX_PRESETS.forEach(preset => {
     const button = AUDIO_FX_UI.presetButtons.get(preset.key);
     if (!button) return;
@@ -487,7 +505,7 @@ function refreshAudioFXPresetButtons() {
   });
 }
 
-function audioFxTargetsMatchCurrent(targetValues) {
+function audioFxTargetsMatchCurrent(targetValues: Record<AudioFxKey, number>): boolean {
   for (const c of AUDIO_FX_CONTROLS) {
     const cur = getAudioFXControlValue(c.key);
     const tgt = targetValues[c.key];
@@ -497,7 +515,7 @@ function audioFxTargetsMatchCurrent(targetValues) {
   return true;
 }
 
-function inferActiveAudioFxPresetKey() {
+function inferActiveAudioFxPresetKey(): string | null {
   for (let i = 0; i < AUDIO_FX_PRESETS.length; i++) {
     const preset = AUDIO_FX_PRESETS[i];
     const targetValues = buildPresetTargetValues(preset);
@@ -506,31 +524,31 @@ function inferActiveAudioFxPresetKey() {
   return null;
 }
 
-function refreshAudioFXPresetHighlightFromControls() {
+function refreshAudioFXPresetHighlightFromControls(): void {
   AUDIO_FX_UI.activePresetKey = inferActiveAudioFxPresetKey();
   refreshAudioFXPresetButtons();
 }
 
-function clampAudioFXValue(control, value) {
+function clampAudioFXValue(control: AudioFxControl, value: number): number {
   const clamped = Math.max(control.min, Math.min(control.max, value));
   const step    = Number(control.step) || 1;
   const stepped = Math.round((clamped - control.min) / step) * step + control.min;
   return Math.max(control.min, Math.min(control.max, stepped));
 }
 
-function buildPresetTargetValues(preset) {
-  const targetValues = {};
-  const values = preset.values == null ? {} : preset.values;
+function buildPresetTargetValues(preset: Pick<FxPreset<AudioFxKey>, 'values'>): Record<AudioFxKey, number> {
+  const targetValues = {} as Record<AudioFxKey, number>;
+  const values: Partial<Record<AudioFxKey, number>> = preset.values == null ? {} : preset.values;
   AUDIO_FX_CONTROLS.forEach(control => {
     const rawValue = Object.prototype.hasOwnProperty.call(values, control.key)
-      ? values[control.key]
+      ? values[control.key]!
       : control.neutral;
     targetValues[control.key] = clampAudioFXValue(control, rawValue);
   });
   return targetValues;
 }
 
-function applyAudioFXPreset(presetKey) {
+function applyAudioFXPreset(presetKey: string): void {
   if (presetKey === 'reset') {
     resetAudioFXEffects();
     return;
@@ -548,11 +566,11 @@ function applyAudioFXPreset(presetKey) {
 // ANIMATION
 // ================================================================
 
-function animateAudioFXControlToNeutral(controlKey) {
+function animateAudioFXControlToNeutral(controlKey: AudioFxKey): void {
   const control = AUDIO_FX_CONTROLS.find(c => c.key === controlKey);
   if (!control || isAudioFXControlNeutral(controlKey)) return;
 
-  const targetValues = {};
+  const targetValues = {} as Record<AudioFxKey, number>;
   AUDIO_FX_CONTROLS.forEach(c => {
     const v = getAudioFXControlValue(c.key);
     targetValues[c.key] = v === null || Number.isNaN(v) ? c.neutral : v;
@@ -564,7 +582,9 @@ function animateAudioFXControlToNeutral(controlKey) {
   animateAudioFXToValues(targetValues, 320, { inferPresetAtEnd: true });
 }
 
-function animateAudioFXToValues(targetValues, durationMs = 300, options = {}) {
+function animateAudioFXToValues(
+  targetValues: Record<AudioFxKey, number>, durationMs = 300, options: { inferPresetAtEnd?: boolean } = {},
+): void {
   const { inferPresetAtEnd = false } = options;
 
   if (AUDIO_FX_UI.presetAnimationFrame) {
@@ -572,14 +592,14 @@ function animateAudioFXToValues(targetValues, durationMs = 300, options = {}) {
     AUDIO_FX_UI.presetAnimationFrame = null;
   }
 
-  const startValues = {};
+  const startValues = {} as Record<AudioFxKey, number | null>;
   AUDIO_FX_CONTROLS.forEach(control => {
     startValues[control.key] = getAudioFXControlValue(control.key);
   });
 
   const startTime = performance.now();
 
-  const animate = now => {
+  const animate = (now: number) => {
     const elapsed = now - startTime;
     const t       = Math.min(1, elapsed / durationMs);
     const eased   = 1 - Math.pow(1 - t, 3);
@@ -610,11 +630,11 @@ function animateAudioFXToValues(targetValues, durationMs = 300, options = {}) {
 // RESET
 // ================================================================
 
-export function isAudioFXAnyControlModified() {
+export function isAudioFXAnyControlModified(): boolean {
   return AUDIO_FX_CONTROLS.some(control => !isAudioFXControlNeutral(control.key));
 }
 
-export function resetAudioFXEffects() {
+export function resetAudioFXEffects(): void {
   const targetValues = buildPresetTargetValues({ values: {} });
   AUDIO_FX_UI.activePresetKey = 'reset';
   refreshAudioFXPresetButtons();
@@ -625,7 +645,7 @@ export function resetAudioFXEffects() {
 // TOOLBAR BUTTONS
 // ================================================================
 
-export function refreshAudioFXToolbarButtons() {
+export function refreshAudioFXToolbarButtons(): void {
   const hasAudio = isAudioFXAnyControlModified() || AudioEngineAPI.hasActiveEffects();
   const hasMidi = isMidiFXAnyControlModified();
   const anyFx = hasAudio || hasMidi;
