@@ -35,7 +35,7 @@ On **reste sur la plateforme web** (Web MIDI, Web Bluetooth, Web Audio dans Chro
 
 ## 2. Règles de travail
 
-1. **Aucun changement fonctionnel ni visuel.** La refonte doit être invisible pour l'utilisateur final : mêmes onglets, mêmes boutons, mêmes couleurs, mêmes comportements, même config. Si un comportement actuel semble être un bug, le signaler sans le corriger dans la foulée.
+1. **Aucun changement fonctionnel ni visuel.** La refonte doit être invisible pour l'utilisateur final : mêmes onglets, mêmes boutons, mêmes couleurs, mêmes comportements, même config. Si un comportement actuel semble être un bug, le signaler sans le corriger dans la foulée : l'ajouter à `docs/bugs.md` avec son diagnostic (l'utilisateur décidera à la fin lesquels corriger).
 2. **Une phase à la fois.** À la fin de chaque phase, l'app doit fonctionner. Résume ce qui a été fait, puis enchaîne sur la phase suivante. Décision de l'utilisateur (2026-10-13) : pas de test sur tablette entre les phases, la checklist de non-régression (section 5) est passée **une seule fois, juste avant une fusion dans `main`**. En compensation :
    - à la fin de chaque phase, vérifier automatiquement dans Chromium headless, en paysage et en portrait, que le rendu et les comportements restent identiques à `v1-vanilla` (captures comparées au pixel, popups FX, lecture d'un son, console sans erreur) ;
    - poser un tag local `refonte-phase-N` sur le dernier commit de chaque phase, pour pouvoir retrouver par bisection la phase qui a introduit une régression trouvée sur tablette.
@@ -173,8 +173,9 @@ Objectif : même code, mais en modules ES et construit par Vite.
 1. Supprimer le code mort, les anciens dossiers `js/` et `css/` s'ils sont vides, `version.js`, l'ancien `sw.js`.
 2. `README.md` : nouvelle stack, commandes, structure, schéma de config (toujours valable), procédure de release.
 3. `CLAUDE.md` : réécrire les sections Commands, Releasing et Architecture pour la nouvelle structure.
-4. Repasser la checklist complète en conditions réelles (piano en USB **et** en BLE, tablette dans les deux orientations, hors ligne).
-5. **→ Fin du jalon 3** : proposer la fusion dans `main`.
+4. Passer en revue `docs/bugs.md` avec l'utilisateur : il décide quels bugs corriger, et quand (avant ou après la fusion).
+5. Repasser la checklist complète en conditions réelles (piano en USB **et** en BLE, tablette dans les deux orientations, hors ligne).
+6. **→ Fin du jalon 3** : proposer la fusion dans `main`.
 
 ---
 
@@ -219,19 +220,20 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
 - [x] Phase 1 : Vite + modules ES (2026-10-13, `b03c234`), tag `refonte-phase-1`
   - Écart au plan : le paquet npm `ble-midi` n'est pas utilisable (CLI Node avec dépendances natives noble/bleno/midi, `npm install` échoue, `parsePacket` non exporté). Avec l'accord de l'utilisateur, le parseur est porté en module ES dans `src/midi/ble-midi-parser.js` (MIT, origine indiquée).
   - Node 18 en local : Vite 6 (Vite 7 demande Node ≥ 20.19).
+  - Bug constaté (non corrigé) : voir `docs/bugs.md` n° 1.
   - Vérifié en Chromium headless (paysage 1280×800 et portrait 800×1280) : captures des 4 onglets identiques au pixel près à `v1-vanilla`, popups FX, lecture d'un son et popup « À propos » OK, aucune erreur console.
 - [x] Phase 2 : PWA et déploiement (2026-10-13, `fe1f760` + `62d2711`), tag `refonte-phase-2`
   - Node 24 LTS épinglé dans `.nvmrc` (`vite-plugin-pwa` 2 et Workbox 7.4 demandent Node ≥ 20) ; le défaut nvm de l'utilisateur reste Node 18.
   - Version passée à 1.7.0 pour distinguer la nouvelle version de la v1 sur la tablette.
   - Sons : au premier accès, le SW télécharge le fichier entier sans en-tête `Range` (GitHub Pages répond 206 aux requêtes Range des `<audio>`, et une réponse 206 ne peut pas être mise en cache), puis sert les plages depuis le cache.
-  - Constat sur la v1 (non corrigé sur `main`) : son SW fait `cache.put` sur la réponse 206 de GitHub Pages, ce qui échoue ; en test, `impro-audio-1.6.4` reste vide. Le hors ligne des sons de la v1 ne repose donc probablement que sur le cache HTTP du navigateur.
+  - Bug de l'ancien SW (sons jamais mis en cache sur GitHub Pages) : voir `docs/bugs.md` n° 4.
   - Vérifié en Chromium headless avec un serveur qui répond en 206 : passage v1 → nouvelle version (anciens caches supprimés, son de l'ancien cache recopié), app lancée serveur arrêté, sons déjà joués relancés et seek hors ligne OK, son jamais joué marqué manquant ; captures identiques à `v1-vanilla` hormis le numéro de version.
 - [ ] **Jalon 1 fusionné dans `main`**
 - [x] Phase 3 : TypeScript (2026-10-13, `4745932` → `580c8d6` + doc), tag `refonte-phase-3`
   - `strict: true` dès la conversion, aucun `any` ; trois projets `tsc` (app / Service Worker en lib WebWorker / `vite.config.ts` en Node), lancés par `npm run typecheck` puis dans le workflow avec `npm test`.
   - `id` générés depuis le libellé (onglet Films : nom de l'image de couverture), y compris sur les entrées commentées ; seul ajustement manuel : `piano` (actif) / `piano-gp1` (commenté).
   - Vitest 5 installé dès cette phase pour le test d'unicité des `id` (Vitest 3 remontait des alertes `npm audit` critiques via tinypool).
-  - Bug v1 constaté (non corrigé) : l'auto-connexion USB au piano au chargement (`populateMidiSelects`) envoie `new Event('change')` sans `bubbles: true`, alors que l'écouteur est délégué sur `#panels` : le select affiche le piano mais `handleMidiSelectChange` n'est jamais appelé.
+  - Bugs constatés (non corrigés) : voir `docs/bugs.md` n° 2 et 3.
   - Vérifié en Chromium headless : captures identiques à `v1-vanilla` (aux variations d'animation près, présentes aussi entre deux captures de la v1), scénario SW/hors ligne de la phase 2 toujours OK.
 - [ ] Phase 4 : moteurs séparés, FX unifiés, tests
 - [ ] **Jalon 2 fusionné dans `main`**

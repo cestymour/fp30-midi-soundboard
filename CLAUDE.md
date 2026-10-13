@@ -8,7 +8,7 @@ PWA soundboard for live improv theater, used on an Android tablet in Chrome. It 
 
 ## Refonte en cours
 
-A technical, behaviour-preserving rewrite is in progress on the `refonte` branch. `REFONTE.md` is the work brief (phases, rules, progress in its « Suivi » section) and `docs/checklist.md` is the manual non-regression checklist. Never merge into or push `main` without the user's explicit approval: a push to `main` deploys to production, and the app is used on stage.
+A technical, behaviour-preserving rewrite is in progress on the `refonte` branch. `REFONTE.md` is the work brief (phases, rules, progress in its « Suivi » section), `docs/checklist.md` is the manual non-regression checklist, and `docs/bugs.md` lists the bugs found along the way, with their diagnosis. Behaviour must not change during the rewrite: add newly found bugs to `docs/bugs.md` instead of fixing them. Never merge into or push `main` without the user's explicit approval: a push to `main` deploys to production, and the app is used on stage.
 
 ## Commands
 
