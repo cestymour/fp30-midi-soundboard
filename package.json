@@ -1,6 +1,6 @@
 {
   "name": "fp30-midi-soundboard",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "private": true,
   "type": "module",
   "description": "Soundboard MIDI et audio pour spectacles de théâtre d'improvisation",
