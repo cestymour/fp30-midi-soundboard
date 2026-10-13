@@ -1,0 +1,225 @@
+# Refonte technique — brief pour l'IA
+
+Ce fichier est un **prompt de travail**. Il décrit la refonte technique du projet de bout en bout. Si tu es une IA chargée de la réaliser : lis-le en entier, lis `CLAUDE.md`, regarde la section « Suivi » en bas pour savoir où on en est, puis reprends à la première étape non cochée.
+
+---
+
+## 1. Contexte
+
+- **Application** : PWA soundboard pour du théâtre d'improvisation, utilisée **en spectacle** sur une tablette Android ~11" dans Chrome (paysage et portrait). Elle pilote un piano Roland FP-30X en MIDI (USB via Web MIDI, ou BLE via Web Bluetooth) et joue des clips audio à travers une chaîne d'effets Web Audio.
+- **Utilisateur** : un seul développeur, projet perso. Code, commentaires, textes d'interface et messages de commit **en français**.
+- **Dépôt** : `git@github-perso:cestymour/fp30-midi-soundboard.git`. Production : https://cestymour.github.io/fp30-midi-soundboard/ (GitHub Pages, déployé à **chaque push sur `main`** par `.github/workflows/deploy.yml`).
+- **Stack actuelle** : vanilla JS sans build, sans modules (scope global, ordre des `<script>` dans `index.html` = ordre des dépendances), sans tests. Environ 4 600 lignes de JS et 2 100 de CSS. Voir `CLAUDE.md` pour l'architecture détaillée.
+
+### Problèmes à résoudre
+
+1. Scope global et dépendances implicites. `STATE` est déclaré dans `app.js` (chargé en dernier) mais utilisé par les fichiers précédents.
+2. `js/midi-fx-ui.js` et `js/audio-fx-ui.js` (~630 lignes chacun) sont deux implémentations parallèles quasi identiques.
+3. Maintenance manuelle fragile : `APP_VERSION` à incrémenter à la main dans `version.js`, et liste `APP_ASSETS` de `sw.js` à garder synchronisée avec `index.html`.
+4. Le cache audio est versionné (`impro-audio-${APP_VERSION}`) : chaque nouvelle version fait retélécharger ~104 Mo de sons.
+5. DOM construit impérativement, synchronisation état ↔ interface à la main.
+6. Aucun typage alors que la config (`MIDI_TABS`, `AUDIO_TABS`, presets FX) a un schéma riche, et aucun test.
+
+### Stack cible
+
+- **Vite** (build statique, toujours déployé sur GitHub Pages)
+- **TypeScript** (`strict` à terme)
+- **Svelte 5** (runes) pour l'interface
+- **vite-plugin-pwa** en mode `injectManifest` (Service Worker maison basé sur Workbox)
+- **Vitest** pour la logique pure
+- Paquet npm **`ble-midi`** (skratchdot) à la place de `js/ble-midi-parser.bundle.js`, qui en est un bundle browserify
+
+On **reste sur la plateforme web** (Web MIDI, Web Bluetooth, Web Audio dans Chrome Android). Pas de natif, pas de Capacitor, pas de React, Next ou Angular.
+
+---
+
+## 2. Règles de travail
+
+1. **Aucun changement fonctionnel ni visuel.** La refonte doit être invisible pour l'utilisateur final : mêmes onglets, mêmes boutons, mêmes couleurs, mêmes comportements, même config. Si un comportement actuel semble être un bug, le signaler sans le corriger dans la foulée.
+2. **Une phase à la fois.** À la fin de chaque phase, l'app doit fonctionner. Arrête-toi, résume ce qui a été fait, et demande à l'utilisateur de passer la checklist de non-régression (section 5) sur la tablette avant de continuer.
+3. **Git**
+   - Le travail se fait sur la branche `refonte`, jamais directement sur `main`.
+   - Commits petits et fréquents, messages en français, à la manière de l'historique existant.
+   - **Ne jamais fusionner dans `main` ni pousser `main` sans accord explicite de l'utilisateur** : un push sur `main` déploie en production, et l'app sert en spectacle.
+4. **Garder la doc à jour** : à la fin de chaque jalon, mettre à jour `README.md` et `CLAUDE.md` pour qu'ils décrivent la nouvelle stack (commandes, structure, conventions). Mettre à jour la section « Suivi » de ce fichier à chaque étape terminée.
+5. **Respecter le style existant** : noms de fonctions explicites, commentaires en français et de densité comparable au code actuel.
+6. Toujours vérifier dans les deux orientations (paysage et portrait).
+
+---
+
+## 3. Étape 0 — Préparation git
+
+Si ce n'est pas déjà fait (vérifier avec `git tag` et `git branch -a`) :
+
+```bash
+git switch main
+git add CLAUDE.md REFONTE.md && git commit -m "ajout CLAUDE.md et plan de refonte"
+git tag -a v1-vanilla -m "Dernière version vanilla JS avant refonte"
+git push origin main v1-vanilla
+git switch -c refonte
+git push -u origin refonte
+```
+
+Demander confirmation à l'utilisateur avant les `git push`.
+
+### Mode d'emploi git pendant la refonte (à rappeler à l'utilisateur au besoin)
+
+- **Correctif urgent en production** : `git switch main`, corriger, commit, push (ça déploie), puis `git switch refonte && git merge main`.
+- **Fin d'un jalon** : `git switch main && git merge refonte && git push` (avec l'accord de l'utilisateur), puis `git switch refonte` pour continuer.
+- **Revenir à l'ancienne version en production** : lancer le workflow « Deploy » à la main depuis l'onglet *Actions* de GitHub, sur le tag `v1-vanilla`. Le tag contient l'ancien `deploy.yml`, qui publie la racine telle quelle, donc ça fonctionne. Prérequis à faire une fois : *Settings → Environments → github-pages → Deployment branches and tags*, ajouter la règle de tag `v*`. En local : `git switch -c v1 v1-vanilla`.
+- Les anciennes branches distantes `dev-*` et `fusion_sounds` peuvent être supprimées si l'utilisateur le souhaite (vérifier d'abord qu'elles sont fusionnées).
+
+---
+
+## 4. Les phases
+
+### Jalon 1 — Outillage (fusion dans `main` à la fin)
+
+#### Phase 1 : Vite + modules ES (toujours en JavaScript)
+
+Objectif : même code, mais en modules ES et construit par Vite.
+
+1. Créer `package.json` (scripts `dev`, `build`, `preview`), installer Vite. Ajouter `node_modules/` et `dist/` à `.gitignore`.
+2. `vite.config.js` avec `base: './'` (le site est servi sous `/fp30-midi-soundboard/`). Vérifier que `npm run build` puis `npm run preview` fonctionnent avec ce chemin.
+3. Déplacer le code dans `src/` :
+   - `src/config/` : les quatre fichiers de config, en `export const`.
+   - `src/state.js` : l'objet `STATE`, sorti de `app.js`. C'est ce qui supprime la contrainte d'ordre de chargement.
+   - `src/midi/`, `src/audio/`, `src/fx/`, `src/app.js`, `src/main.js` (point d'entrée qui appelle `init()`).
+   - Remplacer chaque usage d'un global par un `import` explicite. `window.AudioEngineAPI` devient un export.
+4. Remplacer `js/ble-midi-parser.bundle.js` par `import … from 'ble-midi'`. Vérifier que l'API utilisée par `bluetoothMIDI.js` est bien la même.
+5. Fichiers statiques : `sounds/`, `images/`, les icônes et `manifest.json` vont dans le dossier `public/` de Vite (copié tel quel à la racine de `dist/`).
+   - **Attention** : il existe déjà un dossier `public/` qui contient les icônes, référencées en `public/favicon.ico`, etc. Vite sert le contenu de `public/` **à la racine**. Il faut donc corriger les chemins (`favicon.ico`, `pwa-192x192.png`, … dans `index.html` et `manifest.json`), ou ranger les icônes dans `public/icons/` et ajuster.
+   - Les chemins de sons et d'images dans la config (`file`, `img`) doivent continuer à fonctionner sans modification de leur valeur si possible.
+6. `index.html` : une seule balise `<script type="module" src="/src/main.js">`, les CSS importés depuis `main.js`.
+7. Pendant cette phase, désactiver l'enregistrement de l'ancien `sw.js` en dev (il est remplacé en phase 2).
+8. Ne pas modifier la logique métier.
+
+**Critères** : `npm run dev` et `npm run build` sans erreur ni avertissement, plus aucun global partagé entre fichiers (hors API du navigateur), checklist de non-régression OK (sauf hors ligne, traité en phase 2).
+
+#### Phase 2 : PWA et déploiement
+
+1. Installer `vite-plugin-pwa` et `workbox-*`. Mode **`injectManifest`** avec un `src/sw.js` maison. Le manifest web peut être généré par le plugin à partir de l'actuel `manifest.json`, en gardant exactement les mêmes valeurs.
+2. Le SW doit être publié **sous le nom `sw.js` à la racine du site**, comme aujourd'hui. Comme l'URL ne change pas, le navigateur de la tablette remplacera l'ancien SW par le nouveau.
+3. Stratégies du nouveau SW :
+   - **Fichiers app** : precache Workbox (liste et révisions générées au build). Supprimer `version.js` et `APP_ASSETS`. La version affichée dans la popup « À propos » vient désormais de `package.json` (injectée par Vite via `define`, par exemple `__APP_VERSION__`).
+   - **Sons (`/sounds/`)** : `CacheFirst`, avec un **nom de cache stable** non versionné (par exemple `impro-audio`), plus `CacheableResponsePlugin({ statuses: [200] })` et `RangeRequestsPlugin`, car les éléments `<audio>` font des requêtes `Range`.
+   - **Polices Google Fonts** : `StaleWhileRevalidate` ou `CacheFirst`, pour que l'app reste correcte hors ligne.
+   - `skipWaiting` + `clientsClaim`, comme l'ancien SW.
+   - `cleanupOutdatedCaches()`.
+4. **Migration depuis l'ancien SW** : à l'activation, supprimer les anciens caches dont le nom commence par `impro-app-` ou `impro-audio-` (noms de l'ancien `sw.js`). Optionnel : avant de supprimer l'ancien cache audio, recopier ses entrées dans le nouveau cache `impro-audio` pour éviter de retélécharger les sons.
+5. Enregistrement du SW dans `main.js` (via `virtual:pwa-register` ou à la main), uniquement en production.
+6. `.github/workflows/deploy.yml` : ajouter `actions/setup-node` (Node LTS, cache npm), `npm ci`, `npm run build`, puis publier `dist/` au lieu de `.`. Garder `workflow_dispatch`.
+7. Supprimer `start-local.bat` ou le remplacer par un équivalent `npm run dev`. Mettre à jour `README.md` et `CLAUDE.md`, en particulier la section « Releasing / cache invalidation », qui devient : plus rien à faire à la main.
+
+**Critères** : build OK, app installable, fonctionne hors ligne après un premier chargement (app + sons déjà joués), la mise à jour depuis la version `v1-vanilla` installée sur la tablette se fait proprement (vérifier dans DevTools → Application que les anciens caches disparaissent), checklist OK.
+
+**→ Fin du jalon 1** : proposer à l'utilisateur de fusionner dans `main`.
+
+### Jalon 2 — Code
+
+#### Phase 3 : TypeScript
+
+1. Installer TypeScript, `tsconfig.json` (cibler les navigateurs récents, `moduleResolution: bundler`). Commencer avec `strict: false` si nécessaire.
+2. Créer `src/types.ts` : `MidiItem` (`pc` 1-based, `msb`, `lsb`…), `MidiTab`, `AudioItem` (`file`, `img?`, `start?`, `end?`, `catClass?`…), `AudioTab` (`cols?`, `gridType?`…), `FxControl` (`key`, `min`, `max`, `step`, `neutral`, `read`, `apply`, `formatValue`), `FxPreset` (`values` partiel ou `null` pour le reset). Le schéma complet est documenté dans `README.md`.
+3. **Identifiants stables** : ajouter un champ `id: string` **obligatoire** aux onglets, catégories et tuiles (MIDI et audio), dans les types et dans toute la config. Un slug court et lisible (`'nature'`, `'faune'`, `'pluie'`), unique parmi ses frères et qui ne change plus ensuite, même si le libellé, le fichier ou le patch changent. Aujourd'hui, les éléments ne sont identifiables que par leur libellé, leur `file` ou leur `pc`/`msb`/`lsb`. L'`id` prépare d'éventuelles préférences utilisateur (masquer ou réordonner des tuiles) sans rien changer à l'affichage. Ajouter un test Vitest qui vérifie l'unicité des `id` à chaque niveau.
+4. Convertir la config en premier (gain immédiat), puis les autres fichiers un par un.
+5. Typer Web MIDI (inclus dans la lib DOM) et Web Bluetooth (`@types/web-bluetooth`).
+6. Passer en `strict: true` à la fin de la phase.
+7. Ajouter une étape `tsc --noEmit` dans le workflow de déploiement : un build qui ne typecheck pas ne doit jamais partir en production.
+
+**Critères** : `tsc --noEmit` sans erreur en mode strict, aucun `any` non justifié, checklist OK.
+
+#### Phase 4 : séparer les moteurs de l'interface et unifier les FX
+
+1. **`src/midi/`** : `sendMidi`, l'envoi de patch, de volume et de all-notes-off, la connexion USB et la classe `BluetoothMIDI`. Plus aucun accès au DOM. Exposer l'état de connexion par des événements ou des callbacks.
+2. **`src/audio/`** : `AudioEngine`, `MediaElementTrack`, lecture, fades, boucle de progression. Plus aucun accès au DOM : la mise à jour des barres de progression et des sliders passe par des événements ou par l'état partagé.
+3. **`src/fx/`** : **une seule** implémentation de la logique des presets, paramétrée par le tableau de contrôles. Elle doit couvrir ce que font aujourd'hui en double les fonctions `build…PresetTargetValues`, `…TargetsMatchCurrent`, `infer…PresetKey`, `clamp…Value`, `animate…ToValues`, `is…AnyControlModified` et `reset…Effects`. Règles à conserver :
+   - les `values` d'un preset ne listent que les contrôles qu'il modifie, et les autres reviennent à leur `neutral` (pas à leur position actuelle) ;
+   - `values: null` est le preset de reset ;
+   - le preset actif est déduit des valeurs courantes, pour que la surbrillance revienne après un changement d'onglet ou une réouverture de la popup ;
+   - l'état FX MIDI est ce que l'app a envoyé en dernier (jamais relu depuis le piano), et l'état FX audio est lu via `getCurrentSettings()` du moteur.
+4. Les deux overlays (MIDI et audio) utilisent ce module commun. Il ne doit rester dans chacun que ce qui est vraiment spécifique.
+5. Installer Vitest et écrire des tests pour : le calcul des cibles d'un preset, l'inférence du preset actif, le clamp, la conversion `pc` 1-based → 0-based et les octets MIDI envoyés pour un patch, le formatage du temps, et éventuellement le parsing BLE.
+6. Ajouter `npm test` dans le workflow de déploiement.
+
+**Critères** : les fichiers de `midi/`, `audio/` et `fx/` n'importent rien du DOM ni de l'interface, tests verts, checklist OK.
+
+**→ Fin du jalon 2** : proposer la fusion dans `main`.
+
+### Jalon 3 — Interface
+
+#### Phase 5 : Svelte 5, composant par composant
+
+1. Installer Svelte 5 et `@sveltejs/vite-plugin-svelte`.
+2. `src/state.svelte.ts` : l'état partagé en runes (`$state`), qui remplace l'objet `STATE`.
+3. **Accès à la config par une fonction** : les composants ne lisent jamais `MIDI_TABS` / `AUDIO_TABS` directement, mais passent par un module unique (par exemple `src/config/tabs.ts` avec `getMidiTabs()` / `getAudioTabs()`). Pour l'instant, ces fonctions renvoient la config telle quelle. Plus tard, c'est le seul endroit à modifier pour appliquer des préférences utilisateur (tuiles masquées, ordre), sans toucher aux composants. Les boucles `{#each}` utilisent l'`id` comme clé (`{#each items as item (item.id)}`).
+4. Migrer **progressivement** : un composant Svelte peut être monté (`mount`) dans un conteneur existant, donc l'app reste fonctionnelle entre chaque composant. Ordre suggéré :
+   1. `FxOverlay.svelte` : **un seul** composant générique pour MIDI et audio, avec les contrôles, les presets et les boutons de la barre d'outils.
+   2. `Transport.svelte` / `SeekBar.svelte` (lecture/pause, seek par glisser).
+   3. `SoundButton.svelte`, `AudioPanel.svelte`.
+   4. `MidiPanel.svelte` (y compris la réorganisation en portrait, aujourd'hui `rearrangeMidiGrid`).
+   5. `TabNav.svelte`, `AboutPopup.svelte`, le bouton d'arrêt d'urgence.
+   6. `App.svelte`, qui remplace `buildUI()` et `init()`.
+5. L'égalisation des hauteurs de boutons (`equalizeMidiButtons`, `equalizeAudioButtons` + `ResizeObserver`) : la remplacer par du CSS Grid (`grid-auto-rows: 1fr`, container queries) **si le rendu est strictement identique**. Sinon, la garder sous forme d'action Svelte.
+6. CSS : découper `css/style.css` et `css/style.fx.css` dans les composants (styles scopés) au fil de la migration. Garder un fichier global pour les variables, le reset et les polices.
+7. Le Wake Lock et l'enregistrement du SW restent dans `main.ts` ou dans un module dédié.
+
+**Critères** : plus aucune construction de DOM impérative (`createElement`, `innerHTML`) hors cas justifié, rendu identique en paysage et en portrait, checklist OK.
+
+#### Phase 6 : finitions
+
+1. Supprimer le code mort, les anciens dossiers `js/` et `css/` s'ils sont vides, `version.js`, l'ancien `sw.js`.
+2. `README.md` : nouvelle stack, commandes, structure, schéma de config (toujours valable), procédure de release.
+3. `CLAUDE.md` : réécrire les sections Commands, Releasing et Architecture pour la nouvelle structure.
+4. Repasser la checklist complète en conditions réelles (piano en USB **et** en BLE, tablette dans les deux orientations, hors ligne).
+5. **→ Fin du jalon 3** : proposer la fusion dans `main`.
+
+---
+
+## 5. Checklist de non-régression (manuelle, sur la tablette)
+
+À créer dans `docs/checklist.md` dès la phase 1, à compléter si besoin, et à faire passer à l'utilisateur à la fin de chaque phase.
+
+- [ ] Chargement de l'app, onglets affichés, navigation entre onglets
+- [ ] Connexion du piano en **USB** (Web MIDI) : sélection de l'entrée et de la sortie
+- [ ] Connexion du piano en **Bluetooth** (BLE MIDI), y compris le loopback des notes jouées
+- [ ] Sélection d'instruments : le bon son sur le piano (Program Change + Bank Select MSB/LSB)
+- [ ] Volume MIDI, all-notes-off, bouton d'arrêt d'urgence
+- [ ] Popup FX MIDI : sliders, presets, reset, surbrillance du preset après fermeture/réouverture et après changement d'onglet
+- [ ] Lecture de clips audio, y compris ceux avec `start` / `end`
+- [ ] Fades, stop, lecture/pause, seek par clic et par glisser, barre de progression
+- [ ] Popup FX audio : sliders, presets, reset, surbrillance, effet audible
+- [ ] Onglet animaux (`gridType: 'animals'`) et onglets avec `cols`
+- [ ] Mode **paysage** et mode **portrait** : mise en page, hauteurs de boutons égalisées, réorganisation des grilles MIDI en portrait
+- [ ] Popup « À propos » et numéro de version
+- [ ] Wake Lock : l'écran ne se met pas en veille
+- [ ] **Hors ligne** (mode avion) : l'app se lance, les sons déjà joués une fois se relancent
+- [ ] Mise à jour : après un déploiement, la tablette récupère la nouvelle version
+
+---
+
+## 6. Tester sur la tablette pendant le développement
+
+Web MIDI, Web Bluetooth et les Service Workers exigent un **contexte sécurisé**. `localhost` en est un, mais `http://<ip-du-pc>:5173` non. `adb reverse` n'est pas utilisable puisque le port USB de la tablette sert au piano. Méthode recommandée :
+
+1. Sur le PC : `npm run dev -- --host` (ou `npm run build && npm run preview -- --host` pour tester le SW).
+2. Sur la tablette : ouvrir `chrome://flags/#unsafely-treat-insecure-origin-as-secure`, y ajouter `http://<ip-du-pc>:5173` (et le port de `preview`), puis relancer Chrome.
+
+Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, vérifier la redirection de port Windows → WSL (ou le mode réseau `mirrored` de WSL) et le pare-feu Windows.
+
+---
+
+## 7. Suivi
+
+À mettre à jour par l'IA à chaque étape terminée (date + commit).
+
+- [x] Étape 0 : tag `v1-vanilla` et branche `refonte` (2026-10-13)
+- [ ] Phase 1 : Vite + modules ES
+- [ ] Phase 2 : PWA et déploiement
+- [ ] **Jalon 1 fusionné dans `main`**
+- [ ] Phase 3 : TypeScript
+- [ ] Phase 4 : moteurs séparés, FX unifiés, tests
+- [ ] **Jalon 2 fusionné dans `main`**
+- [ ] Phase 5 : Svelte 5
+- [ ] Phase 6 : finitions
+- [ ] **Jalon 3 fusionné dans `main`**
