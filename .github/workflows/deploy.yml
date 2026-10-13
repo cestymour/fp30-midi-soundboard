@@ -23,13 +23,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc' # Même version de Node qu'en local
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build    # Construit le site dans dist/ (app + Service Worker)
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: '.'           # Racine du projet (pas de dossier dist)
+          path: 'dist'        # Site construit par Vite
 
       - name: Deploy to GitHub Pages
         id: deployment
