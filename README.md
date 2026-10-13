@@ -36,7 +36,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Responsive layout** — automatic grid reorganization in portrait mode
 - **About popup** — shows Service Worker and Wake Lock status, cache reset button
 - **Live audio FX mixer** — full overlay on the audio panel to shape the sound in real time (EQ, filters, tempo, delay, reverb) while a clip plays or before the next one; presets with smooth transitions, global reset, and quick per-control recall
-- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs to the connected piano (reverb, chorus, cutoff, resonance, attack, release, decay) via `sendMidi()` in `src/midi/midi.js`. The UI lives in `src/fx/midi-fx-ui.js` and shares styles with the audio FX popup in `src/css/style.fx.css`. Slider positions reflect what the app last sent, not a read-back from the instrument.
+- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs to the connected piano (reverb, chorus, cutoff, resonance, attack, release, decay) via `sendMidi()` in `src/midi/midi.ts`. The UI lives in `src/fx/midi-fx-ui.ts` and shares styles with the audio FX popup in `src/css/style.fx.css`. Slider positions reflect what the app last sent, not a read-back from the instrument.
 
 ### How it works
 
@@ -50,7 +50,7 @@ Use **Effets** / **Reset** in the MIDI panel header to open the piano FX overlay
 Click a button → the sound plays immediately from the device speakers.  
 Click again → the sound fades out and stops.
 
-Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `src/audio/audio.js`; the overlay UI lives in `src/fx/audio-fx-ui.js` and `src/css/style.fx.css`.
+Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `src/audio/audio.ts`; the overlay UI lives in `src/fx/audio-fx-ui.ts` and `src/css/style.fx.css`.
 
 ### Notes
 
@@ -63,8 +63,8 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 
 ### Tech
 
-- Vanilla JavaScript (ES modules) — no UI framework
-- Vite — dev server and static build
+- TypeScript (strict, ES modules) — no UI framework
+- Vite — dev server and static build; Vitest — unit tests
 - Web MIDI API — USB wired connection
 - Web Bluetooth API — BLE MIDI wireless connection
 - Native `Audio` — audio playback
@@ -78,28 +78,29 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 
 ```
 /
-├── index.html                      # Entry point (loads src/main.js)
-├── vite.config.js                  # Vite + PWA configuration
+├── index.html                      # Entry point (loads src/main.ts)
+├── vite.config.ts                  # Vite + PWA configuration
 ├── package.json                    # Scripts, dependencies, app version
 ├── src/
-│   ├── main.js                     # Entry: styles, init(), Service Worker registration
-│   ├── app.js                      # Orchestrator: DOM, navigation, transport
-│   ├── state.js                    # Shared state (STATE)
-│   ├── sw.js                       # Service Worker (Workbox)
+│   ├── main.ts                     # Entry: styles, init(), Service Worker registration
+│   ├── app.ts                      # Orchestrator: DOM, navigation, transport
+│   ├── state.ts                    # Shared state (STATE)
+│   ├── types.ts                    # Shared types (config schema, FX controls and presets)
+│   ├── sw.ts                       # Service Worker (Workbox)
 │   ├── config/                     # Data + FX presets
-│   │   ├── midi.config.js          # MIDI instrument data (MIDI_TABS)
-│   │   ├── audio.config.js         # Audio sound data (AUDIO_TABS)
-│   │   ├── midi-fx.config.js       # MIDI FX overlay presets (MIDI_FX_PRESETS)
-│   │   └── audio-fx.config.js      # Audio FX overlay presets (AUDIO_FX_PRESETS)
+│   │   ├── midi.config.ts          # MIDI instrument data (MIDI_TABS)
+│   │   ├── audio.config.ts         # Audio sound data (AUDIO_TABS)
+│   │   ├── midi-fx.config.ts       # MIDI FX overlay presets (MIDI_FX_PRESETS)
+│   │   └── audio-fx.config.ts      # Audio FX overlay presets (AUDIO_FX_PRESETS)
 │   ├── midi/
-│   │   ├── midi.js                 # MIDI logic (USB + Bluetooth)
-│   │   ├── bluetoothMIDI.js        # BluetoothMIDI class (BLE MIDI)
-│   │   └── ble-midi-parser.js      # BLE MIDI packet parser
+│   │   ├── midi.ts                 # MIDI logic (USB + Bluetooth)
+│   │   ├── bluetoothMIDI.ts        # BluetoothMIDI class (BLE MIDI)
+│   │   └── ble-midi-parser.ts      # BLE MIDI packet parser
 │   ├── audio/
-│   │   └── audio.js                # Audio playback + Web Audio effects engine
+│   │   └── audio.ts                # Audio playback + Web Audio effects engine
 │   ├── fx/
-│   │   ├── midi-fx-ui.js           # MIDI piano FX overlay (CC sliders, presets)
-│   │   └── audio-fx-ui.js          # Audio FX overlay (mixer UI, presets)
+│   │   ├── midi-fx-ui.ts           # MIDI piano FX overlay (CC sliders, presets)
+│   │   └── audio-fx-ui.ts          # Audio FX overlay (mixer UI, presets)
 │   └── css/
 │       ├── style.css               # Unified stylesheet
 │       └── style.fx.css            # FX overlay (mixer popup)
@@ -116,24 +117,27 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 
 All tab data and FX preset strips live under **`src/config/`**, as ES module exports imported by the app.
 
-#### MIDI instruments — `src/config/midi.config.js`
+#### MIDI instruments — `src/config/midi.config.ts`
 
 Exports `MIDI_TABS` — array of MIDI tabs, each containing categories and instruments:
 
 ```js
-export const MIDI_TABS = [
+export const MIDI_TABS: MidiTab[] = [
   {
+    id: 'instruments',      // Stable identifier (see below)
     label: 'Instruments',   // Tab name
     icon: '🎹',             // Emoji displayed in the tab
     accent: '#7c9cff',      // Tab accent color
     cols: 7,                // Number of columns (optional, default: 5)
     categories: [
       {
+        id: 'classique',
         label: 'Classique', // Category name
         icon: '🎹',
         color: '#7c9cff',   // Category title color
         items: [
           {
+            id: 'piano',
             name: 'Piano',  // Button label
             icon: '🎹',     // Button emoji
             pc: 1,          // Program Change (1-128, musical notation)
@@ -148,13 +152,14 @@ export const MIDI_TABS = [
 ];
 ```
 
-#### Audio sounds — `src/config/audio.config.js`
+#### Audio sounds — `src/config/audio.config.ts`
 
 Exports `AUDIO_TABS` — same structure as `MIDI_TABS`, with audio-specific fields:
 
 ```js
-export const AUDIO_TABS = [
+export const AUDIO_TABS: AudioTab[] = [
   {
+    id: 'nature',
     label: 'Nature',
     icon: '🌿',
     accent: '#4cffaa',
@@ -163,11 +168,13 @@ export const AUDIO_TABS = [
     // gridType: 'animals',  // Special grid layout (Animals tab)
     categories: [
       {
+        id: 'nature-eau',
         label: 'Nature & Water',
         icon: '🌊',
         color: '#4cffaa',
         items: [
           {
+            id: 'foret',
             name: 'Forest',                     // Button label
             icon: '🌲',                          // Button emoji (or image path)
             file: 'sounds/foret-oiseau.wav',    // Path to audio file (under public/)
@@ -185,9 +192,13 @@ export const AUDIO_TABS = [
 ];
 ```
 
-#### FX preset strips — `src/config/midi-fx.config.js` and `src/config/audio-fx.config.js`
+#### Stable identifiers (`id`)
 
-Preset buttons for the MIDI and audio FX overlays. Each file exports an array — `MIDI_FX_PRESETS` and `AUDIO_FX_PRESETS` — of objects `{ key, icon, text, values }`. Use `values: null` for the reset row; otherwise `values` maps control keys to numbers (MIDI: e.g. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay`; audio: e.g. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Any control **not** listed in `values` uses that control’s **neutral** default from `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` in the corresponding `src/fx/*-fx-ui.js` file (not the slider’s current position).
+Every tab, category and item has a required `id`: a short, readable slug (`'nature'`, `'faune'`, `'pluie'`), unique among its siblings (tab ids are unique across MIDI and audio tabs). **Never change an `id` once it exists**, even if the label, file or patch changes: it will be used to store user preferences (hidden or reordered tiles). `npm test` checks uniqueness. The types are in `src/types.ts`.
+
+#### FX preset strips — `src/config/midi-fx.config.ts` and `src/config/audio-fx.config.ts`
+
+Preset buttons for the MIDI and audio FX overlays. Each file exports an array — `MIDI_FX_PRESETS` and `AUDIO_FX_PRESETS` — of objects `{ key, icon, text, values }`. Use `values: null` for the reset row; otherwise `values` maps control keys to numbers (MIDI: e.g. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay`; audio: e.g. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Any control **not** listed in `values` uses that control’s **neutral** default from `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` in the corresponding `src/fx/*-fx-ui.ts` file (not the slider’s current position).
 
 #### Special tab types
 
@@ -235,7 +246,7 @@ Preset buttons for the MIDI and audio FX overlays. Each file exports an array �
 #### GitHub Pages (automatic)
 
 Deployment is handled by GitHub Actions (`.github/workflows/deploy.yml`).  
-Every push to `main` installs dependencies (`npm ci`), builds the site with Vite and publishes `dist/`.
+Every push to `main` installs dependencies (`npm ci`), runs the type check and the tests, builds the site with Vite and publishes `dist/`.
 
 **Initial setup:**
 1. Go to **Settings → Pages** in your GitHub repository
@@ -249,6 +260,8 @@ Requires Node.js (version in `.nvmrc`; with nvm: `nvm use`).
 ```bash
 npm install        # once
 npm run dev        # dev server on http://localhost:5173/ (no Service Worker)
+npm run typecheck  # TypeScript check (app, Service Worker, Vite config)
+npm test           # unit tests (Vitest)
 npm run build      # production build in dist/
 npm run preview    # serves dist/ (with the Service Worker)
 ```
@@ -313,7 +326,7 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
 - **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
 - **Mixeur d’effets audio en direct** — grande popup sur le panneau audio pour façonner le son en temps réel (égalisation, filtres, tempo, delay, reverb) pendant la lecture ou avant le morceau suivant ; presets avec transitions en douceur, reset global et rappel rapide par curseur
-- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards vers le piano connecté (reverb, chorus, cutoff, résonance, attaque, relâchement, decay) via `sendMidi()` dans `src/midi/midi.js`. L’interface est dans `src/fx/midi-fx-ui.js` et partage les styles de la popup audio dans `src/css/style.fx.css`. Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
+- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards vers le piano connecté (reverb, chorus, cutoff, résonance, attaque, relâchement, decay) via `sendMidi()` dans `src/midi/midi.ts`. L’interface est dans `src/fx/midi-fx-ui.ts` et partage les styles de la popup audio dans `src/css/style.fx.css`. Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
 
 ### Comment ça fonctionne
 
@@ -327,7 +340,7 @@ Les boutons **Effets** / **Reset** de la barre du panneau MIDI ouvrent la popup 
 Cliquer sur un bouton → le son se joue immédiatement depuis les haut-parleurs de l'appareil.  
 Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 
-Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `src/audio/audio.js` ; l’interface de la popup est dans `src/fx/audio-fx-ui.js` et `src/css/style.fx.css`.
+Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `src/audio/audio.ts` ; l’interface de la popup est dans `src/fx/audio-fx-ui.ts` et `src/css/style.fx.css`.
 
 ### Notes
 
@@ -340,8 +353,8 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 
 ### Stack technique
 
-- Vanilla JavaScript (modules ES) — aucun framework d'interface
-- Vite — serveur de développement et build statique
+- TypeScript (strict, modules ES) — aucun framework d'interface
+- Vite — serveur de développement et build statique ; Vitest — tests unitaires
 - Web MIDI API — connexion USB filaire
 - Web Bluetooth API — connexion Bluetooth MIDI (BLE MIDI)
 - `Audio` natif — lecture audio
@@ -355,28 +368,29 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 
 ```
 /
-├── index.html                      # Point d'entrée (charge src/main.js)
-├── vite.config.js                  # Configuration Vite + PWA
+├── index.html                      # Point d'entrée (charge src/main.ts)
+├── vite.config.ts                  # Configuration Vite + PWA
 ├── package.json                    # Scripts, dépendances, version de l'app
 ├── src/
-│   ├── main.js                     # Entrée : styles, init(), enregistrement du Service Worker
-│   ├── app.js                      # Chef d'orchestre : DOM, navigation, transport
-│   ├── state.js                    # État partagé (STATE)
-│   ├── sw.js                       # Service Worker (Workbox)
+│   ├── main.ts                     # Entrée : styles, init(), enregistrement du Service Worker
+│   ├── app.ts                      # Chef d'orchestre : DOM, navigation, transport
+│   ├── state.ts                    # État partagé (STATE)
+│   ├── types.ts                    # Types partagés (schéma de config, contrôles et presets FX)
+│   ├── sw.ts                       # Service Worker (Workbox)
 │   ├── config/                     # Données + presets FX
-│   │   ├── midi.config.js          # Données instruments MIDI (MIDI_TABS)
-│   │   ├── audio.config.js         # Données sons audio (AUDIO_TABS)
-│   │   ├── midi-fx.config.js       # Presets popup effets MIDI (MIDI_FX_PRESETS)
-│   │   └── audio-fx.config.js      # Presets popup effets audio (AUDIO_FX_PRESETS)
+│   │   ├── midi.config.ts          # Données instruments MIDI (MIDI_TABS)
+│   │   ├── audio.config.ts         # Données sons audio (AUDIO_TABS)
+│   │   ├── midi-fx.config.ts       # Presets popup effets MIDI (MIDI_FX_PRESETS)
+│   │   └── audio-fx.config.ts      # Presets popup effets audio (AUDIO_FX_PRESETS)
 │   ├── midi/
-│   │   ├── midi.js                 # Logique MIDI (USB + Bluetooth)
-│   │   ├── bluetoothMIDI.js        # Classe BluetoothMIDI (BLE MIDI)
-│   │   └── ble-midi-parser.js      # Parser paquet BLE MIDI
+│   │   ├── midi.ts                 # Logique MIDI (USB + Bluetooth)
+│   │   ├── bluetoothMIDI.ts        # Classe BluetoothMIDI (BLE MIDI)
+│   │   └── ble-midi-parser.ts      # Parser paquet BLE MIDI
 │   ├── audio/
-│   │   └── audio.js                # Lecture audio + moteur Web Audio (effets)
+│   │   └── audio.ts                # Lecture audio + moteur Web Audio (effets)
 │   ├── fx/
-│   │   ├── midi-fx-ui.js           # Popup effets piano MIDI (curseurs CC, presets)
-│   │   └── audio-fx-ui.js          # Popup mixeur effets (UI, presets)
+│   │   ├── midi-fx-ui.ts           # Popup effets piano MIDI (curseurs CC, presets)
+│   │   └── audio-fx-ui.ts          # Popup mixeur effets (UI, presets)
 │   └── css/
 │       ├── style.css               # CSS unifié
 │       └── style.fx.css            # Popup mixeur / effets
@@ -393,24 +407,27 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 
 Les données d’onglets et les bandeaux de presets FX sont dans **`src/config/`**, sous forme d’exports de modules ES importés par l’app.
 
-#### Instruments MIDI — `src/config/midi.config.js`
+#### Instruments MIDI — `src/config/midi.config.ts`
 
 Exporte `MIDI_TABS` — tableau d'onglets MIDI, chacun contenant des catégories et des instruments :
 
 ```js
-export const MIDI_TABS = [
+export const MIDI_TABS: MidiTab[] = [
   {
+    id: 'instruments',      // Identifiant stable (voir plus bas)
     label: 'Instruments',   // Nom de l'onglet
     icon: '🎹',             // Emoji affiché dans l'onglet
     accent: '#7c9cff',      // Couleur de l'onglet
     cols: 7,                // Nombre de colonnes (optionnel, défaut : 5)
     categories: [
       {
+        id: 'classique',
         label: 'Classique', // Nom de la catégorie
         icon: '🎹',
         color: '#7c9cff',   // Couleur du titre de catégorie
         items: [
           {
+            id: 'piano',
             name: 'Piano',  // Nom affiché sur le bouton
             icon: '🎹',     // Emoji du bouton
             pc: 1,          // Program Change (1-128, notation musicale)
@@ -425,13 +442,14 @@ export const MIDI_TABS = [
 ];
 ```
 
-#### Sons audio — `src/config/audio.config.js`
+#### Sons audio — `src/config/audio.config.ts`
 
 Exporte `AUDIO_TABS` — même structure que `MIDI_TABS`, avec des champs spécifiques audio :
 
 ```js
-export const AUDIO_TABS = [
+export const AUDIO_TABS: AudioTab[] = [
   {
+    id: 'nature',
     label: 'Nature',
     icon: '🌿',
     accent: '#4cffaa',
@@ -440,11 +458,13 @@ export const AUDIO_TABS = [
     // gridType: 'animals',  // Grille spéciale (onglet Animaux)
     categories: [
       {
+        id: 'nature-eau',
         label: 'Nature & Eau',
         icon: '🌊',
         color: '#4cffaa',
         items: [
           {
+            id: 'foret',
             name: 'Forêt',                      // Nom affiché sur le bouton
             icon: '🌲',                          // Emoji (ou chemin vers image)
             file: 'sounds/foret-oiseau.wav',    // Chemin vers le fichier audio (dans public/)
@@ -462,9 +482,13 @@ export const AUDIO_TABS = [
 ];
 ```
 
-#### Bandeaux de presets FX — `src/config/midi-fx.config.js` et `src/config/audio-fx.config.js`
+#### Identifiants stables (`id`)
 
-Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un tableau — `MIDI_FX_PRESETS` et `AUDIO_FX_PRESETS` — d’objets `{ key, icon, text, values }`. `values: null` correspond à la ligne Reset ; sinon `values` associe chaque clé de contrôle à un nombre (MIDI : ex. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay` ; audio : ex. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Tout contrôle **absent** de `values` prend la valeur **neutre** définie dans `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` du fichier `src/fx/*-fx-ui.js` correspondant (pas la position actuelle du curseur).
+Chaque onglet, catégorie et tuile a un `id` obligatoire : un slug court et lisible (`'nature'`, `'faune'`, `'pluie'`), unique parmi ses frères (les id d’onglets sont uniques entre onglets MIDI et audio). **Ne jamais modifier un `id` existant**, même si le libellé, le fichier ou le patch changent : il servira à enregistrer des préférences utilisateur (tuiles masquées ou réordonnées). `npm test` vérifie l’unicité. Les types sont dans `src/types.ts`.
+
+#### Bandeaux de presets FX — `src/config/midi-fx.config.ts` et `src/config/audio-fx.config.ts`
+
+Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un tableau — `MIDI_FX_PRESETS` et `AUDIO_FX_PRESETS` — d’objets `{ key, icon, text, values }`. `values: null` correspond à la ligne Reset ; sinon `values` associe chaque clé de contrôle à un nombre (MIDI : ex. `reverb`, `chorus`, `cutoff`, `resonance`, `attack`, `release`, `decay` ; audio : ex. `bass`, `mid`, `treble`, `lowPass`, `highPass`, `reverb`, `delay`, `speed`). Tout contrôle **absent** de `values` prend la valeur **neutre** définie dans `MIDI_FX_CONTROLS` / `AUDIO_FX_CONTROLS` du fichier `src/fx/*-fx-ui.ts` correspondant (pas la position actuelle du curseur).
 
 #### Types d'onglets spéciaux
 
@@ -512,7 +536,7 @@ Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un
 #### GitHub Pages (automatique)
 
 Le déploiement est géré par GitHub Actions (`.github/workflows/deploy.yml`).  
-À chaque push sur la branche `main`, le workflow installe les dépendances (`npm ci`), construit le site avec Vite et publie `dist/`.
+À chaque push sur la branche `main`, le workflow installe les dépendances (`npm ci`), lance la vérification TypeScript et les tests, construit le site avec Vite et publie `dist/`.
 
 **Configuration initiale :**
 1. Aller dans **Settings → Pages** du dépôt GitHub
@@ -526,6 +550,8 @@ Nécessite Node.js (version dans `.nvmrc` ; avec nvm : `nvm use`).
 ```bash
 npm install        # une fois
 npm run dev        # serveur de dev sur http://localhost:5173/ (sans Service Worker)
+npm run typecheck  # vérification TypeScript (app, Service Worker, config Vite)
+npm test           # tests unitaires (Vitest)
 npm run build      # build de production dans dist/
 npm run preview    # sert dist/ (avec le Service Worker)
 ```

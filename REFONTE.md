@@ -227,7 +227,12 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
   - Constat sur la v1 (non corrigé sur `main`) : son SW fait `cache.put` sur la réponse 206 de GitHub Pages, ce qui échoue ; en test, `impro-audio-1.6.4` reste vide. Le hors ligne des sons de la v1 ne repose donc probablement que sur le cache HTTP du navigateur.
   - Vérifié en Chromium headless avec un serveur qui répond en 206 : passage v1 → nouvelle version (anciens caches supprimés, son de l'ancien cache recopié), app lancée serveur arrêté, sons déjà joués relancés et seek hors ligne OK, son jamais joué marqué manquant ; captures identiques à `v1-vanilla` hormis le numéro de version.
 - [ ] **Jalon 1 fusionné dans `main`**
-- [ ] Phase 3 : TypeScript
+- [x] Phase 3 : TypeScript (2026-10-13, `4745932` → `580c8d6`), tag `refonte-phase-3`
+  - `strict: true` dès la conversion, aucun `any` ; trois projets `tsc` (app / Service Worker en lib WebWorker / `vite.config.ts` en Node), lancés par `npm run typecheck` puis dans le workflow avec `npm test`.
+  - `id` générés depuis le libellé (onglet Films : nom de l'image de couverture), y compris sur les entrées commentées ; seul ajustement manuel : `piano` (actif) / `piano-gp1` (commenté).
+  - Vitest 5 installé dès cette phase pour le test d'unicité des `id` (Vitest 3 remontait des alertes `npm audit` critiques via tinypool).
+  - Bug v1 constaté (non corrigé) : l'auto-connexion USB au piano au chargement (`populateMidiSelects`) envoie `new Event('change')` sans `bubbles: true`, alors que l'écouteur est délégué sur `#panels` : le select affiche le piano mais `handleMidiSelectChange` n'est jamais appelé.
+  - Vérifié en Chromium headless : captures identiques à `v1-vanilla` (aux variations d'animation près, présentes aussi entre deux captures de la v1), scénario SW/hors ligne de la phase 2 toujours OK.
 - [ ] Phase 4 : moteurs séparés, FX unifiés, tests
 - [ ] **Jalon 2 fusionné dans `main`**
 - [ ] Phase 5 : Svelte 5
