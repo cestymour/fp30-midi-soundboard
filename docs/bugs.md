@@ -10,7 +10,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé** (co
 
 ## 1. Changement de son direct : pas de fondu de sortie, ancienne piste jamais libérée
 
-- **Statut** : corrigé (2026-10-14) : `cancelFade()` libère (`dispose()`) la piste dont le fondu de sortie est interrompu. Le changement de son reste sans fondu croisé (l'ancien son est coupé net), comme avant
+- **Statut** : corrigé (2026-10-14) : `cancelFade()` libère (`dispose()`) la piste dont le fondu de sortie est interrompu. Le changement de son reste sans fondu croisé : l'ancien son est coupé net, **voulu** (décision de l'utilisateur, 2026-10-14 : un fondu de sortie retarderait le son suivant, qui doit partir tout de suite)
 - **Constaté** : phase 1 (2026-10-13), à la lecture du code
 - **Où** : v1 : `js/audio.js` (`stopSound()`, `playSound()`), clic dans `js/app.js` (`buildSoundBtn`) ; refonte : `src/audio/playback.ts` (`stopSound()`, `playSound()`, `cancelFade()`), clic dans `src/ui/components/SoundButton.svelte`
 - **Scénario** : un son joue, on clique sur un **autre** bouton son.
