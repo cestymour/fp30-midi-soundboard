@@ -33,7 +33,6 @@ Nothing to bump by hand for caching. `src/sw.ts` is a Workbox Service Worker bui
 
 - Sounds (`/sounds/`): `CacheFirst` in the stable, unversioned cache `impro-audio`. On a miss the whole file is fetched without the `Range` header (a 206 can't be cached), and `RangeRequestsPlugin` then serves `<audio>` range requests from the cache.
 - Images (`/images/`): `CacheFirst` in `impro-images`. Google Fonts: `impro-fonts-css` (StaleWhileRevalidate) and `impro-fonts` (CacheFirst).
-- On activation, the SW migrates from the 1.6.x SW: it copies `impro-audio-*` entries into `impro-audio`, then deletes the `impro-app-*` and `impro-audio-*` caches. Keep that code (and `tools/regression/migration.mjs`) until every tablet has updated to 1.7.x; the user will say when.
 - The SW is registered in `src/main.ts`, in production builds only.
 
 The version shown in the About popup comes from `package.json` (`version`), injected at build time as `__APP_VERSION__` (see `vite.config.ts`). Bump it for each release so you can tell on the tablet which version is running.
@@ -41,7 +40,7 @@ The version shown in the About popup comes from `package.json` (`version`), inje
 ## Testing
 
 - Unit tests (`*.test.ts` next to the code): presets, MIDI bytes, timing, BLE parser, config ids, and playback (`src/audio/playback.test.ts`: fades and track disposal, with fake tracks in place of `<audio>` and Web Audio).
-- `tools/regression/`: headless Chromium, no piano. `run.sh` compares `dist/` with a reference build, by default the latest `vX.Y.Z` tag (`REGRESSION_REF` to choose another, `v1-vanilla` included): screenshots, a 23-step interaction scenario, and the Service Worker update from 1.6.x and offline mode. For a CSS-only change, `tools/regression/styles.sh <reference build>` compares the computed style of every element (and `::before` / `::after`) between two builds, in about twenty UI states and at every media query breakpoint. See its README for the setup (Chromium, `playwright-core` outside the repo).
+- `tools/regression/`: headless Chromium, no piano. `run.sh` compares `dist/` with a reference build, by default the latest `vX.Y.Z` tag (`REGRESSION_REF` to choose another, `v1-vanilla` included): screenshots and a 23-step interaction scenario. Offline mode and Service Worker updates are only checked by hand (`docs/checklist.md`). For a CSS-only change, `tools/regression/styles.sh <reference build>` compares the computed style of every element (and `::before` / `::after`) between two builds, in about twenty UI states and at every media query breakpoint. See its README for the setup (Chromium, `playwright-core` outside the repo).
 - `docs/checklist.md`: the manual checklist on the tablet, with the real piano, and how to serve the app to the tablet (`adb reverse`) or to a browser on the Windows host.
 
 ## Architecture

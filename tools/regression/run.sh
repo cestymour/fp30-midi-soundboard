@@ -10,10 +10,9 @@ TOOLS=$REPO/tools/regression
 WORK=${REGRESSION_WORK:-/tmp/fp30-regression}
 REF=${REGRESSION_REF:-$(git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*')}
 REF_DIR=$WORK/ref
-V1_DIR=$WORK/v1
 OUT=$WORK/out
 
-rm -rf "$WORK" && mkdir -p "$OUT" "$WORK/site" "$WORK/site-ref" "$WORK/site2"
+rm -rf "$WORK" && mkdir -p "$OUT" "$WORK/site" "$WORK/site-ref"
 cp -r dist "$WORK/site/fp30-midi-soundboard"
 
 # Version de référence : v1-vanilla est un site statique, servi tel quel ;
@@ -30,13 +29,11 @@ else
   REF_ROOT=$WORK/site-ref
   REF_URL=http://localhost:8090/fp30-midi-soundboard/
 fi
-# La mise à jour du Service Worker se teste toujours depuis la v1 (migration de ses caches)
-git worktree add -f "$V1_DIR" v1-vanilla >/dev/null 2>&1
 
 node "$TOOLS/server.mjs" "$REF_ROOT" 8090 & PID_REF=$!
 node "$TOOLS/server.mjs" "$WORK/site" 8091 & PID_NEW=$!
 # Nettoyage même en cas d'erreur ou d'interruption
-trap 'kill $PID_REF $PID_NEW $(cat "$WORK/server.pid" 2>/dev/null) 2>/dev/null; git worktree remove --force "$REF_DIR" 2>/dev/null; git worktree remove --force "$V1_DIR" 2>/dev/null' EXIT
+trap 'kill $PID_REF $PID_NEW 2>/dev/null; git worktree remove --force "$REF_DIR" 2>/dev/null' EXIT
 sleep 1
 NEW_URL=http://localhost:8091/fp30-midi-soundboard/
 
@@ -52,11 +49,5 @@ for size in "1280 800" "800 1280"; do
   node "$TOOLS/behavior.mjs" "$NEW_URL" "$1" "$2" > "$OUT/behavior-new-$1.json"
   node "$TOOLS/compare-behavior.mjs" "$OUT/behavior-ref-$1.json" "$OUT/behavior-new-$1.json"
 done
-
-echo "== Service Worker : mise à jour depuis la v1, hors ligne"
-node "$TOOLS/server.mjs" "$WORK/site2" 8095 & echo $! > "$WORK/server.pid"
-sleep 1
-SITE2="$WORK/site2/fp30-midi-soundboard" SERVER_PID_FILE="$WORK/server.pid" V1_DIR="$V1_DIR" NEW_BUILD="$REPO/dist" \
-  node "$TOOLS/migration.mjs" 2>&1 | grep -v WakeLock
 
 echo "Résultats : $OUT"

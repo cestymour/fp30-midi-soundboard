@@ -26,10 +26,6 @@ declare const self: ServiceWorkerGlobalScope & {
 const AUDIO_CACHE  = 'impro-audio';
 const IMAGES_CACHE = 'impro-images';
 
-// Préfixes des caches de l'ancien sw.js (versions ≤ 1.6.x, avant la refonte)
-const LEGACY_APP_CACHE_PREFIX   = 'impro-app-';
-const LEGACY_AUDIO_CACHE_PREFIX = 'impro-audio-';
-
 // Activation immédiate sans attendre la fermeture des onglets
 self.skipWaiting();
 clientsClaim();
@@ -102,41 +98,3 @@ registerRoute(
     plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
   }),
 );
-
-// ═══════════════════════════════════════════════════════
-// MIGRATION — caches de l'ancien Service Worker
-// ═══════════════════════════════════════════════════════
-
-/**
- * Recopie les sons déjà en cache par l'ancien SW dans le nouveau cache
- * audio (évite de retélécharger ~100 Mo), puis supprime les anciens caches.
- */
-async function migrateLegacyCaches(): Promise<void> {
-  const keys = await caches.keys();
-
-  const legacyAudioCaches = keys.filter(key => key.startsWith(LEGACY_AUDIO_CACHE_PREFIX));
-  if (legacyAudioCaches.length) {
-    const audioCache = await caches.open(AUDIO_CACHE);
-    for (const key of legacyAudioCaches) {
-      const legacyCache = await caches.open(key);
-      for (const request of await legacyCache.keys()) {
-        if (await audioCache.match(request)) continue;
-        const response = await legacyCache.match(request);
-        if (response?.status === 200) await audioCache.put(request, response);
-      }
-    }
-  }
-
-  await Promise.all(
-    keys
-      .filter(key => key.startsWith(LEGACY_APP_CACHE_PREFIX) || key.startsWith(LEGACY_AUDIO_CACHE_PREFIX))
-      .map(key => {
-        console.log('[SW] Suppression ancien cache :', key);
-        return caches.delete(key);
-      })
-  );
-}
-
-self.addEventListener('activate', event => {
-  event.waitUntil(migrateLegacyCaches());
-});
