@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'node:fs';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
@@ -10,4 +11,22 @@ export default defineConfig({
     // Version affichée dans la popup « À propos »
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
+  plugins: [
+    VitePWA({
+      // Service Worker maison (src/sw.js), publié sous le nom sw.js à la racine du site
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      // Enregistrement fait à la main dans src/main.js
+      injectRegister: false,
+      // Manifest web : on garde public/manifest.json tel quel
+      manifest: false,
+      injectManifest: {
+        rollupFormat: 'iife',
+        // Fichiers app à précacher ; sons et images sont mis en cache au premier accès
+        globPatterns: ['**/*.{html,js,css,ico,png,json}'],
+        globIgnores: ['sounds/**', 'images/**'],
+      },
+    }),
+  ],
 });
