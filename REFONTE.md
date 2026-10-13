@@ -242,6 +242,13 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
   - 46 tests Vitest (presets, inférence, clamp, octets MIDI d'un patch et routage USB/BT, arrêt d'urgence, temps de lecture et seek, parseur BLE, validité des presets et patchs de la config).
   - Scripts de non-régression automatique versionnés dans `tools/regression/` (captures, scénario de 23 étapes comparé au DOM de la v1, mise à jour du SW et hors ligne) : tout identique à `v1-vanilla` en paysage et en portrait.
 - [ ] **Jalon 2 fusionné dans `main`**
-- [ ] Phase 5 : Svelte 5
+- [x] Phase 5 : Svelte 5 (2026-10-13, `0c5c4cb` → `b256dfd` + doc), tag `refonte-phase-5`
+  - `@sveltejs/vite-plugin-svelte` 6 (la 7 demande Vite 8 ; on reste sur Vite 6). `npm run typecheck` lance `svelte-check --fail-on-warnings` sur l'app.
+  - Migration progressive : d'abord la popup d'effets (`FxOverlay.svelte` + `FxOverlayController`), puis toute l'interface (`App.svelte`, `ui/components/`). Plus aucune construction de DOM impérative : il reste seulement des mesures (hauteur des boutons, position de la popup sur la grille active).
+  - `state.svelte.ts` : `STATE` en runes ; `$state.raw` pour les objets comparés par identité ou fournis par le navigateur (ports MIDI, BLE, piste, son courant), qui ne doivent pas passer par un proxy. Accès à la config par `config/tabs.ts`, `{#each}` indexés par `id`.
+  - Égalisation des hauteurs de boutons : gardée en JS (`layout.svelte.ts`). Un équivalent CSS Grid ne donnerait pas exactement le même rendu (le calcul dépend de la hauteur réelle des titres et du nombre de rangées par colonne), ce qui est la condition posée par le brief.
+  - CSS : `css/global.css` (variables, reset, page, curseur `.vol-slider` partagé par le volume et les popups) ; le reste est scopé dans les composants. Chaque famille de règles reste dans un seul composant, dans son ordre d'origine : Svelte ajoute la même spécificité (une classe) à toutes les règles scopées, donc la cascade ne change pas. Deux composants de mise en page ajoutés, sans changement du DOM : `Panel` (cadre et barre de contrôles communs) et `FxToolbar` (boutons Effets / Reset). Supprimés car jamais utilisés : `.icon-stop`, `#settings-btn > *`. Règles gardées pour un balisage jamais rendu : `.paused` (bug n° 5) et `.fx-track`, en `:global(...)`.
+  - Bugs constatés (non corrigés, comportement de la v1 conservé) : voir `docs/bugs.md` n° 5 et 6, confirmés par le scénario sur `v1-vanilla`.
+  - Vérifié en Chromium headless : scénario de 23 étapes identique à `v1-vanilla` en paysage et en portrait, captures identiques (hors variations d'animation et numéro de version), mise à jour du SW et hors ligne OK. Découpage du CSS vérifié avec un nouvel outil (`tools/regression/styles.sh`) : styles calculés de tous les éléments identiques avant et après, dans une vingtaine d'états et sur 7 tailles d'écran.
 - [ ] Phase 6 : finitions
 - [ ] **Jalon 3 fusionné dans `main`**

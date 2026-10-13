@@ -36,7 +36,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Responsive layout** — automatic grid reorganization in portrait mode
 - **About popup** — shows Service Worker and Wake Lock status, cache reset button
 - **Live audio FX mixer** — full overlay on the audio panel to shape the sound in real time (EQ, filters, tempo, delay, reverb) while a clip plays or before the next one; presets with smooth transitions, global reset, and quick per-control recall
-- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs to the connected piano (reverb, chorus, cutoff, resonance, attack, release, decay) via `sendMidi()` in `src/midi/midi.ts`. Both FX popups share one implementation (`src/ui/fx-overlay.ts`, preset logic in `src/fx/fx-presets.ts`) and the styles in `src/css/style.fx.css`. Slider positions reflect what the app last sent, not a read-back from the instrument.
+- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs to the connected piano (reverb, chorus, cutoff, resonance, attack, release, decay) via `sendMidi()` in `src/midi/midi.ts`. Both FX popups share one implementation (the `src/ui/FxOverlay.svelte` component, preset logic in `src/fx/fx-presets.ts`). Slider positions reflect what the app last sent, not a read-back from the instrument.
 
 ### How it works
 
@@ -50,7 +50,7 @@ Use **Effets** / **Reset** in the MIDI panel header to open the piano FX overlay
 Click a button → the sound plays immediately from the device speakers.  
 Click again → the sound fades out and stops.
 
-Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `src/audio/audio-engine.ts`; the overlay is the shared FX popup (`src/ui/fx-overlay.ts`).
+Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `src/audio/audio-engine.ts`; the overlay is the shared FX popup (`src/ui/FxOverlay.svelte`).
 
 ### Notes
 
@@ -63,7 +63,7 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 
 ### Tech
 
-- TypeScript (strict, ES modules) — no UI framework
+- TypeScript (strict, ES modules), Svelte 5 (runes) — user interface
 - Vite — dev server and static build; Vitest — unit tests
 - Web MIDI API — USB wired connection
 - Web Bluetooth API — BLE MIDI wireless connection
@@ -83,9 +83,10 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 ├── package.json                    # Scripts, dependencies, app version
 ├── tools/regression/               # Automated comparison with v1 (headless Chromium, see its README)
 ├── src/
-│   ├── main.ts                     # Entry: styles, init(), Service Worker registration
-│   ├── app.ts                      # Builds tabs and panels, navigation, layout, About, Wake Lock
-│   ├── state.ts                    # Shared state (STATE)
+│   ├── main.ts                     # Entry: global styles, mounts App, MIDI, Wake Lock, Service Worker
+│   ├── App.svelte                  # Header, one panel per tab, About and FX popups
+│   ├── state.svelte.ts             # Shared state (STATE, Svelte runes)
+│   ├── wake-lock.ts                # Keeps the screen on
 │   ├── types.ts                    # Shared types (config schema, FX controls and presets)
 │   ├── events.ts                   # Small typed event emitter (engines → UI)
 │   ├── sw.ts                       # Service Worker (Workbox)
@@ -93,7 +94,8 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 │   │   ├── midi.config.ts          # MIDI instrument data (MIDI_TABS)
 │   │   ├── audio.config.ts         # Audio sound data (AUDIO_TABS)
 │   │   ├── midi-fx.config.ts       # MIDI FX overlay presets (MIDI_FX_PRESETS)
-│   │   └── audio-fx.config.ts      # Audio FX overlay presets (AUDIO_FX_PRESETS)
+│   │   ├── audio-fx.config.ts      # Audio FX overlay presets (AUDIO_FX_PRESETS)
+│   │   └── tabs.ts                 # Config access for the UI (getMidiTabs, getAudioTabs)
 │   ├── midi/                       # MIDI engine (no DOM)
 │   │   ├── midi.ts                 # Sending: USB/BT routing, patch, volume, all notes off
 │   │   ├── connection.ts           # USB (Web MIDI) and Bluetooth connection
@@ -108,14 +110,16 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 │   │   ├── fx-animation.ts         # Slider animation towards targets
 │   │   ├── midi-fx.ts              # MIDI FX controls (CC)
 │   │   └── audio-fx.ts             # Audio FX controls
-│   ├── ui/                         # DOM
-│   │   ├── fx-overlay.ts           # Generic FX popup
-│   │   ├── fx-overlays.ts          # MIDI and audio FX popups, toolbar buttons
-│   │   ├── transport.ts            # Sound buttons, transport bar, seek
-│   │   └── midi-ui.ts              # MIDI connection badges and selects, volume
+│   ├── ui/                         # User interface (Svelte)
+│   │   ├── FxOverlay.svelte        # Generic FX popup (MIDI and audio)
+│   │   ├── fx-overlay.svelte.ts    # FX popup state and logic (controller)
+│   │   ├── fx-overlays.svelte.ts   # MIDI and audio FX popups, Effets/Reset state
+│   │   ├── transport.svelte.ts     # Sound buttons and transport bar state
+│   │   ├── midi-ui.svelte.ts       # MIDI connection selects, active instrument
+│   │   ├── layout.svelte.ts        # Active tab, orientation, button heights
+│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, SoundButton, Transport…
 │   └── css/
-│       ├── style.css               # Unified stylesheet
-│       └── style.fx.css            # FX overlay (mixer popup)
+│       └── global.css              # Variables, reset, shared slider (other styles are in the components)
 └── public/                         # Copied as-is to the site root
     ├── manifest.json               # PWA manifest
     ├── favicon.ico, apple-touch-icon.png, pwa-*.png
@@ -272,7 +276,7 @@ Requires Node.js (version in `.nvmrc`; with nvm: `nvm use`).
 ```bash
 npm install        # once
 npm run dev        # dev server on http://localhost:5173/ (no Service Worker)
-npm run typecheck  # TypeScript check (app, Service Worker, Vite config)
+npm run typecheck  # TypeScript + Svelte check (app, Service Worker, Vite config)
 npm test           # unit tests (Vitest)
 npm run build      # production build in dist/
 npm run preview    # serves dist/ (with the Service Worker)
@@ -338,7 +342,7 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
 - **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
 - **Mixeur d’effets audio en direct** — grande popup sur le panneau audio pour façonner le son en temps réel (égalisation, filtres, tempo, delay, reverb) pendant la lecture ou avant le morceau suivant ; presets avec transitions en douceur, reset global et rappel rapide par curseur
-- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards vers le piano connecté (reverb, chorus, cutoff, résonance, attaque, relâchement, decay) via `sendMidi()` dans `src/midi/midi.ts`. Les deux popups d’effets partagent une seule implémentation (`src/ui/fx-overlay.ts`, logique des presets dans `src/fx/fx-presets.ts`) et les styles de `src/css/style.fx.css`. Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
+- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards vers le piano connecté (reverb, chorus, cutoff, résonance, attaque, relâchement, decay) via `sendMidi()` dans `src/midi/midi.ts`. Les deux popups d’effets partagent une seule implémentation (le composant `src/ui/FxOverlay.svelte`, logique des presets dans `src/fx/fx-presets.ts`). Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
 
 ### Comment ça fonctionne
 
@@ -352,7 +356,7 @@ Les boutons **Effets** / **Reset** de la barre du panneau MIDI ouvrent la popup 
 Cliquer sur un bouton → le son se joue immédiatement depuis les haut-parleurs de l'appareil.  
 Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
 
-Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `src/audio/audio-engine.ts` ; la popup est la popup d’effets commune (`src/ui/fx-overlay.ts`).
+Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `src/audio/audio-engine.ts` ; la popup est la popup d’effets commune (`src/ui/FxOverlay.svelte`).
 
 ### Notes
 
@@ -365,7 +369,7 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 
 ### Stack technique
 
-- TypeScript (strict, modules ES) — aucun framework d'interface
+- TypeScript (strict, modules ES), Svelte 5 (runes) — interface
 - Vite — serveur de développement et build statique ; Vitest — tests unitaires
 - Web MIDI API — connexion USB filaire
 - Web Bluetooth API — connexion Bluetooth MIDI (BLE MIDI)
@@ -385,9 +389,10 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 ├── package.json                    # Scripts, dépendances, version de l'app
 ├── tools/regression/               # Comparaison automatique avec la v1 (Chromium headless, voir son README)
 ├── src/
-│   ├── main.ts                     # Entrée : styles, init(), enregistrement du Service Worker
-│   ├── app.ts                      # Construction des onglets et panneaux, navigation, mise en page, À propos, Wake Lock
-│   ├── state.ts                    # État partagé (STATE)
+│   ├── main.ts                     # Entrée : styles globaux, montage d'App, MIDI, Wake Lock, Service Worker
+│   ├── App.svelte                  # En-tête, un panneau par onglet, popups À propos et effets
+│   ├── state.svelte.ts             # État partagé (STATE, runes Svelte)
+│   ├── wake-lock.ts                # Garde l'écran allumé
 │   ├── types.ts                    # Types partagés (schéma de config, contrôles et presets FX)
 │   ├── events.ts                   # Petit émetteur d'événements typé (moteurs → interface)
 │   ├── sw.ts                       # Service Worker (Workbox)
@@ -395,7 +400,8 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 │   │   ├── midi.config.ts          # Données instruments MIDI (MIDI_TABS)
 │   │   ├── audio.config.ts         # Données sons audio (AUDIO_TABS)
 │   │   ├── midi-fx.config.ts       # Presets popup effets MIDI (MIDI_FX_PRESETS)
-│   │   └── audio-fx.config.ts      # Presets popup effets audio (AUDIO_FX_PRESETS)
+│   │   ├── audio-fx.config.ts      # Presets popup effets audio (AUDIO_FX_PRESETS)
+│   │   └── tabs.ts                 # Accès à la config pour l'interface (getMidiTabs, getAudioTabs)
 │   ├── midi/                       # Moteur MIDI (sans DOM)
 │   │   ├── midi.ts                 # Envoi : routage USB/BT, patch, volume, all notes off
 │   │   ├── connection.ts           # Connexion USB (Web MIDI) et Bluetooth
@@ -410,14 +416,16 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 │   │   ├── fx-animation.ts         # Animation des curseurs vers les cibles
 │   │   ├── midi-fx.ts              # Contrôles effets MIDI (CC)
 │   │   └── audio-fx.ts             # Contrôles effets audio
-│   ├── ui/                         # DOM
-│   │   ├── fx-overlay.ts           # Popup d'effets générique
-│   │   ├── fx-overlays.ts          # Popups effets MIDI et audio, boutons de barre
-│   │   ├── transport.ts            # Boutons de sons, barre de transport, seek
-│   │   └── midi-ui.ts              # Badges et listes de connexion MIDI, volume
+│   ├── ui/                         # Interface (Svelte)
+│   │   ├── FxOverlay.svelte        # Popup d'effets générique (MIDI et audio)
+│   │   ├── fx-overlay.svelte.ts    # État et logique d'une popup d'effets (contrôleur)
+│   │   ├── fx-overlays.svelte.ts   # Popups effets MIDI et audio, état Effets/Reset
+│   │   ├── transport.svelte.ts     # État des boutons de sons et de la barre de transport
+│   │   ├── midi-ui.svelte.ts       # Listes de connexion MIDI, instrument actif
+│   │   ├── layout.svelte.ts        # Onglet actif, orientation, hauteur des boutons
+│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, SoundButton, Transport…
 │   └── css/
-│       ├── style.css               # CSS unifié
-│       └── style.fx.css            # Popup mixeur / effets
+│       └── global.css              # Variables, reset, curseur partagé (le reste est dans les composants)
 └── public/                         # Copié tel quel à la racine du site
     ├── manifest.json               # Manifeste PWA
     ├── favicon.ico, apple-touch-icon.png, pwa-*.png
@@ -574,7 +582,7 @@ Nécessite Node.js (version dans `.nvmrc` ; avec nvm : `nvm use`).
 ```bash
 npm install        # une fois
 npm run dev        # serveur de dev sur http://localhost:5173/ (sans Service Worker)
-npm run typecheck  # vérification TypeScript (app, Service Worker, config Vite)
+npm run typecheck  # vérification TypeScript + Svelte (app, Service Worker, config Vite)
 npm test           # tests unitaires (Vitest)
 npm run build      # build de production dans dist/
 npm run preview    # sert dist/ (avec le Service Worker)

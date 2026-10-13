@@ -12,28 +12,30 @@ await page.waitForTimeout(500);
 const steps = [];
 const snap = async (label) => {
   const s = await page.evaluate(() => {
+    // Classes de portée ajoutées par Svelte (styles scopés) : ignorées
+    const cn = e => e.className.replace(/ svelte-[a-z0-9]+/g, '');
     const ov = id => { const o = document.getElementById(id); if (!o) return null; return {
       open: o.classList.contains('is-open'), aria: o.getAttribute('aria-hidden'),
       active: [...o.querySelectorAll('.fx-preset-btn.is-active')].map(b => b.textContent.trim()),
       sliders: [...o.querySelectorAll('.fx-slider')].map(i => i.value + (i.classList.contains('is-modified') ? '*' : '')),
       values: [...o.querySelectorAll('.fx-control__value')].map(v => v.textContent),
       resetOneDisabled: [...o.querySelectorAll('.fx-one-reset')].map(b => b.disabled),
-      cards: [...o.querySelectorAll('.fx-control')].map(c => c.className),
+      cards: [...o.querySelectorAll('.fx-control')].map(c => cn(c)),
     }; };
-    const cls = sel => [...document.querySelectorAll(sel)].map(e => e.className);
+    const cls = sel => [...document.querySelectorAll(sel)].map(e => cn(e));
     return {
       tabs: cls('.tab-btn'), panels: cls('.panel'),
       midiFx: ov('midi-fx-overlay'), audioFx: ov('audio-fx-overlay'),
       toolbar: cls('.midi-fx-open-btn, .midi-fx-reset-btn, .audio-fx-open-btn, .audio-fx-reset-btn'),
-      playPause: [...document.querySelectorAll('.transport-play-pause')].map(b => b.className + '|' + b.disabled + '|' + b.innerHTML.replace(/<!--[^]*?-->/g, '')),
+      playPause: [...document.querySelectorAll('.transport-play-pause')].map(b => cn(b) + '|' + b.disabled + '|' + b.innerHTML.replace(/<!--[^]*?-->/g, '').replace(/ svelte-[a-z0-9]+/g, '')),
       handles: cls('.transport-seek-handle'),
       timeKnown: [...document.querySelectorAll('.transport-time')].map(t => /^\d+:\d\d \/ \d+:\d\d$/.test(t.textContent) ? 'temps' : t.textContent),
-      soundBtns: [...document.querySelectorAll('.sound-btn')].filter(b => b.className !== 'sound-btn' && !/^sound-btn( sound-btn--img| animaux-\w+)*$/.test(b.className)).map(b => b.title + ':' + b.className),
+      soundBtns: [...document.querySelectorAll('.sound-btn')].filter(b => cn(b) !== 'sound-btn' && !/^sound-btn( sound-btn--img| animaux-\w+)*$/.test(cn(b))).map(b => b.title + ':' + cn(b)),
       progressShown: [...document.querySelectorAll('.sound-btn')].filter(b => !['', '0%', '0.00%'].includes(b.style.getPropertyValue('--progress'))).map(b => b.title),
       progressTransition: [...document.querySelectorAll('.sound-btn')].filter(b => b.style.getPropertyValue('--progress-transition')).map(b => b.title + ':' + b.style.getPropertyValue('--progress-transition')),
       instActive: [...document.querySelectorAll('.inst-btn.active')].map(b => b.title),
       vols: [...document.querySelectorAll('.vol-slider.midi-vol, .vol-slider.audio-vol')].map(s => s.value + '|' + s.style.getPropertyValue('--vol-pct') + '|' + s.closest('.panel-controls').querySelector('.vol-value').textContent + '|' + s.closest('.panel-controls').querySelector('.vol-icon').textContent),
-      badges: [...document.querySelectorAll('.midi-badge')].map(b => b.className + ':' + b.textContent),
+      badges: [...document.querySelectorAll('.midi-badge')].map(b => cn(b) + ':' + b.textContent),
       about: document.getElementById('about-overlay')?.style.display,
       bodySeeking: document.body.classList.contains('is-seeking'),
     };
