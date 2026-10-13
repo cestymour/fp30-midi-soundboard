@@ -10,7 +10,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé par l
 
 - **Statut** : ouvert
 - **Constaté** : phase 1 (2026-10-13), à la lecture du code
-- **Où** : `src/audio/audio.ts`, `stopSound()` et `playSound()` ; appelés par le clic d'un bouton son dans `src/app.ts` (`buildSoundBtn`)
+- **Où** : v1 : `js/audio.js` (`stopSound()`, `playSound()`), clic dans `js/app.js` (`buildSoundBtn`) ; refonte : `src/audio/playback.ts` (`stopSound()`, `playSound()`, `cancelFade()`), clic dans `src/ui/components/SoundButton.svelte`
 - **Scénario** : un son joue, on clique sur un **autre** bouton son.
 - **Diagnostic** :
   1. Le clic appelle `stopSound(true)` puis `playSound(btn)` immédiatement.
@@ -25,7 +25,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé par l
 
 - **Statut** : ouvert (mineur)
 - **Constaté** : phase 3 (2026-10-13), à la lecture du code
-- **Où** : `src/audio/audio.ts`, `fadeAudio()` (variables de module `_fadeTimer` et `_fadingAudio`)
+- **Où** : v1 : `js/audio.js` ; refonte : `src/audio/playback.ts`, `fadeAudio()` (variables de module `_fadeTimer` et `_fadingAudio`)
 - **Scénario** : un fondu démarre alors qu'un autre est en cours sans passer par `cancelFade()`, par exemple deux clics rapides sur pause (fondu de 150 ms) : `togglePlayPause()` n'appelle pas `cancelFade()`, et `STATE.isPaused` ne passe à `true` qu'à la fin du premier fondu.
 - **Diagnostic** : le second `fadeAudio()` écrase `_fadeTimer` sans arrêter le premier intervalle. Quand le premier atteint sa cible, il fait `clearInterval(_fadeTimer)`, ce qui arrête **le second** fondu, et seul le callback du premier est appelé.
 - **Conséquences** : volume ou état de pause incohérents dans des cas de clics très rapides. Pas observé en usage.
@@ -35,7 +35,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé par l
 
 - **Statut** : ouvert
 - **Constaté** : phase 3 (2026-10-13), à la lecture du code ; **à confirmer sur la tablette** avec le piano branché en USB avant d'ouvrir l'app
-- **Où** : `src/midi/midi.ts`, `populateMidiSelects(true)` ; écouteur `change` délégué sur `#panels` dans `src/app.ts` (`initMidiSelectDelegation`)
+- **Où** : v1 : `js/midi.js`, `populateMidiSelects(true)`, et l'écouteur `change` délégué sur `#panels` dans `js/app.js` (`initMidiSelectDelegation`) ; refonte : `src/ui/midi-ui.svelte.ts`, `populateMidiSelects(true)`, qui reproduit le comportement (piano affiché dans la liste, sans connexion)
 - **Diagnostic** : au premier chargement, si une sortie MIDI dont le nom contient « piano » existe, le code la sélectionne dans la liste puis fait `sel.dispatchEvent(new Event('change'))`. Cet événement est créé **sans `bubbles: true`** : il ne remonte pas jusqu'à `#panels`, où se trouve le seul écouteur. `handleMidiSelectChange()` n'est donc jamais appelé.
 - **Symptôme attendu** : la liste affiche le piano mais le badge reste « Non connecté », et les boutons d'instruments n'ont aucun effet (« Pas de connexion MIDI active » dans la console) tant qu'on ne resélectionne pas le piano à la main.
 - **Piste de correction** : `new Event('change', { bubbles: true })`. Le README annonce cette auto-connexion (« Auto-connects to the Roland FP-30X on page load »).

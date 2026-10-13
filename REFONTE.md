@@ -251,4 +251,7 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
   - Bugs constatés (non corrigés, comportement de la v1 conservé) : voir `docs/bugs.md` n° 5 et 6, confirmés par le scénario sur `v1-vanilla`.
   - Vérifié en Chromium headless : scénario de 23 étapes identique à `v1-vanilla` en paysage et en portrait, captures identiques (hors variations d'animation et numéro de version), mise à jour du SW et hors ligne OK. Découpage du CSS vérifié avec un nouvel outil (`tools/regression/styles.sh`) : styles calculés de tous les éléments identiques avant et après, dans une vingtaine d'états et sur 7 tailles d'écran.
 - [ ] Phase 6 : finitions
+  - [x] Code mort et doc (2026-10-13) : anciens `js/`, `css/`, `version.js` et `sw.js` déjà supprimés aux phases précédentes ; dépendance inutilisée `workbox-window` retirée ; commentaires périmés de `vite.config.ts` corrigés ; README (lecture audio, numéro de version à incrémenter) ; emplacements v1 / refonte des bugs mis à jour dans `docs/bugs.md`. Aucun export mort (ceux non importés ailleurs sont utilisés dans leur module). Non-régression en Chromium headless inchangée.
+  - [ ] Revue de `docs/bugs.md` avec l'utilisateur
+  - [ ] Checklist complète sur la tablette (USB, BLE, deux orientations, hors ligne)
 - [ ] **Jalon 3 fusionné dans `main`**

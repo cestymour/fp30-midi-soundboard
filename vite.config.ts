@@ -15,11 +15,11 @@ export default defineConfig({
   plugins: [
     svelte(),
     VitePWA({
-      // Service Worker maison (src/sw.js), publié sous le nom sw.js à la racine du site
+      // Service Worker maison (src/sw.ts), publié sous le nom sw.js à la racine du site
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.ts',
-      // Enregistrement fait à la main dans src/main.js
+      // Enregistrement fait à la main dans src/main.ts
       injectRegister: false,
       // Manifest web : on garde public/manifest.json tel quel
       manifest: false,

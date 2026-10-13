@@ -67,7 +67,7 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 - Vite — dev server and static build; Vitest — unit tests
 - Web MIDI API — USB wired connection
 - Web Bluetooth API — BLE MIDI wireless connection
-- Native `Audio` — audio playback
+- Web Audio API + `<audio>` element — audio playback and effects chain
 - Service Worker (Workbox, `vite-plugin-pwa`) — precached app + audio cached on first play
 - Wake Lock API — prevents screen dimming
 - GitHub Actions — automatic deployment to GitHub Pages
@@ -290,7 +290,7 @@ To test on a tablet on the same network, add `-- --host` and see `docs/checklist
 
 Nothing to do by hand: the Service Worker precache list and file revisions are generated at build time, so installed clients pick up the new version after each deployment. Audio files are kept in a stable cache (`impro-audio`) and are not downloaded again after an update.
 
-The version number shown in the About popup is the `version` field of `package.json`.
+The version number shown in the About popup is the `version` field of `package.json`: bump it for each release, to tell which version runs on the tablet.
 
 ---
 
@@ -373,7 +373,7 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 - Vite — serveur de développement et build statique ; Vitest — tests unitaires
 - Web MIDI API — connexion USB filaire
 - Web Bluetooth API — connexion Bluetooth MIDI (BLE MIDI)
-- `Audio` natif — lecture audio
+- Web Audio API + élément `<audio>` — lecture audio et chaîne d'effets
 - Service Worker (Workbox, `vite-plugin-pwa`) — app précachée + sons mis en cache au premier clic
 - Wake Lock API — empêche la mise en veille de l'écran
 - GitHub Actions — déploiement automatique sur GitHub Pages
@@ -596,7 +596,7 @@ Pour tester sur une tablette du même réseau, ajouter `-- --host` et voir `docs
 
 Rien à faire à la main : la liste des fichiers précachés par le Service Worker et leurs révisions sont générées au build, donc les appareils installés récupèrent la nouvelle version après chaque déploiement. Les sons sont dans un cache stable (`impro-audio`) et ne sont pas retéléchargés après une mise à jour.
 
-Le numéro de version affiché dans la popup « À propos » est le champ `version` de `package.json`.
+Le numéro de version affiché dans la popup « À propos » est le champ `version` de `package.json` : l'incrémenter à chaque publication, pour savoir quelle version tourne sur la tablette.
 
 ---
 
