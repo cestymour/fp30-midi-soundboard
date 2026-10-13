@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Typecheck
+        run: npm run typecheck  # Un build qui ne typecheck pas ne part jamais en production
+
+      - name: Tests
+        run: npm test
+
       - name: Build
         run: npm run build    # Construit le site dans dist/ (app + Service Worker)
 
