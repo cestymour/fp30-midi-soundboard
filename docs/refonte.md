@@ -1,6 +1,8 @@
 # Refonte technique — brief pour l'IA
 
-Ce fichier est un **prompt de travail**. Il décrit la refonte technique du projet de bout en bout. Si tu es une IA chargée de la réaliser : lis-le en entier, lis `CLAUDE.md`, regarde la section « Suivi » en bas pour savoir où on en est, puis reprends à la première étape non cochée.
+> **Terminée le 2026-10-14** (version 1.7.1, tag `v1.7.1`). Ce document est gardé comme historique : il décrit le passage de la v1 en vanilla JS (tag `v1-vanilla`) à la stack actuelle, et ses étapes. Ses règles (travail sur la branche `refonte`, aucun changement de comportement) ne s'appliquent plus ; pour travailler sur le projet aujourd'hui, voir `CLAUDE.md`. La branche `refonte` a été supprimée après la fusion ; les tags `refonte-phase-1` à `refonte-phase-6` marquent la fin de chaque phase.
+
+Ce fichier était un **prompt de travail**. Il décrit la refonte technique du projet de bout en bout. Si tu es une IA chargée de la réaliser : lis-le en entier, lis `CLAUDE.md`, regarde la section « Suivi » en bas pour savoir où on en est, puis reprends à la première étape non cochée.
 
 ---
 
@@ -258,3 +260,4 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
 - [x] **Jalon 3 fusionné dans `main`** (2026-10-13, avance rapide sur `77af6b1`, avec les jalons 1 et 2)
   - Premier déploiement cassé : GitHub Pages publiait encore depuis la branche (« Deploy from a branch »), et ce déploiement automatique a écrasé `dist/` avec les sources. Corrigé par l'utilisateur (Settings → Pages → Source : GitHub Actions) puis workflow relancé : production vérifiée (build servie, `sw.js` en 200, version 1.7.0).
 - [x] **Bugs n° 1, 2, 3, 5 et 6 corrigés** (2026-10-14), un commit par bug sur `main`, de `cfa7936` à `ec72ae7` ; détail dans `docs/bugs.md`. Nouveau test `src/audio/playback.test.ts` (pistes factices) pour les n° 1 et 2. Vérifié dans Edge sous Windows, piano en USB : connexion USB automatique au chargement (badge « ● USB », aucune action), envoi USB des messages d'un instrument, scénario de 23 étapes sans erreur ; seuls écarts avec la référence : ceux attendus des n° 3, 5 et 6.
+- [x] **Clôture** (2026-10-14) : tag `v1.7.1` ; `REFONTE.md` déplacé ici ; `CLAUDE.md`, `docs/bugs.md`, `docs/checklist.md` et l'outil de non-régression (référence par défaut : dernière version publiée) mis à jour pour l'après-refonte ; branche `refonte` et anciennes branches déjà fusionnées (`dev-*`, `fusion_sounds`) supprimées ; tag `refonte-phase-6` poussé.
