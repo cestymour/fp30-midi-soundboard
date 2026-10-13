@@ -27,7 +27,7 @@ vi.mock('./audio-engine.ts', () => ({
 }));
 
 import { STATE } from '../state.svelte.ts';
-import { playSound, stopSound } from './playback.ts';
+import { playSound, stopSound, togglePlayPause } from './playback.ts';
 
 type Track = InstanceType<typeof FakeTrack>;
 
@@ -75,5 +75,36 @@ describe('changement de son', () => {
 
     expect(a.disposed).toBe(true);
     expect(liveTracks.size).toBe(0);
+  });
+});
+
+describe('fondus simultanés', () => {
+  it('une pause pendant le fondu d\'entrée met bien le son en pause', async () => {
+    const a = await play(A);
+    vi.advanceTimersByTime(100);
+    a.currentTime = 3;
+
+    togglePlayPause();
+    vi.advanceTimersByTime(1000);
+
+    expect(STATE.isPaused).toBe(true);
+    expect(a.paused).toBe(true);
+    expect(a.volume).toBe(0);
+    expect(a.currentTime).toBe(3);
+    expect(a.disposed).toBe(false);
+  });
+
+  it('deux clics rapides sur pause : le son reste en pause, au volume 0', async () => {
+    const a = await play(A);
+    vi.advanceTimersByTime(1000);
+
+    togglePlayPause();
+    vi.advanceTimersByTime(50);
+    togglePlayPause();
+    vi.advanceTimersByTime(1000);
+
+    expect(STATE.isPaused).toBe(true);
+    expect(a.paused).toBe(true);
+    expect(a.volume).toBe(0);
   });
 });

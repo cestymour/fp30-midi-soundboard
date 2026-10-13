@@ -47,20 +47,22 @@ function cancelFade(): void {
   if (_fadingAudio) {
     // Fondu de sortie interrompu (son arrêté puis autre son lancé aussitôt) :
     // la piste est libérée comme à la fin du fondu. La piste courante, elle,
-    // est libérée par l'appelant (stopSound, playSound).
-    if (_fadingAudio === STATE.currentAudio) _fadingAudio.stop();
-    else _fadingAudio.dispose();
+    // reste en place (stopSound et playSound la libèrent eux-mêmes).
+    if (_fadingAudio !== STATE.currentAudio) _fadingAudio.dispose();
     _fadingAudio = null;
   }
 }
 
 function fadeAudio(
   audio: MediaElementTrack, from: number, to: number, ms: number, onDone: (() => void) | null,
-): ReturnType<typeof setInterval> | null {
+): void {
+  // Un seul fondu à la fois : celui en cours s'arrête là (sans son callback)
+  cancelFade();
+
   if (from === to || ms <= 0) {
     audio.volume = Math.min(1, Math.max(0, to));
     onDone?.();
-    return null;
+    return;
   }
 
   const steps = 20;
@@ -68,20 +70,20 @@ function fadeAudio(
   const delta = (to - from) / steps;
   let current = from;
 
-  _fadeTimer = setInterval(() => {
+  const timer = setInterval(() => {
     current += delta;
     audio.volume = Math.min(1, Math.max(0, current));
 
     if ((delta < 0 && current <= to) || (delta > 0 && current >= to)) {
-      clearInterval(_fadeTimer ?? undefined);
+      clearInterval(timer);
       _fadeTimer = null;
       _fadingAudio = null;
       onDone?.();
     }
   }, interval);
 
+  _fadeTimer = timer;
   _fadingAudio = audio;
-  return _fadeTimer;
 }
 
 // ================================================================
