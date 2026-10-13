@@ -1,0 +1,159 @@
+/* ============================================================
+   IMPRO SOUNDBOARD — global.css
+   Variables, reset, page, et le curseur .vol-slider partagé par
+   le volume des panneaux et les popups d'effets.
+   Le reste des styles est dans les composants (styles scopés).
+============================================================ */
+
+:root {
+  /* ── Couleurs de base ── */
+  --bg-base:        #0d0d0f;
+  --bg-surface:     #141418;
+  --bg-card:        #1a1a20;
+  --bg-card-hover:  #22222c;
+  --border:         #2a2a35;
+  --border-glow:    #3a3a50;
+  --text-primary:   #e8e8f0;
+  --text-secondary: #b8b8d0;
+  --text-muted:     #666680;
+  --color-danger:   #ff3d71;
+
+  /* ── Accent courant ── */
+  --current-accent: #7c9cff;
+
+  /* ── Layout ── */
+  --header-h:   48px;
+  --controls-h: 52px;
+  --gap:        8px;
+  --gap-inner:  5px;
+  --radius:     6px;
+
+  /* ── Typographie ── */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  touch-action: manipulation;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 100%; height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════
+    CURSEUR — volume des panneaux et popups d'effets
+════════════════════════════════════════════════════════ */
+
+/* Slider tactile large */
+.vol-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 36px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  border: none;
+}
+
+.vol-slider::-webkit-slider-runnable-track {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    var(--panel-accent, var(--current-accent)) 0%,
+    var(--panel-accent, var(--current-accent)) var(--vol-pct, 75%),
+    var(--border) var(--vol-pct, 75%),
+    var(--border) 100%
+  );
+  border: 1px solid var(--border-glow);
+}
+.vol-slider::-moz-range-track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--border);
+  border: 1px solid var(--border-glow);
+}
+.vol-slider::-moz-range-progress {
+  height: 12px;
+  border-radius: 6px 0 0 6px;
+  background: var(--panel-accent, var(--current-accent));
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  border: 3px solid var(--panel-accent, var(--current-accent));
+  box-shadow: 0 0 8px var(--panel-accent, var(--current-accent));
+  margin-top: -6px;
+  transition: transform 0.1s;
+}
+.vol-slider::-moz-range-thumb {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  border: 3px solid var(--panel-accent, var(--current-accent));
+  cursor: pointer;
+}
+.vol-slider:active::-webkit-slider-thumb { transform: scale(1.2); }
+
+/* ═══════════════════════════════════════════════════════
+    RESPONSIVE
+════════════════════════════════════════════════════════ */
+
+/* ── Desktop large ── */
+@media (min-width: 1024px) {
+  :root { --gap: 10px; --header-h: 48px; --controls-h: 52px; }
+}
+
+/* ── Tablette portrait ── */
+@media (max-width: 1024px) and (orientation: portrait) {
+  :root { --gap: 8px; }
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  :root { --header-h: 44px; --gap: 6px; }
+}
+
+/* ── Portrait — tous écrans ── */
+@media (orientation: portrait) {
+  :root {
+    --controls-h: auto;
+  }
+
+  .vol-slider {
+    height: 44px;
+    flex: 1;
+  }
+
+  .vol-slider::-webkit-slider-runnable-track { height: 14px; }
+  .vol-slider::-moz-range-track             { height: 14px; }
+  .vol-slider::-moz-range-progress          { height: 14px; }
+
+  .vol-slider::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+    margin-top: -7px;
+  }
+  .vol-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+  }
+}

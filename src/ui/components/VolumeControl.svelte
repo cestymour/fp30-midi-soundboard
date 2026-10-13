@@ -40,3 +40,31 @@
          oninput={handleInput} />
   <span class="vol-value">{valueText}</span>
 </div>
+
+<style>
+  /* Le curseur (.vol-slider) est stylé dans css/global.css : les popups d'effets l'utilisent aussi */
+  .volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+
+  .vol-icon  { font-size: 16px; flex-shrink: 0; }
+  .vol-value {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    min-width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── Portrait — tous écrans ── */
+  @media (orientation: portrait) {
+    .vol-icon  { font-size: 18px; }
+    .vol-value { font-size: 12px; min-width: 36px; }
+  }
+</style>

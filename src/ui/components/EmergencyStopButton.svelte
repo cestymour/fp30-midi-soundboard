@@ -37,3 +37,86 @@
   </svg>
   <span class="emergency-stop-btn__label">STOP</span>
 </button>
+
+<style>
+  /* ── Focus accessible (clavier uniquement) ── */
+  .emergency-stop-btn:focus-visible {
+    outline: 2px solid var(--current-accent);
+    outline-offset: -2px;
+  }
+
+  .emergency-stop-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-sizing: border-box;
+    min-height: 44px;
+    background: color-mix(in srgb, var(--color-danger) 8%, var(--bg-card));
+    border: 1px solid var(--color-danger);
+    border-radius: var(--radius);
+    color: var(--color-danger);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+    flex-shrink: 0;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .emergency-stop-btn:hover {
+    background: color-mix(in srgb, var(--color-danger) 15%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color-danger) 35%, transparent);
+  }
+
+  .emergency-stop-btn:active {
+    background: color-mix(in srgb, var(--color-danger) 30%, transparent);
+    transform: scale(0.93);
+  }
+
+  .emergency-stop-btn__label {
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+  }
+
+  /* Masquer le libellé STOP si peu de largeur (paysage étroit) */
+  @media (orientation: portrait), (max-width: 900px) {
+    .emergency-stop-btn__label {
+      display: none;
+    }
+
+    .emergency-stop-btn {
+      padding: 0 10px;
+      min-width: 44px;
+      min-height: 44px;
+      height: 44px;
+      box-sizing: border-box;
+    }
+  }
+
+  /* En portrait, la toolbar peut wrapper : on réaffiche le libellé STOP */
+  @media (orientation: portrait) {
+    .emergency-stop-btn__label {
+      display: inline;
+    }
+
+    .emergency-stop-btn {
+      min-width: unset;
+      padding: 8px 14px;
+    }
+  }
+
+  /* ── Portrait — tous écrans ── */
+  @media (orientation: portrait) {
+    .emergency-stop-btn {
+      min-height: 44px;
+      height: 44px;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+  }
+</style>

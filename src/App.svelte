@@ -42,3 +42,62 @@
 <AboutPopup bind:this={aboutPopup} />
 <FxOverlay controller={midiFxOverlay} />
 <FxOverlay controller={audioFxOverlay} />
+
+<style>
+  /* ═══════════════════════════════════════════════════════
+      HEADER — logo + onglets sur une seule ligne compacte
+  ════════════════════════════════════════════════════════ */
+  #header {
+    height: var(--header-h);
+    min-height: var(--header-h);
+    display: flex;
+    align-items: stretch;
+    background: var(--bg-surface);
+    border-bottom: 2px solid var(--border);
+    z-index: 10;
+  }
+
+  #settings-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--header-h);
+    min-width: var(--header-h);
+    height: 100%;
+    border: none;
+    border-left: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 30px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color 0.15s, background 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ── Focus accessible (clavier uniquement) ── */
+  #settings-btn:focus-visible {
+    outline: 2px solid var(--current-accent);
+    outline-offset: -2px;
+  }
+
+  #settings-btn:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  #settings-btn:active {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+      PANELS
+  ════════════════════════════════════════════════════════ */
+  #panels {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+</style>

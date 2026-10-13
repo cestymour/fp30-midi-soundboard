@@ -3,8 +3,7 @@
              Wake Lock et enregistrement du Service Worker
 ================================================================ */
 
-import './css/style.css';
-import './css/style.fx.css';
+import './css/global.css';
 import { mount } from 'svelte';
 import App from './App.svelte';
 import { initBluetooth, initWebMidi } from './midi/connection.ts';

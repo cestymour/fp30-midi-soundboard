@@ -67,3 +67,107 @@
     </div>
   </div>
 </div>
+
+<style>
+  #about-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  #about-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glow);
+    border-radius: calc(var(--radius) * 2);
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 280px;
+    max-width: 400px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6),
+                0 0 80px color-mix(in srgb, var(--current-accent) 10%, transparent);
+    font-family: var(--font-mono);
+  }
+
+  #about-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--current-accent);
+  }
+
+  #about-version {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  #about-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 10px 12px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  #about-credit {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  #about-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ── Focus accessible (clavier uniquement) ── */
+  #about-reload-btn:focus-visible,
+  #about-close-btn:focus-visible {
+    outline: 2px solid var(--current-accent);
+    outline-offset: -2px;
+  }
+
+  #about-reload-btn,
+  #about-close-btn {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+    text-align: center;
+  }
+
+  #about-reload-btn {
+    background: transparent;
+    border: 1px solid var(--current-accent);
+    color: var(--current-accent);
+  }
+  #about-reload-btn:hover {
+    background: color-mix(in srgb, var(--current-accent) 15%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--current-accent) 30%, transparent);
+  }
+  #about-reload-btn:active {
+    background: color-mix(in srgb, var(--current-accent) 25%, transparent);
+  }
+
+  #about-close-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  #about-close-btn:hover {
+    border-color: var(--border-glow);
+    color: var(--text-secondary);
+  }
+</style>

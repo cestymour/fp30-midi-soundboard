@@ -7,11 +7,11 @@
   import { STATE } from '../../state.svelte.ts';
   import { hasCurrentSound, setAudioVolume } from '../../audio/playback.ts';
   import { audioFxOverlay, fxToolbar, resetAllFXEffects } from '../fx-overlays.svelte.ts';
-  import { layout } from '../layout.svelte.ts';
   import Transport from './Transport.svelte';
   import SoundButton from './SoundButton.svelte';
   import CategoryTitle from './CategoryTitle.svelte';
-  import PanelUtilityButton from './PanelUtilityButton.svelte';
+  import Panel from './Panel.svelte';
+  import FxToolbar from './FxToolbar.svelte';
   import EmergencyStopButton from './EmergencyStopButton.svelte';
   import VolumeControl from './VolumeControl.svelte';
 
@@ -37,37 +37,22 @@
   }
 </script>
 
-<section
-  class="panel panel-audio"
-  class:active={layout.activeTab === index}
-  class:is-playing={hasSound && !STATE.isPaused}
-  class:is-paused={hasSound && STATE.isPaused}
-  data-panel={index}
-  data-type="audio"
-  style:--panel-accent={tab.accent}
->
-  <div class="panel-controls">
-    <div class="controls-left">
-      <Transport />
-    </div>
-    <div class="controls-right">
-      <div class="fx-btn-group">
-        <PanelUtilityButton
-          className="audio-fx-open-btn" title="Mixer audio" icon="🎚️" label="Effets"
-          active={audioFxOverlay.isOpen} onclick={() => audioFxOverlay.open()}
-        />
-        <PanelUtilityButton
-          className="audio-fx-reset-btn" title="Réinitialiser les effets audio" icon={'↺'} label="Reset"
-          active={fxToolbar.anyFx} onclick={resetAllFXEffects}
-        />
-      </div>
-      <EmergencyStopButton extraClass="audio-stop-btn" />
-      <VolumeControl
-        sliderClass="audio-vol" max={100} value={volumePct} volPct={volumePct + '%'}
-        valueText={volumePct + '%'} onvolume={handleVolume}
-      />
-    </div>
-  </div>
+<Panel type="audio" {index} accent={tab.accent} isPlaying={hasSound && !STATE.isPaused} isPaused={hasSound && STATE.isPaused}>
+  {#snippet left()}
+    <Transport />
+  {/snippet}
+  {#snippet right()}
+    <FxToolbar
+      kind="audio" openTitle="Mixer audio" resetTitle="Réinitialiser les effets audio"
+      isOpen={audioFxOverlay.isOpen} anyFx={fxToolbar.anyFx}
+      onopen={() => audioFxOverlay.open()} onreset={resetAllFXEffects}
+    />
+    <EmergencyStopButton extraClass="audio-stop-btn" />
+    <VolumeControl
+      sliderClass="audio-vol" max={100} value={volumePct} volPct={volumePct + '%'}
+      valueText={volumePct + '%'} onvolume={handleVolume}
+    />
+  {/snippet}
 
   {#if tab.gridType === 'animals'}
     <div class="audio-grid animals-grid">
@@ -103,4 +88,107 @@
       {/each}
     </div>
   {/if}
-</section>
+</Panel>
+
+<style>
+  /* Les styles des boutons eux-mêmes (y compris dans la grille Animaux)
+     sont dans SoundButton.svelte */
+
+  /* ═══════════════════════════════════════════════════════
+      COLONNES ET BLOCS CATÉGORIE
+  ════════════════════════════════════════════════════════ */
+  .audio-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .audio-cat-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-inner);
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+      PANNEAU AUDIO — grille
+  ════════════════════════════════════════════════════════ */
+  .audio-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: var(--gap);
+    align-content: start;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+    PANNEAU AUDIO — mode colonnes (Films)
+  ════════════════════════════════════════════════════════ */
+  .audio-grid-cols {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap);
+    overflow: hidden;
+  }
+
+  .audio-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap-inner);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+    GRILLE ANIMAUX — 4×8 paysage, 8×4 portrait (transposé)
+  ════════════════════════════════════════════════════════ */
+  :global(.panel) .audio-grid.animals-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: var(--gap-inner);
+
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    align-content: stretch;
+    align-items: stretch;
+  }
+
+  /* ── Tablette portrait ── */
+  @media (max-width: 1024px) and (orientation: portrait) {
+    .audio-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    .audio-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* ── Portrait — tous écrans ── */
+  @media (orientation: portrait) {
+    :global(.panel) .audio-grid.animals-grid {
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      grid-auto-flow: column;
+    }
+
+    .audio-grid:not(.audio-grid-cols) .audio-cat-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Onglet Films : 2 colonnes en portrait */
+    .audio-grid.audio-grid-cols {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+    }
+
+    .audio-grid-cols .audio-col {
+      width: 100%;
+      min-height: 0;
+    }
+  }
+</style>
