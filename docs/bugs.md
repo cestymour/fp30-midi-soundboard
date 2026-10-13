@@ -62,7 +62,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé** (co
 
 ## 6. Icône de volume : seul le panneau manipulé est mis à jour
 
-- **Statut** : ouvert, à corriger après la fusion (mineur)
+- **Statut** : corrigé (2026-10-14) : dans `VolumeControl.svelte`, l'icône est dérivée de la valeur partagée (`$derived`), donc identique sur tous les panneaux du même type
 - **Constaté** : phase 5 (2026-10-13), à la lecture du code, confirmé par le scénario de `tools/regression` sur `v1-vanilla` (volume MIDI à 20 : 🔈 sur le premier panneau, 🔊 sur le second)
 - **Où** : v1 : `buildMidiControls()` / `buildAudioControls()` et `syncMidiSliders()` / `syncAudioSliders()` ; refonte : `src/ui/components/VolumeControl.svelte`
 - **Diagnostic** : le volume (MIDI ou audio) est partagé entre tous les panneaux du même type : curseur, pourcentage et valeur sont synchronisés. Mais l'emoji (🔇 🔈 🔉 🔊) n'est recalculé que sur le panneau où l'on a bougé le curseur ; il vaut 🔊 au départ sur tous les panneaux.

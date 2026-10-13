@@ -1,7 +1,7 @@
 <!--
   VolumeControl.svelte — Curseur de volume d'un panneau (MIDI ou audio)
-  La valeur est partagée entre panneaux ; l'icône ne change que sur le
-  panneau où l'on a bougé le curseur (comportement d'origine).
+  La valeur est partagée entre panneaux ; l'icône en découle, donc elle
+  est la même sur tous les panneaux du même type.
 -->
 <script lang="ts">
   let { sliderClass, max, value, volPct, valueText, onvolume }: {
@@ -11,11 +11,9 @@
     /** Variable CSS --vol-pct du curseur */
     volPct:      string;
     valueText:   string;
-    /** Applique la valeur du curseur ; renvoie la valeur à refléter dans l'icône (sur 0-max) */
-    onvolume:    (raw: number) => number;
+    /** Applique la valeur du curseur (sur 0-max) */
+    onvolume:    (raw: number) => void;
   } = $props();
-
-  let icon = $state('🔊');
 
   /** Emoji de volume selon le pourcentage */
   function volumeIcon(val: number): string {
@@ -26,9 +24,10 @@
     else               return '🔊';
   }
 
+  const icon = $derived(volumeIcon(value));
+
   function handleInput(event: Event & { currentTarget: HTMLInputElement }): void {
-    const iconValue = onvolume(parseInt(event.currentTarget.value, 10));
-    icon = volumeIcon(iconValue);
+    onvolume(parseInt(event.currentTarget.value, 10));
   }
 </script>
 

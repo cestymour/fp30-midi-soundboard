@@ -30,10 +30,9 @@
     return cols;
   });
 
-  function handleVolume(raw: number): number {
+  function handleVolume(raw: number): void {
     setAudioVolume(raw / 100);
     if (audioFxOverlay.isOpen) audioFxOverlay.sync();
-    return Math.round(STATE.audioVolume * 100);
   }
 </script>
 

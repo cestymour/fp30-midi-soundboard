@@ -39,9 +39,8 @@
     return cols;
   });
 
-  function handleVolume(raw: number): number {
+  function handleVolume(raw: number): void {
     setMidiVolume(raw);
-    return STATE.midiVolume;
   }
 </script>
 
