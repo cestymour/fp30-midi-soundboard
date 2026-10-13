@@ -2,7 +2,7 @@
 
 La refonte ne change aucun comportement (voir `REFONTE.md`, règle 1) : les bugs repérés en chemin sont listés ici avec leur diagnostic, **sans être corrigés**. À la fin de la refonte, l'utilisateur décide lesquels corriger.
 
-Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé par la refonte** (le nouveau code se comporte autrement par construction, sans correctif ciblé).
+Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé** (correctif ciblé après la fusion, daté), **corrigé par la refonte** (le nouveau code se comporte autrement par construction, sans correctif ciblé).
 
 **Décision de l'utilisateur (2026-10-13, phase 6)** : corriger les n° 1, 2, 3, 5 et 6, **après** la fusion de la refonte dans `main`, un commit par bug. Le n° 5 est bien un bug (pas un repère « déjà joué » à garder).
 
@@ -10,7 +10,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé par l
 
 ## 1. Changement de son direct : pas de fondu de sortie, ancienne piste jamais libérée
 
-- **Statut** : ouvert, à corriger après la fusion
+- **Statut** : corrigé (2026-10-14) : `cancelFade()` libère (`dispose()`) la piste dont le fondu de sortie est interrompu. Le changement de son reste sans fondu croisé (l'ancien son est coupé net), comme avant
 - **Constaté** : phase 1 (2026-10-13), à la lecture du code
 - **Où** : v1 : `js/audio.js` (`stopSound()`, `playSound()`), clic dans `js/app.js` (`buildSoundBtn`) ; refonte : `src/audio/playback.ts` (`stopSound()`, `playSound()`, `cancelFade()`), clic dans `src/ui/components/SoundButton.svelte`
 - **Scénario** : un son joue, on clique sur un **autre** bouton son.

@@ -45,8 +45,11 @@ function cancelFade(): void {
     _fadeTimer = null;
   }
   if (_fadingAudio) {
-    _fadingAudio.pause();
-    _fadingAudio.currentTime = 0;
+    // Fondu de sortie interrompu (son arrêté puis autre son lancé aussitôt) :
+    // la piste est libérée comme à la fin du fondu. La piste courante, elle,
+    // est libérée par l'appelant (stopSound, playSound).
+    if (_fadingAudio === STATE.currentAudio) _fadingAudio.stop();
+    else _fadingAudio.dispose();
     _fadingAudio = null;
   }
 }
