@@ -36,7 +36,9 @@ On **reste sur la plateforme web** (Web MIDI, Web Bluetooth, Web Audio dans Chro
 ## 2. Règles de travail
 
 1. **Aucun changement fonctionnel ni visuel.** La refonte doit être invisible pour l'utilisateur final : mêmes onglets, mêmes boutons, mêmes couleurs, mêmes comportements, même config. Si un comportement actuel semble être un bug, le signaler sans le corriger dans la foulée.
-2. **Une phase à la fois.** À la fin de chaque phase, l'app doit fonctionner. Arrête-toi, résume ce qui a été fait, et demande à l'utilisateur de passer la checklist de non-régression (section 5) sur la tablette avant de continuer.
+2. **Une phase à la fois.** À la fin de chaque phase, l'app doit fonctionner. Résume ce qui a été fait, puis enchaîne sur la phase suivante. Décision de l'utilisateur (2026-10-13) : pas de test sur tablette entre les phases, la checklist de non-régression (section 5) est passée **une seule fois, juste avant une fusion dans `main`**. En compensation :
+   - à la fin de chaque phase, vérifier automatiquement dans Chromium headless, en paysage et en portrait, que le rendu et les comportements restent identiques à `v1-vanilla` (captures comparées au pixel, popups FX, lecture d'un son, console sans erreur) ;
+   - poser un tag local `refonte-phase-N` sur le dernier commit de chaque phase, pour pouvoir retrouver par bisection la phase qui a introduit une régression trouvée sur tablette.
 3. **Git**
    - Le travail se fait sur la branche `refonte`, jamais directement sur `main`.
    - Commits petits et fréquents, messages en français, à la manière de l'historique existant.
