@@ -1,8 +1,13 @@
 /* ================================================================
    midi-fx-ui.js - Popup FX piano grand format
-   Dépend de : midi.js (sendMidi), app.js (STATE)
    Envoie des CC MIDI standard au Roland FP-30X via sendMidi()
 ================================================================ */
+
+import { STATE } from '../state.js';
+import { MIDI_FX_PRESETS } from '../config/midi-fx.config.js';
+import { sendMidi } from '../midi/midi.js';
+import { AudioEngineAPI } from '../audio/audio.js';
+import { isAudioFXAnyControlModified } from './audio-fx-ui.js';
 
 const MIDI_FX_CONTROLS = [
   {
@@ -128,7 +133,7 @@ const MIDI_FX_STATE = {
 // BUILD
 // ================================================================
 
-function buildMidiFXPopup() {
+export function buildMidiFXPopup() {
   if (MIDI_FX_UI.overlay) return;
 
   const overlay = document.createElement('div');
@@ -308,7 +313,7 @@ function updateMidiFXPopupLayout() {
 // OPEN / CLOSE
 // ================================================================
 
-function openMidiFXPopup() {
+export function openMidiFXPopup() {
   if (!MIDI_FX_UI.overlay) return;
   if (STATE.midiFxPopupOpen) {
     closeMidiFXPopup();
@@ -329,7 +334,7 @@ function openMidiFXPopup() {
   });
 }
 
-function closeMidiFXPopup() {
+export function closeMidiFXPopup() {
   if (!MIDI_FX_UI.overlay) return;
   STATE.midiFxPopupOpen = false;
   MIDI_FX_UI.overlay.classList.remove('is-open');
@@ -594,11 +599,11 @@ function animateMidiFXToValues(targetValues, durationMs = 300, options = {}) {
 // RESET
 // ================================================================
 
-function isMidiFXAnyControlModified() {
+export function isMidiFXAnyControlModified() {
   return MIDI_FX_CONTROLS.some(control => !isMidiFXControlNeutral(control.key));
 }
 
-function resetMidiFXEffects() {
+export function resetMidiFXEffects() {
   const targetValues = buildMidiFXPresetTargetValues({ values: {} });
   MIDI_FX_UI.activePresetKey = 'reset';
   refreshMidiFXPresetButtons();
@@ -609,10 +614,9 @@ function resetMidiFXEffects() {
 // TOOLBAR BUTTONS
 // ================================================================
 
-function refreshMidiFXToolbarButtons() {
+export function refreshMidiFXToolbarButtons() {
   const hasMidi = isMidiFXAnyControlModified();
-  const hasAudio = (typeof isAudioFXAnyControlModified === 'function' && isAudioFXAnyControlModified()) ||
-    (typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects());
+  const hasAudio = isAudioFXAnyControlModified() || AudioEngineAPI.hasActiveEffects();
   const anyFx = hasMidi || hasAudio;
 
   document.querySelectorAll('.midi-fx-reset-btn').forEach(button => {

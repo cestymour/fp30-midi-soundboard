@@ -1,4 +1,4 @@
-const AUDIO_TABS = [
+export const AUDIO_TABS = [
 /*
   // ════════════════════════════════════════════════════════
   // ONGLET — Nature

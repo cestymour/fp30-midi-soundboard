@@ -1,13 +1,16 @@
 /* ================================================================
    audio.js - Moteur audio Web Audio API (MP3 / OGG / WAV)
-   Variables globales lues/ecrites : STATE (defini dans app.js)
 ================================================================ */
+
+import { STATE } from '../state.js';
+import { updateSeekUI, updateTransportUI } from '../app.js';
+import { syncAudioFXPopupFromEngine } from '../fx/audio-fx-ui.js';
 
 // ================================================================
 // UTILITAIRES
 // ================================================================
 
-function syncAudioSliders(pct) {
+export function syncAudioSliders(pct) {
   document.querySelectorAll('.audio-vol').forEach(s => {
     if (parseInt(s.value, 10) === pct) return;
     s.value = pct;
@@ -602,7 +605,7 @@ class MediaElementTrack {
 
 const AUDIO_ENGINE = new AudioEngine();
 
-window.AudioEngineAPI = {
+export const AudioEngineAPI = {
   init: () => AUDIO_ENGINE.ensureContext(),
   resume: () => AUDIO_ENGINE.resume(),
   load: (src) => AUDIO_ENGINE.createTrack(src).load(),
@@ -647,7 +650,7 @@ function cancelFade() {
   }
 }
 
-function fadeAudio(audio, from, to, ms, onDone) {
+export function fadeAudio(audio, from, to, ms, onDone) {
   if (from === to || ms <= 0) {
     audio.volume = Math.min(1, Math.max(0, to));
     onDone?.();
@@ -679,7 +682,7 @@ function fadeAudio(audio, from, to, ms, onDone) {
 // PROGRESSION
 // ================================================================
 
-function startProgressLoop(audio, btn, startOffset, endOffset) {
+export function startProgressLoop(audio, btn, startOffset, endOffset) {
   if (STATE.progressRAF) cancelAnimationFrame(STATE.progressRAF);
 
   const dur = audio.duration;
@@ -709,7 +712,7 @@ function startProgressLoop(audio, btn, startOffset, endOffset) {
   STATE.progressRAF = requestAnimationFrame(tick);
 }
 
-function stopProgressLoop() {
+export function stopProgressLoop() {
   if (STATE.progressRAF) {
     cancelAnimationFrame(STATE.progressRAF);
     STATE.progressRAF = null;
@@ -720,7 +723,7 @@ function stopProgressLoop() {
 // STOP
 // ================================================================
 
-function stopSound(fade = false) {
+export function stopSound(fade = false) {
   cancelFade();
   stopProgressLoop();
 
@@ -749,7 +752,7 @@ function stopSound(fade = false) {
   if (STATE.audioFxPopupOpen) syncAudioFXPopupFromEngine();
 }
 
-function emergencyStopAudio() {
+export function emergencyStopAudio() {
   stopSound(true);
 }
 
@@ -759,7 +762,7 @@ function emergencyStopAudio() {
 
 let _playRequestId = 0;
 
-async function playSound(btn) {
+export async function playSound(btn) {
   const src = btn.dataset.audio;
   if (!src) return;
 

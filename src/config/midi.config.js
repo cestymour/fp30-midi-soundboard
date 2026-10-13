@@ -1,4 +1,4 @@
-const MIDI_TABS = [
+export const MIDI_TABS = [
 
   // ════════════════════════════════════════════════════════
   // ONGLET 0 — Instruments

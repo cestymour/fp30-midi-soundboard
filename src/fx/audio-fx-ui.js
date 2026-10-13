@@ -1,7 +1,11 @@
 /* ================================================================
    audio-fx-ui.js - Popup FX audio grand format
-   Depend de : audio.js (AudioEngineAPI), app.js (STATE)
 ================================================================ */
+
+import { STATE } from '../state.js';
+import { AUDIO_FX_PRESETS } from '../config/audio-fx.config.js';
+import { AudioEngineAPI } from '../audio/audio.js';
+import { isMidiFXAnyControlModified } from './midi-fx-ui.js';
 
 const AUDIO_FX_CONTROLS = [
   {
@@ -139,7 +143,7 @@ const AUDIO_FX_UI = {
 // BUILD
 // ================================================================
 
-function buildAudioFXPopup() {
+export function buildAudioFXPopup() {
   if (AUDIO_FX_UI.overlay) return;
 
   const overlay = document.createElement('div');
@@ -319,7 +323,7 @@ function updateAudioFXPopupLayout() {
 // OPEN / CLOSE
 // ================================================================
 
-function openAudioFXPopup() {
+export function openAudioFXPopup() {
   if (!AUDIO_FX_UI.overlay) return;
   if (STATE.audioFxPopupOpen) {
     closeAudioFXPopup();
@@ -340,7 +344,7 @@ function openAudioFXPopup() {
   });
 }
 
-function closeAudioFXPopup() {
+export function closeAudioFXPopup() {
   if (!AUDIO_FX_UI.overlay) return;
   STATE.audioFxPopupOpen = false;
   AUDIO_FX_UI.overlay.classList.remove('is-open');
@@ -352,7 +356,7 @@ function closeAudioFXPopup() {
 // SYNC
 // ================================================================
 
-function syncAudioFXPopupFromEngine() {
+export function syncAudioFXPopupFromEngine() {
   if (!AUDIO_FX_UI.overlay) return;
 
   const settings = AudioEngineAPI.getCurrentSettings();
@@ -606,12 +610,11 @@ function animateAudioFXToValues(targetValues, durationMs = 300, options = {}) {
 // RESET
 // ================================================================
 
-function isAudioFXAnyControlModified() {
+export function isAudioFXAnyControlModified() {
   return AUDIO_FX_CONTROLS.some(control => !isAudioFXControlNeutral(control.key));
 }
 
-function resetAudioFXEffects() {
-  if (typeof AudioEngineAPI === 'undefined') return;
+export function resetAudioFXEffects() {
   const targetValues = buildPresetTargetValues({ values: {} });
   AUDIO_FX_UI.activePresetKey = 'reset';
   refreshAudioFXPresetButtons();
@@ -622,10 +625,9 @@ function resetAudioFXEffects() {
 // TOOLBAR BUTTONS
 // ================================================================
 
-function refreshAudioFXToolbarButtons() {
-  const hasAudio = isAudioFXAnyControlModified() ||
-    (typeof AudioEngineAPI !== 'undefined' && AudioEngineAPI.hasActiveEffects());
-  const hasMidi = typeof isMidiFXAnyControlModified === 'function' && isMidiFXAnyControlModified();
+export function refreshAudioFXToolbarButtons() {
+  const hasAudio = isAudioFXAnyControlModified() || AudioEngineAPI.hasActiveEffects();
+  const hasMidi = isMidiFXAnyControlModified();
   const anyFx = hasAudio || hasMidi;
 
   document.querySelectorAll('.audio-fx-reset-btn').forEach(button => {

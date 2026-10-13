@@ -1,33 +1,27 @@
 /* ================================================================
-   app.js — Chef d'orchestre : état global, construction DOM,
+   app.js — Chef d'orchestre : construction DOM,
             navigation onglets, initialisation
-   Dépend de : midi.js, audio.js, midi.config.js, audio.config.js
 ================================================================ */
 
-// ═══════════════════════════════════════════════════════
-// ÉTAT GLOBAL PARTAGÉ
-// ═══════════════════════════════════════════════════════
-const STATE = {
-  // ── MIDI ──
-  MIDI_CHANNEL:          0,
-  bt:                    null,   // instance BluetoothMIDI, initialisée dans midi.js
-  midiOutput:            null,
-  midiInput:             null,
-  midiAccess:            null,
-  midiVolume:            100,
-  activeInstBtn:         null,
-  currentConnectionType: null,   // 'usb' | 'bt' | null
-  isSwitchingToUsb:      false,
-
-  // ── Audio ──
-  currentAudio:          null,
-  currentSoundBtn:       null,
-  progressRAF:           null,
-  audioVolume:           1,
-  isPaused:              false,
-  midiFxPopupOpen:       false,
-  audioFxPopupOpen:      false,
-};
+import { STATE } from './state.js';
+import { MIDI_TABS } from './config/midi.config.js';
+import { AUDIO_TABS } from './config/audio.config.js';
+import {
+  sendVolume, sendEmergencyStopMidi, selectInstrument, syncMidiSliders,
+  initBluetooth, initWebMidi, handleMidiSelectChange,
+} from './midi/midi.js';
+import {
+  syncAudioSliders, fadeAudio, startProgressLoop, stopProgressLoop,
+  stopSound, emergencyStopAudio, playSound,
+} from './audio/audio.js';
+import {
+  buildMidiFXPopup, openMidiFXPopup, closeMidiFXPopup,
+  resetMidiFXEffects, refreshMidiFXToolbarButtons,
+} from './fx/midi-fx-ui.js';
+import {
+  buildAudioFXPopup, openAudioFXPopup, closeAudioFXPopup,
+  syncAudioFXPopupFromEngine, resetAudioFXEffects, refreshAudioFXToolbarButtons,
+} from './fx/audio-fx-ui.js';
 
 // ═══════════════════════════════════════════════════════
 // RÉFÉRENCES DOM
@@ -273,7 +267,7 @@ function equalizeAudioButtons() {
  * Mise à jour légère — appelée dans la boucle RAF (60fps).
  * Met à jour le temps, la barre de seek et la progression du bouton.
  */
-function updateSeekUI() {
+export function updateSeekUI() {
   const audio = STATE.currentAudio;
   const btn   = STATE.currentSoundBtn;
   if (!audio || !btn) return;
@@ -306,7 +300,7 @@ function updateSeekUI() {
  * Mise à jour complète de l'UI — appelée uniquement sur changement d'état
  * (play, stop, pause, emergency stop).
  */
-function updateTransportUI() {
+export function updateTransportUI() {
   const audio = STATE.currentAudio;
   const btn   = STATE.currentSoundBtn;
 
@@ -785,7 +779,7 @@ function buildAboutPopup() {
     <div id="about-card">
       <div id="about-title">[IMPRO] Soundboard</div>
       <div id="about-work">Work with 🎹 Piano Roland FP30X</div>
-      <div id="about-version">v${typeof APP_VERSION !== 'undefined' ? APP_VERSION : '—'}</div>
+      <div id="about-version">v${__APP_VERSION__}</div>
       <div id="about-info">
         <span id="about-sw-status">Service Worker : vérification...</span>
         <br>
@@ -866,8 +860,8 @@ function activateTab(idx) {
   document.querySelectorAll('.panel').forEach((p, i) =>
     p.classList.toggle('active', i === idx));
 
-  if (typeof refreshMidiFXToolbarButtons === 'function') refreshMidiFXToolbarButtons();
-  if (typeof refreshAudioFXToolbarButtons === 'function') refreshAudioFXToolbarButtons();
+  refreshMidiFXToolbarButtons();
+  refreshAudioFXToolbarButtons();
 
   requestAnimationFrame(() => {
     const activePanel = document.querySelector('.panel.active');
@@ -880,28 +874,34 @@ function activateTab(idx) {
   });
 }
 
-tabNav.addEventListener('click', e => {
-  const btn = e.target.closest('.tab-btn');
-  if (!btn) return;
-  activateTab(parseInt(btn.dataset.tab, 10));
-});
+function initTabNavigation() {
+  tabNav.addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    activateTab(parseInt(btn.dataset.tab, 10));
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // DÉLÉGATION — Changement select MIDI
 // ═══════════════════════════════════════════════════════
-panelsEl.addEventListener('change', async e => {
-  if (!e.target.classList.contains('midi-select')) return;
-  await handleMidiSelectChange(e.target.value);
-});
+function initMidiSelectDelegation() {
+  panelsEl.addEventListener('change', async e => {
+    if (!e.target.classList.contains('midi-select')) return;
+    await handleMidiSelectChange(e.target.value);
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // RESIZE — recalcul hauteurs boutons
 // ═══════════════════════════════════════════════════════
-const resizeObserver = new ResizeObserver(() => {
-  equalizeMidiButtons();
-  equalizeAudioButtons();
-});
-resizeObserver.observe(document.getElementById('panels'));
+function initResizeObserver() {
+  const resizeObserver = new ResizeObserver(() => {
+    equalizeMidiButtons();
+    equalizeAudioButtons();
+  });
+  resizeObserver.observe(document.getElementById('panels'));
+}
 
 // ═══════════════════════════════════════════════════════
 // WAKE LOCK — Empêche la mise en veille de l'écran
@@ -928,18 +928,10 @@ function initWakeLock() {
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
-function init() {
-  if (typeof MIDI_TABS === 'undefined' || typeof AUDIO_TABS === 'undefined') {
-    panelsEl.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;
-        height:100%;color:var(--color-danger);font-family:'IBM Plex Mono',monospace;
-        font-size:13px;text-align:center;padding:20px;">
-        ⚠️ <strong>MIDI_TABS</strong> ou <strong>AUDIO_TABS</strong> introuvable.<br>
-        Vérifiez que <strong>midi.config.js</strong> et
-        <strong>audio.config.js</strong> sont chargés.
-      </div>`;
-    return;
-  }
+export function init() {
+  initTabNavigation();
+  initMidiSelectDelegation();
+  initResizeObserver();
 
   buildUI();
   initLogoInteraction();
@@ -948,6 +940,4 @@ function init() {
   try { initBluetooth(); } catch (e) { console.warn('[BT] Init échoué :', e); }
   try { initWebMidi();   } catch (e) { console.warn('[MIDI] Init échoué :', e); }
 }
-
-init();
 

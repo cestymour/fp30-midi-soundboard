@@ -1,11 +1,12 @@
 // bluetoothMIDI.js — Connexion Bluetooth MIDI (vanilla JS, sans React)
-// Dépend de ble-midi-parser.bundle.js chargé avant ce script (expose window.BleMidiParser).
+
+import { parsePacket } from './ble-midi-parser.js';
 
 const MIDI_SERVICE_UUID        = '03b80e5a-ede8-4b33-a751-6ce34ec4c700';
 const MIDI_CHARACTERISTIC_UUID = '7772e5db-3868-4112-a1a9-f2669d106bf3';
 const MAX_RETRIES              = 3;
 
-class BluetoothMIDI {
+export class BluetoothMIDI {
   #status        = 'idle';
   #error         = null;
   #device        = null;
@@ -123,7 +124,7 @@ class BluetoothMIDI {
             if (!value) return;
             const packet = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
             let info;
-            try { info = window.BleMidiParser.parsePacket(packet); } catch { return; }
+            try { info = parsePacket(packet); } catch { return; }
             if (!info?.events?.length) return;
             for (const ev of info.events) {
               const status = ev.midiStatus, one = ev.midiOne, two = ev.midiTwo;

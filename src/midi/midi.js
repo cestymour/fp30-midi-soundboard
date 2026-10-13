@@ -1,14 +1,15 @@
 /* ================================================================
    midi.js — Gestion MIDI (USB + Bluetooth)
-   Dépend de : bluetoothMIDI.js, ble-midi-parser.bundle.js
-   Variables globales lues/écrites : STATE (défini dans app.js)
 ================================================================ */
+
+import { STATE } from '../state.js';
+import { BluetoothMIDI } from './bluetoothMIDI.js';
 
 // ═══════════════════════════════════════════════════════
 // ENVOI MIDI
 // ═══════════════════════════════════════════════════════
 
-function sendMidi(bytes) {
+export function sendMidi(bytes) {
   if (STATE.midiOutput) {
     STATE.midiOutput.send(bytes);
   } else if (STATE.bt?.status === 'connected') {
@@ -18,17 +19,17 @@ function sendMidi(bytes) {
   }
 }
 
-function sendInstrumentPatch(item) {
+export function sendInstrumentPatch(item) {
   sendMidi([0xB0 | STATE.MIDI_CHANNEL, 0x00, item.msb]);
   sendMidi([0xB0 | STATE.MIDI_CHANNEL, 0x20, item.lsb]);
   sendMidi([0xC0 | STATE.MIDI_CHANNEL, item.pc - 1]);
 }
 
-function sendVolume(val) {
+export function sendVolume(val) {
   sendMidi([0xB0 | STATE.MIDI_CHANNEL, 0x07, val]);
 }
 
-function sendEmergencyStopMidi() {
+export function sendEmergencyStopMidi() {
   for (let ch = 0; ch < 16; ch++) {
     sendMidi([0xB0 | ch, 123, 0]); // All Notes Off
     sendMidi([0xB0 | ch, 121, 0]); // Reset All Controllers
@@ -39,7 +40,7 @@ function sendEmergencyStopMidi() {
 // SÉLECTION INSTRUMENT
 // ═══════════════════════════════════════════════════════
 
-function selectInstrument(btn, item) {
+export function selectInstrument(btn, item) {
   if (STATE.activeInstBtn) STATE.activeInstBtn.classList.remove('active');
   STATE.activeInstBtn = btn;
   btn.classList.add('active');
@@ -69,7 +70,7 @@ function updateAllMidiSelects(val) {
   document.querySelectorAll('.midi-select').forEach(s => { s.value = val; });
 }
 
-function syncMidiSliders(val) {
+export function syncMidiSliders(val) {
   document.querySelectorAll('.midi-vol').forEach(s => {
     if (parseInt(s.value) === val) return;
     s.value = val;
@@ -82,7 +83,7 @@ function syncMidiSliders(val) {
 // BLUETOOTH MIDI
 // ═══════════════════════════════════════════════════════
 
-function initBluetooth() {
+export function initBluetooth() {
   STATE.bt = new BluetoothMIDI({
     onStatusChange: (status) => {
       if (status === 'connected') {
@@ -111,7 +112,7 @@ function initBluetooth() {
 // WEB MIDI (USB)
 // ═══════════════════════════════════════════════════════
 
-function initWebMidi() {
+export function initWebMidi() {
   navigator.requestMIDIAccess({ sysex: false }).then(access => {
     STATE.midiAccess = access;
     populateMidiSelects(true);
@@ -183,7 +184,7 @@ function disconnectMidiInput() {
 // HANDLER — Changement de connexion (délégué depuis app.js)
 // ═══════════════════════════════════════════════════════
 
-async function handleMidiSelectChange(val) {
+export async function handleMidiSelectChange(val) {
   updateAllMidiSelects(val);
 
   if (val === '__none__') {
