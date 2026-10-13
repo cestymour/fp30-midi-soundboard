@@ -4,7 +4,7 @@
 ================================================================ */
 
 import type { MidiItem } from '../types.ts';
-import { STATE } from '../state.ts';
+import { STATE } from '../state.svelte.ts';
 import { sendInstrumentPatch } from '../midi/midi.ts';
 import {
   MIDI_SELECT_BLUETOOTH, MIDI_SELECT_NONE, getUsbOutputs, isBluetoothAvailable, midiConnectionEvents,

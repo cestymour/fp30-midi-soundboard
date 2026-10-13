@@ -5,10 +5,10 @@
 ================================================================ */
 
 import type { AudioItem } from '../types.ts';
-import { STATE } from '../state.ts';
+import { STATE } from '../state.svelte.ts';
 import { hasCurrentSound, playbackEvents, seekToRatio } from '../audio/playback.ts';
 import { formatTime, getPlaybackProgress } from '../audio/timing.ts';
-import { audioFxOverlay } from './fx-overlays.ts';
+import { audioFxOverlay } from './fx-overlays.svelte.ts';
 
 // ═══════════════════════════════════════════════════════
 // BOUTONS DE SONS

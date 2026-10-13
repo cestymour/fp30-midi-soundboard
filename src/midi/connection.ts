@@ -4,7 +4,7 @@
    `midiConnectionEvents`.
 ================================================================ */
 
-import { STATE } from '../state.ts';
+import { STATE } from '../state.svelte.ts';
 import { createEmitter } from '../events.ts';
 import { BluetoothMIDI } from './bluetoothMIDI.ts';
 import type { BluetoothStatus } from './bluetoothMIDI.ts';

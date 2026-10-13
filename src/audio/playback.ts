@@ -5,7 +5,7 @@
 ================================================================ */
 
 import type { AudioItem } from '../types.ts';
-import { STATE } from '../state.ts';
+import { STATE } from '../state.svelte.ts';
 import { createEmitter } from '../events.ts';
 import { AudioEngineAPI } from './audio-engine.ts';
 import type { MediaElementTrack } from './audio-engine.ts';

@@ -1,5 +1,5 @@
 /* ================================================================
-   fx-overlays.ts — Les deux popups d'effets (piano MIDI et audio)
+   fx-overlays.svelte.ts — Les deux popups d'effets (piano MIDI et audio)
    et les boutons Effets / Reset des barres de panneau.
    Seul ce qui diffère entre les deux popups est ici.
 ================================================================ */
@@ -9,13 +9,13 @@ import { AUDIO_FX_PRESETS } from '../config/audio-fx.config.ts';
 import { MIDI_FX_CONTROLS, MIDI_FX_STATE, applyMidiFxValue } from '../fx/midi-fx.ts';
 import { AUDIO_FX_CONTROLS, applyAudioFxValue } from '../fx/audio-fx.ts';
 import { AudioEngineAPI } from '../audio/audio-engine.ts';
-import { FxOverlay } from './fx-overlay.ts';
+import { FxOverlayController } from './fx-overlay.svelte.ts';
 
 // ═══════════════════════════════════════════════════════
 // POPUP EFFETS PIANO (CC MIDI)
 // ═══════════════════════════════════════════════════════
 
-export const midiFxOverlay = new FxOverlay({
+export const midiFxOverlay = new FxOverlayController({
   overlayId: 'midi-fx-overlay',
   ariaLabel: 'Effets piano MIDI',
   attributes: {
@@ -40,7 +40,7 @@ export const midiFxOverlay = new FxOverlay({
 // POPUP EFFETS AUDIO
 // ═══════════════════════════════════════════════════════
 
-export const audioFxOverlay = new FxOverlay({
+export const audioFxOverlay = new FxOverlayController({
   overlayId: 'audio-fx-overlay',
   ariaLabel: 'Effets audio',
   attributes: {

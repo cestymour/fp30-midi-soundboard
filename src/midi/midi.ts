@@ -3,7 +3,7 @@
              arrêt d'urgence. Aucun accès au DOM.
 ================================================================ */
 
-import { STATE } from '../state.ts';
+import { STATE } from '../state.svelte.ts';
 import type { MidiItem } from '../types.ts';
 
 // ═══════════════════════════════════════════════════════

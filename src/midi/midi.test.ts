@@ -3,7 +3,7 @@
 ================================================================ */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { STATE } from '../state.ts';
+import { STATE } from '../state.svelte.ts';
 import { MIDI_TABS } from '../config/midi.config.ts';
 import { buildInstrumentPatchMessages, sendEmergencyStopMidi, sendInstrumentPatch, sendVolume } from './midi.ts';
 

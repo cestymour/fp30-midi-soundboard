@@ -29,6 +29,8 @@ const snap = async (label) => {
       handles: cls('.transport-seek-handle'),
       timeKnown: [...document.querySelectorAll('.transport-time')].map(t => /^\d+:\d\d \/ \d+:\d\d$/.test(t.textContent) ? 'temps' : t.textContent),
       soundBtns: [...document.querySelectorAll('.sound-btn')].filter(b => b.className !== 'sound-btn' && !/^sound-btn( sound-btn--img| animaux-\w+)*$/.test(b.className)).map(b => b.title + ':' + b.className),
+      progressShown: [...document.querySelectorAll('.sound-btn')].filter(b => !['', '0%', '0.00%'].includes(b.style.getPropertyValue('--progress'))).map(b => b.title),
+      progressTransition: [...document.querySelectorAll('.sound-btn')].filter(b => b.style.getPropertyValue('--progress-transition')).map(b => b.title + ':' + b.style.getPropertyValue('--progress-transition')),
       instActive: [...document.querySelectorAll('.inst-btn.active')].map(b => b.title),
       vols: [...document.querySelectorAll('.vol-slider.midi-vol, .vol-slider.audio-vol')].map(s => s.value + '|' + s.style.getPropertyValue('--vol-pct') + '|' + s.closest('.panel-controls').querySelector('.vol-value').textContent + '|' + s.closest('.panel-controls').querySelector('.vol-icon').textContent),
       badges: [...document.querySelectorAll('.midi-badge')].map(b => b.className + ':' + b.textContent),
@@ -53,7 +55,7 @@ await page.click('.panel.active .midi-fx-open-btn'); await page.waitForTimeout(3
 await snap('réouverture après changement d\'onglet');
 await page.click('#midi-fx-overlay .fx-one-reset >> nth=0'); await page.waitForTimeout(600);
 await snap('reset d\'un seul curseur');
-await page.evaluate(() => { const i = document.querySelectorAll('#midi-fx-overlay .fx-slider')[1]; i.value = '50'; i.dispatchEvent(new Event('input')); });
+await page.evaluate(() => { const i = document.querySelectorAll('#midi-fx-overlay .fx-slider')[1]; i.value = '50'; i.dispatchEvent(new Event('input', { bubbles: true })); });
 await page.waitForTimeout(100);
 await snap('curseur chorus à 50');
 await page.click('#midi-fx-overlay .fx-preset-btn >> nth=4'); await page.waitForTimeout(600);
@@ -90,10 +92,10 @@ await page.click('.panel.active .sound-btn >> nth=2'); await page.waitForTimeout
 await snap('re-clic en pause : redémarrage');
 await page.click('.panel.active .emergency-stop-btn'); await page.waitForTimeout(800);
 await snap('arrêt d\'urgence');
-await page.evaluate(() => { const s = document.querySelector('.panel.active .audio-vol'); s.value = '30'; s.dispatchEvent(new Event('input')); });
+await page.evaluate(() => { const s = document.querySelector('.panel.active .audio-vol'); s.value = '30'; s.dispatchEvent(new Event('input', { bubbles: true })); });
 await snap('volume audio 30');
 await tab(0);
-await page.evaluate(() => { const s = document.querySelector('.panel.active .midi-vol'); s.value = '20'; s.dispatchEvent(new Event('input')); });
+await page.evaluate(() => { const s = document.querySelector('.panel.active .midi-vol'); s.value = '20'; s.dispatchEvent(new Event('input', { bubbles: true })); });
 await snap('volume MIDI 20');
 await page.evaluate(() => { const b = [...document.querySelectorAll('.sound-btn')].find(b => b.dataset.audio.includes('cheval_hennissement')); b.dataset.audio = 'sounds/inexistant.mp3'; });
 await page.click('#settings-btn'); await page.waitForTimeout(200);

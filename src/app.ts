@@ -3,8 +3,11 @@
             navigation onglets, initialisation
 ================================================================ */
 
+import { mount } from 'svelte';
+import FxOverlay from './ui/FxOverlay.svelte';
+import type { FxOverlayController } from './ui/fx-overlay.svelte.ts';
 import type { AudioItem, AudioTab, Category, MidiTab } from './types.ts';
-import { STATE } from './state.ts';
+import { STATE } from './state.svelte.ts';
 import { MIDI_TABS } from './config/midi.config.ts';
 import { AUDIO_TABS } from './config/audio.config.ts';
 import { sendEmergencyStopMidi, setMidiVolume } from './midi/midi.ts';
@@ -12,7 +15,7 @@ import { initBluetooth, initWebMidi, selectMidiConnection } from './midi/connect
 import { emergencyStopAudio, playSound, setAudioVolume, stopSound, togglePlayPause } from './audio/playback.ts';
 import { bindMidiConnectionUI, selectInstrument, syncMidiSliders } from './ui/midi-ui.ts';
 import { bindPlaybackUI, initSeekBarDrag, registerSoundButton, syncAudioSliders } from './ui/transport.ts';
-import { audioFxOverlay, midiFxOverlay, refreshFxToolbarButtons, resetAllFXEffects } from './ui/fx-overlays.ts';
+import { audioFxOverlay, midiFxOverlay, refreshFxToolbarButtons, resetAllFXEffects } from './ui/fx-overlays.svelte.ts';
 
 // ═══════════════════════════════════════════════════════
 // RÉFÉRENCES DOM
@@ -324,8 +327,11 @@ function buildUI(): void {
   });
 
   buildAboutPopup();
-  midiFxOverlay.build();
-  audioFxOverlay.build();
+  // Popups d'effets (Svelte), ajoutées à la fin de #app comme avant
+  const app = document.getElementById('app')!;
+  // Étape de migration : le typage générique du composant n'est pas inférable via mount()
+  mount(FxOverlay, { target: app, props: { controller: midiFxOverlay as unknown as FxOverlayController<string, unknown> } });
+  mount(FxOverlay, { target: app, props: { controller: audioFxOverlay as unknown as FxOverlayController<string, unknown> } });
 }
 
 // ── Contrôles MIDI ──

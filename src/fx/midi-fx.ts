@@ -6,7 +6,7 @@
 ================================================================ */
 
 import type { MidiFxKey, FxControl } from '../types.ts';
-import { STATE } from '../state.ts';
+import { STATE } from '../state.svelte.ts';
 import { sendMidi } from '../midi/midi.ts';
 
 export type MidiFxControl = FxControl<MidiFxKey, MidiFxState>;
