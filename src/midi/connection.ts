@@ -20,7 +20,7 @@ export type MidiConnectionEvent =
   /** Valeur à afficher dans toutes les listes de connexion */
   | { type: 'selection'; value: string }
   /** La liste des sorties USB a changé (au premier accès Web MIDI, puis à chaque branchement) */
-  | { type: 'outputs'; isFirstLoad: boolean };
+  | { type: 'outputs' };
 
 export const midiConnectionEvents = createEmitter<MidiConnectionEvent>();
 
@@ -76,12 +76,20 @@ export function initBluetooth(): void {
 export function initWebMidi(): void {
   navigator.requestMIDIAccess({ sysex: false }).then(access => {
     STATE.midiAccess = access;
-    midiConnectionEvents.emit({ type: 'outputs', isFirstLoad: true });
-    access.onstatechange = () => midiConnectionEvents.emit({ type: 'outputs', isFirstLoad: false });
+    midiConnectionEvents.emit({ type: 'outputs' });
+    autoConnectUsbPiano();
+    access.onstatechange = () => midiConnectionEvents.emit({ type: 'outputs' });
   }, () => {
     STATE.currentConnectionType = null;
     midiConnectionEvents.emit({ type: 'status' });
   });
+}
+
+/** Au chargement : connexion USB au piano s'il est déjà branché (sortie dont le nom contient « piano ») */
+function autoConnectUsbPiano(): void {
+  if (STATE.currentConnectionType) return;
+  const piano = getUsbOutputs().find(out => out.name?.toLowerCase().includes('piano'));
+  if (piano) void selectMidiConnection(piano.id);
 }
 
 function disconnectMidiInput(): void {

@@ -59,7 +59,7 @@ function updateAllMidiSelects(val: string): void {
 }
 
 /** Reconstruit les options (sorties USB, Bluetooth) et restaure la sélection de chaque liste */
-function populateMidiSelects(isFirstLoad = false): void {
+function populateMidiSelects(): void {
   const options: MidiSelectOption[] = [{ value: MIDI_SELECT_NONE, label: '— Connexion MIDI —' }];
   if (isBluetoothAvailable()) {
     options.push({ value: MIDI_SELECT_BLUETOOTH, label: 'ᛒ Bluetooth MIDI' });
@@ -69,21 +69,12 @@ function populateMidiSelects(isFirstLoad = false): void {
   });
   midiSelects.options = options;
 
-  midiSelects.values = midiSelects.values.map((prev, selIdx) => {
+  midiSelects.values = midiSelects.values.map(prev => {
     // Restaurer la valeur sélectionnée
     if (STATE.currentConnectionType === 'bt') {
       return toSelectValue(MIDI_SELECT_BLUETOOTH);
     } else if (STATE.currentConnectionType === 'usb' && STATE.midiOutput) {
       return toSelectValue(STATE.midiOutput.id);
-    } else if (isFirstLoad && selIdx === 0) {
-      const pianoOpt = options.find(
-        o => o.value !== MIDI_SELECT_NONE
-          && o.value !== MIDI_SELECT_BLUETOOTH
-          && o.label.toLowerCase().includes('piano')
-      );
-      // Le piano est seulement affiché, pas connecté : l'ancien code déclenchait un
-      // événement change sans bubbles, jamais reçu (docs/bugs.md n° 3)
-      return pianoOpt ? pianoOpt.value : MIDI_SELECT_NONE;
     }
     return toSelectValue(prev || MIDI_SELECT_NONE);
   });
@@ -94,6 +85,6 @@ export function bindMidiConnectionUI(): void {
   midiConnectionEvents.on(event => {
     // Le badge suit STATE.currentConnectionType directement (événement 'status')
     if (event.type === 'selection') updateAllMidiSelects(event.value);
-    else if (event.type === 'outputs') populateMidiSelects(event.isFirstLoad);
+    else if (event.type === 'outputs') populateMidiSelects();
   });
 }
