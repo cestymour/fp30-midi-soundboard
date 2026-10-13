@@ -1,4 +1,4 @@
-// Scénario d'interactions ; enregistre l'état du DOM après chaque étape (comparé entre v1 et nouvelle version)
+// Scénario d'interactions ; enregistre l'état du DOM après chaque étape (comparé entre la référence et la nouvelle version)
 import { launchBrowser } from './browser.mjs';
 const [,, url, vw, vh] = process.argv;
 const browser = await launchBrowser();

@@ -1,4 +1,4 @@
-// Compare le rendu de la v1 et de la nouvelle build : captures + DOM sérialisé
+// Compare le rendu de la version de référence et de la nouvelle build : captures + DOM sérialisé
 import { launchBrowser } from './browser.mjs';
 import fs from 'node:fs';
 const [,, label, url, outDir] = process.argv;
