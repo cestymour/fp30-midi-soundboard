@@ -80,7 +80,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 8. Parseur BLE MIDI : les messages de 1 ou 2 octets décalent la lecture du paquet
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-10-14, version 1.7.3) : chaque statut a sa longueur de données (`getDataLength()`), une donnée n'est lue que si son bit 7 est à 0, le running status survit aux messages temps réel et passe d'un paquet au suivant (`parsePacket(packet, runningStatus)`, mémorisé dans `BluetoothMIDI`). Tests ajoutés dans `ble-midi-parser.test.ts`. Reste à confirmer avec le piano que les notes ne restent plus bloquées
 - **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 1), confirmé en faisant tourner `parsePacket` sur des paquets construits à la main. Le même jour, l'utilisateur rapporte le symptôme, **en Bluetooth uniquement** : avec un son tenu comme l'orgue, quand on joue beaucoup de notes à la fois, une ou plusieurs notes continuent de sonner après qu'on a relâché les touches (le relâchement n'est pas pris en compte)
 - **Où** : `src/midi/ble-midi-parser.ts`, `parseFullMidiMessage()` et `parseRunningStatusMidiMessage()` ; conséquence dans le loopback de `src/midi/bluetoothMIDI.ts`
 - **Diagnostic** : en Bluetooth, chaque note jouée sur le piano revient à l'application, qui la renvoie au piano (loopback) ; un Note Off mal décodé n'est donc jamais renvoyé, et la note renvoyée reste tenue. Trois défauts du parseur peuvent faire perdre un Note Off :
@@ -92,8 +92,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
   - `[80 80 FE 80 80 3C 00]` (Active Sensing puis Note Off en running status) : le Note Off est perdu, et la note reste bloquée ;
   - `[80 80 3C 00 3E 00]` juste après un paquet de Note On : les deux Note Off sont perdus.
 - **Pourquoi l'orgue** : un son de piano s'éteint de lui-même, une note bloquée passe inaperçue ; un orgue tient la note indéfiniment.
-- **Autre cause possible** : une écriture GATT qui échoue est abandonnée (`MIDI OUT (BT) échoué` dans la console), et le relâchement d'un accord produit une rafale d'écritures, une par note.
-- **Piste de correction** : donner à chaque statut sa longueur de données (`C0`/`D0` : 1 ; `F8`–`FF` : 0 ; `F1`/`F3` : 1 ; sinon 2), ne pas laisser un message temps réel remplacer le running status, garder le running status d'un paquet au suivant, et ajouter les paquets ci-dessus aux tests.
+- **Autre cause possible, non corrigée** : une écriture GATT qui échoue est abandonnée (`MIDI OUT (BT) échoué` dans la console), et le relâchement d'un accord produit une rafale d'écritures, une par note. Si des notes restent encore bloquées en 1.7.3, chercher ce message dans la console.
 
 ## 9. Animation des effets piano : les 7 CC sont renvoyés à chaque frame
 

@@ -34,6 +34,8 @@ export class BluetoothMIDI {
   #writeQueue: Promise<void> = Promise.resolve();
   /** Loopback : renvoyer le MIDI entrant vers le piano (comme midiOutput.send(event.data) en USB). */
   #loopbackIncoming = true;
+  /** Running status du dernier paquet reçu : un paquet peut commencer sans statut */
+  #runningStatus = -1;
 
   constructor({ onNoteOn, onNoteOff, onStatusChange, onError, loopbackIncoming = true }: BluetoothMIDIOptions = {}) {
     this.#onNoteOn       = onNoteOn       ?? null;
@@ -130,12 +132,14 @@ export class BluetoothMIDI {
           this.#characteristic = characteristic;
           await characteristic.startNotifications();
 
+          this.#runningStatus = -1;
           const handler = (event: Event) => {
             const value = (event?.target as BluetoothRemoteGATTCharacteristic | null)?.value;
             if (!value) return;
             const packet = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
             let info;
-            try { info = parsePacket(packet); } catch { return; }
+            try { info = parsePacket(packet, this.#runningStatus); } catch { return; }
+            this.#runningStatus = info.runningStatus;
             if (!info?.events?.length) return;
             for (const ev of info.events) {
               // Les champs MIDI sont absents des messages 'sysex' et 'unknown' : écartés par les tests typeof

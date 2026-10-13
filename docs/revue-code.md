@@ -37,6 +37,7 @@ Les risques les plus sérieux pour un spectacle concernent **le MIDI en Bluetoot
 
 ### 1. Parseur BLE MIDI : les messages de 1 ou 2 octets décalent la lecture
 
+- **Statut** : corrigé en 1.7.3 (bug n° 8 de `docs/bugs.md`, avec deux autres défauts du running status trouvés en le corrigeant)
 - **Où** : `src/midi/ble-midi-parser.ts:113` (`parseFullMidiMessage`) et `:122` (`parseRunningStatusMidiMessage`), utilisé par la boucle de retour (loopback) de `src/midi/bluetoothMIDI.ts:144`
 - **Diagnostic** : le parseur lit toujours **deux** octets de données après un octet de statut. C'est faux pour Program Change (`0xC0`) et Channel Pressure (`0xD0`), qui n'en ont qu'un, et pour les messages temps réel d'un seul octet comme Active Sensing (`0xFE`). Dans un paquet qui contient un autre message après ceux-là, l'octet d'horodatage suivant est pris pour une donnée, et tout le reste du paquet est mal décodé. Le défaut vient du paquet `ble-midi` d'origine, recopié tel quel.
 - **Essai** (sortie réelle de `parsePacket`) :

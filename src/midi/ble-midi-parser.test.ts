@@ -43,3 +43,43 @@ describe('parsePacket', () => {
     expect(parsePacket(packet(0x00, 0x80, 0x90, 60, 100)).events).toEqual([]);
   });
 });
+
+// Bug n° 8 (docs/bugs.md) : l'ancien parseur lisait toujours 2 octets de données
+describe('parsePacket : longueur des messages et running status', () => {
+  const bytes = (ev: unknown) => {
+    const { midiStatus, midiOne, midiTwo } = ev as MessageMidi;
+    return [midiStatus, midiOne, midiTwo];
+  };
+
+  it('Program Change (1 octet) suivi d\'un Note On', () => {
+    const info = parsePacket(packet(0x80, 0x80, 0xC0, 5, 0x80, 0x90, 60, 100));
+    expect(info.events.map(bytes)).toEqual([[0xC0, 5, undefined], [0x90, 60, 100]]);
+  });
+
+  it('Active Sensing (0 octet) ne fait pas perdre le Note Off qui suit', () => {
+    const info = parsePacket(packet(0x80, 0x80, 0x80, 60, 64, 0x80, 0xFE, 0x80, 62, 64));
+    expect(info.events.map(bytes)).toEqual([[0x80, 60, 64], [0xFE, undefined, undefined], [0x80, 62, 64]]);
+  });
+
+  it('accord relâché : plusieurs Note Off en running status, avec et sans timestamp', () => {
+    const info = parsePacket(packet(0x80, 0x80, 0x90, 60, 0, 0x81, 62, 0, 64, 0));
+    expect(info.events.map(bytes)).toEqual([[0x90, 60, 0], [0x90, 62, 0], [0x90, 64, 0]]);
+  });
+
+  it('le running status passe au paquet suivant', () => {
+    const first  = parsePacket(packet(0x80, 0x80, 0x90, 60, 100));
+    expect(first.runningStatus).toBe(0x90);
+    const second = parsePacket(packet(0x80, 0x80, 60, 0, 62, 0), first.runningStatus);
+    expect(second.events.map(bytes)).toEqual([[0x90, 60, 0], [0x90, 62, 0]]);
+  });
+
+  it('sans running status connu, des données seules sont ignorées', () => {
+    const info = parsePacket(packet(0x80, 0x80, 60, 0));
+    expect(info.events.map(e => e.type)).toEqual(['unknown']);
+  });
+
+  it('un message système commun annule le running status', () => {
+    const info = parsePacket(packet(0x80, 0x80, 0x90, 60, 100, 0x80, 0xF6, 0x80, 62, 0));
+    expect(info.events.map(e => e.type)).toEqual(['fullMidiMessage', 'fullMidiMessage', 'unknown']);
+  });
+});
