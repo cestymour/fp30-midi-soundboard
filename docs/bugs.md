@@ -68,3 +68,12 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 - **Diagnostic** : le volume (MIDI ou audio) est partagé entre tous les panneaux du même type : curseur, pourcentage et valeur sont synchronisés. Mais l'emoji (🔇 🔈 🔉 🔊) n'est recalculé que sur le panneau où l'on a bougé le curseur ; il vaut 🔊 au départ sur tous les panneaux.
 - **Conséquences** : après avoir baissé le volume audio à 0 sur l'onglet Films, l'onglet Animaux affiche 🔊 avec un curseur à 0 %.
 - **Piste de correction** : calculer l'emoji à partir de la valeur partagée (`STATE.midiVolume`, `STATE.audioVolume`) plutôt que dans un état local au panneau.
+
+## 7. Bouton « Vider le cache et recharger » : il ne vide aucun cache
+
+- **Statut** : ouvert
+- **Constaté** : 2026-10-14, à la lecture du code (revue de la 1.7.2)
+- **Où** : `src/ui/components/AboutPopup.svelte`, `reloadWithoutCache()` et le libellé de `#about-reload-btn`
+- **Diagnostic** : le bouton désinscrit le Service Worker (`reg.unregister()`) puis recharge la page. Désinscrire un SW ne supprime pas ses caches : `impro-audio`, `impro-images`, les polices et le precache Workbox restent, de même que d'éventuels caches de la 1.6.x (`impro-app-*`, `impro-audio-*`, plus nettoyés depuis la 1.7.2). Garder `impro-audio` est souhaitable (pas de retéléchargement des sons, hors ligne préservé) ; c'est le libellé qui est trompeur.
+- **Conséquences** : l'utilisateur croit repartir d'un cache vide alors que non. Ce que le bouton fait vraiment : recharger l'application depuis le réseau, sans passer par le SW, donc récupérer la dernière version publiée.
+- **Piste de correction** : renommer le bouton selon ce qu'il fait, par exemple « ⟳ Mettre à jour et recharger » (et le commentaire d'en-tête du composant, « rechargement sans cache »). Ne pas ajouter de suppression des caches : on perdrait les sons hors ligne.
