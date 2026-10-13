@@ -1,10 +1,10 @@
-# Bugs constatés pendant la refonte
+# Bugs
 
-La refonte ne change aucun comportement (voir `REFONTE.md`, règle 1) : les bugs repérés en chemin sont listés ici avec leur diagnostic, **sans être corrigés**. À la fin de la refonte, l'utilisateur décide lesquels corriger.
+Journal des bugs repérés, avec leur diagnostic. Un bug trouvé en chemin est d'abord noté ici ; l'utilisateur décide ensuite s'il faut le corriger, et quand. Les n° 1 à 6 ont été trouvés pendant la refonte (voir `docs/refonte.md`), qui ne devait changer aucun comportement : ils ont été notés sans être corrigés, puis corrigés après la fusion dans `main` (version 1.7.1). Les « Où » donnent l'emplacement dans la v1 (tag `v1-vanilla`) et dans le code de la refonte, avant le correctif.
 
-Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé** (correctif ciblé après la fusion, daté), **corrigé par la refonte** (le nouveau code se comporte autrement par construction, sans correctif ciblé).
+Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la refonte** (le nouveau code se comporte autrement par construction, sans correctif ciblé).
 
-**Décision de l'utilisateur (2026-10-13, phase 6)** : corriger les n° 1, 2, 3, 5 et 6, **après** la fusion de la refonte dans `main`, un commit par bug. Le n° 5 est bien un bug (pas un repère « déjà joué » à garder). Fait le 2026-10-14.
+**Décision de l'utilisateur (2026-10-13, phase 6)** : corriger les n° 1, 2, 3, 5 et 6, **après** la fusion de la refonte dans `main`, un commit par bug. Le n° 5 est bien un bug (pas un repère « déjà joué » à garder). Fait le 2026-10-14 (version 1.7.1).
 
 ---
 
@@ -44,7 +44,7 @@ Statuts : **ouvert** (présent en production et sur `refonte`), **corrigé** (co
 
 ## 4. Ancien Service Worker : les sons ne sont pas mis en cache sur GitHub Pages
 
-- **Statut** : corrigé par la refonte (phase 2), présent en production tant que `v1-vanilla` y est
+- **Statut** : corrigé par la refonte (phase 2) ; en production depuis la 1.7.0
 - **Constaté** : phase 2 (2026-10-13), test en Chromium headless + `curl` sur la production
 - **Où** : ancien `sw.js` (tag `v1-vanilla`), fonction `handleAudio()`
 - **Diagnostic** : les éléments `<audio>` envoient des requêtes `Range` (`bytes=0-`), auxquelles GitHub Pages répond `206 Partial Content` (vérifié avec `curl -H "Range: bytes=0-"`). L'ancien SW fait `cache.put(request, response)` sur cette réponse 206, ce que l'API Cache refuse (promesse rejetée, non attendue, donc silencieuse). En test, le cache `impro-audio-1.6.4` reste vide après lecture de sons.
