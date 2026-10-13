@@ -216,11 +216,16 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
 À mettre à jour par l'IA à chaque étape terminée (date + commit).
 
 - [x] Étape 0 : tag `v1-vanilla` et branche `refonte` (2026-10-13)
-- [x] Phase 1 : Vite + modules ES (2026-10-13, `b03c234`), en attente de la checklist sur tablette
+- [x] Phase 1 : Vite + modules ES (2026-10-13, `b03c234`), tag `refonte-phase-1`
   - Écart au plan : le paquet npm `ble-midi` n'est pas utilisable (CLI Node avec dépendances natives noble/bleno/midi, `npm install` échoue, `parsePacket` non exporté). Avec l'accord de l'utilisateur, le parseur est porté en module ES dans `src/midi/ble-midi-parser.js` (MIT, origine indiquée).
   - Node 18 en local : Vite 6 (Vite 7 demande Node ≥ 20.19).
   - Vérifié en Chromium headless (paysage 1280×800 et portrait 800×1280) : captures des 4 onglets identiques au pixel près à `v1-vanilla`, popups FX, lecture d'un son et popup « À propos » OK, aucune erreur console.
-- [ ] Phase 2 : PWA et déploiement
+- [x] Phase 2 : PWA et déploiement (2026-10-13, `fe1f760` + `62d2711`), tag `refonte-phase-2`
+  - Node 24 LTS épinglé dans `.nvmrc` (`vite-plugin-pwa` 2 et Workbox 7.4 demandent Node ≥ 20) ; le défaut nvm de l'utilisateur reste Node 18.
+  - Version passée à 1.7.0 pour distinguer la nouvelle version de la v1 sur la tablette.
+  - Sons : au premier accès, le SW télécharge le fichier entier sans en-tête `Range` (GitHub Pages répond 206 aux requêtes Range des `<audio>`, et une réponse 206 ne peut pas être mise en cache), puis sert les plages depuis le cache.
+  - Constat sur la v1 (non corrigé sur `main`) : son SW fait `cache.put` sur la réponse 206 de GitHub Pages, ce qui échoue ; en test, `impro-audio-1.6.4` reste vide. Le hors ligne des sons de la v1 ne repose donc probablement que sur le cache HTTP du navigateur.
+  - Vérifié en Chromium headless avec un serveur qui répond en 206 : passage v1 → nouvelle version (anciens caches supprimés, son de l'ancien cache recopié), app lancée serveur arrêté, sons déjà joués relancés et seek hors ligne OK, son jamais joué marqué manquant ; captures identiques à `v1-vanilla` hormis le numéro de version.
 - [ ] **Jalon 1 fusionné dans `main`**
 - [ ] Phase 3 : TypeScript
 - [ ] Phase 4 : moteurs séparés, FX unifiés, tests

@@ -18,6 +18,14 @@
 - [ ] **Hors ligne** (mode avion) : l'app se lance, les sons déjà joués une fois se relancent
 - [ ] Mise à jour : après un déploiement, la tablette récupère la nouvelle version
 
+### Première mise à jour depuis `v1-vanilla` (fusion du jalon 1)
+
+À faire sur la tablette où la v1 est installée, avant de vider quoi que ce soit :
+
+- [ ] Après le déploiement, rouvrir l'app (deux fois si besoin) : la popup « À propos » affiche la nouvelle version et « Service Worker : actif ✓ »
+- [ ] DevTools à distance (`chrome://inspect` depuis le PC, tablette en USB) → Application → Cache Storage : plus aucun cache `impro-app-*` ni `impro-audio-*` ; présence de `workbox-precache-v2-…` et `impro-audio`
+- [ ] Jouer quelques sons en ligne, passer en mode avion, relancer l'app : elle démarre et ces sons se relancent (y compris avec seek)
+
 ## Tester sur la tablette pendant le développement
 
 Web MIDI, Web Bluetooth et les Service Workers exigent un contexte sécurisé (`localhost` ou HTTPS).

@@ -12,22 +12,29 @@ A technical, behaviour-preserving rewrite is in progress on the `refonte` branch
 
 ## Commands
 
-Vite build (Node ≥ 18), vanilla JS in ES modules. No linter and no test suite yet.
+Vite build, vanilla JS in ES modules. No linter and no test suite yet.
 
-- `npm install` once, then `npm run dev` (dev server on http://localhost:5173/).
-- `npm run build` builds to `dist/`, and `npm run preview` serves the build. `vite.config.js` uses `base: './'` because production is served under `/fp30-midi-soundboard/`.
-- Deploy: every push to `main` publishes to GitHub Pages (`.github/workflows/deploy.yml`). **During phase 1 this workflow still publishes the repo root, which no longer works: do not merge into `main` before phase 2 is done.**
+- Node version is pinned in `.nvmrc` (24 LTS; `vite-plugin-pwa` needs Node ≥ 20). The user's nvm default is still Node 18, so run `source ~/.nvm/nvm.sh && nvm use` in the repo before any npm command.
+- `npm install` once, then `npm run dev` (dev server on http://localhost:5173/, no Service Worker).
+- `npm run build` builds to `dist/`, and `npm run preview` serves the build with the Service Worker. `vite.config.js` uses `base: './'` because production is served under `/fp30-midi-soundboard/`.
+- Deploy: every push to `main` runs `npm ci` + `npm run build` and publishes `dist/` to GitHub Pages (`.github/workflows/deploy.yml`).
 
 ## Releasing / cache invalidation
 
-The version shown in the About popup comes from `package.json` (`version`), injected at build time as `__APP_VERSION__` (see `vite.config.js`).
+Nothing to bump by hand for caching. `src/sw.js` is a Workbox Service Worker built by `vite-plugin-pwa` (`injectManifest`) and published as `sw.js` at the site root. The precache list and file revisions are generated at build time (HTML, JS, CSS, icons, `manifest.json`).
 
-The old root `sw.js` + `version.js` are still in the repo but are no longer registered or deployed (phase 1). Phase 2 replaces them with a `vite-plugin-pwa` Service Worker.
+- Sounds (`/sounds/`): `CacheFirst` in the stable, unversioned cache `impro-audio`. On a miss the whole file is fetched without the `Range` header (a 206 can't be cached), and `RangeRequestsPlugin` then serves `<audio>` range requests from the cache.
+- Images (`/images/`): `CacheFirst` in `impro-images`. Google Fonts: `impro-fonts-css` (StaleWhileRevalidate) and `impro-fonts` (CacheFirst).
+- On activation, the SW migrates from the pre-refonte SW: it copies `impro-audio-*` entries into `impro-audio`, then deletes the `impro-app-*` and `impro-audio-*` caches. Keep that code until every device has updated.
+- The SW is registered in `src/main.js`, in production builds only.
+
+The version shown in the About popup comes from `package.json` (`version`), injected at build time as `__APP_VERSION__` (see `vite.config.js`). Bump it for each release so you can tell on the tablet which version is running.
 
 ## Architecture
 
 Entry point: `index.html` loads `src/main.js`, which imports the CSS and calls `init()` from `src/app.js`. Every dependency is an explicit `import`. There are no shared globals besides browser APIs.
 
+- `src/sw.js`: the Service Worker (see above).
 - `public/`: static files copied as-is to the site root: `sounds/`, `images/`, icons, `manifest.json`. Config paths such as `file: 'sounds/x.mp3'` and `img: 'images/films/x.jpg'` are relative to the page, so they work both in dev and under the GitHub Pages sub-path.
 - `src/state.js`: the shared mutable `STATE` object.
 - `src/config/*.config.js`: pure data exports (`MIDI_TABS`, `AUDIO_TABS`, `MIDI_FX_PRESETS`, `AUDIO_FX_PRESETS`).
