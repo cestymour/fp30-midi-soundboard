@@ -1,0 +1,15 @@
+{
+  "name": "fp30-midi-soundboard",
+  "version": "1.6.4",
+  "private": true,
+  "type": "module",
+  "description": "Soundboard MIDI et audio pour spectacles de théâtre d'improvisation",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.4.4"
+  }
+}
