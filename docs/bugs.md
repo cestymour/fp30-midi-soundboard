@@ -77,3 +77,57 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 - **Diagnostic** : le bouton désinscrit le Service Worker (`reg.unregister()`) puis recharge la page. Désinscrire un SW ne supprime pas ses caches : `impro-audio`, `impro-images`, les polices et le precache Workbox restent, de même que d'éventuels caches de la 1.6.x (`impro-app-*`, `impro-audio-*`, plus nettoyés depuis la 1.7.2). Garder `impro-audio` est souhaitable (pas de retéléchargement des sons, hors ligne préservé) ; c'est le libellé qui est trompeur.
 - **Conséquences** : l'utilisateur croit repartir d'un cache vide alors que non. Ce que le bouton fait vraiment : recharger l'application depuis le réseau, sans passer par le SW, donc récupérer la dernière version publiée.
 - **Piste de correction** : renommer le bouton selon ce qu'il fait, par exemple « ⟳ Mettre à jour et recharger » (et le commentaire d'en-tête du composant, « rechargement sans cache »). Ne pas ajouter de suppression des caches : on perdrait les sons hors ligne.
+
+## 8. Parseur BLE MIDI : les messages de 1 ou 2 octets décalent la lecture du paquet
+
+- **Statut** : ouvert
+- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 1), confirmé en faisant tourner `parsePacket` sur des paquets construits à la main. Le même jour, l'utilisateur rapporte le symptôme, **en Bluetooth uniquement** : avec un son tenu comme l'orgue, quand on joue beaucoup de notes à la fois, une ou plusieurs notes continuent de sonner après qu'on a relâché les touches (le relâchement n'est pas pris en compte)
+- **Où** : `src/midi/ble-midi-parser.ts`, `parseFullMidiMessage()` et `parseRunningStatusMidiMessage()` ; conséquence dans le loopback de `src/midi/bluetoothMIDI.ts`
+- **Diagnostic** : en Bluetooth, chaque note jouée sur le piano revient à l'application, qui la renvoie au piano (loopback) ; un Note Off mal décodé n'est donc jamais renvoyé, et la note renvoyée reste tenue. Trois défauts du parseur peuvent faire perdre un Note Off :
+  1. il lit toujours deux octets de données après un statut. Program Change (`C0`) et Channel Pressure (`D0`) n'en ont qu'un, les messages temps réel (`F8`–`FF`, dont Active Sensing) aucun. Dans un paquet qui contient un message après ceux-là, l'octet d'horodatage suivant est pris pour une donnée et le reste du paquet est mal décodé. Défaut hérité du paquet `ble-midi` d'origine ;
+  2. un message temps réel remplace le running status : les Note Off qui suivent sans statut prennent celui du message temps réel et sont écartés ;
+  3. le running status repart de zéro à chaque paquet : si le relâchement d'un accord est découpé en plusieurs paquets et que le suivant commence sans statut, ses Note Off ont le statut -1 et sont écartés. C'est le scénario qui colle le mieux au symptôme (beaucoup de notes relâchées à la fois).
+- **Scénarios** :
+  - `[80 80 C0 05 80 90 3C 64]` (Program Change puis Note On) : le loopback renvoie `C0 3C` au piano, qui change de son, et la note est perdue ;
+  - `[80 80 FE 80 80 3C 00]` (Active Sensing puis Note Off en running status) : le Note Off est perdu, et la note reste bloquée ;
+  - `[80 80 3C 00 3E 00]` juste après un paquet de Note On : les deux Note Off sont perdus.
+- **Pourquoi l'orgue** : un son de piano s'éteint de lui-même, une note bloquée passe inaperçue ; un orgue tient la note indéfiniment.
+- **Autre cause possible** : une écriture GATT qui échoue est abandonnée (`MIDI OUT (BT) échoué` dans la console), et le relâchement d'un accord produit une rafale d'écritures, une par note.
+- **Piste de correction** : donner à chaque statut sa longueur de données (`C0`/`D0` : 1 ; `F8`–`FF` : 0 ; `F1`/`F3` : 1 ; sinon 2), ne pas laisser un message temps réel remplacer le running status, garder le running status d'un paquet au suivant, et ajouter les paquets ci-dessus aux tests.
+
+## 9. Animation des effets piano : les 7 CC sont renvoyés à chaque frame
+
+- **Statut** : ouvert
+- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 2) ; retard non mesuré
+- **Où** : `src/ui/fx-overlay.svelte.ts`, `animateToValues()` (rappel `onFrame`), puis `applyMidiFxValue()` (`src/fx/midi-fx.ts`)
+- **Diagnostic** : à chaque frame d'une animation (preset, Reset, ↺), `setControlValue(…, true)` est appelé pour chacun des 7 contrôles, que sa valeur ait changé ou non, et chaque appel envoie un CC : environ 140 messages pour une animation de 320 ms. Le Reset en envoie autant quand tout est déjà au neutre.
+- **Conséquences** : en BLE, chaque message est une écriture GATT, faite l'une après l'autre et affichée dans la console. Si la liaison suit moins vite que l'animation, la file grossit, et un changement d'instrument ou un arrêt d'urgence appuyé juste après attend qu'elle se vide. Sans effet notable en USB.
+- **Piste de correction** : n'envoyer un CC que si la valeur arrondie diffère de `MIDI_FX_STATE` ; ne pas animer quand les cibles sont déjà atteintes. Ce que reçoit le piano ne change pas.
+
+## 10. Reprise après pause, puis Stop rapide : `TypeError`
+
+- **Statut** : ouvert
+- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 5)
+- **Où** : `src/audio/playback.ts`, `togglePlayPause()`, callback `.then()` de la reprise
+- **Scénario** : un son en pause ; ▶, puis STOP (ou un autre son) avant que `play()` ne soit résolu.
+- **Diagnostic** : le callback relit `STATE.currentAudio!` et `STATE.currentSoundItem!` sans vérifier qu'ils sont encore là : après un Stop, `getPlaybackRange(null)` lève une `TypeError`. Si un autre son a été lancé, il reçoit un fondu de 150 ms et un événement `resume` qui ne le concernent pas. Pas de `.catch()` sur `play()`.
+- **Conséquences** : erreur dans la console ; petit creux de volume possible sur le nouveau son.
+- **Piste de correction** : mémoriser la piste et le son avant `play()`, vérifier `STATE.currentAudio === audio` dans le `.then()` (comme `playSound`), ajouter un `.catch()`.
+
+## 11. Volume déplacé pendant un fondu d'entrée : ignoré
+
+- **Statut** : ouvert
+- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 6)
+- **Où** : `src/audio/playback.ts`, `fadeAudio()` et `setAudioVolume()`
+- **Scénario** : on lance un son et on baisse le volume dans les 300 ms du fondu d'entrée (150 ms pour une reprise).
+- **Diagnostic** : `setAudioVolume` applique la valeur, mais le fondu en cours l'écrase à la frame suivante et termine sur la cible fixée à son lancement.
+- **Conséquences** : le curseur affiche la nouvelle valeur, le son reste à l'ancienne jusqu'au prochain mouvement du curseur.
+- **Piste de correction** : dans `setAudioVolume`, annuler un fondu d'entrée en cours (pas un fondu de sortie), ou faire lire `STATE.audioVolume` au fondu d'entrée à chaque pas.
+
+## 12. Statut Wake Lock « actif » après sa libération
+
+- **Statut** : ouvert
+- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 9)
+- **Où** : `src/wake-lock.ts`, lu par `src/ui/components/AboutPopup.svelte`
+- **Diagnostic** : le navigateur libère le verrou quand la page passe en arrière-plan. `STATE.wakeLock` garde l'objet libéré : si la nouvelle demande échoue au retour au premier plan, la popup À propos affiche toujours « Wake Lock : actif ✓ ».
+- **Piste de correction** : tester `!STATE.wakeLock.released`, ou remettre `STATE.wakeLock` à `null` sur l'événement `release`.
