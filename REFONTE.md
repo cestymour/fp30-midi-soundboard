@@ -228,7 +228,7 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
   - Sons : au premier accès, le SW télécharge le fichier entier sans en-tête `Range` (GitHub Pages répond 206 aux requêtes Range des `<audio>`, et une réponse 206 ne peut pas être mise en cache), puis sert les plages depuis le cache.
   - Bug de l'ancien SW (sons jamais mis en cache sur GitHub Pages) : voir `docs/bugs.md` n° 4.
   - Vérifié en Chromium headless avec un serveur qui répond en 206 : passage v1 → nouvelle version (anciens caches supprimés, son de l'ancien cache recopié), app lancée serveur arrêté, sons déjà joués relancés et seek hors ligne OK, son jamais joué marqué manquant ; captures identiques à `v1-vanilla` hormis le numéro de version.
-- [ ] **Jalon 1 fusionné dans `main`**
+- [x] **Jalon 1 fusionné dans `main`** (avec les jalons 2 et 3, voir plus bas)
 - [x] Phase 3 : TypeScript (2026-10-13, `4745932` → `580c8d6` + doc), tag `refonte-phase-3`
   - `strict: true` dès la conversion, aucun `any` ; trois projets `tsc` (app / Service Worker en lib WebWorker / `vite.config.ts` en Node), lancés par `npm run typecheck` puis dans le workflow avec `npm test`.
   - `id` générés depuis le libellé (onglet Films : nom de l'image de couverture), y compris sur les entrées commentées ; seul ajustement manuel : `piano` (actif) / `piano-gp1` (commenté).
@@ -241,7 +241,7 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
   - `STATE` ne contient plus d'élément DOM : `currentSoundBtn` → `currentSoundItem` (l'`AudioItem`), `activeInstBtn` et les drapeaux d'ouverture des popups passent dans l'interface.
   - 46 tests Vitest (presets, inférence, clamp, octets MIDI d'un patch et routage USB/BT, arrêt d'urgence, temps de lecture et seek, parseur BLE, validité des presets et patchs de la config).
   - Scripts de non-régression automatique versionnés dans `tools/regression/` (captures, scénario de 23 étapes comparé au DOM de la v1, mise à jour du SW et hors ligne) : tout identique à `v1-vanilla` en paysage et en portrait.
-- [ ] **Jalon 2 fusionné dans `main`**
+- [x] **Jalon 2 fusionné dans `main`** (avec les jalons 1 et 3, voir plus bas)
 - [x] Phase 5 : Svelte 5 (2026-10-13, `0c5c4cb` → `b256dfd` + doc), tag `refonte-phase-5`
   - `@sveltejs/vite-plugin-svelte` 6 (la 7 demande Vite 8 ; on reste sur Vite 6). `npm run typecheck` lance `svelte-check --fail-on-warnings` sur l'app.
   - Migration progressive : d'abord la popup d'effets (`FxOverlay.svelte` + `FxOverlayController`), puis toute l'interface (`App.svelte`, `ui/components/`). Plus aucune construction de DOM impérative : il reste seulement des mesures (hauteur des boutons, position de la popup sur la grille active).
@@ -254,4 +254,6 @@ Le PC tourne sous WSL : si la tablette n'arrive pas à joindre le serveur, véri
   - [x] Code mort et doc (2026-10-13) : anciens `js/`, `css/`, `version.js` et `sw.js` déjà supprimés aux phases précédentes ; dépendance inutilisée `workbox-window` retirée ; commentaires périmés de `vite.config.ts` corrigés ; README (lecture audio, numéro de version à incrémenter) ; emplacements v1 / refonte des bugs mis à jour dans `docs/bugs.md`. Aucun export mort (ceux non importés ailleurs sont utilisés dans leur module). Non-régression en Chromium headless inchangée.
   - [x] Revue de `docs/bugs.md` avec l'utilisateur (2026-10-13) : bugs n° 1, 2, 3, 5 et 6 à corriger **après** la fusion, un commit par bug
   - [x] Checklist sur la tablette (2026-10-13) : passée à la main par l'utilisateur, servie par `npm run preview` via `adb reverse`, piano en Bluetooth ; jugée « à peu près bonne » et validée par l'utilisateur, sans passage exhaustif (le scénario automatisé sur la tablette n'a pas pu tourner, batterie vide). La ligne « Mise à jour » ne se vérifie qu'après le déploiement.
-- [ ] **Jalon 3 fusionné dans `main`**
+  - [x] Scénario automatisé avec le piano (2026-10-14) : les 23 étapes rejouées dans Edge sous Windows (`npm run preview`, Edge lancé avec `--remote-debugging-port` ; le Chrome du poste est verrouillé par une stratégie d'entreprise), piano en Bluetooth. Aucune erreur, 479 messages MIDI envoyés, états identiques à la référence hors état de départ (page déjà utilisée) et bugs connus n° 5 et 6. Sous Windows, la première connexion BLE au piano a échoué (déconnexion GATT juste après `connect`), puis a fonctionné : problème de la pile Bluetooth du poste, pas de l'app.
+- [x] **Jalon 3 fusionné dans `main`** (2026-10-13, avance rapide sur `77af6b1`, avec les jalons 1 et 2)
+  - Premier déploiement cassé : GitHub Pages publiait encore depuis la branche (« Deploy from a branch »), et ce déploiement automatique a écrasé `dist/` avec les sources. Corrigé par l'utilisateur (Settings → Pages → Source : GitHub Actions) puis workflow relancé : production vérifiée (build servie, `sw.js` en 200, version 1.7.0).
