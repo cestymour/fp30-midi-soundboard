@@ -116,7 +116,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 10. Reprise après pause, puis Stop rapide : `TypeError`
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `togglePlayPause()` mémorise la piste et le son avant `play()`, la reprise ne fait rien si la piste n'est plus la piste courante, et un échec de `play()` laisse le son en pause (`.catch()`). Tests dans `playback.test.ts`
 - **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 5)
 - **Où** : `src/audio/playback.ts`, `togglePlayPause()`, callback `.then()` de la reprise
 - **Scénario** : un son en pause ; ▶, puis STOP (ou un autre son) avant que `play()` ne soit résolu.

@@ -226,17 +226,21 @@ export function togglePlayPause(): void {
   if (!STATE.currentAudio || !STATE.currentSoundItem) return;
 
   if (STATE.isPaused) {
-    // Resume avec fade in
-    STATE.currentAudio.volume = 0;
-    STATE.currentAudio.play().then(() => {
-      // Relus après la reprise de lecture, comme dans la version d'origine
-      const audio = STATE.currentAudio!;
-      const item  = STATE.currentSoundItem!;
+    // Reprise avec fondu d'entrée. Piste et son sont mémorisés avant play() : si le son
+    // est arrêté, ou un autre lancé, avant la fin de play(), la reprise ne fait rien (bug n° 10)
+    const audio = STATE.currentAudio;
+    const item  = STATE.currentSoundItem;
+    audio.volume = 0;
+    audio.play().then(() => {
+      if (STATE.currentAudio !== audio) return;
       STATE.isPaused = false;
       fadeAudio(audio, 0, STATE.audioVolume, 150, null);
       const { startOffset, endOffset } = getPlaybackRange(item);
       startProgressLoop(audio, item, startOffset, endOffset);
       playbackEvents.emit({ type: 'resume' });
+    }).catch((err: unknown) => {
+      // Le son reste en pause : un nouvel appui sur ▶ réessaie
+      if (STATE.currentAudio === audio) console.warn('Reprise impossible :', item.file, err);
     });
   } else {
     // Pause avec fade out

@@ -27,7 +27,7 @@ vi.mock('./audio-engine.ts', () => ({
 }));
 
 import { STATE } from '../state.svelte.ts';
-import { playSound, stopSound, togglePlayPause } from './playback.ts';
+import { playbackEvents, playSound, stopSound, togglePlayPause } from './playback.ts';
 
 type Track = InstanceType<typeof FakeTrack>;
 
@@ -106,5 +106,70 @@ describe('fondus simultanés', () => {
     expect(STATE.isPaused).toBe(true);
     expect(a.paused).toBe(true);
     expect(a.volume).toBe(0);
+  });
+});
+
+describe('reprise après pause (bug n° 10)', () => {
+  /** Met le son en pause, puis rend la prochaine reprise (play()) pilotable à la main */
+  async function pausedWithPendingPlay(): Promise<{ a: Track; resolve: () => void; reject: () => void }> {
+    const a = await play(A);
+    vi.advanceTimersByTime(1000);
+    togglePlayPause();
+    vi.advanceTimersByTime(1000);
+    expect(STATE.isPaused).toBe(true);
+
+    let resolve!: () => void;
+    let reject!: () => void;
+    a.play = () => new Promise<Track>((ok, ko) => {
+      resolve = () => { a.paused = false; ok(a); };
+      reject = () => ko(new Error('play() refusé'));
+    });
+    return { a, resolve: () => resolve(), reject: () => reject() };
+  }
+
+  it('STOP avant la fin de play() : ni erreur, ni reprise', async () => {
+    const { resolve } = await pausedWithPendingPlay();
+    const events: string[] = [];
+    const off = playbackEvents.on(e => events.push(e.type));
+
+    togglePlayPause();
+    stopSound(false);
+    resolve();
+    await vi.runAllTimersAsync();
+    off();
+
+    expect(events).toEqual(['stop']);
+    expect(STATE.currentAudio).toBeNull();
+    expect(STATE.isPaused).toBe(false);
+  });
+
+  it('autre son lancé avant la fin de play() : la reprise ne touche pas au nouveau son', async () => {
+    const { resolve } = await pausedWithPendingPlay();
+
+    togglePlayPause();
+    const b = await play(B);
+    vi.advanceTimersByTime(1000);
+    const events: string[] = [];
+    const off = playbackEvents.on(e => events.push(e.type));
+    resolve();
+    await vi.runAllTimersAsync();
+    off();
+
+    expect(events).not.toContain('resume');
+    expect(STATE.currentAudio).toBe(b);
+    expect(b.volume).toBe(STATE.audioVolume);
+  });
+
+  it('play() refusé : le son reste en pause, sans promesse rejetée non gérée', async () => {
+    const { a, reject } = await pausedWithPendingPlay();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    togglePlayPause();
+    reject();
+    await vi.runAllTimersAsync();
+
+    expect(STATE.currentAudio).toBe(a);
+    expect(STATE.isPaused).toBe(true);
+    expect(warn).toHaveBeenCalled();
   });
 });
