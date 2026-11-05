@@ -12,14 +12,17 @@ import { sendRolandRemoteControl, sendVolume } from './midi.ts';
 
 /** Valeurs spéciales de la liste de connexion (les sorties USB y figurent par leur id) */
 export const MIDI_SELECT_NONE      = '__none__';
+/** Bluetooth : reconnexion au piano connu sans sélecteur, sinon ouverture du sélecteur */
 export const MIDI_SELECT_BLUETOOTH = '__bluetooth__';
+/** Bluetooth, autre appareil : ouvre toujours le sélecteur (proposé quand un piano est connu) */
+export const MIDI_SELECT_BLUETOOTH_OTHER = '__bluetooth_other__';
 
 export type MidiConnectionEvent =
-  /** STATE.currentConnectionType a pu changer (badge USB / BT / non connecté) */
+  /** STATE.currentConnectionType ou STATE.btStatus a pu changer (badge) */
   | { type: 'status' }
   /** Valeur à afficher dans toutes les listes de connexion */
   | { type: 'selection'; value: string }
-  /** La liste des sorties USB a changé (au premier accès Web MIDI, puis à chaque branchement) */
+  /** La liste des sorties a changé (accès Web MIDI, branchement USB, piano Bluetooth connu ou retrouvé) */
   | { type: 'outputs' };
 
 export const midiConnectionEvents = createEmitter<MidiConnectionEvent>();
@@ -46,15 +49,21 @@ export function isBluetoothAvailable(): boolean {
 
 export function initBluetooth(): void {
   STATE.bt = new BluetoothMIDI({
-    onStatusChange: (status) => {
+    onStatusChange: (status, error) => {
+      STATE.btStatus = status;
+      STATE.btError  = error;
       if (status === 'connected') {
         STATE.midiOutput = null;
         STATE.currentConnectionType = 'bt';
+        midiConnectionEvents.emit({ type: 'outputs' }); // nom du piano connu dans les listes
         emitSelection(MIDI_SELECT_BLUETOOTH);
         midiConnectionEvents.emit({ type: 'status' });
         sendRolandRemoteControl();
         sendVolume(STATE.midiVolume);
-      } else if (status === 'idle' || status === 'error') {
+      } else if (status === 'reconnecting' || status === 'connecting' || status === 'scanning') {
+        // Badge « ◌ BT… » ; pendant une reconnexion automatique, la connexion reste « bt »
+        midiConnectionEvents.emit({ type: 'status' });
+      } else if (status === 'idle' || status === 'error' || status === 'lost') {
         if (STATE.isSwitchingToUsb) return;
         if (STATE.currentConnectionType === 'bt') {
           STATE.currentConnectionType = null;
@@ -65,8 +74,14 @@ export function initBluetooth(): void {
         } else {
           emitSelection(MIDI_SELECT_NONE);
         }
+        midiConnectionEvents.emit({ type: 'status' });
       }
     },
+  });
+  // Dernier piano retrouvé (si le navigateur le permet) : proposé dans les listes,
+  // pour s'y reconnecter sans sélecteur
+  void STATE.bt.restore().then(found => {
+    if (found) midiConnectionEvents.emit({ type: 'outputs' });
   });
 }
 
@@ -109,8 +124,10 @@ function autoConnectUsbPiano(): void {
 // CHANGEMENT DE CONNEXION (choix dans la liste MIDI)
 // ═══════════════════════════════════════════════════════
 
-/** `val` : MIDI_SELECT_NONE, MIDI_SELECT_BLUETOOTH ou l'id d'une sortie USB */
+/** `val` : MIDI_SELECT_NONE, MIDI_SELECT_BLUETOOTH(_OTHER) ou l'id d'une sortie USB */
 export async function selectMidiConnection(val: string): Promise<void> {
+  const pickAnotherDevice = val === MIDI_SELECT_BLUETOOTH_OTHER;
+  if (pickAnotherDevice) val = MIDI_SELECT_BLUETOOTH;
   emitSelection(val);
 
   if (val === MIDI_SELECT_NONE) {
@@ -124,8 +141,8 @@ export async function selectMidiConnection(val: string): Promise<void> {
     const prevId     = prevOutput?.id ?? null;
     STATE.midiOutput = null;
 
-    if (STATE.bt?.status !== 'connected') {
-      await STATE.bt!.connect();
+    if (STATE.bt?.status !== 'connected' || pickAnotherDevice) {
+      await (pickAnotherDevice ? STATE.bt!.connect() : STATE.bt!.reconnect());
       // Le statut a changé pendant connect() : relu sans le rétrécissement de type d'avant l'await
       const statusAfterConnect = STATE.bt?.status as BluetoothStatus | undefined;
       if (statusAfterConnect !== 'connected') {

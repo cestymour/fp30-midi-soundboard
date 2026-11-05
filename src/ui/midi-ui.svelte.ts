@@ -8,7 +8,8 @@ import type { MidiItem } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import { sendInstrumentPatch } from '../midi/midi.ts';
 import {
-  MIDI_SELECT_BLUETOOTH, MIDI_SELECT_NONE, getUsbOutputs, isBluetoothAvailable, midiConnectionEvents,
+  MIDI_SELECT_BLUETOOTH, MIDI_SELECT_BLUETOOTH_OTHER, MIDI_SELECT_NONE, getUsbOutputs, isBluetoothAvailable,
+  midiConnectionEvents,
 } from '../midi/connection.ts';
 
 // ═══════════════════════════════════════════════════════
@@ -62,7 +63,15 @@ function updateAllMidiSelects(val: string): void {
 function populateMidiSelects(): void {
   const options: MidiSelectOption[] = [{ value: MIDI_SELECT_NONE, label: '— Connexion MIDI —' }];
   if (isBluetoothAvailable()) {
-    options.push({ value: MIDI_SELECT_BLUETOOTH, label: 'ᛒ Bluetooth MIDI' });
+    // Piano déjà connu (choisi, ou retrouvé au lancement) : s'y reconnecter sans sélecteur,
+    // et proposer à part le sélecteur pour un autre appareil
+    const known = STATE.bt?.knownDeviceName;
+    if (known) {
+      options.push({ value: MIDI_SELECT_BLUETOOTH, label: 'ᛒ ' + known });
+      options.push({ value: MIDI_SELECT_BLUETOOTH_OTHER, label: 'ᛒ Autre appareil Bluetooth…' });
+    } else {
+      options.push({ value: MIDI_SELECT_BLUETOOTH, label: 'ᛒ Bluetooth MIDI' });
+    }
   }
   getUsbOutputs().forEach(out => {
     options.push({ value: out.id, label: '🎹 ' + out.name });

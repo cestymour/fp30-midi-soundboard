@@ -8,7 +8,7 @@
    d'identité (son en cours === son du bouton) restent valables.
 ================================================================ */
 
-import type { BluetoothMIDI } from './midi/bluetoothMIDI.ts';
+import type { BluetoothErrorCode, BluetoothMIDI, BluetoothStatus } from './midi/bluetoothMIDI.ts';
 import type { MediaElementTrack } from './audio/audio-engine.ts';
 import type { AudioItem } from './types.ts';
 
@@ -22,6 +22,9 @@ class AppState {
   MIDI_CHANNEL          = $state(3);
   /** Instance BluetoothMIDI, initialisée dans midi/connection.ts */
   bt                    = $state.raw<BluetoothMIDI | null>(null);
+  /** Copie réactive de STATE.bt.status / error, pour le badge */
+  btStatus              = $state<BluetoothStatus>('idle');
+  btError               = $state<BluetoothErrorCode | null>(null);
   midiOutput            = $state.raw<MIDIOutput | null>(null);
   midiAccess            = $state.raw<MIDIAccess | null>(null);
   midiVolume            = $state(100);
