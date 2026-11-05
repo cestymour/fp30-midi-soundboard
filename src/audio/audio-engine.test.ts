@@ -82,3 +82,13 @@ describe('MediaElementTrack.load (bug n° 20)', () => {
     await expect(done).resolves.toBe(track);
   });
 });
+
+describe('MediaElementTrack.dispose (bug n° 22)', () => {
+  it("vide la source de l'élément <audio>, pour libérer son décodeur", () => {
+    const { track, audio } = makeTrack();
+    track.dispose();
+    expect(audio.src).toBe('');
+    expect(audio.loads).toBe(1);
+    expect(audio.paused).toBe(true);
+  });
+});

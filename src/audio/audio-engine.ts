@@ -628,6 +628,10 @@ export class MediaElementTrack {
       try { this.sourceNode.disconnect(); } catch (_) {}
       this.sourceNode = null;
     }
+    // Vide la source : le navigateur libère tout de suite le décodeur et le fichier
+    // en mémoire, sans attendre le ramasse-miettes (bug n° 22)
+    this.audio.removeAttribute('src');
+    this.audio.load();
     this.engine.unregisterTrack(this);
   }
 

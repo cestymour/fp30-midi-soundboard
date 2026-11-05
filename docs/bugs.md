@@ -234,7 +234,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 22. Une piste libérée garde son élément `<audio>` et son décodeur
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `dispose()` vide la source de l'élément (`removeAttribute('src')` puis `load()`). Test dans `audio-engine.test.ts`. À vérifier sur la tablette : une longue série de sons, sans son qui refuse de démarrer
 - **Constaté** : 2026-10-14, revue de code de la 1.7.2 (n° 10 de la revue de la 1.8.0)
 - **Où** : `src/audio/audio-engine.ts`, `MediaElementTrack.dispose()`
 - **Diagnostic** : `dispose()` met en pause et déconnecte la piste du graphe, mais garde la source de l'élément `<audio>`. Son décodeur reste alloué jusqu'au passage du ramasse-miettes, à chaque son joué. Chrome Android limite le nombre de lecteurs média simultanés.
