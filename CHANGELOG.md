@@ -2,6 +2,47 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.9.0 — 2026-11-05
+
+Cette version suit la revue de code de la 1.8.0 : le hors ligne devient fiable avant un spectacle, la mise à jour se force depuis la popup À propos, et plusieurs petits défauts de lecture sont corrigés.
+
+### Nouveautés
+
+- **Télécharger tous les sons pour le hors ligne.** Dans la popup À propos (⚙), « ⬇ Télécharger tous les sons » met en cache tous les sons et toutes les images de couverture. Un compteur indique où on en est (« Hors ligne : 68 / 68 sons, 36 / 36 images »). Avant, un son n'était disponible hors ligne qu'après avoir été joué une fois. Les fichiers déjà en cache ne sont pas retéléchargés.
+- **Stockage protégé.** L'application demande à Chrome de ne pas effacer ses fichiers quand l'appareil manque de place. La popup À propos indique si c'est accordé (« Stockage : protégé ✓ ») : Chrome l'accorde en général à l'application installée.
+- **« ⟳ Mettre à jour l'application »** remplace « Vider le cache et recharger ». Le bouton installe la dernière version publiée puis recharge, sans retélécharger les sons. Hors ligne, il ne recharge rien et affiche « Hors ligne : mise à jour impossible ». Avant, appuyé hors ligne, il pouvait empêcher l'application de s'ouvrir jusqu'au retour du réseau.
+- **Un Reset par type d'effets.** Le Reset d'un onglet MIDI ne remet à zéro que les effets du piano, et celui d'un onglet de sons que les effets audio. Chacun s'allume seulement pour ses effets. Avant, les deux Reset remettaient tout à zéro (bug n° 19).
+- **Popup des effets épurée.** Les valeurs chiffrées et les étiquettes en trois lettres au-dessus des curseurs ont disparu. Seul reste le nom sous chaque curseur, plus gros et plus lisible, en jaune quand l'effet est actif.
+- **Piano Bluetooth proposé après un rechargement**, même dans Edge. La liste propose toujours « ᛒ FP-30X ». Si le navigateur ne sait pas retrouver le piano, le choisir ouvre le sélecteur avec ce seul piano. L'application ne se connecte jamais toute seule au lancement.
+- **Polices intégrées à l'application.** Elles ne viennent plus de Google : le premier lancement hors ligne a les bonnes polices. L'affichage est identique.
+
+### Corrections
+
+- **Son qui grésille avec les effets audio à fond** (réverbération, delay, basses) : un limiteur empêche maintenant la sortie de saturer. Sans effet fort, le son est inchangé (bug n° 21).
+- **Bas de l'écran coupé dans un onglet Chrome** : la dernière rangée de boutons passait sous la barre d'adresse. L'application installée n'était pas touchée (bug n° 23).
+- **Volume baissé juste après le lancement d'un son** : il était ignoré pendant le fondu d'entrée, et il s'applique maintenant tout de suite (bug n° 11).
+- **Reprise après pause puis STOP rapide** : la reprise pouvait toucher au son suivant et laissait une erreur dans la console (bug n° 10).
+- **Fichier son manquant** : il était demandé deux fois, avec une erreur dans la console (bug n° 20).
+- **Mémoire** : chaque son joué gardait son lecteur audio jusqu'au nettoyage automatique de Chrome. Il est maintenant libéré tout de suite (bug n° 22).
+- **Wake Lock** : la popup À propos l'affichait « actif » alors qu'il ne l'était plus (bug n° 12).
+
+### À savoir
+
+- **Avant un spectacle** : ouvrir la popup À propos avec du réseau, et appuyer sur « ⬇ Télécharger tous les sons » jusqu'à ce que le bouton disparaisse.
+- **Arrêt d'urgence** : la queue d'effet de l'orgue signalée en 1.8.0 ne se produit plus (vérifié sur le piano). Le court fondu de sortie des sons au STOP est voulu.
+- **Un son remplacé** dans `public/sounds/` doit changer de nom, sinon la tablette garde l'ancien (bug n° 14, laissé tel quel).
+
+### À vérifier sur la tablette
+
+Avec `docs/checklist.md`, en particulier :
+- le téléchargement de tous les sons, puis un son jamais joué en mode avion ;
+- « Mettre à jour l'application » en ligne et en mode avion ;
+- les deux Reset séparés ;
+- la popup des effets en paysage et en portrait ;
+- un son fort avec réverbération et basses à fond : plus de grésillement, et sans effet, le son n'a pas changé ;
+- la dernière rangée de boutons dans un onglet Chrome ;
+- après un rechargement, « ᛒ FP-30X » dans la liste.
+
 ## 1.8.0 — 2026-11-05
 
 Cette version change la façon dont l'application pilote le piano. Les instruments et les effets partent sur le canal MIDI 4, celui du son du clavier du FP-30X : choisir une tuile change directement ce que jouent les touches. Le piano n'est plus mis en Local Off, et l'application ne lui renvoie plus les notes jouées.
