@@ -81,7 +81,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 ## 8. Parseur BLE MIDI : les messages de 1 ou 2 octets décalent la lecture du paquet
 
 - **Statut** : corrigé par suppression du loopback (2026-11-05, branche `canal-4` ; vérifié le même jour sur le PC, Edge, en Bluetooth et en USB : plus de note tenue, réverbération par l'Ambiance ; reste à vérifier sur la tablette) : patchs et effets partent sur le canal 4, celui du son du clavier, si bien que l'application ne renvoie plus aucune note au piano (voir « Précisions du 2026-11-05 » ci-dessous et `docs/fp30x-midi.md`). Historique : parseur corrigé le 2026-10-14 (version 1.7.3) : chaque statut a sa longueur de données (`getDataLength()`), une donnée n'est lue que si son bit 7 est à 0, le running status survit aux messages temps réel et passe d'un paquet au suivant (`parsePacket(packet, runningStatus)`, mémorisé dans `BluetoothMIDI`). Tests ajoutés dans `ble-midi-parser.test.ts`. **Le symptôme persiste en 1.7.3** (testé par l'utilisateur sur la tablette, 2026-10-14) : les défauts du parseur étaient réels, mais ce n'est pas la cause, ou pas la seule. Piste la plus probable : le Note Off arrive bien, mais son renvoi au piano se perd (une écriture GATT par message, abandonnée en cas d'échec, voir « Autre cause possible » plus bas). Diagnostic en cours : relevé des paquets BLE bruts reçus et envoyés sur la tablette. Tag `v1.7.3` en attente de la vraie correction
-- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 1), confirmé en faisant tourner `parsePacket` sur des paquets construits à la main. Le même jour, l'utilisateur rapporte le symptôme, **en Bluetooth uniquement** : avec un son tenu comme l'orgue, quand on joue beaucoup de notes à la fois, une ou plusieurs notes continuent de sonner après qu'on a relâché les touches (le relâchement n'est pas pris en compte)
+- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 1), confirmé en faisant tourner `parsePacket` sur des paquets construits à la main. Le même jour, l'utilisateur rapporte le symptôme, **en Bluetooth uniquement** : avec un son tenu comme l'orgue, quand on joue beaucoup de notes à la fois, une ou plusieurs notes continuent de sonner après qu'on a relâché les touches (le relâchement n'est pas pris en compte)
 - **Où** : `src/midi/ble-midi-parser.ts`, `parseFullMidiMessage()` et `parseRunningStatusMidiMessage()` ; conséquence dans le loopback de `src/midi/bluetoothMIDI.ts`
 - **Diagnostic** : en Bluetooth, chaque note jouée sur le piano revient à l'application, qui la renvoie au piano (loopback) ; un Note Off mal décodé n'est donc jamais renvoyé, et la note renvoyée reste tenue. Trois défauts du parseur peuvent faire perdre un Note Off :
   1. il lit toujours deux octets de données après un statut. Program Change (`C0`) et Channel Pressure (`D0`) n'en ont qu'un, les messages temps réel (`F8`–`FF`, dont Active Sensing) aucun. Dans un paquet qui contient un message après ceux-là, l'octet d'horodatage suivant est pris pour une donnée et le reste du paquet est mal décodé. Défaut hérité du paquet `ble-midi` d'origine ;
@@ -93,7 +93,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
   - `[80 80 3C 00 3E 00]` juste après un paquet de Note On : les deux Note Off sont perdus.
 - **Pourquoi l'orgue** : un son de piano s'éteint de lui-même, une note bloquée passe inaperçue ; un orgue tient la note indéfiniment.
 - **Autre cause possible, non corrigée** : une écriture GATT qui échoue est abandonnée (`MIDI OUT (BT) échoué` dans la console), et le relâchement d'un accord produit une rafale d'écritures, une par note. Si des notes restent encore bloquées en 1.7.3, chercher ce message dans la console.
-- **Pistes de la revue 1.7.3** (`docs/revue-code-1.7.3.md`, n° 1) : le repli sur `writeValueWithResponse` échoue probablement aussi (la norme BLE MIDI n'impose que l'écriture sans réponse), donc un échec perd le message. Correctif proposé : renvoyer au piano le paquet reçu **tel quel** (une écriture par notification au lieu d'une par message, sans passer par le parseur, comme le loopback USB), et réessayer une écriture échouée. Hypothèse à vérifier : sur Android avant la version 13, notifications et écritures sur la même caractéristique partagent un tampon. À relever sur la tablette : `characteristic.properties`, les messages d'échec, le nombre de Note Off reçus et réécrits, la version d'Android.
+- **Pistes de la revue 1.7.3** (`git show 3583b57:docs/revue-code-1.7.3.md`, n° 1) : le repli sur `writeValueWithResponse` échoue probablement aussi (la norme BLE MIDI n'impose que l'écriture sans réponse), donc un échec perd le message. Correctif proposé : renvoyer au piano le paquet reçu **tel quel** (une écriture par notification au lieu d'une par message, sans passer par le parseur, comme le loopback USB), et réessayer une écriture échouée. Hypothèse à vérifier : sur Android avant la version 13, notifications et écritures sur la même caractéristique partagent un tampon. À relever sur la tablette : `characteristic.properties`, les messages d'échec, le nombre de Note Off reçus et réécrits, la version d'Android.
 - **Défaut mineur restant** : `parseSysex` n'annule pas le running status, alors qu'un SysEx devrait le faire. Sans effet ici (le piano n'envoie pas de SysEx pendant le jeu).
 - **Précisions du 2026-11-05** (utilisateur, et implémentation MIDI du FP-30X dans `docs/DOC_FP30X/FP-30X_MIDI_Imple_eng01_W.pdf`) :
   - **pourquoi le loopback** : le Program Change de l'application règle une partie GM2 du piano (canal 1), distincte du son du clavier. Pour ne pas entendre les deux à la fois, l'utilisateur coupe le son du clavier **à la main** (Local Off : Function + fa le plus grave) à chaque mise sous tension, et l'application renvoie les touches au piano. Sans loopback, le piano est muet (essai d'avril 2026, commit `4d548ec`). Le loopback est donc indispensable tant que le Local Off est en place ;
@@ -106,7 +106,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 ## 9. Animation des effets piano : les 7 CC sont renvoyés à chaque frame
 
 - **Statut** : corrigé (2026-11-05, branche `canal-4`) : pendant une animation, chaque contrôle n'est envoyé que si sa valeur (alignée sur le pas) change, et rien n'est animé ni envoyé quand les cibles sont déjà atteintes (`animateToValues()` dans `src/ui/fx-overlay.svelte.ts`, test dans `fx-overlay.test.ts`). Vaut aussi pour la popup audio. Depuis le passage au canal 4, la réverbération est un SysEx : sans ce correctif, il en partait un à chaque frame
-- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 2) ; retard non mesuré
+- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 2) ; retard non mesuré
 - **Où** : `src/ui/fx-overlay.svelte.ts`, `animateToValues()` (rappel `onFrame`), puis `applyMidiFxValue()` (`src/fx/midi-fx.ts`)
 - **Diagnostic** : à chaque frame d'une animation (preset, Reset, ↺), `setControlValue(…, true)` est appelé pour chacun des 7 contrôles, que sa valeur ait changé ou non, et chaque appel envoie un CC : environ 140 messages pour une animation de 320 ms. Le Reset en envoie autant quand tout est déjà au neutre.
 - **Conséquences** : en BLE, chaque message est une écriture GATT, faite l'une après l'autre et affichée dans la console. Si la liaison suit moins vite que l'animation, la file grossit, et un changement d'instrument ou un arrêt d'urgence appuyé juste après attend qu'elle se vide. Sans effet notable en USB.
@@ -115,7 +115,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 ## 10. Reprise après pause, puis Stop rapide : `TypeError`
 
 - **Statut** : ouvert
-- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 5)
+- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 5)
 - **Où** : `src/audio/playback.ts`, `togglePlayPause()`, callback `.then()` de la reprise
 - **Scénario** : un son en pause ; ▶, puis STOP (ou un autre son) avant que `play()` ne soit résolu.
 - **Diagnostic** : le callback relit `STATE.currentAudio!` et `STATE.currentSoundItem!` sans vérifier qu'ils sont encore là : après un Stop, `getPlaybackRange(null)` lève une `TypeError`. Si un autre son a été lancé, il reçoit un fondu de 150 ms et un événement `resume` qui ne le concernent pas. Pas de `.catch()` sur `play()`.
@@ -125,7 +125,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 ## 11. Volume déplacé pendant un fondu d'entrée : ignoré
 
 - **Statut** : ouvert
-- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 6)
+- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 6)
 - **Où** : `src/audio/playback.ts`, `fadeAudio()` et `setAudioVolume()`
 - **Scénario** : on lance un son et on baisse le volume dans les 300 ms du fondu d'entrée (150 ms pour une reprise).
 - **Diagnostic** : `setAudioVolume` applique la valeur, mais le fondu en cours l'écrase à la frame suivante et termine sur la cible fixée à son lancement.
@@ -135,7 +135,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 ## 12. Statut Wake Lock « actif » après sa libération
 
 - **Statut** : ouvert
-- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 9)
+- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 9)
 - **Où** : `src/wake-lock.ts`, lu par `src/ui/components/AboutPopup.svelte`
 - **Diagnostic** : le navigateur libère le verrou quand la page passe en arrière-plan. `STATE.wakeLock` garde l'objet libéré : si la nouvelle demande échoue au retour au premier plan, la popup À propos affiche toujours « Wake Lock : actif ✓ ».
 - **Piste de correction** : tester `!STATE.wakeLock.released`, ou remettre `STATE.wakeLock` à `null` sur l'événement `release`.
@@ -143,7 +143,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 ## 13. Instrument et effets non renvoyés au piano à la connexion ou à la reconnexion
 
 - **Statut** : corrigé (2026-11-05, branche `canal-4`) : à chaque connexion (USB, Bluetooth, reconnexion automatique), l'application envoie le contrôle à distance Roland et le volume, puis l'événement `connected`, sur lequel `bindMidiConnectionUI()` renvoie l'instrument surligné et tous les effets (`sendAllMidiFx()`). Test dans `src/midi/connection.test.ts`
-- **Constaté** : 2026-11-05, revue de code (`docs/revue-code-1.7.3.md`, n° 2)
+- **Constaté** : 2026-11-05, revue de code de la 1.7.3 (`git show 3583b57:docs/revue-code-1.7.3.md`, n° 2)
 - **Où** : `src/midi/connection.ts` (`onStatusChange` à `connected`, branche USB de `selectMidiConnection`), `src/ui/midi-ui.svelte.ts` (`selectInstrument`)
 - **Scénarios** :
   - en Bluetooth, la liaison tombe (piano éteint puis rallumé) et on se reconnecte : seul le volume (CC7) est renvoyé ;
@@ -155,7 +155,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 ## 14. Un son remplacé sous le même nom n'est jamais mis à jour sur la tablette
 
 - **Statut** : ouvert
-- **Constaté** : 2026-11-05, revue de code (`docs/revue-code-1.7.3.md`, n° 3)
+- **Constaté** : 2026-11-05, revue de code de la 1.7.3 (`git show 3583b57:docs/revue-code-1.7.3.md`, n° 3)
 - **Où** : `src/sw.ts`, route `/sounds/` (`CacheFirst` dans `impro-audio`, sans révision) ; même chose pour `/images/`
 - **Scénario** : on remplace un fichier de `public/sounds/` par une autre version sous le même nom, et on ajuste son `start` / `end` dans la configuration, puis on publie.
 - **Diagnostic** : la configuration est mise à jour (precache), mais le Service Worker sert l'ancien fichier depuis `impro-audio` sans interroger le réseau. Le bouton « Vider le cache et recharger » ne vide pas ce cache (bug n° 7).
@@ -187,7 +187,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 ## 17. Câble USB débranché ou branché après le lancement : non suivi
 
 - **Statut** : corrigé (2026-11-05, branche `canal-4`) : un port débranché est oublié (badge « Non connecté »), et un piano branché après le lancement est connecté automatiquement, comme au chargement, si aucune autre connexion n'est active. Tests dans `src/midi/connection.test.ts`
-- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 4) ; inscrit ici au moment du correctif
+- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 4) ; inscrit ici au moment du correctif
 - **Où** : `src/midi/connection.ts` (`onstatechange`, `autoConnectUsbPiano`)
 - **Diagnostic** : au débranchement, `onstatechange` ne faisait que reconstruire la liste : `STATE.midiOutput` gardait le port et le badge restait « ● USB ». Un piano branché après le lancement n'était pas connecté automatiquement (seulement au premier accès Web MIDI).
 - **Conséquences** : badge trompeur après un débranchement ; après un rebranchement, il fallait choisir le piano à la main dans la liste.
