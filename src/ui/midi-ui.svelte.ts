@@ -7,6 +7,7 @@
 import type { MidiItem } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import { sendInstrumentPatch } from '../midi/midi.ts';
+import { sendAllMidiFx } from '../fx/midi-fx.ts';
 import {
   MIDI_SELECT_BLUETOOTH, MIDI_SELECT_BLUETOOTH_OTHER, MIDI_SELECT_NONE, getUsbOutputs, isBluetoothAvailable,
   midiConnectionEvents,
@@ -89,11 +90,21 @@ function populateMidiSelects(): void {
   });
 }
 
+/**
+ * À chaque (re)connexion, le piano reçoit l'instrument surligné et les effets affichés
+ * (bug n° 13) : il a pu redémarrer, ou l'instrument a été choisi avant la connexion
+ */
+function resendPianoState(): void {
+  if (instruments.active) sendInstrumentPatch(instruments.active);
+  sendAllMidiFx();
+}
+
 /** Met l'interface à jour à chaque changement des sorties MIDI ou de la connexion */
 export function bindMidiConnectionUI(): void {
   midiConnectionEvents.on(event => {
     // Le badge suit STATE.currentConnectionType directement (événement 'status')
     if (event.type === 'selection') updateAllMidiSelects(event.value);
     else if (event.type === 'outputs') populateMidiSelects();
+    else if (event.type === 'connected') resendPianoState();
   });
 }

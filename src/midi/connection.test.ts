@@ -6,12 +6,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { STATE } from '../state.svelte.ts';
 import { MIDI_SELECT_BLUETOOTH, MIDI_SELECT_NONE, selectMidiConnection } from './connection.ts';
+import { ROLAND_ADDRESS, buildRolandDt1 } from './midi.ts';
+import { bindMidiConnectionUI, instruments } from '../ui/midi-ui.svelte.ts';
+
+bindMidiConnectionUI();
 
 afterEach(() => {
   STATE.bt = null;
   STATE.midiOutput = null;
   STATE.midiAccess = null;
   STATE.currentConnectionType = null;
+  instruments.active = null;
   vi.restoreAllMocks();
 });
 
@@ -69,5 +74,21 @@ describe('selectMidiConnection', () => {
     finish();
     await bluetooth;
     expect(STATE.currentConnectionType).toBeNull();
+  });
+});
+
+describe('état renvoyé au piano à la connexion (bug n° 13)', () => {
+  it('contrôle à distance, volume, puis l\'instrument surligné et les effets', async () => {
+    const output = usbAccess();
+    instruments.active = { id: 'harpe', name: 'Harpe', icon: '', pc: 47, msb: 121, lsb: 0 };
+    STATE.midiVolume = 90;
+    await selectMidiConnection(output.id);
+    const sent = output.send.mock.calls.map(([bytes]) => Array.from(bytes as number[]));
+    expect(sent[0]).toEqual(buildRolandDt1(ROLAND_ADDRESS.remoteControl, [1]));
+    expect(sent[1]).toEqual([0xB3, 0x07, 90]);
+    expect(sent.slice(2, 5)).toEqual([[0xB3, 0x00, 121], [0xB3, 0x20, 0], [0xC3, 46]]);
+    expect(sent).toContainEqual(buildRolandDt1(ROLAND_ADDRESS.ambience, [1]));
+    expect(sent).toContainEqual([0xB3, 93, 0]);
+    expect(sent).toHaveLength(5 + 7);
   });
 });

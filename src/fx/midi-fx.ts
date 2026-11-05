@@ -120,6 +120,11 @@ export const MIDI_FX_STATE: MidiFxState = {
   decay:     64,
 };
 
+/** Renvoie tous les effets tels que l'application les a envoyés en dernier (à la connexion du piano) */
+export function sendAllMidiFx(): void {
+  MIDI_FX_CONTROLS.forEach(control => control.apply(MIDI_FX_STATE[control.key]));
+}
+
 /** Envoie une valeur (arrondie) au piano et la mémorise comme état courant */
 export function applyMidiFxValue(control: MidiFxControl, value: number): void {
   const rounded = Math.round(value);

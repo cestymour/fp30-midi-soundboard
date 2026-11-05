@@ -22,6 +22,12 @@ export type MidiConnectionEvent =
   | { type: 'status' }
   /** Valeur à afficher dans toutes les listes de connexion */
   | { type: 'selection'; value: string }
+  /**
+   * Le piano vient d'être connecté (USB, Bluetooth, ou reconnexion automatique) : contrôle
+   * à distance et volume déjà envoyés, à l'interface de renvoyer l'instrument et les effets
+   * (le piano a pu redémarrer entre-temps)
+   */
+  | { type: 'connected' }
   /** La liste des sorties a changé (accès Web MIDI, branchement USB, piano Bluetooth connu ou retrouvé) */
   | { type: 'outputs' };
 
@@ -43,6 +49,16 @@ export function isBluetoothAvailable(): boolean {
   return !!navigator.bluetooth;
 }
 
+/**
+ * À chaque connexion : contrôle à distance d'abord (sans lui, le piano ignore les réglages
+ * en SysEx), volume, puis l'événement `connected` pour l'instrument et les effets
+ */
+function sendConnectionState(): void {
+  sendRolandRemoteControl();
+  sendVolume(STATE.midiVolume);
+  midiConnectionEvents.emit({ type: 'connected' });
+}
+
 // ═══════════════════════════════════════════════════════
 // BLUETOOTH MIDI
 // ═══════════════════════════════════════════════════════
@@ -58,8 +74,7 @@ export function initBluetooth(): void {
         midiConnectionEvents.emit({ type: 'outputs' }); // nom du piano connu dans les listes
         emitSelection(MIDI_SELECT_BLUETOOTH);
         midiConnectionEvents.emit({ type: 'status' });
-        sendRolandRemoteControl();
-        sendVolume(STATE.midiVolume);
+        sendConnectionState();
       } else if (status === 'reconnecting' || status === 'connecting' || status === 'scanning') {
         // Badge « ◌ BT… » ; pendant une reconnexion automatique, la connexion reste « bt »
         midiConnectionEvents.emit({ type: 'status' });
@@ -183,9 +198,6 @@ export async function selectMidiConnection(val: string): Promise<void> {
     STATE.currentConnectionType = STATE.midiOutput ? 'usb' : null;
     STATE.isSwitchingToUsb = false;
     midiConnectionEvents.emit({ type: 'status' });
-    if (STATE.midiOutput) {
-      sendRolandRemoteControl();
-      sendVolume(STATE.midiVolume);
-    }
+    if (STATE.midiOutput) sendConnectionState();
   }
 }
