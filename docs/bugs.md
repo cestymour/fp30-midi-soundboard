@@ -136,7 +136,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 12. Statut Wake Lock « actif » après sa libération
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `STATE.wakeLock` est remis à `null` sur l'événement `release` du verrou. Test dans `wake-lock.test.ts`
 - **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 9)
 - **Où** : `src/wake-lock.ts`, lu par `src/ui/components/AboutPopup.svelte`
 - **Diagnostic** : le navigateur libère le verrou quand la page passe en arrière-plan. `STATE.wakeLock` garde l'objet libéré : si la nouvelle demande échoue au retour au premier plan, la popup À propos affiche toujours « Wake Lock : actif ✓ ».
