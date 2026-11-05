@@ -33,6 +33,23 @@ export interface AudioEngineState {
 
 type EffectSettings = Omit<AudioEngineState, 'volume'>;
 
+/** Limiteur de sortie : au-dessus de −2 dBFS, le niveau ne monte plus que de 1 dB pour 20 */
+const LIMITER_THRESHOLD_DB = -2;
+const LIMITER_RATIO        = 20;
+
+/**
+ * Gain qui annule le gain de compensation automatique du compresseur Web Audio
+ * (« makeup gain » de la norme : (1 / gain à 0 dBFS)^0,6). Sans lui, tout le son
+ * serait remonté d'environ 1 dB. Avec lui, sous le seuil, rien ne change.
+ * Mesuré dans Chromium (OfflineAudioContext, sinus) : −30 dB en entrée → −30 dB
+ * en sortie ; +20 dB en entrée → −0,6 dB en sortie.
+ */
+export function limiterTrimGain(thresholdDb: number, ratio: number): number {
+  // Genou nul : à 0 dBFS en entrée, la sortie vaut seuil + (0 − seuil) / ratio
+  const fullRangeGainDb = thresholdDb * (1 - 1 / ratio);
+  return Math.pow(10, (fullRangeGainDb * 0.6) / 20);
+}
+
 class AudioEngine {
   defaultState: AudioEngineState;
   state: AudioEngineState;
@@ -60,6 +77,8 @@ class AudioEngine {
   reverb!: ConvolverNode;
   reverbWet!: GainNode;
   dryGain!: GainNode;
+  limiter!: DynamicsCompressorNode;
+  limiterTrim!: GainNode;
 
   constructor() {
     this.defaultState = {
@@ -162,7 +181,19 @@ class AudioEngine {
     this.reverb.connect(this.reverbWet);
     this.reverbWet.connect(this.masterGain);
 
-    this.masterGain.connect(ctx.destination);
+    // Limiteur en sortie : réverbération, delay et égaliseur s'ajoutent au son, et au-delà
+    // de 0 dBFS la sortie écrêtait (grésillement, bug n° 21)
+    this.limiter = ctx.createDynamicsCompressor();
+    this.limiterTrim = ctx.createGain();
+    this.limiter.threshold.value = LIMITER_THRESHOLD_DB;
+    this.limiter.knee.value = 0;
+    this.limiter.ratio.value = LIMITER_RATIO;
+    this.limiter.attack.value = 0.003;
+    this.limiter.release.value = 0.25;
+    this.limiterTrim.gain.value = limiterTrimGain(LIMITER_THRESHOLD_DB, LIMITER_RATIO);
+    this.masterGain.connect(this.limiter);
+    this.limiter.connect(this.limiterTrim);
+    this.limiterTrim.connect(ctx.destination);
     this.reverb.buffer = this.createImpulseResponse(ctx, 4.8, 3.8);
     this.reverbPreDelay.delayTime.value = 0.035;
 

@@ -226,7 +226,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 21. Son qui grésille avec des effets audio réglés à fond
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : limiteur entre `masterGain` et la sortie (`DynamicsCompressorNode`, seuil −2 dB, ratio 20, genou 0, attaque 3 ms), suivi d'un gain qui annule la compensation automatique du compresseur (`limiterTrimGain()`). Mesuré dans Chromium : sous −2 dBFS le son ne change pas (−30 dB en entrée, −30 dB en sortie), et +20 dB en entrée ressort à −0,6 dBFS. **À vérifier à l'oreille** sur la tablette : un son fort, volume à 100 %, réverbération et basses à fond
 - **Constaté** : par l'utilisateur, avec certains réglages (musiques de film), curseurs à fond ; revue de code de la 1.7.2 (n° 9 de la revue de la 1.8.0)
 - **Où** : `src/audio/audio-engine.ts`, `masterGain → destination`
 - **Diagnostic** : la réverbération (gain jusqu'à ×1,38), le delay (réinjection jusqu'à 0,95) et les boosts d'égaliseur (jusqu'à +15 dB) s'ajoutent au signal sec, et rien ne limite la sortie. Le compresseur du graphe a un ratio de 1 : il ne fait rien. Au-delà de 0 dBFS, la carte son écrête : c'est le grésillement.

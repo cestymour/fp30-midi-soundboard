@@ -5,7 +5,7 @@ vi.hoisted(() => {
   (globalThis as { window?: unknown }).window ??= { location: { protocol: 'http:' } };
 });
 
-import { MediaElementTrack } from './audio-engine.ts';
+import { limiterTrimGain, MediaElementTrack } from './audio-engine.ts';
 
 type AudioEngine = ConstructorParameters<typeof MediaElementTrack>[0];
 
@@ -90,5 +90,11 @@ describe('MediaElementTrack.dispose (bug n° 22)', () => {
     expect(audio.src).toBe('');
     expect(audio.loads).toBe(1);
     expect(audio.paused).toBe(true);
+  });
+});
+
+describe('limiteur de sortie (bug n° 21)', () => {
+  it('le gain de compensation annule celui du compresseur (seuil −2 dB, ratio 20 : −1,14 dB)', () => {
+    expect(20 * Math.log10(limiterTrimGain(-2, 20))).toBeCloseTo(-1.14, 2);
   });
 });
