@@ -7,8 +7,10 @@
 import type { MidiItem } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import { sendInstrumentPatch } from '../midi/midi.ts';
+import { sendAllMidiFx } from '../fx/midi-fx.ts';
 import {
-  MIDI_SELECT_BLUETOOTH, MIDI_SELECT_NONE, getUsbOutputs, isBluetoothAvailable, midiConnectionEvents,
+  MIDI_SELECT_BLUETOOTH, MIDI_SELECT_BLUETOOTH_OTHER, MIDI_SELECT_NONE, getUsbOutputs, isBluetoothAvailable,
+  midiConnectionEvents,
 } from '../midi/connection.ts';
 
 // ═══════════════════════════════════════════════════════
@@ -62,7 +64,15 @@ function updateAllMidiSelects(val: string): void {
 function populateMidiSelects(): void {
   const options: MidiSelectOption[] = [{ value: MIDI_SELECT_NONE, label: '— Connexion MIDI —' }];
   if (isBluetoothAvailable()) {
-    options.push({ value: MIDI_SELECT_BLUETOOTH, label: 'ᛒ Bluetooth MIDI' });
+    // Piano déjà connu (choisi, ou retrouvé au lancement) : s'y reconnecter sans sélecteur,
+    // et proposer à part le sélecteur pour un autre appareil
+    const known = STATE.bt?.knownDeviceName;
+    if (known) {
+      options.push({ value: MIDI_SELECT_BLUETOOTH, label: 'ᛒ ' + known });
+      options.push({ value: MIDI_SELECT_BLUETOOTH_OTHER, label: 'ᛒ Autre appareil Bluetooth…' });
+    } else {
+      options.push({ value: MIDI_SELECT_BLUETOOTH, label: 'ᛒ Bluetooth MIDI' });
+    }
   }
   getUsbOutputs().forEach(out => {
     options.push({ value: out.id, label: '🎹 ' + out.name });
@@ -80,11 +90,21 @@ function populateMidiSelects(): void {
   });
 }
 
+/**
+ * À chaque (re)connexion, le piano reçoit l'instrument surligné et les effets affichés
+ * (bug n° 13) : il a pu redémarrer, ou l'instrument a été choisi avant la connexion
+ */
+function resendPianoState(): void {
+  if (instruments.active) sendInstrumentPatch(instruments.active);
+  sendAllMidiFx();
+}
+
 /** Met l'interface à jour à chaque changement des sorties MIDI ou de la connexion */
 export function bindMidiConnectionUI(): void {
   midiConnectionEvents.on(event => {
     // Le badge suit STATE.currentConnectionType directement (événement 'status')
     if (event.type === 'selection') updateAllMidiSelects(event.value);
     else if (event.type === 'outputs') populateMidiSelects();
+    else if (event.type === 'connected') resendPianoState();
   });
 }

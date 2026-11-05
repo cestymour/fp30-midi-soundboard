@@ -4,7 +4,7 @@
 ================================================================ */
 
 import type { FxControl } from '../types.ts';
-import { easeOutCubic, interpolateFxValues } from './fx-presets.ts';
+import { easeOutCubic, interpolateFxPositions } from './fx-presets.ts';
 import type { FxCurrentValues, FxValues } from './fx-presets.ts';
 
 export interface FxAnimation {
@@ -13,7 +13,8 @@ export interface FxAnimation {
 
 /**
  * Interpole les valeurs à chaque frame (requestAnimationFrame) :
- * `onFrame` reçoit les valeurs alignées sur le pas de chaque contrôle,
+ * `onFrame` reçoit les positions intermédiaires, non alignées sur le pas (affichage
+ * fluide ; à l'appelant d'aligner ce qu'il envoie avec `clampFxValue`),
  * `onEnd` est appelé une fois la durée écoulée (pas en cas d'annulation).
  */
 export function animateFxValues<Key extends string>(
@@ -30,7 +31,7 @@ export function animateFxValues<Key extends string>(
   const animate = (now: number) => {
     const elapsed = now - startTime;
     const t       = Math.min(1, elapsed / durationMs);
-    onFrame(interpolateFxValues(controls, startValues, targetValues, easeOutCubic(t)));
+    onFrame(interpolateFxPositions(controls, startValues, targetValues, easeOutCubic(t)));
 
     if (t < 1) {
       frame = requestAnimationFrame(animate);

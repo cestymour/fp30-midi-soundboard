@@ -8,17 +8,24 @@
    d'identité (son en cours === son du bouton) restent valables.
 ================================================================ */
 
-import type { BluetoothMIDI } from './midi/bluetoothMIDI.ts';
+import type { BluetoothErrorCode, BluetoothMIDI, BluetoothStatus } from './midi/bluetoothMIDI.ts';
 import type { MediaElementTrack } from './audio/audio-engine.ts';
 import type { AudioItem } from './types.ts';
 
 class AppState {
   // ── MIDI ──
-  MIDI_CHANNEL          = $state(0);
+  /**
+   * Canal 4 (0-based : 3) : sur le FP-30X, c'est le canal du son du clavier lui-même.
+   * Un patch envoyé ici change ce que jouent les touches : pas de Local Off ni de
+   * renvoi des notes au piano (voir docs/fp30x-midi.md).
+   */
+  MIDI_CHANNEL          = $state(3);
   /** Instance BluetoothMIDI, initialisée dans midi/connection.ts */
   bt                    = $state.raw<BluetoothMIDI | null>(null);
+  /** Copie réactive de STATE.bt.status / error, pour le badge */
+  btStatus              = $state<BluetoothStatus>('idle');
+  btError               = $state<BluetoothErrorCode | null>(null);
   midiOutput            = $state.raw<MIDIOutput | null>(null);
-  midiInput             = $state.raw<MIDIInput | null>(null);
   midiAccess            = $state.raw<MIDIAccess | null>(null);
   midiVolume            = $state(100);
   currentConnectionType = $state<'usb' | 'bt' | null>(null);

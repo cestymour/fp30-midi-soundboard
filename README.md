@@ -36,7 +36,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Responsive layout** — automatic grid reorganization in portrait mode
 - **About popup** — shows Service Worker and Wake Lock status, cache reset button
 - **Live audio FX mixer** — full overlay on the audio panel to shape the sound in real time (EQ, filters, tempo, delay, reverb) while a clip plays or before the next one; presets with smooth transitions, global reset, and quick per-control recall
-- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs to the connected piano (reverb, chorus, cutoff, resonance, attack, release, decay) via `sendMidi()` in `src/midi/midi.ts`. Both FX popups share one implementation (the `src/ui/FxOverlay.svelte` component, preset logic in `src/fx/fx-presets.ts`). Slider positions reflect what the app last sent, not a read-back from the instrument.
+- **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs on channel 4 to the connected piano (chorus, cutoff, resonance, attack, release, decay), and the reverb slider sets the piano’s Ambience (0–10) with a Roland SysEx message, via `sendMidi()` in `src/midi/midi.ts`. Both FX popups share one implementation (the `src/ui/FxOverlay.svelte` component, preset logic in `src/fx/fx-presets.ts`). Slider positions reflect what the app last sent, not a read-back from the instrument.
 
 ### How it works
 
@@ -56,7 +56,7 @@ Use **Effets** / **Reset** in the audio panel header to open the FX overlay (ove
 
 - GM2 sounds will work on any GM2-compatible instrument.
 - Roland-specific sounds (Roland sound banks) are designed for the FP-30X and may not work as expected on other devices.
-- MIDI piano FX use common CC numbers (e.g. 91 reverb, 93 chorus, 74 brightness/cutoff); interpretation depends on the connected instrument (tuned for Roland FP-30X).
+- Patches and MIDI piano FX go to channel 4, the channel of the FP-30X’s own keyboard sound: the keys play the chosen instrument directly, with no Local Off on the piano. FX use common CC numbers (93 chorus, 74 cutoff…); reverb is the piano’s Ambience setting (Roland SysEx), because channel 4 ignores CC91. Over USB, Chrome asks once for MIDI SysEx access. Details in `docs/fp30x-midi.md`.
 - Audio files are cached dynamically on first play. Before a show, play each sound once with an internet connection to ensure offline availability.
 
 ---
@@ -342,7 +342,7 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
 - **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
 - **Mixeur d’effets audio en direct** — grande popup sur le panneau audio pour façonner le son en temps réel (égalisation, filtres, tempo, delay, reverb) pendant la lecture ou avant le morceau suivant ; presets avec transitions en douceur, reset global et rappel rapide par curseur
-- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards vers le piano connecté (reverb, chorus, cutoff, résonance, attaque, relâchement, decay) via `sendMidi()` dans `src/midi/midi.ts`. Les deux popups d’effets partagent une seule implémentation (le composant `src/ui/FxOverlay.svelte`, logique des presets dans `src/fx/fx-presets.ts`). Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
+- **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards sur le canal 4 vers le piano connecté (chorus, cutoff, résonance, attaque, relâchement, decay), et le curseur de réverbération règle l’Ambiance du piano (0 à 10) par un message SysEx Roland, via `sendMidi()` dans `src/midi/midi.ts`. Les deux popups d’effets partagent une seule implémentation (le composant `src/ui/FxOverlay.svelte`, logique des presets dans `src/fx/fx-presets.ts`). Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
 
 ### Comment ça fonctionne
 
@@ -362,7 +362,7 @@ Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup
 
 - Les sons GM2 fonctionnent sur tout instrument compatible GM2.
 - Les sons spécifiques Roland (banques Roland) sont conçus pour le FP-30X et peuvent ne pas fonctionner correctement sur d'autres appareils.
-- Les effets piano MIDI utilisent des numéros de CC courants (ex. 91 reverb, 93 chorus, 74 cutoff / brilliance) ; l’effet réel dépend de l’instrument connecté (réglages pensés pour le Roland FP-30X).
+- Les patchs et les effets piano MIDI partent sur le canal 4, celui du son du clavier du FP-30X : les touches jouent directement l’instrument choisi, sans Local Off sur le piano. Les effets utilisent des numéros de CC courants (93 chorus, 74 cutoff…) ; la réverbération est le réglage Ambiance du piano (SysEx Roland), car le canal 4 ignore le CC91. En USB, Chrome demande une fois l’accès SysEx MIDI. Détails dans `docs/fp30x-midi.md`.
 - Les fichiers audio sont mis en cache dynamiquement au premier clic. Avant un spectacle, jouer chaque son une fois avec une connexion internet pour garantir le fonctionnement hors ligne.
 
 ---

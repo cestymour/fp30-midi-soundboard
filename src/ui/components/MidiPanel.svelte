@@ -23,11 +23,28 @@
   const selectIndex = registerMidiSelect();
 
   const BADGES = {
-    usb:  { text: '● USB', className: 'midi-badge usb' },
-    bt:   { text: '● BT',  className: 'midi-badge bt' },
-    none: { text: 'Non connecté', className: 'midi-badge' },
+    usb:     { text: '● USB', className: 'midi-badge usb' },
+    bt:      { text: '● BT',  className: 'midi-badge bt' },
+    /** Connexion ou reconnexion automatique Bluetooth en cours */
+    pending: { text: '◌ BT…', className: 'midi-badge bt' },
+    none:    { text: 'Non connecté', className: 'midi-badge' },
+    lost:    { text: 'BT perdu', className: 'midi-badge err' },
   };
-  const badge = $derived(BADGES[STATE.currentConnectionType ?? 'none']);
+  /** Échecs Bluetooth (un sélecteur fermé sans choisir n'en est pas un) */
+  const BT_ERROR_BADGES = {
+    adapterOff: { text: 'Bluetooth désactivé', className: 'midi-badge err' },
+    denied:     { text: 'Bluetooth refusé', className: 'midi-badge err' },
+    failed:     { text: 'Échec BT', className: 'midi-badge err' },
+  };
+  const badge = $derived.by(() => {
+    if (STATE.currentConnectionType === 'usb') return BADGES.usb;
+    const bt = STATE.btStatus;
+    if (bt === 'connecting' || bt === 'reconnecting') return BADGES.pending;
+    if (STATE.currentConnectionType === 'bt') return BADGES.bt;
+    if (bt === 'lost') return BADGES.lost;
+    if (bt === 'error' && STATE.btError) return BT_ERROR_BADGES[STATE.btError];
+    return BADGES.none;
+  });
 
   // ── Grille : colonnes de la config, 2 en portrait ──
   const colCount     = $derived(tab.cols ?? 5);
