@@ -251,7 +251,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 24. Barre d'un panneau MIDI : « Reset » et la valeur du volume coupés sur téléphone en paysage
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : en paysage étroit (moins de 900 px de large) ou peu haut (moins de 500 px), les libellés deviennent « FX » et « RAZ » (remise à zéro), au lieu d'être masqués sous 900 px et entiers au-dessus. Vérifié en 915 × 412 et 740 × 360 : la barre tient, valeur du volume comprise
 - **Constaté** : 2026-11-05, sur une capture en 915 × 412 (Chromium headless, téléphone en paysage), en corrigeant la popup des effets
 - **Où** : barre du panneau MIDI (`Panel.svelte`, `FxToolbar.svelte`, `VolumeControl.svelte`) ; les libellés ne sont masqués qu'en dessous de 900 px de large (`@media (orientation: portrait), (max-width: 900px)` dans `FxToolbar.svelte`)
 - **Diagnostic** : entre 900 et environ 1000 px de large, la barre affiche la liste de connexion, le badge, « Effets » / « Reset » avec leurs libellés, le STOP et le volume : elle déborde, le texte « Reset » touche le bord de son bouton et la valeur « 100 » du volume est coupée à droite.
