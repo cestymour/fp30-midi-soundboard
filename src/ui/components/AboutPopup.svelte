@@ -1,10 +1,13 @@
 <!--
   AboutPopup.svelte — Popup « À propos » : version, état du Service Worker
-  et du Wake Lock, mise à jour de l'application
+  et du Wake Lock, hors ligne (stockage, téléchargement de tous les sons),
+  mise à jour de l'application
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
   import { updateAndReload } from '../../app-update.ts';
+  import { downloadAllForOffline, getOfflineStatus, isStoragePersisted, requestPersistentStorage } from '../../offline.ts';
+  import type { OfflineStatus } from '../../offline.ts';
 
   let isOpen  = $state(false);
   /** Affichage en ligne : absent avant la première ouverture (masqué par le CSS) */
@@ -14,6 +17,48 @@
   /** Mise à jour demandée et pas encore terminée */
   let updating     = $state(false);
   let updateStatus = $state('');
+
+  // Hors ligne
+  let storageStatus  = $state('Stockage : vérification...');
+  let offline        = $state<OfflineStatus | null>(null);
+  /** Progression du téléchargement en cours (null : aucun) */
+  let download       = $state<{ done: number; total: number } | null>(null);
+  let downloadResult = $state('');
+  const allCached = $derived(!!offline
+    && offline.sounds.cached === offline.sounds.total
+    && offline.images.cached === offline.images.total);
+
+  async function refreshOffline(): Promise<void> {
+    const persisted = await isStoragePersisted();
+    storageStatus = persisted === null ? 'Stockage : non disponible'
+      : persisted ? 'Stockage : protégé ✓'
+      : "Stockage : non protégé (Chrome peut l'effacer s'il manque de place)";
+    try {
+      offline = await getOfflineStatus();
+    } catch {
+      offline = null; // Cache API indisponible
+    }
+  }
+
+  async function downloadAll(): Promise<void> {
+    downloadResult = '';
+    download = { done: 0, total: 0 };
+    let failed: string[];
+    try {
+      failed = await downloadAllForOffline((done, total) => { download = { done, total }; });
+    } catch {
+      failed = [];
+      downloadResult = 'Téléchargement impossible.';
+    }
+    download = null;
+    if (!downloadResult) {
+      downloadResult = failed.length === 0 ? 'Tout est disponible hors ligne ✓'
+        : failed.length === 1 ? "1 fichier n'a pas pu être téléchargé (réseau ?)."
+        : `${failed.length} fichiers n'ont pas pu être téléchargés (réseau ?).`;
+    }
+    await requestPersistentStorage();
+    await refreshOffline();
+  }
 
   export function open(): void {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -31,6 +76,8 @@
     }
 
     if (!updating) updateStatus = '';
+    if (!download) downloadResult = '';
+    void refreshOffline();
 
     isOpen  = true;
     display = 'flex';
@@ -69,6 +116,21 @@
       <span id="about-sw-status">{swStatus}</span>
       <br>
       <span id="about-wl-status">{wlStatus}</span>
+    </div>
+    <div id="about-offline">
+      <span id="about-storage-status">{storageStatus}</span>
+      {#if offline}
+        <br>
+        <span id="about-offline-count">Hors ligne : {offline.sounds.cached} / {offline.sounds.total} sons, {offline.images.cached} / {offline.images.total} images</span>
+      {/if}
+      {#if download}
+        <div class="about-offline-msg" role="status">Téléchargement… {download.done} / {download.total}</div>
+      {:else if downloadResult}
+        <div class="about-offline-msg" role="status">{downloadResult}</div>
+      {/if}
+      {#if offline && !allCached}
+        <button id="about-download-btn" onclick={downloadAll} disabled={!!download}>⬇ Télécharger tous les sons</button>
+      {/if}
     </div>
     <div id="about-credit">by cestymour</div>
     <div id="about-actions">
@@ -126,6 +188,51 @@
     background: var(--bg-base);
     border: 1px solid var(--border);
     border-radius: var(--radius);
+  }
+
+  #about-offline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 10px 12px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  #about-offline br {
+    display: none;
+  }
+
+  .about-offline-msg {
+    color: var(--text-secondary);
+  }
+
+  #about-download-btn {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-align: center;
+    background: transparent;
+    border: 1px solid var(--current-accent);
+    color: var(--current-accent);
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  #about-download-btn:hover {
+    background: color-mix(in srgb, var(--current-accent) 15%, transparent);
+  }
+  #about-download-btn:focus-visible {
+    outline: 2px solid var(--current-accent);
+    outline-offset: -2px;
+  }
+  #about-download-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
   }
 
   #about-credit {

@@ -17,14 +17,12 @@ import { RangeRequestsPlugin } from 'workbox-range-requests';
 import { clientsClaim } from 'workbox-core';
 import type { WorkboxPlugin } from 'workbox-core/types';
 import type { PrecacheEntry } from 'workbox-precaching';
+import { AUDIO_CACHE, IMAGES_CACHE } from './cache-names.ts';
 
 declare const self: ServiceWorkerGlobalScope & {
   /** Liste des fichiers à précacher, injectée au build par vite-plugin-pwa */
   __WB_MANIFEST: (PrecacheEntry | string)[];
 };
-
-const AUDIO_CACHE  = 'impro-audio';
-const IMAGES_CACHE = 'impro-images';
 
 // Activation immédiate sans attendre la fermeture des onglets
 self.skipWaiting();

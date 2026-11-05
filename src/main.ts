@@ -10,6 +10,7 @@ import { initBluetooth, initWebMidi } from './midi/connection.ts';
 import { bindMidiConnectionUI } from './ui/midi-ui.svelte.ts';
 import { bindPlaybackUI } from './ui/transport.svelte.ts';
 import { initWakeLock } from './wake-lock.ts';
+import { requestPersistentStorage } from './offline.ts';
 
 // L'interface suit les moteurs MIDI et audio
 bindMidiConnectionUI();
@@ -18,6 +19,8 @@ bindPlaybackUI();
 mount(App, { target: document.getElementById('app')! });
 
 initWakeLock();
+// Sons en cache protégés de l'effacement automatique par Chrome, si le navigateur l'accorde
+void requestPersistentStorage().then(granted => console.log('[Stockage] Persistant :', granted));
 
 try { initBluetooth(); } catch (e) { console.warn('[BT] Init échoué :', e); }
 try { initWebMidi();   } catch (e) { console.warn('[MIDI] Init échoué :', e); }
