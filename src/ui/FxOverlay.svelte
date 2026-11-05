@@ -417,7 +417,6 @@
     font-weight: 600;
     letter-spacing: 0.02em;
     line-height: 1.15;
-    overflow-wrap: anywhere;
   }
 
   /* ── Bouton reset individuel ────────────────────────────────── */
@@ -688,6 +687,80 @@
   @media (orientation: landscape) and (max-width: 520px) {
     .fx-presets {
       grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+    }
+  }
+
+  /* ── Téléphone en paysage (peu de hauteur) ──────────────────────
+     Les cartes sont trop étroites pour le nom et le reset côte à côte : le nom se coupait
+     lettre par lettre et écrasait le curseur. Ici, chaque carte empile reset, curseur et
+     nom (sur une ligne), et les presets sont des tuiles basses, icône à côté du texte. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .fx-popup {
+      padding: 8px;
+      gap: 6px;
+    }
+
+    .fx-presets {
+      max-height: 80px;
+      gap: 4px;
+      grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    }
+
+    .fx-preset-btn {
+      flex-direction: row;
+      min-height: 36px;
+      padding: 4px 6px;
+      gap: 4px;
+    }
+
+    .fx-preset-btn__icon,
+    .fx-preset-btn--reset .fx-preset-btn__icon {
+      font-size: 16px;
+    }
+
+    .fx-preset-btn__text {
+      width: auto;
+      align-self: center;
+    }
+
+    .fx-grid {
+      gap: 6px;
+    }
+
+    .fx-control {
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 4px;
+      padding: 6px 4px;
+    }
+
+    /* Nom et reset deviennent des lignes de la carte */
+    .fx-control__foot {
+      display: contents;
+    }
+
+    .fx-one-reset {
+      grid-row: 1;
+      justify-self: center;
+      width: 30px;
+      height: 30px;
+      font-size: 15px;
+    }
+
+    .fx-slider-wrap {
+      grid-row: 2;
+    }
+
+    .fx-slider-rail {
+      min-height: 0;
+      --fx-slider-span-min: 40px;
+    }
+
+    .fx-control__name {
+      grid-row: 3;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 </style>
