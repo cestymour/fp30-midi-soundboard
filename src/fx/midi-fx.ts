@@ -16,7 +16,6 @@ export type MidiFxState = Record<MidiFxKey, number>;
 export const MIDI_FX_CONTROLS: MidiFxControl[] = [
   {
     key: 'reverb',
-    label: 'REV',
     shortLabel: 'Reverb',
     group: 'reverb',
     // Ambiance du piano (SysEx Roland, 0 à 10, 1 par défaut sur le piano) : sur le
@@ -31,7 +30,6 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
   },
   {
     key: 'chorus',
-    label: 'CHO',
     shortLabel: 'Chorus',
     group: 'chorus',
     min: 0,
@@ -44,7 +42,6 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
   },
   {
     key: 'cutoff',
-    label: 'CUT',
     shortLabel: 'Cutoff',
     group: 'filter',
     min: 0,
@@ -57,7 +54,6 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
   },
   {
     key: 'resonance',
-    label: 'RES',
     shortLabel: 'Resonance',
     group: 'filter',
     min: 0,
@@ -70,7 +66,6 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
   },
   {
     key: 'attack',
-    label: 'ATK',
     shortLabel: 'Attack',
     group: 'envelope',
     min: 0,
@@ -83,7 +78,6 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
   },
   {
     key: 'release',
-    label: 'REL',
     shortLabel: 'Release',
     group: 'envelope',
     min: 0,
@@ -96,7 +90,6 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
   },
   {
     key: 'decay',
-    label: 'DEC',
     shortLabel: 'Decay',
     group: 'envelope',
     min: 0,

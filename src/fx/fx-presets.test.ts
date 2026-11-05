@@ -17,7 +17,7 @@ type Key = 'gain' | 'freq';
 
 function control(key: Key, min: number, max: number, step: number, neutral: number): FxControl<Key, never> {
   return {
-    key, label: key, shortLabel: key, group: key, min, max, step, neutral,
+    key, shortLabel: key, group: key, min, max, step, neutral,
     read: () => neutral, apply: () => {}, formatValue: v => v,
   };
 }

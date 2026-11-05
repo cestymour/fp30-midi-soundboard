@@ -21,7 +21,6 @@ export const midiFxOverlay = new FxOverlayController({
   attributes: {
     preset:    'data-midi-preset',
     control:   'data-midi-control',
-    valueFor:  'data-midi-value-for',
     railFor:   'data-midi-rail-for',
     sliderFor: 'data-midi-slider-for',
     resetOne:  'data-midi-fx-reset-one',
@@ -46,7 +45,6 @@ export const audioFxOverlay = new FxOverlayController({
   attributes: {
     preset:    'data-preset',
     control:   'data-control',
-    valueFor:  'data-value-for',
     railFor:   'data-rail-for',
     sliderFor: 'data-slider-for',
     resetOne:  'data-audio-fx-reset-one',

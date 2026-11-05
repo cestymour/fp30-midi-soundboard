@@ -104,8 +104,6 @@ export type AudioFxKey = 'bass' | 'mid' | 'treble' | 'lowPass' | 'highPass' | 'r
 /** Un curseur d'une popup d'effets */
 export interface FxControl<Key extends string, Settings> {
   key: Key;
-  /** Étiquette courte en haut de la carte (ex. 'REV') */
-  label: string;
   /** Nom affiché sous le curseur */
   shortLabel: string;
   group: string;
@@ -118,6 +116,7 @@ export interface FxControl<Key extends string, Settings> {
   read: (settings: Settings) => number;
   /** Applique la valeur (envoi MIDI ou réglage du moteur audio) */
   apply: (value: number) => void;
+  /** Valeur lisible (ex. « 4,2 kHz ») : pas affichée, donnée aux lecteurs d'écran (aria-valuetext) */
   formatValue: (value: number) => string | number;
 }
 

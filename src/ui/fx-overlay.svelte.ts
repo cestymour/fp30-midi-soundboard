@@ -19,7 +19,6 @@ import type { FxAnimation } from '../fx/fx-animation.ts';
 export interface FxOverlayAttributes {
   preset:    string;
   control:   string;
-  valueFor:  string;
   railFor:   string;
   sliderFor: string;
   resetOne:  string;

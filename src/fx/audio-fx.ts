@@ -12,7 +12,6 @@ export type AudioFxControl = FxControl<AudioFxKey, AudioEngineState>;
 export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   {
     key: 'bass',
-    label: 'BASS',
     shortLabel: 'Bass',
     group: 'eq',
     min: -15,
@@ -25,7 +24,6 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   },
   {
     key: 'mid',
-    label: 'MID',
     shortLabel: 'Mid',
     group: 'eq',
     min: -15,
@@ -38,7 +36,6 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   },
   {
     key: 'treble',
-    label: 'HIGH',
     shortLabel: 'Treble',
     group: 'eq',
     min: -15,
@@ -51,7 +48,6 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   },
   {
     key: 'lowPass',
-    label: 'LPF',
     shortLabel: 'Low-pass',
     group: 'filters',
     min: 400,
@@ -65,7 +61,6 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   },
   {
     key: 'highPass',
-    label: 'HPF',
     shortLabel: 'High-pass',
     group: 'filters',
     min: 0,
@@ -81,7 +76,6 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   },
   {
     key: 'reverb',
-    label: 'REV',
     shortLabel: 'Reverb',
     group: 'reverb',
     min: 0,
@@ -94,7 +88,6 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   },
   {
     key: 'delay',
-    label: 'DLY',
     shortLabel: 'Delay',
     group: 'delay',
     min: 0,
@@ -114,7 +107,6 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
   },
   {
     key: 'speed',
-    label: 'SPD',
     shortLabel: 'Speed',
     group: 'speed',
     min: 50,

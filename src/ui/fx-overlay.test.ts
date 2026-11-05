@@ -12,7 +12,7 @@ type Settings = Record<Key, number>;
 
 function control(key: Key, min: number, max: number, neutral: number): FxControl<Key, Settings> {
   return {
-    key, label: key, shortLabel: key, group: key, min, max, step: 1, neutral,
+    key, shortLabel: key, group: key, min, max, step: 1, neutral,
     read: settings => settings[key], apply: () => {}, formatValue: v => v,
   };
 }
@@ -48,7 +48,7 @@ function makeOverlay() {
   const applied: [Key, number][] = [];
   const overlay = new FxOverlayController<Key, Settings>({
     overlayId: 'test', ariaLabel: 'test',
-    attributes: { preset: 'p', control: 'c', valueFor: 'v', railFor: 'r', sliderFor: 's', resetOne: 'o' },
+    attributes: { preset: 'p', control: 'c', railFor: 'r', sliderFor: 's', resetOne: 'o' },
     controls: CONTROLS, presets: PRESETS, panelSelector: '', gridSelector: '',
     readSettings: () => state,
     applyValue: (c, value) => { state[c.key] = value; applied.push([c.key, value]); },
