@@ -69,7 +69,7 @@ Engines (`src/midi/`, `src/audio/`, `src/fx/`) never touch the DOM and never imp
 
 UI (Svelte 5). The `*.svelte.ts` modules hold the UI state in runes and the logic that is not tied to one component:
 
-- `src/ui/fx-overlay.svelte.ts`: `FxOverlayController`, the state and logic of one FX popup (values, active preset, layout over the active grid, animations). `src/ui/fx-overlays.svelte.ts` creates the MIDI and audio controllers with only what differs (ids, data attributes, settings source, audio low-pass fix-up), plus `fxToolbar` (the Effets/Reset buttons state) and `resetAllFXEffects()`.
+- `src/ui/fx-overlay.svelte.ts`: `FxOverlayController`, the state and logic of one FX popup (values, active preset, layout over the active grid, animations). `src/ui/fx-overlays.svelte.ts` creates the MIDI and audio controllers with only what differs (ids, data attributes, settings source, audio low-pass fix-up), plus `fxToolbar` (the Effets/Reset buttons state: one Reset light per FX type). Each panel's Reset only resets its own FX popup (piano on MIDI tabs, sounds on audio tabs).
 - `src/ui/transport.svelte.ts`: per-sound button state (`getSoundButtonState(item)`: progress, reset to 0 when the sound stops, transition, missing) and the transport bar text and fill; `bindPlaybackUI()` subscribes to `playbackEvents`.
 - `src/ui/midi-ui.svelte.ts`: connection selects (one per MIDI panel) and the active instrument; `bindMidiConnectionUI()` subscribes to `midiConnectionEvents`.
 - `src/ui/layout.svelte.ts`: active tab, orientation, `activateTab()`, and the button height equalization.

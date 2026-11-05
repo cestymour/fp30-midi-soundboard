@@ -70,9 +70,15 @@ export const audioFxOverlay = new FxOverlayController({
 // BOUTONS DES BARRES DE PANNEAU
 // ═══════════════════════════════════════════════════════
 
+/**
+ * Témoins des boutons Reset. Chaque panneau a le sien, et son Reset ne remet à zéro
+ * que ses effets : piano dans les onglets MIDI, sons dans les onglets audio (bug n° 19).
+ */
 export const fxToolbar = $state({
-  /** Un effet (MIDI ou audio) est actif : boutons Reset allumés */
-  anyFx: false,
+  /** Un effet piano est actif : Reset des panneaux MIDI allumé */
+  anyMidiFx: false,
+  /** Un effet audio est actif : Reset des panneaux audio allumé */
+  anyAudioFx: false,
 });
 
 /**
@@ -80,13 +86,6 @@ export const fxToolbar = $state({
  * Les boutons Effets suivent directement l'ouverture de leur popup.
  */
 export function refreshFxToolbarButtons(): void {
-  const hasMidi  = midiFxOverlay.isAnyControlModified();
-  const hasAudio = audioFxOverlay.isAnyControlModified() || AudioEngineAPI.hasActiveEffects();
-  fxToolbar.anyFx = hasMidi || hasAudio;
-}
-
-/** Reset total des effets — MIDI + Audio */
-export function resetAllFXEffects(): void {
-  midiFxOverlay.reset();
-  audioFxOverlay.reset();
+  fxToolbar.anyMidiFx  = midiFxOverlay.isAnyControlModified();
+  fxToolbar.anyAudioFx = audioFxOverlay.isAnyControlModified() || AudioEngineAPI.hasActiveEffects();
 }

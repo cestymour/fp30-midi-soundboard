@@ -207,7 +207,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 19. Reset des effets : un seul bouton remet à zéro les effets piano et les effets audio
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : le Reset d'un onglet MIDI ne remet à zéro que les effets piano, celui d'un onglet de sons que les effets audio, et chacun a son témoin (`fxToolbar.anyMidiFx`, `fxToolbar.anyAudioFx`). `resetAllFXEffects()` est supprimé
 - **Constaté** : 2026-11-05, par l'utilisateur
 - **Où** : `src/ui/fx-overlays.svelte.ts` (`resetAllFXEffects()`, `fxToolbar.anyFx`), appelé par `MidiPanel.svelte` et `AudioPanel.svelte`
 - **Scénario** : un preset d'effets piano et un preset d'effets audio sont actifs ; on appuie sur Reset dans un onglet de sons.

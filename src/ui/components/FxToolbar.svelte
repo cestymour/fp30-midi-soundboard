@@ -1,6 +1,6 @@
 <!--
   FxToolbar.svelte — Groupe de boutons « Effets » (ouvre la popup) et
-  « Reset » (remet tous les effets à zéro) de la barre d'un panneau.
+  « Reset » (remet à zéro les effets du panneau : piano ou sons) de la barre d'un panneau.
 -->
 <script lang="ts">
   let { kind, openTitle, resetTitle, isOpen, anyFx, onopen, onreset }: {
@@ -10,7 +10,7 @@
     resetTitle: string;
     /** Popup d'effets ouverte */
     isOpen:     boolean;
-    /** Au moins un effet actif (bouton Reset allumé) */
+    /** Au moins un effet de ce panneau actif (bouton Reset allumé) */
     anyFx:      boolean;
     onopen:     () => void;
     onreset:    () => void;

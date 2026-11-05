@@ -9,7 +9,7 @@
   import { setMidiVolume } from '../../midi/midi.ts';
   import { selectMidiConnection } from '../../midi/connection.ts';
   import { instruments, midiSelects, registerMidiSelect, selectInstrument } from '../midi-ui.svelte.ts';
-  import { fxToolbar, midiFxOverlay, resetAllFXEffects } from '../fx-overlays.svelte.ts';
+  import { fxToolbar, midiFxOverlay } from '../fx-overlays.svelte.ts';
   import { layout } from '../layout.svelte.ts';
   import CategoryTitle from './CategoryTitle.svelte';
   import Panel from './Panel.svelte';
@@ -79,8 +79,8 @@
   {#snippet right()}
     <FxToolbar
       kind="midi" openTitle="Effets piano" resetTitle="Réinitialiser les effets piano"
-      isOpen={midiFxOverlay.isOpen} anyFx={fxToolbar.anyFx}
-      onopen={() => midiFxOverlay.open()} onreset={resetAllFXEffects}
+      isOpen={midiFxOverlay.isOpen} anyFx={fxToolbar.anyMidiFx}
+      onopen={() => midiFxOverlay.open()} onreset={() => midiFxOverlay.reset()}
     />
     <EmergencyStopButton />
     <VolumeControl
