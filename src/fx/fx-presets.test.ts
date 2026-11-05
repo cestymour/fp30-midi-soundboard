@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FxControl, FxPreset } from '../types.ts';
 import {
   buildControlNeutralTargetValues, buildPresetTargetValues, buildResetTargetValues, clampFxValue,
-  easeOutCubic, inferActiveFxPresetKey, interpolateFxValues, isAnyFxControlModified, isFxControlNeutral,
+  easeOutCubic, inferActiveFxPresetKey, interpolateFxPositions, interpolateFxValues, isAnyFxControlModified, isFxControlNeutral,
 } from './fx-presets.ts';
 import type { FxCurrentValues } from './fx-presets.ts';
 import { MIDI_FX_CONTROLS } from './midi-fx.ts';
@@ -112,6 +112,14 @@ describe('animation', () => {
     expect(interpolateFxValues(CONTROLS, current(null, 20000), target, 0)).toEqual({ gain: 0, freq: 20000 });
     expect(interpolateFxValues(CONTROLS, current(null, 20000), target, 1)).toEqual(target);
     expect(interpolateFxValues(CONTROLS, current(0, 20000), target, 0.5)).toEqual({ gain: 5, freq: 10200 });
+  });
+
+  it('positions sans alignement sur le pas (glissement fluide), cible exacte à la fin', () => {
+    const target = { gain: 10, freq: 400 };
+    const mid = interpolateFxPositions(CONTROLS, current(0, 20000), target, 0.33);
+    expect(mid.gain).toBeCloseTo(3.3);
+    expect(mid.freq).toBeCloseTo(13532);
+    expect(interpolateFxPositions(CONTROLS, current(0, 20000), target, 1)).toEqual(target);
   });
 });
 

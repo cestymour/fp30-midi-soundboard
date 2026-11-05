@@ -108,16 +108,33 @@ export function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
-/** Valeurs intermédiaires d'une animation, alignées sur le pas de chaque contrôle */
-export function interpolateFxValues<Key extends string>(
+/**
+ * Positions intermédiaires d'une animation, dans les bornes mais **sans** alignement
+ * sur le pas : le curseur glisse sans à-coups, même avec peu de crans (Ambiance, 0 à 10).
+ * À `eased` = 1, chaque position vaut exactement sa cible.
+ */
+export function interpolateFxPositions<Key extends string>(
   controls: AnyFxControl<Key>[], startValues: FxCurrentValues<Key>, targetValues: FxValues<Key>, eased: number,
 ): FxValues<Key> {
   const values = {} as FxValues<Key>;
   controls.forEach(control => {
-    const start        = startValues[control.key] ?? control.neutral;
-    const end          = targetValues[control.key];
-    const interpolated = start + (end - start) * eased;
-    values[control.key] = clampFxValue(control, interpolated);
+    const start = startValues[control.key] ?? control.neutral;
+    const end   = targetValues[control.key];
+    values[control.key] = eased >= 1
+      ? end
+      : Math.max(control.min, Math.min(control.max, start + (end - start) * eased));
+  });
+  return values;
+}
+
+/** Valeurs intermédiaires d'une animation, alignées sur le pas de chaque contrôle (ce qu'on envoie) */
+export function interpolateFxValues<Key extends string>(
+  controls: AnyFxControl<Key>[], startValues: FxCurrentValues<Key>, targetValues: FxValues<Key>, eased: number,
+): FxValues<Key> {
+  const positions = interpolateFxPositions(controls, startValues, targetValues, eased);
+  const values = {} as FxValues<Key>;
+  controls.forEach(control => {
+    values[control.key] = clampFxValue(control, positions[control.key]);
   });
   return values;
 }

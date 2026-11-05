@@ -8,7 +8,7 @@
 
 import type { FxControl, FxPreset } from '../types.ts';
 import {
-  buildControlNeutralTargetValues, buildPresetTargetValues, buildResetTargetValues,
+  buildControlNeutralTargetValues, buildPresetTargetValues, buildResetTargetValues, clampFxValue,
   inferActiveFxPresetKey, isAnyFxControlModified, isFxControlNeutral,
 } from '../fx/fx-presets.ts';
 import type { FxCurrentValues, FxValues } from '../fx/fx-presets.ts';
@@ -59,8 +59,10 @@ export class FxOverlayController<Key extends string, Settings> {
   isOpen = $state(false);
   /** Faux tant que la popup n'est pas montée : les curseurs n'existent pas encore */
   isBuilt = $state(false);
-  /** Position des curseurs */
+  /** Position des curseurs (pendant une animation, entre deux crans) */
   values: FxValues<Key> = $state({} as FxValues<Key>);
+  /** Animation en cours : les curseurs acceptent des positions entre deux crans (step="any") */
+  isAnimating = $state(false);
   activePresetKey = $state<string | null>(null);
   layout = $state<FxOverlayLayout | null>(null);
   /** Position verticale du repère du neutre sur chaque rail (en %) */
@@ -291,19 +293,24 @@ export class FxOverlayController<Key extends string, Settings> {
 
     this.presetAnimation?.cancel();
     this.presetAnimation = null;
+    this.isAnimating = this.isBuilt;
 
     this.presetAnimation = animateFxValues(
       this.controls,
       this.getCurrentValues(),
       targetValues,
       durationMs,
-      values => {
+      positions => {
+        if (!this.isBuilt) return;
+        // Le curseur suit la position exacte, le piano reçoit la valeur alignée sur le pas
         this.controls.forEach(control => {
-          this.setControlValue(control.key, values[control.key], true);
+          this.values[control.key] = positions[control.key];
+          this.config.applyValue(control, clampFxValue(control, positions[control.key]));
         });
       },
       () => {
         this.presetAnimation = null;
+        this.isAnimating = false;
         if (inferPresetAtEnd) this.refreshPresetHighlightFromControls();
         this.config.refreshToolbar();
       },

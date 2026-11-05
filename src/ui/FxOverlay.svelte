@@ -5,7 +5,7 @@
 -->
 <script lang="ts" generics="Key extends string, Settings">
   import { onMount } from 'svelte';
-  import { isFxControlModified } from '../fx/fx-presets.ts';
+  import { clampFxValue, isFxControlModified } from '../fx/fx-presets.ts';
   import type { FxOverlayController } from './fx-overlay.svelte.ts';
 
   let { controller }: { controller: FxOverlayController<Key, Settings> } = $props();
@@ -79,7 +79,7 @@
           <div class="fx-control" class:is-modified={isModified} {...{ [attr.control]: control.key }}>
             <div class="fx-control__head">
               <span class="fx-control__tag">{control.label}</span>
-              <span class="fx-control__value" {...{ [attr.valueFor]: control.key }}>{controller.isBuilt ? control.formatValue(value) : '--'}</span>
+              <span class="fx-control__value" {...{ [attr.valueFor]: control.key }}>{controller.isBuilt ? control.formatValue(clampFxValue(control, value)) : '--'}</span>
             </div>
             <div class="fx-slider-wrap">
               <div
@@ -97,7 +97,7 @@
                   type="range"
                   min={control.min}
                   max={control.max}
-                  step={control.step}
+                  step={controller.isAnimating ? 'any' : control.step}
                   value={value}
                   style:--vol-pct={controller.isBuilt ? sliderPct(control.min, control.max, value) : undefined}
                   bind:this={controller.inputs[control.key]}
