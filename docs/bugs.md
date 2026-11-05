@@ -95,6 +95,12 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 - **Autre cause possible, non corrigée** : une écriture GATT qui échoue est abandonnée (`MIDI OUT (BT) échoué` dans la console), et le relâchement d'un accord produit une rafale d'écritures, une par note. Si des notes restent encore bloquées en 1.7.3, chercher ce message dans la console.
 - **Pistes de la revue 1.7.3** (`docs/revue-code-1.7.3.md`, n° 1) : le repli sur `writeValueWithResponse` échoue probablement aussi (la norme BLE MIDI n'impose que l'écriture sans réponse), donc un échec perd le message. Correctif proposé : renvoyer au piano le paquet reçu **tel quel** (une écriture par notification au lieu d'une par message, sans passer par le parseur, comme le loopback USB), et réessayer une écriture échouée. Hypothèse à vérifier : sur Android avant la version 13, notifications et écritures sur la même caractéristique partagent un tampon. À relever sur la tablette : `characteristic.properties`, les messages d'échec, le nombre de Note Off reçus et réécrits, la version d'Android.
 - **Défaut mineur restant** : `parseSysex` n'annule pas le running status, alors qu'un SysEx devrait le faire. Sans effet ici (le piano n'envoie pas de SysEx pendant le jeu).
+- **Précisions du 2026-11-05** (utilisateur, et implémentation MIDI du FP-30X dans `docs/DOC_FP30X/FP-30X_MIDI_Imple_eng01_W.pdf`) :
+  - **pourquoi le loopback** : le Program Change de l'application règle une partie GM2 du piano (canal 1), distincte du son du clavier. Pour ne pas entendre les deux à la fois, l'utilisateur coupe le son du clavier **à la main** (Local Off : Function + fa le plus grave) à chaque mise sous tension, et l'application renvoie les touches au piano. Sans loopback, le piano est muet (essai d'avril 2026, commit `4d548ec`). Le loopback est donc indispensable tant que le Local Off est en place ;
+  - **l'application ne peut pas faire le Local Off elle-même par CC122** : le tableau d'implémentation (p. 17) indique Local On/Off « Transmitted : O, Recognized : X ». Le piano envoie le CC122 quand on fait le raccourci, mais ne le reçoit pas ;
+  - **la pédale n'est pas la seule cause** : les notes restent tenues même sans toucher la pédale de sustain (CC64, que le piano envoie aussi et qui passe par le même loopback : un relâchement de pédale perdu bloquerait toutes les notes). Au relevé sur la tablette, compter aussi les CC64 ;
+  - le piano n'envoie pas d'Active Sensing (p. 17) : le scénario `[80 80 FE …]` ne se produit pas avec le FP-30X ;
+  - piste à tester : d'après le support Roland, le son choisi sur le piano se joue sur le **canal 4**. Si un Bank Select + Program Change envoyé sur le canal 4 change le son du clavier lui-même (y compris pour les sons GM2, `msb:121`, ce que la documentation ne dit pas), le Local Off et le loopback deviennent inutiles, et ce bug disparaît avec eux.
 
 ## 9. Animation des effets piano : les 7 CC sont renvoyés à chaque frame
 
@@ -154,3 +160,25 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 - **Diagnostic** : la configuration est mise à jour (precache), mais le Service Worker sert l'ancien fichier depuis `impro-audio` sans interroger le réseau. Le bouton « Vider le cache et recharger » ne vide pas ce cache (bug n° 7).
 - **Conséquences** : les nouveaux repères s'appliquent à l'ancien fichier : le son démarre ou s'arrête au mauvais endroit, sans message d'erreur. Seul l'effacement des données du site rétablit le bon fichier, ce qui vide aussi le cache de tous les autres sons.
 - **Piste de correction** : au minimum, une règle écrite dans le README (un fichier modifié change de nom). Sinon, versionner l'URL dans la configuration (`?v=2`), ou renouveler le cache audio en recopiant les entrées inchangées.
+
+## 15. Une connexion Bluetooth en cours n'est pas annulée par un autre choix de connexion
+
+- **Statut** : ouvert
+- **Constaté** : 2026-11-05, à la lecture du code (comparaison avec `chord-finder-midi`, `src/useBluetoothMIDI.js`)
+- **Où** : `src/midi/bluetoothMIDI.ts` (`connect()`, `disconnect()`), `src/midi/connection.ts` (`selectMidiConnection`)
+- **Scénario** : on choisit « Bluetooth MIDI », on choisit le piano dans le sélecteur ; pendant la connexion (statut `connecting`, jusqu'à 3 essais espacés), on choisit le piano USB ou « — Connexion MIDI — » dans la liste d'un autre panneau.
+- **Diagnostic** :
+  1. `selectMidiConnection` ne déconnecte le Bluetooth que si son statut est déjà `connected` : une connexion en cours n'est pas arrêtée ;
+  2. même appelé, `disconnect()` n'incrémente pas `#attemptId` : la tentative en cours ne voit pas qu'elle est périmée, termine `gatt.connect()` et passe à `connected`.
+- **Conséquences** : quelques instants après le choix de l'USB (ou de « aucune connexion »), l'application repasse d'elle-même en Bluetooth (`STATE.midiOutput = null`, badge « BT ») : le choix de l'utilisateur est écrasé sans qu'il l'ait demandé.
+- **Piste de correction** : `disconnect()` incrémente le compteur de tentatives (comme `ctx.attempt` dans chord-finder) ; `selectMidiConnection` appelle `disconnect()` quel que soit le statut Bluetooth.
+
+## 16. Lien GATT laissé ouvert après un échec de connexion Bluetooth
+
+- **Statut** : ouvert
+- **Constaté** : 2026-11-05, à la lecture du code (comparaison avec `chord-finder-midi`, qui a corrigé le même défaut en 0.6.x)
+- **Où** : `src/midi/bluetoothMIDI.ts`, `connect()`
+- **Scénario** : `gatt.connect()` réussit, puis `getPrimaryService`, `getCharacteristic` ou `startNotifications` échoue (ou les 3 essais échouent) ; ou bien une tentative devenue périmée (nouvelle connexion lancée entre-temps) termine son `gatt.connect()`.
+- **Diagnostic** : l'erreur remonte au `catch`, qui passe au statut `error` sans fermer le lien GATT ; une tentative périmée fait `return` sans le fermer non plus. Le lien n'est refermé qu'au `#cleanup()` de la connexion suivante, s'il y en a une.
+- **Conséquences** : le piano reste connecté à la tablette sans que personne n'écoute ses notifications. Un FP-30X n'accepte qu'une connexion BLE MIDI : aucun autre appareil (téléphone avec l'application Roland, par exemple) ne peut s'y connecter, et l'interface affiche une erreur alors que le piano se croit connecté.
+- **Piste de correction** : en cas d'échec, et dans une tentative périmée qui ne vise plus ce piano, appeler `device.gatt.disconnect()` (comme `disconnectGatt()` et `ctx.target` dans chord-finder).
