@@ -473,6 +473,8 @@ export class MediaElementTrack {
   onended: (() => void) | null;
   onerror: ((error: Error) => void) | null;
   _loadPromise: Promise<MediaElementTrack> | null;
+  /** Termine le chargement en cours sans attendre le fichier (piste libérée) */
+  _cancelLoad: (() => void) | null;
 
   constructor(engine: AudioEngine, src: string) {
     this.engine = engine;
@@ -485,6 +487,7 @@ export class MediaElementTrack {
     this.onended = null;
     this.onerror = null;
     this._loadPromise = null;
+    this._cancelLoad = null;
 
     this.handleEnded = this.handleEnded.bind(this);
     this.handleError = this.handleError.bind(this);
@@ -546,6 +549,8 @@ export class MediaElementTrack {
         this.audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         this.audio.removeEventListener('canplaythrough', handleCanPlayThrough);
         this.audio.removeEventListener('error', handleError);
+        this._loadPromise = null;
+        this._cancelLoad = null;
       };
 
       const handleLoadedMetadata = () => {
@@ -559,14 +564,19 @@ export class MediaElementTrack {
         if (this.segmentEnd === null && isFinite(this.audio.duration)) {
           this.segmentEnd = this.audio.duration;
         }
-        this._loadPromise = null;
         resolve(this);
       };
 
       const handleError = () => {
         cleanup();
-        this._loadPromise = null;
         reject(new Error(`Impossible de charger ${this.src}`));
+      };
+
+      // Piste libérée pendant le chargement : la promesse est tenue tout de suite, et
+      // l'appelant (playSound) voit que la piste n'est plus la piste courante
+      this._cancelLoad = () => {
+        cleanup();
+        resolve(this);
       };
 
       this.audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -575,7 +585,8 @@ export class MediaElementTrack {
       this.audio.load();
     });
 
-    return this;
+    // La promesse elle-même : `await track.load()` attend vraiment le fichier (bug n° 20)
+    return this._loadPromise;
   }
 
   setPlaybackRange(startOffset: number, endOffset: number | null): void {
@@ -605,6 +616,7 @@ export class MediaElementTrack {
   }
 
   dispose(): void {
+    this._cancelLoad?.();
     this.stop();
     this.audio.removeEventListener('ended', this.handleEnded);
     this.audio.removeEventListener('error', this.handleError);

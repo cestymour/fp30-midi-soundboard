@@ -217,7 +217,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 20. `MediaElementTrack.load()` rend la main avant la fin du chargement
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `load()` renvoie la promesse de chargement. Une piste libérée pendant son chargement tient cette promesse tout de suite (`_cancelLoad`), et `playSound()` voit qu'elle n'est plus la piste courante. Tests dans `audio-engine.test.ts`
 - **Constaté** : 2026-10-14, revue de code de la 1.7.2 (n° 7 de la revue de la 1.8.0)
 - **Où** : `src/audio/audio-engine.ts`, `load()` (renvoie `this` au lieu de la promesse de chargement), appelé par `playSound()`
 - **Diagnostic** : `await audio.load()` n'attend rien. C'est l'appel suivant, dans `play()`, qui attend vraiment le chargement. Si le fichier échoue avant cet appel, la première promesse est rejetée sans personne pour l'attendre (« Uncaught (in promise) » dans la console), et le fichier est redemandé.
