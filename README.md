@@ -34,7 +34,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Emergency Stop** — All Notes Off button to silence the piano instantly
 - **Wake Lock** — prevents screen sleep during a performance
 - **Responsive layout** — automatic grid reorganization in portrait mode
-- **About popup** — shows Service Worker and Wake Lock status, cache reset button
+- **About popup** — shows the version, Service Worker and Wake Lock status, and an « update » button that installs the latest published version and reloads (sounds stay cached; nothing is reloaded when offline)
 - **Live audio FX mixer** — full overlay on the audio panel to shape the sound in real time (EQ, filters, tempo, delay, reverb) while a clip plays or before the next one; presets with smooth transitions, global reset, and quick per-control recall
 - **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs on channel 4 to the connected piano (chorus, cutoff, resonance, attack, release, decay), and the reverb slider sets the piano’s Ambience (0–10) with a Roland SysEx message, via `sendMidi()` in `src/midi/midi.ts`. Both FX popups share one implementation (the `src/ui/FxOverlay.svelte` component, preset logic in `src/fx/fx-presets.ts`). Slider positions reflect what the app last sent, not a read-back from the instrument.
 

@@ -1,15 +1,19 @@
 <!--
   AboutPopup.svelte — Popup « À propos » : version, état du Service Worker
-  et du Wake Lock, rechargement sans cache
+  et du Wake Lock, mise à jour de l'application
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
+  import { updateAndReload } from '../../app-update.ts';
 
   let isOpen  = $state(false);
   /** Affichage en ligne : absent avant la première ouverture (masqué par le CSS) */
   let display = $state<string | undefined>(undefined);
   let swStatus = $state('Service Worker : vérification...');
   let wlStatus = $state('Wake Lock : vérification...');
+  /** Mise à jour demandée et pas encore terminée */
+  let updating     = $state(false);
+  let updateStatus = $state('');
 
   export function open(): void {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -26,6 +30,8 @@
       wlStatus = 'Wake Lock : inactif';
     }
 
+    if (!updating) updateStatus = '';
+
     isOpen  = true;
     display = 'flex';
   }
@@ -35,12 +41,16 @@
     display = 'none';
   }
 
-  async function reloadWithoutCache(): Promise<void> {
-    if ('serviceWorker' in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (const reg of registrations) await reg.unregister();
-    }
-    location.reload();
+  /** Installe la dernière version publiée puis recharge ; les sons restent en cache */
+  async function updateApp(): Promise<void> {
+    updating = true;
+    updateStatus = 'Recherche de la dernière version…';
+    const result = await updateAndReload();
+    if (result === 'reloading') return;
+    updating = false;
+    updateStatus = result === 'offline'
+      ? "Hors ligne : mise à jour impossible. L'application reste utilisable."
+      : "La nouvelle version n'a pas pu s'installer. Réessayer plus tard.";
   }
 </script>
 
@@ -62,7 +72,8 @@
     </div>
     <div id="about-credit">by cestymour</div>
     <div id="about-actions">
-      <button id="about-reload-btn" onclick={reloadWithoutCache}>⟳ Vider le cache et recharger</button>
+      {#if updateStatus}<div id="about-update-status" role="status">{updateStatus}</div>{/if}
+      <button id="about-reload-btn" onclick={updateApp} disabled={updating}>⟳ Mettre à jour l'application</button>
       <button id="about-close-btn" onclick={close}>Fermer</button>
     </div>
   </div>
@@ -159,6 +170,16 @@
   }
   #about-reload-btn:active {
     background: color-mix(in srgb, var(--current-accent) 25%, transparent);
+  }
+  #about-reload-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+  }
+
+  #about-update-status {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
   }
 
   #about-close-btn {

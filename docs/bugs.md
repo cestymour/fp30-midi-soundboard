@@ -71,7 +71,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 7. Bouton « Vider le cache et recharger » : il ne vide aucun cache
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : le bouton s'appelle « ⟳ Mettre à jour l'application » (`src/app-update.ts`). Il ne désinscrit plus le Service Worker : il lui fait chercher la dernière version (`registration.update()`), attend qu'elle soit active, puis recharge. Hors ligne, il ne recharge rien et l'affiche. Aucun cache n'est vidé. Tests dans `app-update.test.ts` ; vérifié dans Chromium headless : site arrêté (pas de rechargement, message), et nouvelle version publiée pendant que l'application est ouverte (la page rechargée affiche encore l'ancien numéro, le bouton passe au nouveau)
 - **Constaté** : 2026-10-14, à la lecture du code (revue de la 1.7.2)
 - **Où** : `src/ui/components/AboutPopup.svelte`, `reloadWithoutCache()` et le libellé de `#about-reload-btn`
 - **Diagnostic** : le bouton désinscrit le Service Worker (`reg.unregister()`) puis recharge la page. Désinscrire un SW ne supprime pas ses caches : `impro-audio`, `impro-images`, les polices et le precache Workbox restent, de même que d'éventuels caches de la 1.6.x (`impro-app-*`, `impro-audio-*`, plus nettoyés depuis la 1.7.2). Garder `impro-audio` est souhaitable (pas de retéléchargement des sons, hors ligne préservé) ; c'est le libellé qui est trompeur.
