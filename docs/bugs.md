@@ -243,7 +243,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 23. Bas de l'écran coupé dans un onglet Chrome
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `#app` en `height: 100dvh`, après `100vh` en repli. À vérifier sur la tablette, dans un onglet Chrome, dans les deux orientations
 - **Constaté** : par l'utilisateur, souvent ; revue de code de la 1.7.2 (n° 11 de la revue de la 1.8.0)
 - **Où** : `src/css/global.css`, `#app { height: 100vh }`
 - **Diagnostic** : dans un onglet Chrome Android, `100vh` compte aussi la barre d'adresse : la page est plus haute que la partie visible, et la dernière rangée de boutons passe sous le bas de l'écran. L'application installée (sans barre d'adresse) n'est pas touchée.
