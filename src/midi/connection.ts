@@ -73,8 +73,20 @@ export function initBluetooth(): void {
 // WEB MIDI (USB)
 // ═══════════════════════════════════════════════════════
 
+/**
+ * Accès Web MIDI avec SysEx (réglages Roland, comme l'Ambiance : voir midi.ts).
+ * Chrome demande l'autorisation une fois. Si elle est refusée, l'USB marche
+ * quand même, sans les réglages en SysEx (prévenu dans la console).
+ */
+function requestMidiAccess(): Promise<MIDIAccess> {
+  return navigator.requestMIDIAccess({ sysex: true }).catch((err: Error) => {
+    console.warn('Accès Web MIDI avec SysEx refusé, nouvel essai sans SysEx (réverbération inactive en USB) :', err?.message);
+    return navigator.requestMIDIAccess({ sysex: false });
+  });
+}
+
 export function initWebMidi(): void {
-  navigator.requestMIDIAccess({ sysex: false }).then(access => {
+  requestMidiAccess().then(access => {
     STATE.midiAccess = access;
     midiConnectionEvents.emit({ type: 'outputs' });
     autoConnectUsbPiano();

@@ -16,6 +16,40 @@ export interface BluetoothMIDIOptions {
 const MIDI_SERVICE_UUID        = '03b80e5a-ede8-4b33-a751-6ce34ec4c700';
 const MIDI_CHARACTERISTIC_UUID = '7772e5db-3868-4112-a1a9-f2669d106bf3';
 const MAX_RETRIES              = 3;
+/** Taille d'un paquet BLE MIDI sans négociation de MTU (MTU 23 - 3 octets d'en-tête ATT) */
+const BLE_PACKET_SIZE          = 20;
+
+/**
+ * Emballe un message MIDI en paquets BLE MIDI.
+ * - message court : `[en-tête, horodatage, …octets]`, un seul paquet ;
+ * - SysEx (`F0 … F7`) : `[en-tête, horodatage, F0, …données]`, puis des paquets de
+ *   continuation `[en-tête, …données]` si le message dépasse `packetSize`. Le `F7`
+ *   final est précédé de son propre horodatage, comme l'exige la norme BLE MIDI.
+ * Horodatage à 0 : en-tête 0x80, horodatage 0x80.
+ */
+export function buildBleMidiPackets(bytes: readonly number[], packetSize = BLE_PACKET_SIZE): Uint8Array<ArrayBuffer>[] {
+  const HEADER = 0x80;
+  const TIMESTAMP = 0x80;
+  if (bytes[0] !== 0xF0) return [new Uint8Array([HEADER, TIMESTAMP, ...bytes])];
+
+  const data = bytes.slice(1, bytes[bytes.length - 1] === 0xF7 ? -1 : undefined);
+  const packets: number[][] = [];
+  let packet = [HEADER, TIMESTAMP, 0xF0];
+  for (const byte of data) {
+    if (packet.length >= packetSize) {
+      packets.push(packet);
+      packet = [HEADER];
+    }
+    packet.push(byte);
+  }
+  if (packet.length + 2 > packetSize) {
+    packets.push(packet);
+    packet = [HEADER];
+  }
+  packet.push(TIMESTAMP, 0xF7);
+  packets.push(packet);
+  return packets.map(p => new Uint8Array(p));
+}
 
 export class BluetoothMIDI {
   #status: BluetoothStatus = 'idle';
@@ -50,17 +84,18 @@ export class BluetoothMIDI {
   get error(): string | null    { return this.#error; }
 
   /**
-   * Envoie des octets MIDI via la caractéristique BLE.
-   * Format BLE MIDI : [header, timestamp, ...midiBytes]
-   * header    = 0x80 (bit7=1, bit6=1, timestamp high = 0)
-   * timestamp = 0x80 (bit7=1, timestamp low = 0)
+   * Envoie un message MIDI (SysEx compris) via la caractéristique BLE,
+   * emballé par `buildBleMidiPackets()` : une écriture GATT par paquet.
    * opts.quiet : pas de log (loopback notes)
    */
   send(midiBytes: number[], opts: { quiet?: boolean } = {}): void {
     if (!this.#characteristic || this.#status !== 'connected') return;
-    const packet = new Uint8Array([0x80, 0x80, ...midiBytes]);
     if (!opts.quiet) console.log('MIDI OUT (BT):', Array.from(midiBytes));
-    const char = this.#characteristic;
+    for (const packet of buildBleMidiPackets(midiBytes)) this.#write(packet);
+  }
+
+  #write(packet: Uint8Array<ArrayBuffer>): void {
+    const char = this.#characteristic!;
     this.#writeQueue = this.#writeQueue
       .then(() => {
         if (!this.#characteristic) return;
