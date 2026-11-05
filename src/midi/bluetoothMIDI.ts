@@ -1,7 +1,7 @@
 // bluetoothMIDI.ts — Connexion Bluetooth MIDI (vanilla JS, sans React)
 
 import { parsePacket } from './ble-midi-parser.ts';
-import type { BleMidiEvent, MessageMidi } from './ble-midi-parser.ts';
+import type { MessageMidi } from './ble-midi-parser.ts';
 
 export type BluetoothStatus = 'idle' | 'unsupported' | 'scanning' | 'connecting' | 'connected' | 'error';
 
@@ -10,7 +10,6 @@ export interface BluetoothMIDIOptions {
   onNoteOff?:        (note: number) => void;
   onStatusChange?:   (status: BluetoothStatus, error: string | null) => void;
   onError?:          (error: string | null) => void;
-  loopbackIncoming?: boolean;
 }
 
 const MIDI_SERVICE_UUID        = '03b80e5a-ede8-4b33-a751-6ce34ec4c700';
@@ -66,17 +65,14 @@ export class BluetoothMIDI {
   #onError: ((error: string | null) => void) | null = null;
   /** Une seule écriture GATT à la fois sur cette caractéristique (sinon « already in progress »). */
   #writeQueue: Promise<void> = Promise.resolve();
-  /** Loopback : renvoyer le MIDI entrant vers le piano (comme midiOutput.send(event.data) en USB). */
-  #loopbackIncoming = true;
   /** Running status du dernier paquet reçu : un paquet peut commencer sans statut */
   #runningStatus = -1;
 
-  constructor({ onNoteOn, onNoteOff, onStatusChange, onError, loopbackIncoming = true }: BluetoothMIDIOptions = {}) {
+  constructor({ onNoteOn, onNoteOff, onStatusChange, onError }: BluetoothMIDIOptions = {}) {
     this.#onNoteOn       = onNoteOn       ?? null;
     this.#onNoteOff      = onNoteOff      ?? null;
     this.#onStatusChange = onStatusChange ?? null;
     this.#onError        = onError        ?? null;
-    this.#loopbackIncoming = loopbackIncoming;
     if (!navigator.bluetooth) this.#setStatus('unsupported');
   }
 
@@ -86,11 +82,10 @@ export class BluetoothMIDI {
   /**
    * Envoie un message MIDI (SysEx compris) via la caractéristique BLE,
    * emballé par `buildBleMidiPackets()` : une écriture GATT par paquet.
-   * opts.quiet : pas de log (loopback notes)
    */
-  send(midiBytes: number[], opts: { quiet?: boolean } = {}): void {
+  send(midiBytes: number[]): void {
     if (!this.#characteristic || this.#status !== 'connected') return;
-    if (!opts.quiet) console.log('MIDI OUT (BT):', Array.from(midiBytes));
+    console.log('MIDI OUT (BT):', Array.from(midiBytes));
     for (const packet of buildBleMidiPackets(midiBytes)) this.#write(packet);
   }
 
@@ -111,21 +106,6 @@ export class BluetoothMIDI {
         console.error('Aucune méthode write disponible sur la caractéristique BLE');
       })
       .catch((e: Error) => console.error('MIDI OUT (BT) échoué:', e.message));
-  }
-
-  /** Reconstitue les octets MIDI bruts (comme event.data Web MIDI) pour le loopback. */
-  #bytesForLoopback(ev: BleMidiEvent): number[] | null {
-    if (ev?.type === 'sysex') return null;
-    // Les champs MIDI sont absents des messages 'unknown' : écartés par les tests typeof ci-dessous
-    const { midiStatus: status, midiOne: one, midiTwo: two } = ev as Partial<MessageMidi>;
-    if (typeof status !== 'number' || typeof one !== 'number') return null;
-    const hi = status & 0xf0;
-    if (hi === 0xc0 || hi === 0xd0) return [status, one];
-    if (hi >= 0x80 && hi <= 0xe0) {
-      if (typeof two !== 'number') return null;
-      return [status, one, two];
-    }
-    return null;
   }
 
   // ─── Connexion ───────────────────────────────────────────────────────────
@@ -179,10 +159,6 @@ export class BluetoothMIDI {
             for (const ev of info.events) {
               // Les champs MIDI sont absents des messages 'sysex' et 'unknown' : écartés par les tests typeof
               const { midiStatus: status, midiOne: one, midiTwo: two } = ev as Partial<MessageMidi>;
-              if (this.#loopbackIncoming) {
-                const lb = this.#bytesForLoopback(ev);
-                if (lb) this.send(lb, { quiet: true });
-              }
               if (typeof status !== 'number' || typeof one !== 'number') continue;
               const msgType = status & 0xf0;
               const hasTwo = typeof two === 'number';

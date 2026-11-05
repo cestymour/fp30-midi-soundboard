@@ -104,13 +104,6 @@ function autoConnectUsbPiano(): void {
   if (piano) void selectMidiConnection(piano.id);
 }
 
-function disconnectMidiInput(): void {
-  if (STATE.midiInput) {
-    STATE.midiInput.onmidimessage = null;
-    STATE.midiInput = null;
-  }
-}
-
 // ═══════════════════════════════════════════════════════
 // CHANGEMENT DE CONNEXION (choix dans la liste MIDI)
 // ═══════════════════════════════════════════════════════
@@ -121,7 +114,6 @@ export async function selectMidiConnection(val: string): Promise<void> {
 
   if (val === MIDI_SELECT_NONE) {
     if (STATE.bt?.status === 'connected') STATE.bt.disconnect();
-    disconnectMidiInput();
     STATE.midiOutput = null;
     STATE.currentConnectionType = null;
     midiConnectionEvents.emit({ type: 'status' });
@@ -129,7 +121,7 @@ export async function selectMidiConnection(val: string): Promise<void> {
   } else if (val === MIDI_SELECT_BLUETOOTH) {
     const prevOutput = STATE.midiOutput;
     const prevId     = prevOutput?.id ?? null;
-    if (STATE.midiOutput) { disconnectMidiInput(); STATE.midiOutput = null; }
+    STATE.midiOutput = null;
 
     if (STATE.bt?.status !== 'connected') {
       await STATE.bt!.connect();
@@ -153,21 +145,11 @@ export async function selectMidiConnection(val: string): Promise<void> {
     // Connexion USB
     STATE.isSwitchingToUsb = true;
     if (STATE.bt?.status === 'connected') STATE.bt.disconnect();
-    disconnectMidiInput();
     STATE.midiOutput = null;
 
     STATE.midiAccess!.outputs.forEach(out => {
       if (out.id === val) STATE.midiOutput = out;
     });
-    STATE.midiAccess!.inputs.forEach(inp => {
-      if (inp.name === STATE.midiOutput?.name) STATE.midiInput = inp;
-    });
-
-    if (STATE.midiInput) {
-      STATE.midiInput.onmidimessage = event => {
-        if (STATE.midiOutput) STATE.midiOutput.send(event.data!);
-      };
-    }
 
     STATE.currentConnectionType = STATE.midiOutput ? 'usb' : null;
     STATE.isSwitchingToUsb = false;

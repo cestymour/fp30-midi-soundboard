@@ -14,7 +14,7 @@ afterEach(() => {
   STATE.midiOutput = null;
   STATE.midiAccess = null;
   STATE.bt = null;
-  STATE.MIDI_CHANNEL = 0;
+  STATE.MIDI_CHANNEL = 3;
   vi.restoreAllMocks();
 });
 
@@ -42,10 +42,14 @@ describe('sélection d\'instrument', () => {
     ]);
   });
 
+  it('canal 4 par défaut : celui du son du clavier du FP-30X', () => {
+    expect(STATE.MIDI_CHANNEL).toBe(3);
+  });
+
   it('envoie le patch sur la sortie USB', () => {
     const sent = mockUsbOutput();
     sendInstrumentPatch({ id: 'harpe', name: 'Harpe', icon: '', pc: 47, msb: 121, lsb: 0 });
-    expect(sent).toEqual([[0xB0, 0x00, 121], [0xB0, 0x20, 0], [0xC0, 46]]);
+    expect(sent).toEqual([[0xB3, 0x00, 121], [0xB3, 0x20, 0], [0xC3, 46]]);
   });
 
   it('les patchs de la configuration sont des valeurs MIDI valides', () => {
@@ -67,7 +71,7 @@ describe('routage USB / Bluetooth', () => {
     const send = vi.fn();
     STATE.bt = { status: 'connected', send } as unknown as typeof STATE.bt;
     sendVolume(100);
-    expect(send).toHaveBeenCalledWith([0xB0, 0x07, 100]);
+    expect(send).toHaveBeenCalledWith([0xB3, 0x07, 100]);
   });
 
   it('préfère la sortie USB au Bluetooth', () => {
@@ -75,7 +79,7 @@ describe('routage USB / Bluetooth', () => {
     const send = vi.fn();
     STATE.bt = { status: 'connected', send } as unknown as typeof STATE.bt;
     sendVolume(64);
-    expect(sent).toEqual([[0xB0, 0x07, 64]]);
+    expect(sent).toEqual([[0xB3, 0x07, 64]]);
     expect(send).not.toHaveBeenCalled();
   });
 
