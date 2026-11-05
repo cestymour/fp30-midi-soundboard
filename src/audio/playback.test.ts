@@ -27,7 +27,7 @@ vi.mock('./audio-engine.ts', () => ({
 }));
 
 import { STATE } from '../state.svelte.ts';
-import { playbackEvents, playSound, stopSound, togglePlayPause } from './playback.ts';
+import { playbackEvents, playSound, setAudioVolume, stopSound, togglePlayPause } from './playback.ts';
 
 type Track = InstanceType<typeof FakeTrack>;
 
@@ -171,5 +171,46 @@ describe('reprise après pause (bug n° 10)', () => {
     expect(STATE.currentAudio).toBe(a);
     expect(STATE.isPaused).toBe(true);
     expect(warn).toHaveBeenCalled();
+  });
+});
+
+describe('volume pendant un fondu (bug n° 11)', () => {
+  it("volume baissé pendant le fondu d'entrée : le son reste au volume choisi", async () => {
+    STATE.audioVolume = 0.8;
+    const a = await play(A);
+    vi.advanceTimersByTime(100);
+
+    setAudioVolume(0.2);
+    vi.advanceTimersByTime(1000);
+
+    expect(a.volume).toBe(0.2);
+    expect(a.disposed).toBe(false);
+  });
+
+  it('volume déplacé pendant le fondu de pause : le son finit quand même en pause, au silence', async () => {
+    STATE.audioVolume = 0.8;
+    const a = await play(A);
+    vi.advanceTimersByTime(1000);
+
+    togglePlayPause();
+    vi.advanceTimersByTime(50);
+    setAudioVolume(0.5);
+    vi.advanceTimersByTime(1000);
+
+    expect(STATE.isPaused).toBe(true);
+    expect(a.paused).toBe(true);
+    expect(a.volume).toBe(0);
+  });
+
+  it("volume déplacé pendant le fondu de sortie d'un STOP : la piste est libérée", async () => {
+    const a = await play(A);
+    vi.advanceTimersByTime(1000);
+
+    stopSound(true);
+    vi.advanceTimersByTime(100);
+    setAudioVolume(0.5);
+    vi.advanceTimersByTime(1000);
+
+    expect(a.disposed).toBe(true);
   });
 });

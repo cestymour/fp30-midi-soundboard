@@ -126,7 +126,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 11. Volume déplacé pendant un fondu d'entrée : ignoré
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `setAudioVolume()` arrête le fondu d'entrée en cours (lancement ou reprise), et le volume choisi s'applique tout de suite. Un fondu de sortie (pause, STOP) n'est pas touché. Tests dans `playback.test.ts`
 - **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 6)
 - **Où** : `src/audio/playback.ts`, `fadeAudio()` et `setAudioVolume()`
 - **Scénario** : on lance un son et on baisse le volume dans les 300 ms du fondu d'entrée (150 ms pour une reprise).

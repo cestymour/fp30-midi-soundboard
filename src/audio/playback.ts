@@ -38,6 +38,8 @@ export function hasCurrentSound(): boolean {
 
 let _fadeTimer: ReturnType<typeof setInterval> | null = null;
 let _fadingAudio: MediaElementTrack | null = null;
+/** Le fondu en cours monte le volume (lancement ou reprise d'un son) */
+let _fadingIn = false;
 
 function cancelFade(): void {
   if (_fadeTimer) {
@@ -51,6 +53,7 @@ function cancelFade(): void {
     if (_fadingAudio !== STATE.currentAudio) _fadingAudio.dispose();
     _fadingAudio = null;
   }
+  _fadingIn = false;
 }
 
 function fadeAudio(
@@ -78,12 +81,14 @@ function fadeAudio(
       clearInterval(timer);
       _fadeTimer = null;
       _fadingAudio = null;
+      _fadingIn = false;
       onDone?.();
     }
   }, interval);
 
   _fadeTimer = timer;
   _fadingAudio = audio;
+  _fadingIn = delta > 0;
 }
 
 // ================================================================
@@ -266,5 +271,8 @@ export function seekToRatio(ratio: number): void {
 /** Volume de lecture des sons (0-1) */
 export function setAudioVolume(volume: number): void {
   STATE.audioVolume = volume;
+  // Fondu d'entrée en cours : il s'arrête là, sinon il écraserait le volume choisi (bug n° 11).
+  // Un fondu de sortie (pause, STOP) continue jusqu'au silence.
+  if (_fadingIn && _fadingAudio === STATE.currentAudio) cancelFade();
   if (STATE.currentAudio) STATE.currentAudio.volume = STATE.audioVolume;
 }
