@@ -105,7 +105,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 9. Animation des effets piano : les 7 CC sont renvoyés à chaque frame
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05, branche `canal-4`) : pendant une animation, chaque contrôle n'est envoyé que si sa valeur (alignée sur le pas) change, et rien n'est animé ni envoyé quand les cibles sont déjà atteintes (`animateToValues()` dans `src/ui/fx-overlay.svelte.ts`, test dans `fx-overlay.test.ts`). Vaut aussi pour la popup audio. Depuis le passage au canal 4, la réverbération est un SysEx : sans ce correctif, il en partait un à chaque frame
 - **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 2) ; retard non mesuré
 - **Où** : `src/ui/fx-overlay.svelte.ts`, `animateToValues()` (rappel `onFrame`), puis `applyMidiFxValue()` (`src/fx/midi-fx.ts`)
 - **Diagnostic** : à chaque frame d'une animation (preset, Reset, ↺), `setControlValue(…, true)` est appelé pour chacun des 7 contrôles, que sa valeur ait changé ou non, et chaque appel envoie un CC : environ 140 messages pour une animation de 320 ms. Le Reset en envoie autant quand tout est déjà au neutre.

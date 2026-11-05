@@ -9,7 +9,7 @@
 import type { FxControl, FxPreset } from '../types.ts';
 import {
   buildControlNeutralTargetValues, buildPresetTargetValues, buildResetTargetValues, clampFxValue,
-  inferActiveFxPresetKey, isAnyFxControlModified, isFxControlNeutral,
+  fxTargetsMatchCurrent, inferActiveFxPresetKey, isAnyFxControlModified, isFxControlNeutral,
 } from '../fx/fx-presets.ts';
 import type { FxCurrentValues, FxValues } from '../fx/fx-presets.ts';
 import { animateFxValues } from '../fx/fx-animation.ts';
@@ -293,11 +293,33 @@ export class FxOverlayController<Key extends string, Settings> {
 
     this.presetAnimation?.cancel();
     this.presetAnimation = null;
-    this.isAnimating = this.isBuilt;
 
+    const finish = () => {
+      this.presetAnimation = null;
+      this.isAnimating = false;
+      if (inferPresetAtEnd) this.refreshPresetHighlightFromControls();
+      this.config.refreshToolbar();
+    };
+
+    const startValues = this.getCurrentValues();
+    // Déjà en place (Reset quand tout est au neutre, preset déjà actif) : rien à animer ni à envoyer
+    if (fxTargetsMatchCurrent(this.controls, targetValues, startValues)) {
+      finish();
+      return;
+    }
+
+    // Dernière valeur envoyée par contrôle : une valeur n'est renvoyée que si elle change
+    // (sinon les 7 effets partaient à chaque frame, bug n° 9)
+    const lastApplied = {} as Record<Key, number | null>;
+    this.controls.forEach(control => {
+      const start = startValues[control.key];
+      lastApplied[control.key] = start === null ? null : clampFxValue(control, start);
+    });
+
+    this.isAnimating = this.isBuilt;
     this.presetAnimation = animateFxValues(
       this.controls,
-      this.getCurrentValues(),
+      startValues,
       targetValues,
       durationMs,
       positions => {
@@ -305,15 +327,13 @@ export class FxOverlayController<Key extends string, Settings> {
         // Le curseur suit la position exacte, le piano reçoit la valeur alignée sur le pas
         this.controls.forEach(control => {
           this.values[control.key] = positions[control.key];
-          this.config.applyValue(control, clampFxValue(control, positions[control.key]));
+          const value = clampFxValue(control, positions[control.key]);
+          if (value === lastApplied[control.key]) return;
+          lastApplied[control.key] = value;
+          this.config.applyValue(control, value);
         });
       },
-      () => {
-        this.presetAnimation = null;
-        this.isAnimating = false;
-        if (inferPresetAtEnd) this.refreshPresetHighlightFromControls();
-        this.config.refreshToolbar();
-      },
+      finish,
     );
   }
 
