@@ -13,8 +13,14 @@ Relevé des essais faits le 2026-11-05 (Edge sous Windows, piano en Bluetooth, m
 |---------|----------------------|
 | CC7 (volume) | oui |
 | CC74 (cutoff) | oui |
+| CC71 (resonance) | oui (Saw Lead 1, GM2) |
+| CC72 (release) | oui (Strings, GM2) |
+| CC73 (attack) | oui (Strings, GM2) |
+| CC75 (decay) | oui (Saw Lead 1, GM2) |
+| CC93 (chorus) | oui (Strings, GM2) |
 | CC91 (réverbération) | **aucun** : la réverbération du clavier est le réglage Ambiance (ci-dessous) |
-| CC93, 71, 72, 73, 75 | pas encore testés |
+
+Le manuel prévient que certains sons ne réagissent pas à certains de ces CC : les essais ont été faits avec des sons qui y réagissent fort.
 
 Sur le canal 1, le CC91 agit normalement.
 
