@@ -25,8 +25,9 @@ export default defineConfig({
       manifest: false,
       injectManifest: {
         rollupFormat: 'iife',
-        // Fichiers app à précacher ; sons et images sont mis en cache au premier accès
-        globPatterns: ['**/*.{html,js,css,ico,png,json}'],
+        // Fichiers app à précacher, polices comprises (woff2 seulement : Chrome n'utilise pas
+        // le repli woff) ; sons et images sont mis en cache au premier accès
+        globPatterns: ['**/*.{html,js,css,ico,png,json,woff2}'],
         globIgnores: ['sounds/**', 'images/**'],
       },
     }),

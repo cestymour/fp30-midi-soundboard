@@ -3,6 +3,12 @@
              Wake Lock et enregistrement du Service Worker
 ================================================================ */
 
+// Polices embarquées dans l'application (precache du Service Worker, donc disponibles
+// hors ligne dès le premier lancement) : mêmes graisses qu'avant chez Google Fonts
+import '@fontsource/rajdhani/500.css';
+import '@fontsource/rajdhani/700.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/600.css';
 import './css/global.css';
 import { mount } from 'svelte';
 import App from './App.svelte';

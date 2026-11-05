@@ -29,10 +29,11 @@ Vite build, TypeScript (`strict`) in ES modules, Svelte 5 (runes) for the UI. Vi
 
 ## Releasing / cache invalidation
 
-Nothing to bump by hand for caching. `src/sw.ts` is a Workbox Service Worker built by `vite-plugin-pwa` (`injectManifest`) and published as `sw.js` at the site root. The precache list and file revisions are generated at build time (HTML, JS, CSS, icons, `manifest.json`). The SW calls `skipWaiting()` and `clientsClaim()`: a new version installs in the background at launch and shows at the next launch. The About popup's « Mettre à jour l'application » button (`src/app-update.ts`) skips that wait: `registration.update()`, wait for the new SW to be active, then reload; nothing is reloaded if the site does not answer (offline). It never unregisters the SW and never clears a cache.
+Nothing to bump by hand for caching. `src/sw.ts` is a Workbox Service Worker built by `vite-plugin-pwa` (`injectManifest`) and published as `sw.js` at the site root. The precache list and file revisions are generated at build time (HTML, JS, CSS, fonts, icons, `manifest.json`). The SW calls `skipWaiting()` and `clientsClaim()`: a new version installs in the background at launch and shows at the next launch. The About popup's « Mettre à jour l'application » button (`src/app-update.ts`) skips that wait: `registration.update()`, wait for the new SW to be active, then reload; nothing is reloaded if the site does not answer (offline). It never unregisters the SW and never clears a cache.
 
 - Sounds (`/sounds/`): `CacheFirst` in the stable, unversioned cache `impro-audio`. On a miss the whole file is fetched without the `Range` header (a 206 can't be cached), and `RangeRequestsPlugin` then serves `<audio>` range requests from the cache.
-- Images (`/images/`): `CacheFirst` in `impro-images`. Google Fonts: `impro-fonts-css` (StaleWhileRevalidate) and `impro-fonts` (CacheFirst).
+- Images (`/images/`): `CacheFirst` in `impro-images`.
+- Fonts (Rajdhani, IBM Plex Mono) come from the `@fontsource/*` packages, imported in `src/main.ts` (same weights as the former Google Fonts link), and are precached (`woff2` in `globPatterns`). The SW deletes the former Google Fonts caches (`impro-fonts-css`, `impro-fonts`) on activation.
 - Cache names shared by the SW and the page are in `src/cache-names.ts`.
 - `src/offline.ts`: `requestPersistentStorage()` (called at startup in `src/main.ts`, so Chrome does not evict the sound cache), and the About popup's « Télécharger tous les sons », which fetches every sound and cover image of the config that is not cached yet and puts it in `impro-audio` / `impro-images` from the page, under the URL `<audio>` requests.
 - The SW is registered in `src/main.ts`, in production builds only.
