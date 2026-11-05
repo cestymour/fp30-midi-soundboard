@@ -37,10 +37,12 @@ function emitSelection(value: string): void {
   midiConnectionEvents.emit({ type: 'selection', value });
 }
 
-/** Sorties USB disponibles */
+/** Sorties USB disponibles (un port débranché peut rester dans la liste de Chrome, marqué « disconnected ») */
 export function getUsbOutputs(): MIDIOutput[] {
   const usbOutputs: MIDIOutput[] = [];
-  if (STATE.midiAccess) STATE.midiAccess.outputs.forEach(o => usbOutputs.push(o));
+  if (STATE.midiAccess) STATE.midiAccess.outputs.forEach(o => {
+    if (o.state !== 'disconnected') usbOutputs.push(o);
+  });
   return usbOutputs;
 }
 
@@ -121,18 +123,40 @@ export function initWebMidi(): void {
     STATE.midiAccess = access;
     midiConnectionEvents.emit({ type: 'outputs' });
     autoConnectUsbPiano();
-    access.onstatechange = () => midiConnectionEvents.emit({ type: 'outputs' });
+    let connectedIds = new Set(getUsbOutputs().map(o => o.id));
+    access.onstatechange = () => {
+      const previousIds = connectedIds;
+      connectedIds = new Set(getUsbOutputs().map(o => o.id));
+      midiConnectionEvents.emit({ type: 'outputs' });
+      handleUsbUnplugged();
+      // Piano branché après le lancement : connexion automatique, comme au chargement
+      autoConnectUsbPiano(id => !previousIds.has(id));
+    };
   }, () => {
     STATE.currentConnectionType = null;
     midiConnectionEvents.emit({ type: 'status' });
   });
 }
 
-/** Au chargement : connexion USB au piano s'il est déjà branché (sortie dont le nom contient « piano ») */
-function autoConnectUsbPiano(): void {
+/**
+ * Connexion USB au piano (sortie dont le nom contient « piano ») si aucune connexion n'est active :
+ * au chargement, puis quand il est branché (`accept` : seulement une sortie qui vient d'apparaître)
+ */
+function autoConnectUsbPiano(accept: (id: string) => boolean = () => true): void {
   if (STATE.currentConnectionType) return;
-  const piano = getUsbOutputs().find(out => out.name?.toLowerCase().includes('piano'));
+  const piano = getUsbOutputs().find(out => accept(out.id) && out.name?.toLowerCase().includes('piano'));
   if (piano) void selectMidiConnection(piano.id);
+}
+
+/** Câble débranché : la sortie courante n'est plus utilisable, le badge repasse à « Non connecté » */
+function handleUsbUnplugged(): void {
+  if (!STATE.midiOutput || STATE.midiOutput.state !== 'disconnected') return;
+  STATE.midiOutput = null;
+  if (STATE.currentConnectionType === 'usb') {
+    STATE.currentConnectionType = null;
+    emitSelection(MIDI_SELECT_NONE);
+    midiConnectionEvents.emit({ type: 'status' });
+  }
 }
 
 // ═══════════════════════════════════════════════════════

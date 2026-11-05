@@ -5,13 +5,14 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { STATE } from '../state.svelte.ts';
-import { MIDI_SELECT_BLUETOOTH, MIDI_SELECT_NONE, selectMidiConnection } from './connection.ts';
+import { MIDI_SELECT_BLUETOOTH, MIDI_SELECT_NONE, initWebMidi, selectMidiConnection } from './connection.ts';
 import { ROLAND_ADDRESS, buildRolandDt1 } from './midi.ts';
 import { bindMidiConnectionUI, instruments } from '../ui/midi-ui.svelte.ts';
 
 bindMidiConnectionUI();
 
 afterEach(() => {
+  vi.unstubAllGlobals();
   STATE.bt = null;
   STATE.midiOutput = null;
   STATE.midiAccess = null;
@@ -90,5 +91,49 @@ describe('état renvoyé au piano à la connexion (bug n° 13)', () => {
     expect(sent).toContainEqual(buildRolandDt1(ROLAND_ADDRESS.ambience, [1]));
     expect(sent).toContainEqual([0xB3, 93, 0]);
     expect(sent).toHaveLength(5 + 7);
+  });
+});
+
+describe('câble USB débranché puis rebranché', () => {
+  function fakeAccess() {
+    const piano = { id: 'usb-1', name: 'Roland Digital Piano', state: 'connected', send: vi.fn() };
+    const access = {
+      outputs: new Map([[piano.id, piano]]),
+      sysexEnabled: true,
+      onstatechange: null as null | (() => void),
+    };
+    vi.stubGlobal('navigator', { requestMIDIAccess: vi.fn(async () => access) });
+    const flush = async () => { for (let i = 0; i < 10; i++) await Promise.resolve(); };
+    return { piano, access, flush };
+  }
+
+  it('débranché : plus de sortie, badge « Non connecté » ; rebranché : reconnexion automatique', async () => {
+    const { piano, access, flush } = fakeAccess();
+    initWebMidi();
+    await flush();
+    expect(STATE.currentConnectionType).toBe('usb');
+
+    piano.state = 'disconnected';
+    access.onstatechange!();
+    expect(STATE.currentConnectionType).toBeNull();
+    expect(STATE.midiOutput).toBeNull();
+
+    piano.state = 'connected';
+    piano.send.mockClear();
+    access.onstatechange!();
+    await flush();
+    expect(STATE.currentConnectionType).toBe('usb');
+    expect(STATE.midiOutput).toBe(piano);
+    expect(piano.send.mock.calls[0][0]).toEqual(buildRolandDt1(ROLAND_ADDRESS.remoteControl, [1]));
+  });
+
+  it('un autre changement de ports ne reconnecte pas un piano laissé de côté', async () => {
+    const { access, flush } = fakeAccess();
+    initWebMidi();
+    await flush();
+    await selectMidiConnection(MIDI_SELECT_NONE);
+    access.onstatechange!(); // par exemple : un autre appareil branché
+    await flush();
+    expect(STATE.currentConnectionType).toBeNull();
   });
 });
