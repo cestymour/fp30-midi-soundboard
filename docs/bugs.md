@@ -142,7 +142,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 13. Instrument et effets non renvoyés au piano à la connexion ou à la reconnexion
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05, branche `canal-4`) : à chaque connexion (USB, Bluetooth, reconnexion automatique), l'application envoie le contrôle à distance Roland et le volume, puis l'événement `connected`, sur lequel `bindMidiConnectionUI()` renvoie l'instrument surligné et tous les effets (`sendAllMidiFx()`). Test dans `src/midi/connection.test.ts`
 - **Constaté** : 2026-11-05, revue de code (`docs/revue-code-1.7.3.md`, n° 2)
 - **Où** : `src/midi/connection.ts` (`onStatusChange` à `connected`, branche USB de `selectMidiConnection`), `src/ui/midi-ui.svelte.ts` (`selectInstrument`)
 - **Scénarios** :
@@ -164,7 +164,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 15. Une connexion Bluetooth en cours n'est pas annulée par un autre choix de connexion
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05, branche `canal-4`) : `disconnect()` incrémente le compteur de tentatives, `selectMidiConnection` déconnecte le Bluetooth quel que soit son état, et une connexion Bluetooth qui aboutit après un autre choix ne l'écrase plus (`selectionId`). Tests dans `bluetoothMIDI.test.ts` et `connection.test.ts`
 - **Constaté** : 2026-11-05, à la lecture du code (comparaison avec `chord-finder-midi`, `src/useBluetoothMIDI.js`)
 - **Où** : `src/midi/bluetoothMIDI.ts` (`connect()`, `disconnect()`), `src/midi/connection.ts` (`selectMidiConnection`)
 - **Scénario** : on choisit « Bluetooth MIDI », on choisit le piano dans le sélecteur ; pendant la connexion (statut `connecting`, jusqu'à 3 essais espacés), on choisit le piano USB ou « — Connexion MIDI — » dans la liste d'un autre panneau.
@@ -176,10 +176,18 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 16. Lien GATT laissé ouvert après un échec de connexion Bluetooth
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05, branche `canal-4`) : nouveau contrôleur repris de chord-finder (`#target`, `disconnectGatt()`) : un échec après l'ouverture du lien, ou une tentative périmée qui ne vise plus ce piano, referme le lien GATT. Tests dans `bluetoothMIDI.test.ts`
 - **Constaté** : 2026-11-05, à la lecture du code (comparaison avec `chord-finder-midi`, qui a corrigé le même défaut en 0.6.x)
 - **Où** : `src/midi/bluetoothMIDI.ts`, `connect()`
 - **Scénario** : `gatt.connect()` réussit, puis `getPrimaryService`, `getCharacteristic` ou `startNotifications` échoue (ou les 3 essais échouent) ; ou bien une tentative devenue périmée (nouvelle connexion lancée entre-temps) termine son `gatt.connect()`.
 - **Diagnostic** : l'erreur remonte au `catch`, qui passe au statut `error` sans fermer le lien GATT ; une tentative périmée fait `return` sans le fermer non plus. Le lien n'est refermé qu'au `#cleanup()` de la connexion suivante, s'il y en a une.
 - **Conséquences** : le piano reste connecté à la tablette sans que personne n'écoute ses notifications. Un FP-30X n'accepte qu'une connexion BLE MIDI : aucun autre appareil (téléphone avec l'application Roland, par exemple) ne peut s'y connecter, et l'interface affiche une erreur alors que le piano se croit connecté.
 - **Piste de correction** : en cas d'échec, et dans une tentative périmée qui ne vise plus ce piano, appeler `device.gatt.disconnect()` (comme `disconnectGatt()` et `ctx.target` dans chord-finder).
+
+## 17. Câble USB débranché ou branché après le lancement : non suivi
+
+- **Statut** : corrigé (2026-11-05, branche `canal-4`) : un port débranché est oublié (badge « Non connecté »), et un piano branché après le lancement est connecté automatiquement, comme au chargement, si aucune autre connexion n'est active. Tests dans `src/midi/connection.test.ts`
+- **Constaté** : 2026-10-14, revue de code (`docs/revue-code.md`, n° 4) ; inscrit ici au moment du correctif
+- **Où** : `src/midi/connection.ts` (`onstatechange`, `autoConnectUsbPiano`)
+- **Diagnostic** : au débranchement, `onstatechange` ne faisait que reconstruire la liste : `STATE.midiOutput` gardait le port et le badge restait « ● USB ». Un piano branché après le lancement n'était pas connecté automatiquement (seulement au premier accès Web MIDI).
+- **Conséquences** : badge trompeur après un débranchement ; après un rebranchement, il fallait choisir le piano à la main dans la liste.

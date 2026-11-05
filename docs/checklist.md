@@ -4,12 +4,16 @@
 
 - [ ] Chargement de l'app, onglets affichés, navigation entre onglets
 - [ ] Connexion du piano en **USB** (Web MIDI) : connexion automatique au chargement si le piano est déjà branché (badge « ● USB »), puis sélection manuelle dans la liste
+- [ ] USB : câble débranché en cours d'usage → badge « Non connecté » ; rebranché → reconnexion automatique, instrument et effets renvoyés
 - [ ] Connexion du piano en **Bluetooth** (BLE MIDI)
+- [ ] Bluetooth : piano éteint puis rallumé en cours d'usage → badge « ◌ BT… », puis reconnexion seule (moins de 20 s) avec l'instrument, les effets et la réverbération d'avant ; piano laissé éteint → « BT perdu », puis « ᛒ <nom du piano> » dans la liste reconnecte sans sélecteur
+- [ ] Bluetooth : après un rechargement de la page, la liste propose « ᛒ <nom du piano> » (si Chrome sait retrouver l'appareil) et s'y reconnecte sans sélecteur
+- [ ] Instrument choisi **avant** la connexion : il est bien joué une fois le piano connecté
 - [ ] Son du clavier actif (ne **pas** faire Function + fa le plus grave) : un instrument choisi dans l'app est joué par les touches, sans le piano en double, en USB comme en Bluetooth ; accord tenu puis relâché avec un orgue : aucune note ne reste tenue
 - [ ] Effets piano : la réverbération (Ambiance, 0 à 10) s'entend en USB comme en Bluetooth ; en USB, Chrome demande une fois l'autorisation SysEx (« contrôler entièrement les appareils MIDI ») : l'accepter
 - [ ] Sélection d'instruments : le bon son sur le piano (Program Change + Bank Select MSB/LSB)
-- [ ] Volume MIDI, all-notes-off, bouton d'arrêt d'urgence
-- [ ] Popup FX MIDI : sliders, presets, reset, surbrillance du preset après fermeture/réouverture et après changement d'onglet
+- [ ] Volume MIDI, bouton d'arrêt d'urgence (coupe tout de suite, réverbération comprise, même pédale enfoncée)
+- [ ] Popup FX MIDI : sliders, presets, reset, surbrillance du preset après fermeture/réouverture et après changement d'onglet ; les curseurs glissent sans à-coups pendant l'animation d'un preset, réverbération comprise
 - [ ] Lecture de clips audio, y compris ceux avec `start` / `end`
 - [ ] Fades, stop, lecture/pause, seek par clic et par glisser, barre de progression
 - [ ] Popup FX audio : sliders, presets, reset, surbrillance, effet audible
