@@ -1,13 +1,14 @@
 /* ================================================================
-   midi-fx.ts — Contrôles d'effets piano (Control Changes MIDI)
-   Envoie des CC MIDI standard au Roland FP-30X via sendMidi().
+   midi-fx.ts — Contrôles d'effets piano
+   Envoie des CC MIDI standard au Roland FP-30X via sendMidi(), sauf la
+   réverbération, qui règle l'Ambiance du piano en SysEx Roland.
    L'état est ce que l'app a envoyé en dernier : il n'est jamais
    relu depuis le piano.
 ================================================================ */
 
 import type { MidiFxKey, FxControl } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
-import { sendMidi } from '../midi/midi.ts';
+import { sendAmbience, sendMidi } from '../midi/midi.ts';
 
 export type MidiFxControl = FxControl<MidiFxKey, MidiFxState>;
 export type MidiFxState = Record<MidiFxKey, number>;
@@ -18,12 +19,14 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
     label: 'REV',
     shortLabel: 'Reverb',
     group: 'reverb',
+    // Ambiance du piano (SysEx Roland, 0 à 10, 1 par défaut sur le piano) : sur le
+    // canal 4, le son du clavier ignore le CC91 (voir docs/fp30x-midi.md)
     min: 0,
-    max: 127,
+    max: 10,
     step: 1,
-    neutral: 0,
+    neutral: 1,
     read: settings => settings.reverb,
-    apply: value => sendMidi([0xB0 | STATE.MIDI_CHANNEL, 91, Math.round(value)]),
+    apply: value => sendAmbience(value),
     formatValue: value => Math.round(value),
   },
   {
@@ -108,7 +111,7 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
 
 // ─── État courant des CC piano (source de vérité côté JS) ─────────
 export const MIDI_FX_STATE: MidiFxState = {
-  reverb:    0,
+  reverb:    1,
   chorus:    0,
   cutoff:    64,
   resonance: 64,

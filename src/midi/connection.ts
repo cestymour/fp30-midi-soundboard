@@ -8,7 +8,7 @@ import { STATE } from '../state.svelte.ts';
 import { createEmitter } from '../events.ts';
 import { BluetoothMIDI } from './bluetoothMIDI.ts';
 import type { BluetoothStatus } from './bluetoothMIDI.ts';
-import { sendVolume } from './midi.ts';
+import { sendRolandRemoteControl, sendVolume } from './midi.ts';
 
 /** Valeurs spéciales de la liste de connexion (les sorties USB y figurent par leur id) */
 export const MIDI_SELECT_NONE      = '__none__';
@@ -52,6 +52,7 @@ export function initBluetooth(): void {
         STATE.currentConnectionType = 'bt';
         emitSelection(MIDI_SELECT_BLUETOOTH);
         midiConnectionEvents.emit({ type: 'status' });
+        sendRolandRemoteControl();
         sendVolume(STATE.midiVolume);
       } else if (status === 'idle' || status === 'error') {
         if (STATE.isSwitchingToUsb) return;
@@ -154,6 +155,9 @@ export async function selectMidiConnection(val: string): Promise<void> {
     STATE.currentConnectionType = STATE.midiOutput ? 'usb' : null;
     STATE.isSwitchingToUsb = false;
     midiConnectionEvents.emit({ type: 'status' });
-    if (STATE.midiOutput) sendVolume(STATE.midiVolume);
+    if (STATE.midiOutput) {
+      sendRolandRemoteControl();
+      sendVolume(STATE.midiVolume);
+    }
   }
 }

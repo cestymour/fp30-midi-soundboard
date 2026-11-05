@@ -5,6 +5,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { STATE } from '../state.svelte.ts';
 import { MIDI_TABS } from '../config/midi.config.ts';
+import { MIDI_FX_CONTROLS, applyMidiFxValue } from '../fx/midi-fx.ts';
 import {
   ROLAND_ADDRESS, buildInstrumentPatchMessages, buildRolandDt1, sendAmbience, sendEmergencyStopMidi,
   sendInstrumentPatch, sendVolume,
@@ -142,5 +143,16 @@ describe('SysEx Roland', () => {
     sendAmbience(5);
     expect(sent).toHaveLength(1);
     expect(sent[0][0]).toBe(0xF0);
+  });
+});
+
+describe('effets piano', () => {
+  it('la réverbération règle l\'Ambiance du piano (SysEx), les autres effets envoient un CC sur le canal 4', () => {
+    const send = vi.fn();
+    STATE.bt = { status: 'connected', send } as unknown as typeof STATE.bt;
+    applyMidiFxValue(MIDI_FX_CONTROLS.find(c => c.key === 'reverb')!, 6);
+    applyMidiFxValue(MIDI_FX_CONTROLS.find(c => c.key === 'chorus')!, 40);
+    expect(send.mock.calls[0][0]).toEqual(buildRolandDt1(ROLAND_ADDRESS.ambience, [6]));
+    expect(send.mock.calls[1][0]).toEqual([0xB3, 93, 40]);
   });
 });
