@@ -191,3 +191,15 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 - **Où** : `src/midi/connection.ts` (`onstatechange`, `autoConnectUsbPiano`)
 - **Diagnostic** : au débranchement, `onstatechange` ne faisait que reconstruire la liste : `STATE.midiOutput` gardait le port et le badge restait « ● USB ». Un piano branché après le lancement n'était pas connecté automatiquement (seulement au premier accès Web MIDI).
 - **Conséquences** : badge trompeur après un débranchement ; après un rebranchement, il fallait choisir le piano à la main dans la liste.
+
+## 18. Arrêt d'urgence : un orgue continue de s'entendre avec beaucoup d'effet
+
+- **Statut** : ouvert (cause à confirmer sur le piano)
+- **Constaté** : 2026-11-05, par l'utilisateur sur le PC (branche `canal-4`, piano en Bluetooth) : avec un orgue et un effet réglé haut (« Delay » d'après l'utilisateur ; la popup des effets piano n'a pas de Delay, mais Release, Decay et la réverbération), l'arrêt d'urgence n'empêche pas d'entendre l'orgue « dans l'église » après l'appui
+- **Où** : `src/midi/midi.ts`, `sendEmergencyStopMidi()` (All Sound Off, All Notes Off, Reset All Controllers)
+- **Hypothèses** :
+  1. **queue de réverbération (Ambiance)** : All Sound Off coupe les notes du canal, mais la réverbération du piano est un effet général, hors canal ; ce qui est déjà dans la réverbération continue de sonner plusieurs secondes avec une Ambiance à 9 ou 10 (preset Cathédrale) ;
+  2. **Release (CC72) élevé** : les notes s'éteindraient lentement si le piano traite All Sound Off comme un relâchement (la documentation dit « turned off immediately », à vérifier).
+- **Test proposé** (sur le PC, orgue sur une tuile, popup des effets piano) : REV à 10 et REL au neutre, accord tenu, STOP : la queue continue-t-elle ? Puis REV à 0 et REL à fond, même essai. Pendant une queue de réverbération, descendre REV à 0 : la queue s'arrête-t-elle net ? (lors des essais du canal 4, passer l'Ambiance de 10 à 0 supprimait la réverbération)
+- **Pistes de correction** selon le résultat : couper l'Ambiance (0) à l'arrêt d'urgence, puis la rétablir quelques secondes plus tard ou au prochain instrument choisi ; et/ou remettre Release au neutre (CC72 = 64) avant All Sound Off.
+
