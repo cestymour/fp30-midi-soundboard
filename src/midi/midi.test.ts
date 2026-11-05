@@ -92,13 +92,15 @@ describe('routage USB / Bluetooth', () => {
 });
 
 describe('arrêt d\'urgence', () => {
-  it('All Notes Off et Reset All Controllers sur les 16 canaux', () => {
+  it('canal du clavier d\'abord, avec All Sound Off ; puis All Notes Off et Reset All Controllers partout', () => {
     const sent = mockUsbOutput();
     sendEmergencyStopMidi();
-    expect(sent).toHaveLength(32);
-    expect(sent[0]).toEqual([0xB0, 123, 0]);
-    expect(sent[1]).toEqual([0xB0, 121, 0]);
-    expect(sent[31]).toEqual([0xBF, 121, 0]);
+    expect(sent.slice(0, 3)).toEqual([[0xB3, 120, 0], [0xB3, 123, 0], [0xB3, 121, 0]]);
+    expect(sent).toHaveLength(3 + 15 * 2);
+    for (let ch = 0; ch < 16; ch++) {
+      expect(sent, `canal ${ch + 1}`).toContainEqual([0xB0 | ch, 123, 0]);
+      expect(sent, `canal ${ch + 1}`).toContainEqual([0xB0 | ch, 121, 0]);
+    }
   });
 });
 

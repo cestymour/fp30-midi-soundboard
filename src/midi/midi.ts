@@ -89,9 +89,19 @@ export function sendAmbience(value: number): void {
   sendMidi(buildRolandDt1(ROLAND_ADDRESS.ambience, [level]));
 }
 
+/**
+ * Arrêt d'urgence. Canal du clavier d'abord, avec All Sound Off (CC120) : il coupe tout
+ * de suite, queues de réverbération comprises, alors qu'All Notes Off laisse sonner les
+ * notes tenues par la pédale. Puis All Notes Off et Reset All Controllers sur les autres canaux.
+ */
 export function sendEmergencyStopMidi(): void {
+  const main = STATE.MIDI_CHANNEL;
+  sendMidi([0xB0 | main, 120, 0]); // All Sound Off
+  sendMidi([0xB0 | main, 123, 0]); // All Notes Off
+  sendMidi([0xB0 | main, 121, 0]); // Reset All Controllers
   for (let ch = 0; ch < 16; ch++) {
-    sendMidi([0xB0 | ch, 123, 0]); // All Notes Off
-    sendMidi([0xB0 | ch, 121, 0]); // Reset All Controllers
+    if (ch === main) continue;
+    sendMidi([0xB0 | ch, 123, 0]);
+    sendMidi([0xB0 | ch, 121, 0]);
   }
 }
