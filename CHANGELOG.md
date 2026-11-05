@@ -13,6 +13,9 @@ Cette version suit la revue de code de la 1.8.0 : le hors ligne devient fiable a
 - **« ⟳ Mettre à jour l'application »** remplace « Vider le cache et recharger ». Le bouton installe la dernière version publiée puis recharge, sans retélécharger les sons. Hors ligne, il ne recharge rien et affiche « Hors ligne : mise à jour impossible ». Avant, appuyé hors ligne, il pouvait empêcher l'application de s'ouvrir jusqu'au retour du réseau.
 - **Un Reset par type d'effets.** Le Reset d'un onglet MIDI ne remet à zéro que les effets du piano, et celui d'un onglet de sons que les effets audio. Chacun s'allume seulement pour ses effets. Avant, les deux Reset remettaient tout à zéro (bug n° 19).
 - **Popup des effets épurée.** Les valeurs chiffrées et les étiquettes en trois lettres au-dessus des curseurs ont disparu. Seul reste le nom sous chaque curseur, plus gros et plus lisible, en jaune quand l'effet est actif.
+- **Popup des effets sur téléphone en paysage.** Les curseurs étaient écrasés et les noms coupés lettre par lettre. Chaque carte montre maintenant son bouton reset en haut, un curseur haut, et le nom entier en bas. Les presets sont des tuiles basses, icône à côté du texte.
+- **Plein écran.** Un bouton « Plein écran » dans la popup À propos (⚙) masque la barre d'adresse et les barres du système, utile quand l'application est ouverte dans un onglet Chrome. Le même bouton en sort. Le geste ou la touche Retour du système en sortent aussi.
+- **Popup À propos** : plus haute que l'écran (téléphone en paysage), elle défile, et « Fermer » reste accessible.
 - **Piano Bluetooth proposé après un rechargement**, même dans Edge. La liste propose toujours « ᛒ FP-30X ». Si le navigateur ne sait pas retrouver le piano, le choisir ouvre le sélecteur avec ce seul piano. L'application ne se connecte jamais toute seule au lancement.
 - **Polices intégrées à l'application.** Elles ne viennent plus de Google : le premier lancement hors ligne a les bonnes polices. L'affichage est identique.
 
@@ -38,7 +41,8 @@ Avec `docs/checklist.md`, en particulier :
 - le téléchargement de tous les sons, puis un son jamais joué en mode avion ;
 - « Mettre à jour l'application » en ligne et en mode avion ;
 - les deux Reset séparés ;
-- la popup des effets en paysage et en portrait ;
+- la popup des effets en paysage et en portrait, et sur un téléphone en paysage ;
+- « Plein écran » dans un onglet Chrome, puis sa sortie ;
 - un son fort avec réverbération et basses à fond : plus de grésillement, et sans effet, le son n'a pas changé ;
 - la dernière rangée de boutons dans un onglet Chrome ;
 - après un rechargement, « ᛒ FP-30X » dans la liste.
