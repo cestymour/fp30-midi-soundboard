@@ -64,8 +64,8 @@ function updateAllMidiSelects(val: string): void {
 function populateMidiSelects(): void {
   const options: MidiSelectOption[] = [{ value: MIDI_SELECT_NONE, label: '— Connexion MIDI —' }];
   if (isBluetoothAvailable()) {
-    // Piano déjà connu (choisi, ou retrouvé au lancement) : s'y reconnecter sans sélecteur,
-    // et proposer à part le sélecteur pour un autre appareil
+    // Piano déjà connu (choisi, ou retrouvé au lancement) : s'y reconnecter (sans sélecteur, ou
+    // sélecteur limité à ce piano sans getDevices), et proposer à part le sélecteur complet
     const known = STATE.bt?.knownDeviceName;
     if (known) {
       options.push({ value: MIDI_SELECT_BLUETOOTH, label: 'ᛒ ' + known });

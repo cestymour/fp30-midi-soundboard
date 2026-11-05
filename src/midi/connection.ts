@@ -95,8 +95,8 @@ export function initBluetooth(): void {
       }
     },
   });
-  // Dernier piano retrouvé (si le navigateur le permet) : proposé dans les listes,
-  // pour s'y reconnecter sans sélecteur
+  // Dernier piano retrouvé : proposé dans les listes, jamais connecté sans qu'on le choisisse
+  // (sans sélecteur si le navigateur a getDevices, sinon sélecteur limité à ce piano)
   void STATE.bt.restore().then(found => {
     if (found) midiConnectionEvents.emit({ type: 'outputs' });
   });
