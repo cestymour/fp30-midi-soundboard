@@ -124,14 +124,23 @@ function autoConnectUsbPiano(): void {
 // CHANGEMENT DE CONNEXION (choix dans la liste MIDI)
 // ═══════════════════════════════════════════════════════
 
+/** Numéro du dernier choix : un choix plus récent l'emporte sur une connexion Bluetooth encore en cours */
+let selectionId = 0;
+
+/** Déconnecte le Bluetooth quel que soit son état, connexion en cours comprise (bug n° 15) */
+function disconnectBluetooth(): void {
+  if (STATE.bt && STATE.bt.status !== 'unsupported') STATE.bt.disconnect();
+}
+
 /** `val` : MIDI_SELECT_NONE, MIDI_SELECT_BLUETOOTH(_OTHER) ou l'id d'une sortie USB */
 export async function selectMidiConnection(val: string): Promise<void> {
+  const selection = ++selectionId;
   const pickAnotherDevice = val === MIDI_SELECT_BLUETOOTH_OTHER;
   if (pickAnotherDevice) val = MIDI_SELECT_BLUETOOTH;
   emitSelection(val);
 
   if (val === MIDI_SELECT_NONE) {
-    if (STATE.bt?.status === 'connected') STATE.bt.disconnect();
+    disconnectBluetooth();
     STATE.midiOutput = null;
     STATE.currentConnectionType = null;
     midiConnectionEvents.emit({ type: 'status' });
@@ -143,6 +152,8 @@ export async function selectMidiConnection(val: string): Promise<void> {
 
     if (STATE.bt?.status !== 'connected' || pickAnotherDevice) {
       await (pickAnotherDevice ? STATE.bt!.connect() : STATE.bt!.reconnect());
+      // Un autre choix a été fait pendant la connexion : c'est lui qui compte
+      if (selection !== selectionId) return;
       // Le statut a changé pendant connect() : relu sans le rétrécissement de type d'avant l'await
       const statusAfterConnect = STATE.bt?.status as BluetoothStatus | undefined;
       if (statusAfterConnect !== 'connected') {
@@ -162,7 +173,7 @@ export async function selectMidiConnection(val: string): Promise<void> {
   } else {
     // Connexion USB
     STATE.isSwitchingToUsb = true;
-    if (STATE.bt?.status === 'connected') STATE.bt.disconnect();
+    disconnectBluetooth();
     STATE.midiOutput = null;
 
     STATE.midiAccess!.outputs.forEach(out => {
