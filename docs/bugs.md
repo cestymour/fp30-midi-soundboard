@@ -93,6 +93,8 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
   - `[80 80 3C 00 3E 00]` juste après un paquet de Note On : les deux Note Off sont perdus.
 - **Pourquoi l'orgue** : un son de piano s'éteint de lui-même, une note bloquée passe inaperçue ; un orgue tient la note indéfiniment.
 - **Autre cause possible, non corrigée** : une écriture GATT qui échoue est abandonnée (`MIDI OUT (BT) échoué` dans la console), et le relâchement d'un accord produit une rafale d'écritures, une par note. Si des notes restent encore bloquées en 1.7.3, chercher ce message dans la console.
+- **Pistes de la revue 1.7.3** (`docs/revue-code-1.7.3.md`, n° 1) : le repli sur `writeValueWithResponse` échoue probablement aussi (la norme BLE MIDI n'impose que l'écriture sans réponse), donc un échec perd le message. Correctif proposé : renvoyer au piano le paquet reçu **tel quel** (une écriture par notification au lieu d'une par message, sans passer par le parseur, comme le loopback USB), et réessayer une écriture échouée. Hypothèse à vérifier : sur Android avant la version 13, notifications et écritures sur la même caractéristique partagent un tampon. À relever sur la tablette : `characteristic.properties`, les messages d'échec, le nombre de Note Off reçus et réécrits, la version d'Android.
+- **Défaut mineur restant** : `parseSysex` n'annule pas le running status, alors qu'un SysEx devrait le faire. Sans effet ici (le piano n'envoie pas de SysEx pendant le jeu).
 
 ## 9. Animation des effets piano : les 7 CC sont renvoyés à chaque frame
 
@@ -130,3 +132,25 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 - **Où** : `src/wake-lock.ts`, lu par `src/ui/components/AboutPopup.svelte`
 - **Diagnostic** : le navigateur libère le verrou quand la page passe en arrière-plan. `STATE.wakeLock` garde l'objet libéré : si la nouvelle demande échoue au retour au premier plan, la popup À propos affiche toujours « Wake Lock : actif ✓ ».
 - **Piste de correction** : tester `!STATE.wakeLock.released`, ou remettre `STATE.wakeLock` à `null` sur l'événement `release`.
+
+## 13. Instrument et effets non renvoyés au piano à la connexion ou à la reconnexion
+
+- **Statut** : ouvert
+- **Constaté** : 2026-11-05, revue de code (`docs/revue-code-1.7.3.md`, n° 2)
+- **Où** : `src/midi/connection.ts` (`onStatusChange` à `connected`, branche USB de `selectMidiConnection`), `src/ui/midi-ui.svelte.ts` (`selectInstrument`)
+- **Scénarios** :
+  - en Bluetooth, la liaison tombe (piano éteint puis rallumé) et on se reconnecte : seul le volume (CC7) est renvoyé ;
+  - on appuie sur un instrument avant d'être connecté : il est surligné, mais rien n'est envoyé.
+- **Diagnostic** : à la connexion, l'application ne renvoie que le volume. L'instrument surligné (`instruments.active`) et les effets affichés (`MIDI_FX_STATE`) ne sont pas renvoyés au piano.
+- **Conséquences** : l'interface affiche un instrument et des effets que le piano n'applique pas, jusqu'à ce qu'on réappuie sur le bouton.
+- **Piste de correction** : sur l'événement `status` passé à connecté (dans `bindMidiConnectionUI()`, pour garder les moteurs indépendants de l'interface), renvoyer l'instrument actif, puis les CC d'effets qui ne sont pas au neutre. À traiter avec le suivi du débranchement USB (revue 1.7.2, n° 4).
+
+## 14. Un son remplacé sous le même nom n'est jamais mis à jour sur la tablette
+
+- **Statut** : ouvert
+- **Constaté** : 2026-11-05, revue de code (`docs/revue-code-1.7.3.md`, n° 3)
+- **Où** : `src/sw.ts`, route `/sounds/` (`CacheFirst` dans `impro-audio`, sans révision) ; même chose pour `/images/`
+- **Scénario** : on remplace un fichier de `public/sounds/` par une autre version sous le même nom, et on ajuste son `start` / `end` dans la configuration, puis on publie.
+- **Diagnostic** : la configuration est mise à jour (precache), mais le Service Worker sert l'ancien fichier depuis `impro-audio` sans interroger le réseau. Le bouton « Vider le cache et recharger » ne vide pas ce cache (bug n° 7).
+- **Conséquences** : les nouveaux repères s'appliquent à l'ancien fichier : le son démarre ou s'arrête au mauvais endroit, sans message d'erreur. Seul l'effacement des données du site rétablit le bon fichier, ce qui vide aussi le cache de tous les autres sons.
+- **Piste de correction** : au minimum, une règle écrite dans le README (un fichier modifié change de nom). Sinon, versionner l'URL dans la configuration (`?v=2`), ou renouveler le cache audio en recopiant les entrées inchangées.
