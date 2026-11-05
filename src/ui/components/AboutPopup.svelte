@@ -152,6 +152,16 @@
     <div id="about-actions">
       {#if canFullscreen}
         <button id="about-fullscreen-btn" class:is-active={isFullscreen} aria-pressed={isFullscreen} onclick={toggleFullscreen}>
+          <!-- Icône dessinée (SVG) : les symboles Unicode de plein écran manquent aux polices d'Android -->
+          <svg class="about-fullscreen-icon" viewBox="0 0 16 16" aria-hidden="true">
+            {#if isFullscreen}
+              <!-- Coins tournés vers l'intérieur : sortir -->
+              <path d="M6 1v5H1M10 1v5h5M6 15v-5H1M10 15v-5h5" />
+            {:else}
+              <!-- Coins tournés vers l'extérieur : agrandir -->
+              <path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5" />
+            {/if}
+          </svg>
           {isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
         </button>
       {/if}
@@ -318,6 +328,10 @@
   }
 
   #about-fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text-secondary);
@@ -326,6 +340,17 @@
     border-color: var(--current-accent);
     color: var(--text-primary);
   }
+  .about-fullscreen-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
   #about-fullscreen-btn.is-active {
     border-color: var(--current-accent);
     color: var(--current-accent);
