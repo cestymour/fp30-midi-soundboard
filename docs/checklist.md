@@ -4,7 +4,9 @@
 
 - [ ] Chargement de l'app, onglets affichés, navigation entre onglets
 - [ ] Connexion du piano en **USB** (Web MIDI) : connexion automatique au chargement si le piano est déjà branché (badge « ● USB »), puis sélection manuelle dans la liste
-- [ ] Connexion du piano en **Bluetooth** (BLE MIDI), y compris le loopback des notes jouées
+- [ ] Connexion du piano en **Bluetooth** (BLE MIDI)
+- [ ] Son du clavier actif (ne **pas** faire Function + fa le plus grave) : un instrument choisi dans l'app est joué par les touches, sans le piano en double, en USB comme en Bluetooth ; accord tenu puis relâché avec un orgue : aucune note ne reste tenue
+- [ ] Effets piano : la réverbération (Ambiance, 0 à 10) s'entend en USB comme en Bluetooth ; en USB, Chrome demande une fois l'autorisation SysEx (« contrôler entièrement les appareils MIDI ») : l'accepter
 - [ ] Sélection d'instruments : le bon son sur le piano (Program Change + Bank Select MSB/LSB)
 - [ ] Volume MIDI, all-notes-off, bouton d'arrêt d'urgence
 - [ ] Popup FX MIDI : sliders, presets, reset, surbrillance du preset après fermeture/réouverture et après changement d'onglet
