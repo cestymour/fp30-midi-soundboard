@@ -1,7 +1,7 @@
 <!--
   AboutPopup.svelte — Popup « À propos » : version, état du Service Worker
   et du Wake Lock, hors ligne (stockage, téléchargement de tous les sons),
-  mise à jour de l'application
+  plein écran, mise à jour de l'application
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
@@ -17,6 +17,19 @@
   /** Mise à jour demandée et pas encore terminée */
   let updating     = $state(false);
   let updateStatus = $state('');
+
+  // Plein écran : utile dans un onglet Chrome, qui garde sinon sa barre d'adresse
+  const canFullscreen = document.fullscreenEnabled;
+  let isFullscreen    = $state(!!document.fullscreenElement);
+
+  async function toggleFullscreen(): Promise<void> {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+    } catch (err) {
+      console.warn('[Plein écran] Refusé :', err);
+    }
+  }
 
   // Hors ligne
   let storageStatus  = $state('Stockage : vérification...');
@@ -101,6 +114,9 @@
   }
 </script>
 
+<!-- Suivi du plein écran, y compris quand on le quitte par le geste ou la touche Retour -->
+<svelte:document onfullscreenchange={() => { isFullscreen = !!document.fullscreenElement; }} />
+
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions (fermeture par le bouton Fermer) -->
 <div
   id="about-overlay"
@@ -134,6 +150,11 @@
     </div>
     <div id="about-credit">by cestymour</div>
     <div id="about-actions">
+      {#if canFullscreen}
+        <button id="about-fullscreen-btn" class:is-active={isFullscreen} aria-pressed={isFullscreen} onclick={toggleFullscreen}>
+          {isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+        </button>
+      {/if}
       {#if updateStatus}<div id="about-update-status" role="status">{updateStatus}</div>{/if}
       <button id="about-reload-btn" onclick={updateApp} disabled={updating}>⟳ Mettre à jour l'application</button>
       <button id="about-close-btn" onclick={close}>Fermer</button>
@@ -163,6 +184,11 @@
     gap: 16px;
     min-width: 280px;
     max-width: 400px;
+    /* Plus haute que l'écran (téléphone en paysage) : on la fait défiler, Fermer reste accessible */
+    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 16px);
+    overflow-y: auto;
+    box-sizing: border-box;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.6),
                 0 0 80px color-mix(in srgb, var(--current-accent) 10%, transparent);
     font-family: var(--font-mono);
@@ -249,12 +275,14 @@
 
   /* ── Focus accessible (clavier uniquement) ── */
   #about-reload-btn:focus-visible,
+  #about-fullscreen-btn:focus-visible,
   #about-close-btn:focus-visible {
     outline: 2px solid var(--current-accent);
     outline-offset: -2px;
   }
 
   #about-reload-btn,
+  #about-fullscreen-btn,
   #about-close-btn {
     font-size: 12px;
     font-weight: 600;
@@ -289,6 +317,21 @@
     text-align: center;
   }
 
+  #about-fullscreen-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  #about-fullscreen-btn:hover {
+    border-color: var(--current-accent);
+    color: var(--text-primary);
+  }
+  #about-fullscreen-btn.is-active {
+    border-color: var(--current-accent);
+    color: var(--current-accent);
+    background: color-mix(in srgb, var(--current-accent) 12%, transparent);
+  }
+
   #about-close-btn {
     background: transparent;
     border: 1px solid var(--border);
@@ -297,5 +340,13 @@
   #about-close-btn:hover {
     border-color: var(--border-glow);
     color: var(--text-secondary);
+  }
+
+  /* Téléphone en paysage : popup plus compacte */
+  @media (orientation: landscape) and (max-height: 500px) {
+    #about-card {
+      padding: 14px 20px;
+      gap: 10px;
+    }
   }
 </style>
