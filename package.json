@@ -1,6 +1,6 @@
 {
   "name": "fp30-midi-soundboard",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": true,
   "type": "module",
   "description": "Soundboard MIDI et audio pour spectacles de théâtre d'improvisation",
@@ -12,6 +12,8 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/rajdhani": "^5.3.0",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@types/node": "^24.19.2",
     "@types/web-bluetooth": "^0.0.21",

@@ -169,6 +169,47 @@ describe('connexion', () => {
     expect(requestDevice).toHaveBeenCalledTimes(1);
   });
 
+  it('le nom du piano est mémorisé aussi, pour le proposer quand getDevices manque', async () => {
+    const bt = makeBt();
+    await bt.connect();
+    expect(storage.get('fp30-soundboard.bluetoothDeviceName')).toBe('FP-30X');
+  });
+
+  it('restore() sans getDevices (Edge) : piano proposé sous son nom, sans connexion automatique', async () => {
+    vi.stubGlobal('navigator', { bluetooth: { requestDevice } });
+    storage.set('fp30-soundboard.bluetoothDevice', 'fp30x');
+    storage.set('fp30-soundboard.bluetoothDeviceName', 'FP-30X');
+    const bt = makeBt();
+
+    expect(await bt.restore()).toBe(true);
+    expect(bt.knownDeviceName).toBe('FP-30X');
+    expect(statuses).toEqual([]);
+    expect(device.gatt.connected).toBe(false);
+
+    // Choisi dans la liste : sélecteur limité à ce piano
+    await bt.reconnect();
+    expect(requestDevice).toHaveBeenCalledTimes(1);
+    expect(requestDevice.mock.calls[0][0].filters).toEqual([{ name: 'FP-30X', services: [expect.any(String)] }]);
+    expect(bt.status).toBe('connected');
+  });
+
+  it('restore() sans getDevices ni piano mémorisé : rien à proposer', async () => {
+    vi.stubGlobal('navigator', { bluetooth: { requestDevice } });
+    const bt = makeBt();
+    expect(await bt.restore()).toBe(false);
+    expect(bt.knownDeviceName).toBeNull();
+  });
+
+  it('« Autre appareil » : sélecteur complet, même si un piano est mémorisé par son nom', async () => {
+    vi.stubGlobal('navigator', { bluetooth: { requestDevice } });
+    storage.set('fp30-soundboard.bluetoothDeviceName', 'FP-30X');
+    const bt = makeBt();
+    await bt.restore();
+
+    await bt.connect();
+    expect(requestDevice.mock.calls[0][0].filters).toEqual([{ services: [expect.any(String)] }]);
+  });
+
   it('restore() retrouve le dernier piano au lancement (getDevices)', async () => {
     storage.set('fp30-soundboard.bluetoothDevice', 'fp30x');
     const bt = makeBt();

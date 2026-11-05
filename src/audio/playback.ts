@@ -38,6 +38,8 @@ export function hasCurrentSound(): boolean {
 
 let _fadeTimer: ReturnType<typeof setInterval> | null = null;
 let _fadingAudio: MediaElementTrack | null = null;
+/** Le fondu en cours monte le volume (lancement ou reprise d'un son) */
+let _fadingIn = false;
 
 function cancelFade(): void {
   if (_fadeTimer) {
@@ -51,6 +53,7 @@ function cancelFade(): void {
     if (_fadingAudio !== STATE.currentAudio) _fadingAudio.dispose();
     _fadingAudio = null;
   }
+  _fadingIn = false;
 }
 
 function fadeAudio(
@@ -78,12 +81,14 @@ function fadeAudio(
       clearInterval(timer);
       _fadeTimer = null;
       _fadingAudio = null;
+      _fadingIn = false;
       onDone?.();
     }
   }, interval);
 
   _fadeTimer = timer;
   _fadingAudio = audio;
+  _fadingIn = delta > 0;
 }
 
 // ================================================================
@@ -226,17 +231,21 @@ export function togglePlayPause(): void {
   if (!STATE.currentAudio || !STATE.currentSoundItem) return;
 
   if (STATE.isPaused) {
-    // Resume avec fade in
-    STATE.currentAudio.volume = 0;
-    STATE.currentAudio.play().then(() => {
-      // Relus après la reprise de lecture, comme dans la version d'origine
-      const audio = STATE.currentAudio!;
-      const item  = STATE.currentSoundItem!;
+    // Reprise avec fondu d'entrée. Piste et son sont mémorisés avant play() : si le son
+    // est arrêté, ou un autre lancé, avant la fin de play(), la reprise ne fait rien (bug n° 10)
+    const audio = STATE.currentAudio;
+    const item  = STATE.currentSoundItem;
+    audio.volume = 0;
+    audio.play().then(() => {
+      if (STATE.currentAudio !== audio) return;
       STATE.isPaused = false;
       fadeAudio(audio, 0, STATE.audioVolume, 150, null);
       const { startOffset, endOffset } = getPlaybackRange(item);
       startProgressLoop(audio, item, startOffset, endOffset);
       playbackEvents.emit({ type: 'resume' });
+    }).catch((err: unknown) => {
+      // Le son reste en pause : un nouvel appui sur ▶ réessaie
+      if (STATE.currentAudio === audio) console.warn('Reprise impossible :', item.file, err);
     });
   } else {
     // Pause avec fade out
@@ -262,5 +271,8 @@ export function seekToRatio(ratio: number): void {
 /** Volume de lecture des sons (0-1) */
 export function setAudioVolume(volume: number): void {
   STATE.audioVolume = volume;
+  // Fondu d'entrée en cours : il s'arrête là, sinon il écraserait le volume choisi (bug n° 11).
+  // Un fondu de sortie (pause, STOP) continue jusqu'au silence.
+  if (_fadingIn && _fadingAudio === STATE.currentAudio) cancelFade();
   if (STATE.currentAudio) STATE.currentAudio.volume = STATE.audioVolume;
 }

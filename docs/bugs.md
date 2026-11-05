@@ -71,12 +71,14 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 7. Bouton « Vider le cache et recharger » : il ne vide aucun cache
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : le bouton s'appelle « ⟳ Mettre à jour l'application » (`src/app-update.ts`). Il ne désinscrit plus le Service Worker : il lui fait chercher la dernière version (`registration.update()`), attend qu'elle soit active, puis recharge. Hors ligne, il ne recharge rien et l'affiche. Aucun cache n'est vidé. Tests dans `app-update.test.ts` ; vérifié dans Chromium headless : site arrêté (pas de rechargement, message), et nouvelle version publiée pendant que l'application est ouverte (la page rechargée affiche encore l'ancien numéro, le bouton passe au nouveau)
 - **Constaté** : 2026-10-14, à la lecture du code (revue de la 1.7.2)
 - **Où** : `src/ui/components/AboutPopup.svelte`, `reloadWithoutCache()` et le libellé de `#about-reload-btn`
 - **Diagnostic** : le bouton désinscrit le Service Worker (`reg.unregister()`) puis recharge la page. Désinscrire un SW ne supprime pas ses caches : `impro-audio`, `impro-images`, les polices et le precache Workbox restent, de même que d'éventuels caches de la 1.6.x (`impro-app-*`, `impro-audio-*`, plus nettoyés depuis la 1.7.2). Garder `impro-audio` est souhaitable (pas de retéléchargement des sons, hors ligne préservé) ; c'est le libellé qui est trompeur.
 - **Conséquences** : l'utilisateur croit repartir d'un cache vide alors que non. Ce que le bouton fait vraiment : recharger l'application depuis le réseau, sans passer par le SW, donc récupérer la dernière version publiée.
-- **Piste de correction** : renommer le bouton selon ce qu'il fait, par exemple « ⟳ Mettre à jour et recharger » (et le commentaire d'en-tête du composant, « rechargement sans cache »). Ne pas ajouter de suppression des caches : on perdrait les sons hors ligne.
+- **Hors ligne** (2026-11-05, revue de la 1.8.0) : le Service Worker est désinscrit **avant** de savoir si le réseau répond. Hors ligne, la page rechargée n'est plus servie par le Service Worker : l'application ne s'ouvre plus tant que le réseau n'est pas revenu.
+- **But du bouton** (précisé par l'utilisateur, 2026-11-05) : forcer la mise à jour quand la tablette affiche encore l'ancienne version (numéro de version de la popup À propos). Les sons ne doivent pas être retéléchargés.
+- **Piste de correction** : renommer le bouton selon ce qu'il fait, par exemple « ⟳ Mettre à jour et recharger » (et le commentaire d'en-tête du composant, « rechargement sans cache »). Ne pas ajouter de suppression des caches : on perdrait les sons hors ligne. Ne pas désinscrire le Service Worker : lui demander de chercher la nouvelle version (`registration.update()`), attendre qu'elle soit installée, puis recharger ; si le réseau ne répond pas, ne rien recharger et le dire.
 
 ## 8. Parseur BLE MIDI : les messages de 1 ou 2 octets décalent la lecture du paquet
 
@@ -114,7 +116,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 10. Reprise après pause, puis Stop rapide : `TypeError`
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `togglePlayPause()` mémorise la piste et le son avant `play()`, la reprise ne fait rien si la piste n'est plus la piste courante, et un échec de `play()` laisse le son en pause (`.catch()`). Tests dans `playback.test.ts`
 - **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 5)
 - **Où** : `src/audio/playback.ts`, `togglePlayPause()`, callback `.then()` de la reprise
 - **Scénario** : un son en pause ; ▶, puis STOP (ou un autre son) avant que `play()` ne soit résolu.
@@ -124,7 +126,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 11. Volume déplacé pendant un fondu d'entrée : ignoré
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `setAudioVolume()` arrête le fondu d'entrée en cours (lancement ou reprise), et le volume choisi s'applique tout de suite. Un fondu de sortie (pause, STOP) n'est pas touché. Tests dans `playback.test.ts`
 - **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 6)
 - **Où** : `src/audio/playback.ts`, `fadeAudio()` et `setAudioVolume()`
 - **Scénario** : on lance un son et on baisse le volume dans les 300 ms du fondu d'entrée (150 ms pour une reprise).
@@ -134,7 +136,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 12. Statut Wake Lock « actif » après sa libération
 
-- **Statut** : ouvert
+- **Statut** : corrigé (2026-11-05) : `STATE.wakeLock` est remis à `null` sur l'événement `release` du verrou. Test dans `wake-lock.test.ts`
 - **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 9)
 - **Où** : `src/wake-lock.ts`, lu par `src/ui/components/AboutPopup.svelte`
 - **Diagnostic** : le navigateur libère le verrou quand la page passe en arrière-plan. `STATE.wakeLock` garde l'objet libéré : si la nouvelle demande échoue au retour au premier plan, la popup À propos affiche toujours « Wake Lock : actif ✓ ».
@@ -154,7 +156,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 14. Un son remplacé sous le même nom n'est jamais mis à jour sur la tablette
 
-- **Statut** : ouvert
+- **Statut** : non corrigé, **décision de l'utilisateur** (2026-11-05) : les sons ne sont jamais remplacés sous le même nom
 - **Constaté** : 2026-11-05, revue de code de la 1.7.3 (`git show 3583b57:docs/revue-code-1.7.3.md`, n° 3)
 - **Où** : `src/sw.ts`, route `/sounds/` (`CacheFirst` dans `impro-audio`, sans révision) ; même chose pour `/images/`
 - **Scénario** : on remplace un fichier de `public/sounds/` par une autre version sous le même nom, et on ajuste son `start` / `end` dans la configuration, puis on publie.
@@ -194,7 +196,7 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 
 ## 18. Arrêt d'urgence : un orgue continue de s'entendre avec beaucoup d'effet
 
-- **Statut** : ouvert (cause à confirmer sur le piano)
+- **Statut** : corrigé par la 1.8.0 (constaté par l'utilisateur le 2026-11-05 : le STOP coupe les sons d'orgue, même avec du delay ou de la réverbération dans le preset). Le court fondu de sortie des **sons** au STOP est voulu
 - **Constaté** : 2026-11-05, par l'utilisateur sur le PC (branche `canal-4`, piano en Bluetooth) : avec un orgue et un effet réglé haut (« Delay » d'après l'utilisateur ; la popup des effets piano n'a pas de Delay, mais Release, Decay et la réverbération), l'arrêt d'urgence n'empêche pas d'entendre l'orgue « dans l'église » après l'appui
 - **Où** : `src/midi/midi.ts`, `sendEmergencyStopMidi()` (All Sound Off, All Notes Off, Reset All Controllers)
 - **Hypothèses** :
@@ -203,3 +205,55 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 - **Test proposé** (sur le PC, orgue sur une tuile, popup des effets piano) : REV à 10 et REL au neutre, accord tenu, STOP : la queue continue-t-elle ? Puis REV à 0 et REL à fond, même essai. Pendant une queue de réverbération, descendre REV à 0 : la queue s'arrête-t-elle net ? (lors des essais du canal 4, passer l'Ambiance de 10 à 0 supprimait la réverbération)
 - **Pistes de correction** selon le résultat : couper l'Ambiance (0) à l'arrêt d'urgence, puis la rétablir quelques secondes plus tard ou au prochain instrument choisi ; et/ou remettre Release au neutre (CC72 = 64) avant All Sound Off.
 
+## 19. Reset des effets : un seul bouton remet à zéro les effets piano et les effets audio
+
+- **Statut** : corrigé (2026-11-05) : le Reset d'un onglet MIDI ne remet à zéro que les effets piano, celui d'un onglet de sons que les effets audio, et chacun a son témoin (`fxToolbar.anyMidiFx`, `fxToolbar.anyAudioFx`). `resetAllFXEffects()` est supprimé
+- **Constaté** : 2026-11-05, par l'utilisateur
+- **Où** : `src/ui/fx-overlays.svelte.ts` (`resetAllFXEffects()`, `fxToolbar.anyFx`), appelé par `MidiPanel.svelte` et `AudioPanel.svelte`
+- **Scénario** : un preset d'effets piano et un preset d'effets audio sont actifs ; on appuie sur Reset dans un onglet de sons.
+- **Diagnostic** : les deux boutons Reset appellent `resetAllFXEffects()`, qui remet à zéro les deux popups. Leur témoin jaune est aussi commun (`anyFx` : un effet piano **ou** audio actif). Historique : à leur création (2026-04-26, `ff55921`), chaque bouton ne remettait à zéro que ses effets. Le commit `78bbbd7` du 2026-04-29 (« maj bouton reset », version vanilla) les a branchés tous les deux sur `resetAllFXEffects()` et a fusionné les témoins. La refonte (1.7.0) l'a gardé tel quel.
+- **Conséquences** : couper la réverbération d'un son coupe aussi celle du piano, et inversement ; le témoin d'un panneau s'allume pour des effets qui ne le concernent pas.
+- **Piste de correction** : un Reset par panneau, qui ne remet à zéro que ses effets (`midiFxOverlay.reset()` ou `audioFxOverlay.reset()`), et un témoin par type (`anyMidiFx`, `anyAudioFx`).
+
+## 20. `MediaElementTrack.load()` rend la main avant la fin du chargement
+
+- **Statut** : corrigé (2026-11-05) : `load()` renvoie la promesse de chargement. Une piste libérée pendant son chargement tient cette promesse tout de suite (`_cancelLoad`), et `playSound()` voit qu'elle n'est plus la piste courante. Tests dans `audio-engine.test.ts`
+- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (n° 7 de la revue de la 1.8.0)
+- **Où** : `src/audio/audio-engine.ts`, `load()` (renvoie `this` au lieu de la promesse de chargement), appelé par `playSound()`
+- **Diagnostic** : `await audio.load()` n'attend rien. C'est l'appel suivant, dans `play()`, qui attend vraiment le chargement. Si le fichier échoue avant cet appel, la première promesse est rejetée sans personne pour l'attendre (« Uncaught (in promise) » dans la console), et le fichier est redemandé.
+- **Conséquences** : erreur dans la console et requête en double pour un fichier manquant. Le son est quand même signalé manquant.
+- **Piste de correction** : `return this._loadPromise;`
+
+## 21. Son qui grésille avec des effets audio réglés à fond
+
+- **Statut** : corrigé (2026-11-05) : limiteur entre `masterGain` et la sortie (`DynamicsCompressorNode`, seuil −2 dB, ratio 20, genou 0, attaque 3 ms), suivi d'un gain qui annule la compensation automatique du compresseur (`limiterTrimGain()`). Mesuré dans Chromium : sous −2 dBFS le son ne change pas (−30 dB en entrée, −30 dB en sortie), et +20 dB en entrée ressort à −0,6 dBFS. **À vérifier à l'oreille** sur la tablette : un son fort, volume à 100 %, réverbération et basses à fond
+- **Constaté** : par l'utilisateur, avec certains réglages (musiques de film), curseurs à fond ; revue de code de la 1.7.2 (n° 9 de la revue de la 1.8.0)
+- **Où** : `src/audio/audio-engine.ts`, `masterGain → destination`
+- **Diagnostic** : la réverbération (gain jusqu'à ×1,38), le delay (réinjection jusqu'à 0,95) et les boosts d'égaliseur (jusqu'à +15 dB) s'ajoutent au signal sec, et rien ne limite la sortie. Le compresseur du graphe a un ratio de 1 : il ne fait rien. Au-delà de 0 dBFS, la carte son écrête : c'est le grésillement.
+- **Piste de correction** : un limiteur (`DynamicsCompressorNode` : seuil −1 dB, ratio 20, genou 0, attaque 3 ms) entre `masterGain` et la sortie.
+
+## 22. Une piste libérée garde son élément `<audio>` et son décodeur
+
+- **Statut** : corrigé (2026-11-05) : `dispose()` vide la source de l'élément (`removeAttribute('src')` puis `load()`). Test dans `audio-engine.test.ts`. À vérifier sur la tablette : une longue série de sons, sans son qui refuse de démarrer
+- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (n° 10 de la revue de la 1.8.0)
+- **Où** : `src/audio/audio-engine.ts`, `MediaElementTrack.dispose()`
+- **Diagnostic** : `dispose()` met en pause et déconnecte la piste du graphe, mais garde la source de l'élément `<audio>`. Son décodeur reste alloué jusqu'au passage du ramasse-miettes, à chaque son joué. Chrome Android limite le nombre de lecteurs média simultanés.
+- **Conséquences** (non constatées) : mémoire qui grimpe pendant un long spectacle, et peut-être un son qui refuse de démarrer.
+- **Piste de correction** : à la fin de `dispose()`, `this.audio.removeAttribute('src'); this.audio.load();`
+
+## 23. Bas de l'écran coupé dans un onglet Chrome
+
+- **Statut** : corrigé (2026-11-05) : `#app` en `height: 100dvh`, après `100vh` en repli. À vérifier sur la tablette, dans un onglet Chrome, dans les deux orientations
+- **Constaté** : par l'utilisateur, souvent ; revue de code de la 1.7.2 (n° 11 de la revue de la 1.8.0)
+- **Où** : `src/css/global.css`, `#app { height: 100vh }`
+- **Diagnostic** : dans un onglet Chrome Android, `100vh` compte aussi la barre d'adresse : la page est plus haute que la partie visible, et la dernière rangée de boutons passe sous le bas de l'écran. L'application installée (sans barre d'adresse) n'est pas touchée.
+- **Piste de correction** : `height: 100dvh` (hauteur réellement visible), précédé de `100vh` pour les navigateurs qui ne le connaissent pas.
+
+## 24. Barre d'un panneau MIDI : « Reset » et la valeur du volume coupés sur téléphone en paysage
+
+- **Statut** : corrigé (2026-11-05) : en paysage étroit (moins de 900 px de large) ou peu haut (moins de 500 px), les libellés deviennent « FX » et « RAZ » (remise à zéro), au lieu d'être masqués sous 900 px et entiers au-dessus. Vérifié en 915 × 412 et 740 × 360 : la barre tient, valeur du volume comprise
+- **Constaté** : 2026-11-05, sur une capture en 915 × 412 (Chromium headless, téléphone en paysage), en corrigeant la popup des effets
+- **Où** : barre du panneau MIDI (`Panel.svelte`, `FxToolbar.svelte`, `VolumeControl.svelte`) ; les libellés ne sont masqués qu'en dessous de 900 px de large (`@media (orientation: portrait), (max-width: 900px)` dans `FxToolbar.svelte`)
+- **Diagnostic** : entre 900 et environ 1000 px de large, la barre affiche la liste de connexion, le badge, « Effets » / « Reset » avec leurs libellés, le STOP et le volume : elle déborde, le texte « Reset » touche le bord de son bouton et la valeur « 100 » du volume est coupée à droite.
+- **Conséquences** : purement visuel, les boutons restent utilisables.
+- **Piste de correction** : masquer aussi les libellés « Effets » / « Reset » quand l'écran est peu haut en paysage (`max-height: 500px`), comme sous 900 px.

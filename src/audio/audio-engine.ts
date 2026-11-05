@@ -33,6 +33,23 @@ export interface AudioEngineState {
 
 type EffectSettings = Omit<AudioEngineState, 'volume'>;
 
+/** Limiteur de sortie : au-dessus de −2 dBFS, le niveau ne monte plus que de 1 dB pour 20 */
+const LIMITER_THRESHOLD_DB = -2;
+const LIMITER_RATIO        = 20;
+
+/**
+ * Gain qui annule le gain de compensation automatique du compresseur Web Audio
+ * (« makeup gain » de la norme : (1 / gain à 0 dBFS)^0,6). Sans lui, tout le son
+ * serait remonté d'environ 1 dB. Avec lui, sous le seuil, rien ne change.
+ * Mesuré dans Chromium (OfflineAudioContext, sinus) : −30 dB en entrée → −30 dB
+ * en sortie ; +20 dB en entrée → −0,6 dB en sortie.
+ */
+export function limiterTrimGain(thresholdDb: number, ratio: number): number {
+  // Genou nul : à 0 dBFS en entrée, la sortie vaut seuil + (0 − seuil) / ratio
+  const fullRangeGainDb = thresholdDb * (1 - 1 / ratio);
+  return Math.pow(10, (fullRangeGainDb * 0.6) / 20);
+}
+
 class AudioEngine {
   defaultState: AudioEngineState;
   state: AudioEngineState;
@@ -60,6 +77,8 @@ class AudioEngine {
   reverb!: ConvolverNode;
   reverbWet!: GainNode;
   dryGain!: GainNode;
+  limiter!: DynamicsCompressorNode;
+  limiterTrim!: GainNode;
 
   constructor() {
     this.defaultState = {
@@ -162,7 +181,19 @@ class AudioEngine {
     this.reverb.connect(this.reverbWet);
     this.reverbWet.connect(this.masterGain);
 
-    this.masterGain.connect(ctx.destination);
+    // Limiteur en sortie : réverbération, delay et égaliseur s'ajoutent au son, et au-delà
+    // de 0 dBFS la sortie écrêtait (grésillement, bug n° 21)
+    this.limiter = ctx.createDynamicsCompressor();
+    this.limiterTrim = ctx.createGain();
+    this.limiter.threshold.value = LIMITER_THRESHOLD_DB;
+    this.limiter.knee.value = 0;
+    this.limiter.ratio.value = LIMITER_RATIO;
+    this.limiter.attack.value = 0.003;
+    this.limiter.release.value = 0.25;
+    this.limiterTrim.gain.value = limiterTrimGain(LIMITER_THRESHOLD_DB, LIMITER_RATIO);
+    this.masterGain.connect(this.limiter);
+    this.limiter.connect(this.limiterTrim);
+    this.limiterTrim.connect(ctx.destination);
     this.reverb.buffer = this.createImpulseResponse(ctx, 4.8, 3.8);
     this.reverbPreDelay.delayTime.value = 0.035;
 
@@ -473,6 +504,8 @@ export class MediaElementTrack {
   onended: (() => void) | null;
   onerror: ((error: Error) => void) | null;
   _loadPromise: Promise<MediaElementTrack> | null;
+  /** Termine le chargement en cours sans attendre le fichier (piste libérée) */
+  _cancelLoad: (() => void) | null;
 
   constructor(engine: AudioEngine, src: string) {
     this.engine = engine;
@@ -485,6 +518,7 @@ export class MediaElementTrack {
     this.onended = null;
     this.onerror = null;
     this._loadPromise = null;
+    this._cancelLoad = null;
 
     this.handleEnded = this.handleEnded.bind(this);
     this.handleError = this.handleError.bind(this);
@@ -546,6 +580,8 @@ export class MediaElementTrack {
         this.audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         this.audio.removeEventListener('canplaythrough', handleCanPlayThrough);
         this.audio.removeEventListener('error', handleError);
+        this._loadPromise = null;
+        this._cancelLoad = null;
       };
 
       const handleLoadedMetadata = () => {
@@ -559,14 +595,19 @@ export class MediaElementTrack {
         if (this.segmentEnd === null && isFinite(this.audio.duration)) {
           this.segmentEnd = this.audio.duration;
         }
-        this._loadPromise = null;
         resolve(this);
       };
 
       const handleError = () => {
         cleanup();
-        this._loadPromise = null;
         reject(new Error(`Impossible de charger ${this.src}`));
+      };
+
+      // Piste libérée pendant le chargement : la promesse est tenue tout de suite, et
+      // l'appelant (playSound) voit que la piste n'est plus la piste courante
+      this._cancelLoad = () => {
+        cleanup();
+        resolve(this);
       };
 
       this.audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -575,7 +616,8 @@ export class MediaElementTrack {
       this.audio.load();
     });
 
-    return this;
+    // La promesse elle-même : `await track.load()` attend vraiment le fichier (bug n° 20)
+    return this._loadPromise;
   }
 
   setPlaybackRange(startOffset: number, endOffset: number | null): void {
@@ -605,6 +647,7 @@ export class MediaElementTrack {
   }
 
   dispose(): void {
+    this._cancelLoad?.();
     this.stop();
     this.audio.removeEventListener('ended', this.handleEnded);
     this.audio.removeEventListener('error', this.handleError);
@@ -616,6 +659,10 @@ export class MediaElementTrack {
       try { this.sourceNode.disconnect(); } catch (_) {}
       this.sourceNode = null;
     }
+    // Vide la source : le navigateur libère tout de suite le décodeur et le fichier
+    // en mémoire, sans attendre le ramasse-miettes (bug n° 22)
+    this.audio.removeAttribute('src');
+    this.audio.load();
     this.engine.unregisterTrack(this);
   }
 

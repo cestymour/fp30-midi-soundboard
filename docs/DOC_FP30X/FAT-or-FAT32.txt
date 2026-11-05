@@ -1,0 +1,4 @@
+https://support.roland.com/hc/en-us/articles/36202958122907-Piano-General-What-types-of-USB-flash-drives-are-compatible-with-Roland-digital-pianos
+Piano General : Quels types de clés USB sont compatibles avec les pianos numériques Roland ?
+
+Les pianos numériques Roland* sont compatibles avec les clés USB du commerce (vendues séparément) d'une capacité maximale de 32 Go, formatées en FAT ou FAT32. Si la clé utilise un autre système de fichiers, veuillez la reformater sur votre ordinateur.

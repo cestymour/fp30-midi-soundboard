@@ -6,19 +6,15 @@
   import { STATE } from '../../state.svelte.ts';
   import { playSound, stopSound } from '../../audio/playback.ts';
   import { getSoundButtonState } from '../transport.svelte.ts';
+  import { getSoundImage } from '../../config/tabs.ts';
 
   let { item }: { item: AudioItem } = $props();
 
   const buttonState = $derived(getSoundButtonState(item));
   const isPlaying   = $derived(item === STATE.currentSoundItem);
 
-  /** Détecte si une chaîne est un chemin vers une image */
-  function isImagePath(str: string | undefined): boolean {
-    return !!str && /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(str);
-  }
-
   /** Image de couverture : `img`, ou `icon` si c'est un chemin d'image */
-  const imageSrc = $derived(item.img ?? (isImagePath(item.icon) ? item.icon : undefined));
+  const imageSrc = $derived(getSoundImage(item));
 
   const baseClass = $derived(
     'sound-btn' + (item.catClass ? ' ' + item.catClass : '') + (imageSrc ? ' sound-btn--img' : ''),

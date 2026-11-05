@@ -6,25 +6,23 @@
    - Fichiers audio (sounds/) : Cache First dans un cache stable
      (non versionné), mis en cache au premier accès
    - Images (images/) : Cache First, mises en cache au premier accès
-   - Polices Google Fonts : mises en cache pour le hors ligne
+   - Polices : embarquées dans l'application (precache)
 ================================================================ */
 
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { CacheFirst } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { RangeRequestsPlugin } from 'workbox-range-requests';
 import { clientsClaim } from 'workbox-core';
 import type { WorkboxPlugin } from 'workbox-core/types';
 import type { PrecacheEntry } from 'workbox-precaching';
+import { AUDIO_CACHE, IMAGES_CACHE } from './cache-names.ts';
 
 declare const self: ServiceWorkerGlobalScope & {
   /** Liste des fichiers à précacher, injectée au build par vite-plugin-pwa */
   __WB_MANIFEST: (PrecacheEntry | string)[];
 };
-
-const AUDIO_CACHE  = 'impro-audio';
-const IMAGES_CACHE = 'impro-images';
 
 // Activation immédiate sans attendre la fermeture des onglets
 self.skipWaiting();
@@ -77,24 +75,10 @@ registerRoute(
 );
 
 // ═══════════════════════════════════════════════════════
-// POLICES GOOGLE FONTS
+// ANCIENS CACHES DES POLICES GOOGLE (jusqu'à la 1.8.0)
 // ═══════════════════════════════════════════════════════
 
-// Feuille de style : servie depuis le cache, rafraîchie en arrière-plan
-registerRoute(
-  ({ url }) => url.origin === 'https://fonts.googleapis.com',
-  new StaleWhileRevalidate({
-    cacheName: 'impro-fonts-css',
-    // 0 = réponse opaque (la balise <link> ne fait pas de requête CORS)
-    plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
-  }),
-);
-
-// Fichiers de polices : immuables, Cache First
-registerRoute(
-  ({ url }) => url.origin === 'https://fonts.gstatic.com',
-  new CacheFirst({
-    cacheName: 'impro-fonts',
-    plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
-  }),
-);
+// Les polices sont désormais dans le precache : les caches Google Fonts ne servent plus
+self.addEventListener('activate', event => {
+  event.waitUntil(Promise.all(['impro-fonts-css', 'impro-fonts'].map(name => caches.delete(name))));
+});

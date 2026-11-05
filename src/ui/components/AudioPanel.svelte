@@ -6,7 +6,7 @@
   import type { AudioTab, Category, AudioItem } from '../../types.ts';
   import { STATE } from '../../state.svelte.ts';
   import { hasCurrentSound, setAudioVolume } from '../../audio/playback.ts';
-  import { audioFxOverlay, fxToolbar, resetAllFXEffects } from '../fx-overlays.svelte.ts';
+  import { audioFxOverlay, fxToolbar } from '../fx-overlays.svelte.ts';
   import Transport from './Transport.svelte';
   import SoundButton from './SoundButton.svelte';
   import CategoryTitle from './CategoryTitle.svelte';
@@ -43,8 +43,8 @@
   {#snippet right()}
     <FxToolbar
       kind="audio" openTitle="Mixer audio" resetTitle="Réinitialiser les effets audio"
-      isOpen={audioFxOverlay.isOpen} anyFx={fxToolbar.anyFx}
-      onopen={() => audioFxOverlay.open()} onreset={resetAllFXEffects}
+      isOpen={audioFxOverlay.isOpen} anyFx={fxToolbar.anyAudioFx}
+      onopen={() => audioFxOverlay.open()} onreset={() => audioFxOverlay.reset()}
     />
     <EmergencyStopButton extraClass="audio-stop-btn" />
     <VolumeControl

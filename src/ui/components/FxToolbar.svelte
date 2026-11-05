@@ -1,6 +1,6 @@
 <!--
   FxToolbar.svelte — Groupe de boutons « Effets » (ouvre la popup) et
-  « Reset » (remet tous les effets à zéro) de la barre d'un panneau.
+  « Reset » (remet à zéro les effets du panneau : piano ou sons) de la barre d'un panneau.
 -->
 <script lang="ts">
   let { kind, openTitle, resetTitle, isOpen, anyFx, onopen, onreset }: {
@@ -10,7 +10,7 @@
     resetTitle: string;
     /** Popup d'effets ouverte */
     isOpen:     boolean;
-    /** Au moins un effet actif (bouton Reset allumé) */
+    /** Au moins un effet de ce panneau actif (bouton Reset allumé) */
     anyFx:      boolean;
     onopen:     () => void;
     onreset:    () => void;
@@ -20,11 +20,11 @@
 <div class="fx-btn-group">
   <button type="button" class="{kind}-fx-open-btn" class:is-active={isOpen} title={openTitle} onclick={onopen}>
     <span class="{kind}-fx-open-btn__icon">🎚️</span>
-    <span class="{kind}-fx-open-btn__label">Effets</span>
+    <span class="{kind}-fx-open-btn__label"><span class="label-long">Effets</span><span class="label-short">FX</span></span>
   </button>
   <button type="button" class="{kind}-fx-reset-btn" class:is-active={anyFx} title={resetTitle} onclick={onreset}>
     <span class="{kind}-fx-reset-btn__icon">↺</span>
-    <span class="{kind}-fx-reset-btn__label">Reset</span>
+    <span class="{kind}-fx-reset-btn__label"><span class="label-long">Reset</span><span class="label-short">RAZ</span></span>
   </button>
 </div>
 
@@ -193,12 +193,19 @@
 
   /* ── Responsive ─────────────────────────────────────────────── */
 
-  @media (orientation: portrait), (max-width: 900px) {
-    .audio-fx-open-btn__label,
-    .audio-fx-reset-btn__label,
-    .midi-fx-open-btn__label,
-    .midi-fx-reset-btn__label {
+  .label-short {
+    display: none;
+  }
+
+  /* Paysage étroit ou peu haut (téléphone) : libellés courts, « FX » et « RAZ » (remise à zéro),
+     au lieu de les masquer. En portrait, la barre peut passer sur plusieurs lignes : libellés entiers. */
+  @media (orientation: landscape) and (max-width: 900px), (orientation: landscape) and (max-height: 500px) {
+    .label-long {
       display: none;
+    }
+
+    .label-short {
+      display: inline;
     }
 
     .audio-fx-open-btn,
@@ -207,24 +214,6 @@
     .midi-fx-reset-btn {
       min-width: 44px;
       padding: 0 8px;
-    }
-  }
-
-  /* En portrait, la toolbar peut se mettre sur plusieurs lignes : on réaffiche les libellés */
-  @media (orientation: portrait) {
-    .audio-fx-open-btn__label,
-    .audio-fx-reset-btn__label,
-    .midi-fx-open-btn__label,
-    .midi-fx-reset-btn__label {
-      display: inline;
-    }
-
-    .audio-fx-open-btn,
-    .audio-fx-reset-btn,
-    .midi-fx-open-btn,
-    .midi-fx-reset-btn {
-      min-width: unset;
-      padding: 0 12px;
     }
   }
 </style>

@@ -8,6 +8,8 @@ Mise à jour du 2026-11-05, pour la version 1.8.0 (branche `canal-4`). Ce docume
 
 Les bugs déjà inscrits dans `docs/bugs.md` y gardent leur numéro, rappelé ici.
 
+**Suite donnée (2026-11-05, version 1.9.0, branche `revue-1.8`)** : l'utilisateur a décidé point par point (colonne « Suite » ci-dessous). Les constats sans numéro dans `bugs.md` y ont été inscrits (n° 20 à 23) avant d'être corrigés. Les constats détaillés plus bas sont gardés tels qu'écrits pour la 1.8.0.
+
 ---
 
 ## Synthèse
@@ -16,25 +18,29 @@ Le côté **piano** (MIDI, Bluetooth, USB) est traité. La 1.8.0 envoie patchs e
 
 Le reste concerne l'**audio**, le **hors ligne** et l'**affichage**. Aucun de ces points n'a été touché depuis la 1.7.2.
 
-| # | Constat | Gravité | Certitude | `bugs.md` |
-|---|---------|---------|-----------|-----------|
-| 1 | Arrêt d'urgence : la queue d'effet d'un orgue continue de sonner | Moyenne | Constaté ; cause **à vérifier** | n° 18 |
-| 2 | Un son remplacé sous le même nom n'est jamais mis à jour sur la tablette | Moyenne | Code | n° 14 |
-| 3 | Bouton « Vider le cache et recharger » : il ne vide aucun cache | Faible | Code | n° 7 |
-| 4 | Reprise après pause puis Stop rapide : `TypeError` | Faible | Code | n° 10 |
-| 5 | Volume déplacé pendant un fondu d'entrée : ignoré | Faible | Code | n° 11 |
-| 6 | Volume appliqué deux fois (élément `<audio>` et gain master) | Faible | **À vérifier** | — |
-| 7 | `MediaElementTrack.load()` rend la main avant la fin du chargement | Faible | Code | — |
-| 8 | Statut Wake Lock « actif » affiché après sa libération | Faible | Code | n° 12 |
-| 9 | Pas de limiteur en sortie du moteur audio | Faible | **À vérifier** à l'oreille | — |
-| 10 | Une piste libérée ne libère pas son élément `<audio>` | Faible | **À vérifier** | — |
-| 11 | `#app` en `100vh` : bas de l'écran coupé dans un onglet Chrome | Faible | Code | — |
-| 12 | Cache des sons non persistant, préchargement à la main | Amélioration | — | — |
-| 13 | Polices Google chargées depuis le réseau | Amélioration | — | — |
-| 14 | Bluetooth au lancement : piano non retrouvé après un rechargement (Edge) | Amélioration | Constaté sur le PC ; tablette **à vérifier** | — |
-| 15 | Curseurs de volume : un appui saute à la position touchée | Amélioration | À décider | — |
-| 16 | Fin d'un son avec `end` non détectée en arrière-plan | Très faible | Code | — |
-| 17 | Code mort et nœuds audio inutilisés | Dette | — | — |
+| # | Constat | Gravité | Certitude | `bugs.md` | Suite (1.9.0) |
+|---|---------|---------|-----------|-----------|---------------|
+| 1 | Arrêt d'urgence : la queue d'effet d'un orgue continue de sonner | Moyenne | Constaté ; cause **à vérifier** | n° 18 | **Plus constaté** en 1.8.0 (essai de l'utilisateur sur le piano). Le fondu de sortie des sons au STOP est voulu |
+| 2 | Un son remplacé sous le même nom n'est jamais mis à jour sur la tablette | Moyenne | Code | n° 14 | **Laissé** : les sons ne sont jamais remplacés |
+| 3 | Bouton « Vider le cache et recharger » : il ne vide aucun cache | Faible | Code | n° 7 | **Corrigé** : « Mettre à jour l'application » (`src/app-update.ts`), sans désinscrire le SW, rien rechargé hors ligne |
+| 4 | Reprise après pause puis Stop rapide : `TypeError` | Faible | Code | n° 10 | **Corrigé** |
+| 5 | Volume déplacé pendant un fondu d'entrée : ignoré | Faible | Code | n° 11 | **Corrigé** |
+| 6 | Volume appliqué deux fois (élément `<audio>` et gain master) | Faible | **À vérifier** | — | **Laissé de côté** |
+| 7 | `MediaElementTrack.load()` rend la main avant la fin du chargement | Faible | Code | n° 20 | **Corrigé** |
+| 8 | Statut Wake Lock « actif » affiché après sa libération | Faible | Code | n° 12 | **Corrigé** |
+| 9 | Pas de limiteur en sortie du moteur audio | Faible | **À vérifier** à l'oreille | n° 21 | **Corrigé** (grésillement constaté par l'utilisateur) : limiteur compensé, transparent sous −2 dBFS (mesuré). À écouter sur la tablette |
+| 10 | Une piste libérée ne libère pas son élément `<audio>` | Faible | **À vérifier** | n° 22 | **Corrigé** |
+| 11 | `#app` en `100vh` : bas de l'écran coupé dans un onglet Chrome | Faible | Code | n° 23 | **Corrigé** (gêne constatée par l'utilisateur) |
+| 12 | Cache des sons non persistant, préchargement à la main | Amélioration | — | — | **Fait** : `persist()` au démarrage, « Télécharger tous les sons » (`src/offline.ts`) |
+| 13 | Polices Google chargées depuis le réseau | Amélioration | — | — | **Fait** : `@fontsource/*`, dans le precache, rendu identique au pixel |
+| 14 | Bluetooth au lancement : piano non retrouvé après un rechargement (Edge) | Amélioration | Constaté sur le PC ; tablette **à vérifier** | — | **Fait** : piano proposé sous son nom, sélecteur limité à ce piano sans `getDevices`. **Pas de connexion automatique** (décision : ne pas prendre le piano à un autre appareil) |
+| 15 | Curseurs de volume : un appui saute à la position touchée | Amélioration | À décider | — | **Voulu** : glisser ou toucher doivent marcher tous les deux |
+| 16 | Fin d'un son avec `end` non détectée en arrière-plan | Très faible | Code | — | **Non** (pas de correctif à base de minuterie) |
+| 17 | Code mort et nœuds audio inutilisés | Dette | — | — | **Plus tard**. S'y ajoute `formatValue`, qui ne sert plus qu'à `aria-valuetext` |
+
+Constats ajoutés par l'utilisateur, faits en 1.9.0 :
+- **Reset couplé** (bug n° 19) : les deux Reset remettaient à zéro les effets piano **et** audio, depuis le commit `78bbbd7` du 2026-04-29 (version vanilla, trois jours après la création des boutons, qui étaient séparés), gardé par la refonte. Chaque panneau a maintenant son Reset et son témoin.
+- **Popup des effets** : valeur chiffrée et trigramme retirés, nom du curseur plus lisible.
 
 ---
 
@@ -172,9 +178,11 @@ La fin d'un son avec `end` est détectée dans la boucle `requestAnimationFrame`
 
 ## Tests à ajouter
 
-1. `togglePlayPause` suivi d'un `stopSound` avant la résolution de `play()` (n° 4), avec les fausses pistes de `playback.test.ts`.
-2. `setAudioVolume` pendant un fondu d'entrée (n° 5).
-3. L'arrêt d'urgence, une fois le n° 1 corrigé : ordre et contenu des messages, Ambiance comprise.
+1. ~~`togglePlayPause` suivi d'un `stopSound` avant la résolution de `play()` (n° 4)~~ : écrit en 1.9.0 (`playback.test.ts`).
+2. ~~`setAudioVolume` pendant un fondu d'entrée (n° 5)~~ : écrit en 1.9.0.
+3. L'arrêt d'urgence : ordre et contenu des messages.
+
+Écrits en 1.9.0 : `audio-engine.test.ts` (chargement et libération d'une piste, gain du limiteur), `wake-lock.test.ts`, `app-update.test.ts`, `offline.test.ts`, et dans `bluetoothMIDI.test.ts` le piano proposé sans `getDevices` (118 tests).
 
 ---
 
@@ -203,7 +211,7 @@ La fin d'un son avec `end` est détectée dans la boucle `requestAnimationFrame`
 ## Outils, build, dépendances
 
 - `tools/regression/` compare avec le dernier tag (`v1.7.2` tant que `v1.7.3` n'est pas posé). La 1.8.0 sera taguée après le test sur la tablette en production.
-- Dépendances : aucune vulnérabilité à la revue 1.7.3. Des versions majeures existent (Vite 8, TypeScript 7, `vite-plugin-svelte` 7) : à prévoir entre deux saisons de spectacles.
+- Dépendances : aucune vulnérabilité à la revue 1.7.3. Le 2026-11-05, `npm audit` signale des failles modérées dans des dépendances de build (`deepmerge`, `fast-uri`, `glob`, tirées par l'outillage Workbox), rien qui parte dans l'application publiée. À traiter avec les mises à jour majeures. Des versions majeures existent (Vite 8, TypeScript 7, `vite-plugin-svelte` 7) : à prévoir entre deux saisons de spectacles.
 
 ## Points positifs
 

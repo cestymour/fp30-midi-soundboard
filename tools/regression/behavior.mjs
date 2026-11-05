@@ -18,7 +18,9 @@ const snap = async (label) => {
       open: o.classList.contains('is-open'), aria: o.getAttribute('aria-hidden'),
       active: [...o.querySelectorAll('.fx-preset-btn.is-active')].map(b => b.textContent.trim()),
       sliders: [...o.querySelectorAll('.fx-slider')].map(i => i.value + (i.classList.contains('is-modified') ? '*' : '')),
-      values: [...o.querySelectorAll('.fx-control__value')].map(v => v.textContent),
+      // Valeur lisible : affichée jusqu'à la 1.8.0, puis seulement en aria-valuetext du curseur
+      values: [...o.querySelectorAll('.fx-control')].map(c =>
+        c.querySelector('.fx-control__value')?.textContent ?? c.querySelector('.fx-slider')?.getAttribute('aria-valuetext')),
       resetOneDisabled: [...o.querySelectorAll('.fx-one-reset')].map(b => b.disabled),
       cards: [...o.querySelectorAll('.fx-control')].map(c => cn(c)),
     }; };

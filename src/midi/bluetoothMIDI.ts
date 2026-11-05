@@ -38,8 +38,19 @@ const RECONNECT_DELAY_MS       = 2000;
 const ADVERTISEMENT_TIMEOUT_MS = 10000;
 /** Identifiant du dernier piano choisi, pour le retrouver au lancement suivant */
 const LAST_DEVICE_STORAGE_KEY  = 'fp30-soundboard.bluetoothDevice';
+/** Nom du dernier piano choisi, pour le proposer au lancement quand getDevices manque */
+const LAST_DEVICE_NAME_STORAGE_KEY = 'fp30-soundboard.bluetoothDeviceName';
 
 const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+/** localStorage sans erreur (stockage indisponible : null) */
+function readStorage(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Classe une erreur Web Bluetooth. `null` : sélecteur fermé sans choisir
@@ -110,6 +121,11 @@ export function buildBleMidiPackets(bytes: readonly number[], packetSize = BLE_P
  * Le dernier piano reste connu (`knownDeviceName`) après une coupure ou une
  * déconnexion : `reconnect()` s'y reconnecte sans repasser par le sélecteur, ce
  * qui ne demande pas de geste de l'utilisateur.
+ *
+ * Au lancement, `restore()` retrouve le dernier piano par getDevices. Sans
+ * getDevices (Edge), il n'est connu que par son nom (`#rememberedName`) :
+ * `reconnect()` ouvre alors le sélecteur limité à ce nom. Aucune connexion
+ * n'est jamais lancée sans que l'utilisateur la choisisse.
  */
 export class BluetoothMIDI {
   #status: BluetoothStatus = 'idle';
@@ -121,6 +137,8 @@ export class BluetoothMIDI {
   #target: BluetoothDevice | null = null;
   /** Piano retrouvé par getDevices, pas encore connecté depuis le lancement */
   #restored: BluetoothDevice | null = null;
+  /** Nom du dernier piano, quand le navigateur ne permet pas de le retrouver (pas de getDevices) */
+  #rememberedName: string | null = null;
   #characteristic: BluetoothRemoteGATTCharacteristic | null = null;
   #onCharChange: ((event: Event) => void) | null = null;
   #stopWatching: (() => void) | null = null;
@@ -144,7 +162,9 @@ export class BluetoothMIDI {
   get status(): BluetoothStatus { return this.#status; }
   get error(): BluetoothErrorCode | null { return this.#error; }
   /** Nom du dernier piano choisi ou retrouvé au lancement (null si aucun) */
-  get knownDeviceName(): string | null { return this.#device ? (this.#device.name || 'Piano') : null; }
+  get knownDeviceName(): string | null {
+    return this.#device ? (this.#device.name || 'Piano') : this.#rememberedName;
+  }
 
   /**
    * Envoie un message MIDI (SysEx compris) via la caractéristique BLE,
@@ -177,8 +197,11 @@ export class BluetoothMIDI {
 
   // ─── Actions ─────────────────────────────────────────────────────────────
 
-  /** Ouvre le sélecteur du navigateur (geste de l'utilisateur requis) et se connecte au piano choisi */
-  async connect(): Promise<void> {
+  /**
+   * Ouvre le sélecteur du navigateur (geste de l'utilisateur requis) et se connecte au
+   * piano choisi. `name` : le sélecteur ne propose que l'appareil de ce nom.
+   */
+  async connect(name?: string): Promise<void> {
     if (!navigator.bluetooth) {
       this.#setStatus('unsupported');
       return;
@@ -189,7 +212,7 @@ export class BluetoothMIDI {
     let device: BluetoothDevice;
     try {
       device = await navigator.bluetooth.requestDevice({
-        filters:          [{ services: [MIDI_SERVICE_UUID] }],
+        filters:          [name ? { name, services: [MIDI_SERVICE_UUID] } : { services: [MIDI_SERVICE_UUID] }],
         optionalServices: [MIDI_SERVICE_UUID],
       });
     } catch (err) {
@@ -201,17 +224,22 @@ export class BluetoothMIDI {
     if (attempt !== this.#attempt) return;
     this.#detach();
     this.#device = device;
+    this.#rememberedName = null;
     try {
       localStorage.setItem(LAST_DEVICE_STORAGE_KEY, device.id);
+      if (device.name) localStorage.setItem(LAST_DEVICE_NAME_STORAGE_KEY, device.name);
     } catch {
       // stockage indisponible : pas de piano retrouvé au prochain lancement
     }
     await this.#connectTo(device, attempt);
   }
 
-  /** Se reconnecte au dernier piano, sans repasser par le sélecteur (sinon, ouvre le sélecteur) */
+  /**
+   * Se reconnecte au dernier piano, sans repasser par le sélecteur. Piano connu par son
+   * nom seulement : sélecteur limité à ce piano. Aucun piano connu : sélecteur complet.
+   */
   async reconnect(): Promise<void> {
-    if (!this.#device) return this.connect();
+    if (!this.#device) return this.connect(this.#rememberedName ?? undefined);
     const attempt = ++this.#attempt;
     this.#detach();
     await this.#connectTo(this.#device, attempt);
@@ -226,28 +254,31 @@ export class BluetoothMIDI {
   }
 
   /**
-   * Retrouve le dernier piano autorisé, si le navigateur le permet (getDevices).
-   * Renvoie true si un piano est retrouvé : `reconnect()` peut alors s'y connecter
-   * sans sélecteur.
+   * Retrouve le dernier piano au lancement, sans s'y connecter. Renvoie true si un piano
+   * est à proposer dans les listes (`knownDeviceName`) :
+   * - retrouvé par getDevices : `reconnect()` s'y connecte sans sélecteur ;
+   * - sinon (Edge, getDevices absent ou piano non retrouvé) : connu par son nom, et
+   *   `reconnect()` ouvre le sélecteur limité à ce piano.
    */
   async restore(): Promise<boolean> {
-    if (!navigator.bluetooth?.getDevices) return false;
-    let id: string | null;
-    try {
-      id = localStorage.getItem(LAST_DEVICE_STORAGE_KEY);
-    } catch {
-      return false;
+    if (!navigator.bluetooth || this.#device) return false;
+    const id = readStorage(LAST_DEVICE_STORAGE_KEY);
+    if (id && navigator.bluetooth.getDevices) {
+      try {
+        const device = (await navigator.bluetooth.getDevices()).find(d => d.id === id);
+        if (device && !this.#device) {
+          this.#restored = device;
+          this.#device = device;
+          return true;
+        }
+      } catch {
+        // fonction présente mais non autorisée
+      }
     }
-    if (!id) return false;
-    try {
-      const device = (await navigator.bluetooth.getDevices()).find(d => d.id === id);
-      if (!device || this.#device) return false;
-      this.#restored = device;
-      this.#device = device;
-      return true;
-    } catch {
-      return false; // fonction présente mais non autorisée
-    }
+    const name = readStorage(LAST_DEVICE_NAME_STORAGE_KEY);
+    if (!name || this.#device) return false;
+    this.#rememberedName = name;
+    return true;
   }
 
   // ─── Lien GATT ───────────────────────────────────────────────────────────

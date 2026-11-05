@@ -76,11 +76,8 @@
         {#each config.controls as control (control.key)}
           {@const value = controller.values[control.key]}
           {@const isModified = controller.isBuilt && isFxControlModified(control, value)}
+          <!-- Pas de valeur chiffrée ni d'étiquette en haut : sur scène, seule la position du curseur compte -->
           <div class="fx-control" class:is-modified={isModified} {...{ [attr.control]: control.key }}>
-            <div class="fx-control__head">
-              <span class="fx-control__tag">{control.label}</span>
-              <span class="fx-control__value" {...{ [attr.valueFor]: control.key }}>{controller.isBuilt ? control.formatValue(clampFxValue(control, value)) : '--'}</span>
-            </div>
             <div class="fx-slider-wrap">
               <div
                 class="fx-slider-rail"
@@ -95,6 +92,8 @@
                   class:is-modified={isModified}
                   {...{ [attr.sliderFor]: control.key }}
                   type="range"
+                  aria-label={control.shortLabel}
+                  aria-valuetext={controller.isBuilt ? String(control.formatValue(clampFxValue(control, value))) : undefined}
                   min={control.min}
                   max={control.max}
                   step={controller.isAnimating ? 'any' : control.step}
@@ -384,7 +383,7 @@
 
   .fx-control {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
     gap: 10px;
     min-width: 0;
     min-height: 0;
@@ -397,28 +396,6 @@
       var(--bg-card);
   }
 
-  .fx-control__head {
-    display: grid;
-    gap: 6px;
-    justify-items: center;
-  }
-
-  .fx-control__tag {
-    color: var(--current-accent);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-  }
-
-  .fx-control__value {
-    min-height: 30px;
-    color: var(--text-primary);
-    font-size: 12px;
-    text-align: center;
-    line-height: 1.05;
-  }
-
   .fx-control__foot {
     position: relative;
     z-index: 2;
@@ -428,8 +405,8 @@
     gap: 8px;
     min-height: 36px;
     padding: 0 2px;
-    color: var(--text-secondary);
-    font-size: 13px;
+    color: var(--text-primary);
+    font-size: 16px;
     background: var(--bg-card);
   }
 
@@ -437,7 +414,9 @@
     flex: 1;
     min-width: 0;
     text-align: center;
-    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
   }
 
   /* ── Bouton reset individuel ────────────────────────────────── */
@@ -583,8 +562,7 @@
 
   /* ── État modifié ────────────────────────────────────────────── */
 
-  .fx-control.is-modified .fx-control__tag,
-  .fx-control.is-modified .fx-control__value {
+  .fx-control.is-modified .fx-control__name {
     color: #ffcc66;
   }
 
@@ -671,7 +649,7 @@
     }
 
     .fx-control__foot {
-      font-size: 11px;
+      font-size: 14px;
       min-height: 32px;
     }
 
@@ -709,6 +687,80 @@
   @media (orientation: landscape) and (max-width: 520px) {
     .fx-presets {
       grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+    }
+  }
+
+  /* ── Téléphone en paysage (peu de hauteur) ──────────────────────
+     Les cartes sont trop étroites pour le nom et le reset côte à côte : le nom se coupait
+     lettre par lettre et écrasait le curseur. Ici, chaque carte empile reset, curseur et
+     nom (sur une ligne), et les presets sont des tuiles basses, icône à côté du texte. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .fx-popup {
+      padding: 8px;
+      gap: 6px;
+    }
+
+    .fx-presets {
+      max-height: 80px;
+      gap: 4px;
+      grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    }
+
+    .fx-preset-btn {
+      flex-direction: row;
+      min-height: 36px;
+      padding: 4px 6px;
+      gap: 4px;
+    }
+
+    .fx-preset-btn__icon,
+    .fx-preset-btn--reset .fx-preset-btn__icon {
+      font-size: 16px;
+    }
+
+    .fx-preset-btn__text {
+      width: auto;
+      align-self: center;
+    }
+
+    .fx-grid {
+      gap: 6px;
+    }
+
+    .fx-control {
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 4px;
+      padding: 6px 4px;
+    }
+
+    /* Nom et reset deviennent des lignes de la carte */
+    .fx-control__foot {
+      display: contents;
+    }
+
+    .fx-one-reset {
+      grid-row: 1;
+      justify-self: center;
+      width: 30px;
+      height: 30px;
+      font-size: 15px;
+    }
+
+    .fx-slider-wrap {
+      grid-row: 2;
+    }
+
+    .fx-slider-rail {
+      min-height: 0;
+      --fx-slider-span-min: 40px;
+    }
+
+    .fx-control__name {
+      grid-row: 3;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 </style>
