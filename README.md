@@ -284,6 +284,8 @@ npm run preview    # serves dist/ (with the Service Worker)
 
 To test on a tablet on the same network, add `-- --host` and see `docs/checklist.md`.
 
+Planned ideas and features (new sound tabs, looper, themes…) are listed in `docs/todo.md`; known bugs in `docs/bugs.md`, release notes in `CHANGELOG.md`.
+
 ---
 
 ### Releasing and PWA cache
@@ -589,6 +591,8 @@ npm run preview    # sert dist/ (avec le Service Worker)
 ```
 
 Pour tester sur une tablette du même réseau, ajouter `-- --host` et voir `docs/checklist.md`.
+
+Les idées et évolutions prévues (nouveaux onglets de sons, looper, thèmes…) sont listées dans `docs/todo.md` ; les bugs connus dans `docs/bugs.md`, les notes de version dans `CHANGELOG.md`.
 
 ---
 
