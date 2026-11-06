@@ -16,7 +16,7 @@ Chaque onglet est une entrée de `AUDIO_TABS` (`src/config/audio.config.ts`), av
 
 ## Looper (version 2.0)
 
-- [ ] **Coder un looper.** C'est une très grosse fonctionnalité, qui ferait passer l'application en 2.0. Il serait peut-être dans une fenêtre accessible depuis l'onglet piano. À concevoir : ce qui est enregistré (notes MIDI du piano, ou son audio), comment on lance, superpose et arrête les boucles, et le calage sur un tempo.
+- [ ] **Coder un looper.** C'est une très grosse fonctionnalité, qui ferait passer l'application en 2.0. Il serait peut-être dans une fenêtre accessible depuis l'onglet piano. À concevoir : ce qui est enregistré (notes MIDI du piano, ou son audio), comment on lance, superpose et arrête les boucles, et le calage sur un tempo. Étude en cours : `docs/feature-loop-station.md`.
 
 ## Thèmes (onglet à étudier)
 
