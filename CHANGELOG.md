@@ -2,6 +2,16 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.9.1 — 2026-11-06
+
+### Corrections
+
+- **Repères du neutre bien visibles dans les popups d'effets.** Les petits traits qui marquent la position « sans effet » de chaque curseur sont plus épais et plus clairs. Ceux d'un neutre au bout du curseur (0 en bas pour Chorus, High-pass, Reverb, Delay ; 20 kHz en haut pour Low-pass) étaient à moitié coupés par le bord : ils tombent maintenant pile au centre de la poignée quand l'effet est au neutre (bug n° 25).
+
+### À vérifier sur la tablette
+
+- Popups des effets piano et audio, en paysage, en portrait et sur un téléphone en paysage : les repères se voient bien, et avec Reset, chaque poignée est posée exactement sur ses repères.
+
 ## 1.9.0 — 2026-11-05
 
 Cette version suit la revue de code de la 1.8.0 : le hors ligne devient fiable avant un spectacle, la mise à jour se force depuis la popup À propos, et plusieurs petits défauts de lecture sont corrigés.
