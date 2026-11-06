@@ -192,8 +192,13 @@ export class FxOverlayController<Key extends string, Settings> {
       return;
     }
 
+    // Le centre de la poignée ne parcourt que la piste moins la largeur de la poignée :
+    // le repère est placé là où se trouve ce centre au neutre. Sans cela, un neutre à
+    // une extrémité (0 en bas, 20 kHz en haut) tombait au bout du rail, à moitié coupé.
+    const thumb     = parseFloat(getComputedStyle(input).getPropertyValue('--fx-thumb-size')) || 0;
+    const travel    = Math.max(0, L - thumb);
     const yTrackTop = (H - L) / 2;
-    const yFromTop  = yTrackTop + (1 - tClamped) * L;
+    const yFromTop  = yTrackTop + thumb / 2 + (1 - tClamped) * travel;
     const yInRail   = Math.max(0, Math.min(H, yFromTop));
     const pctTop    = (yInRail / H) * 100;
     this.neutralMarks[controlKey] = `${pctTop}%`;

@@ -13,6 +13,7 @@
 - [ ] Effets piano : la réverbération (Ambiance, 0 à 10) s'entend en USB comme en Bluetooth ; en USB, Chrome demande une fois l'autorisation SysEx (« contrôler entièrement les appareils MIDI ») : l'accepter
 - [ ] Sélection d'instruments : le bon son sur le piano (Program Change + Bank Select MSB/LSB)
 - [ ] Volume MIDI, bouton d'arrêt d'urgence (coupe tout de suite, réverbération comprise, même pédale enfoncée)
+- [ ] Popups FX : repères du neutre bien visibles de part et d'autre de chaque curseur ; après Reset, chaque poignée est posée pile sur ses repères, y compris en bout de course (Chorus, High-pass, Reverb, Delay, Low-pass)
 - [ ] Barre des panneaux sur téléphone en paysage : « FX » et « RAZ » lisibles, rien de coupé (valeur du volume comprise)
 - [ ] Popup FX MIDI : sliders, presets (Studio : son sec, brillant, notes courtes), reset, surbrillance du preset après fermeture/réouverture et après changement d'onglet ; les curseurs glissent sans à-coups pendant l'animation d'un preset, réverbération comprise ; nom sous chaque curseur lisible, sans valeur chiffrée
 - [ ] Reset séparés : avec un preset piano et un preset audio actifs, le Reset d'un onglet MIDI ne remet à zéro que les effets piano (le Reset des onglets de sons reste allumé), et inversement

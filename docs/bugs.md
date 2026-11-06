@@ -257,3 +257,11 @@ Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la 
 - **Diagnostic** : entre 900 et environ 1000 px de large, la barre affiche la liste de connexion, le badge, « Effets » / « Reset » avec leurs libellés, le STOP et le volume : elle déborde, le texte « Reset » touche le bord de son bouton et la valeur « 100 » du volume est coupée à droite.
 - **Conséquences** : purement visuel, les boutons restent utilisables.
 - **Piste de correction** : masquer aussi les libellés « Effets » / « Reset » quand l'écran est peu haut en paysage (`max-height: 500px`), comme sous 900 px.
+
+## 25. Popups des effets : repères du neutre peu visibles, et à moitié coupés aux extrémités
+
+- **Statut** : corrigé (2026-11-06)
+- **Constaté** : 2026-11-06, par l'utilisateur (« niveaux 0 » des curseurs qu'il ne voyait plus)
+- **Où** : `src/ui/FxOverlay.svelte` (`.fx-neutral-tick`), `src/ui/fx-overlay.svelte.ts` (`updateNeutralRailMarks()`)
+- **Diagnostic** : les repères étaient fins (2 px) et gris foncé, donc peu visibles, surtout depuis que la valeur chiffrée ne s'affiche plus. Leur position ne tenait pas compte de la largeur de la poignée : un neutre à une extrémité (0 en bas pour Chorus, High-pass, Reverb, Delay ; 20 kHz en haut pour Low-pass) tombait au bout du rail, au-delà de la course du centre de la poignée, à moitié coupé par le bord.
+- **Correction** : repères plus épais (3 px), plus longs et plus clairs, avec un léger halo ; placés au centre de la poignée au neutre. La taille de la poignée est une variable CSS (`--fx-thumb-size`) lue par le script, au lieu d'être répétée.
