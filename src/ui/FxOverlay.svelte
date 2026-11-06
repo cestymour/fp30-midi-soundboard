@@ -483,18 +483,19 @@
     --neutral-from-top-pct: 50%;
   }
 
+  /* Repères du neutre (niveau 0 d'un effet), de part et d'autre du curseur : bien visibles */
   .fx-neutral-tick {
     position: absolute;
     z-index: 0;
-    width: 11px;
-    height: 2px;
-    border-radius: 1px;
-    background: color-mix(in srgb, var(--text-muted) 75%, var(--border));
+    width: 13px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--text-secondary);
+    box-shadow: 0 0 4px color-mix(in srgb, var(--text-secondary) 45%, transparent);
     pointer-events: none;
     top: var(--neutral-from-top-pct, 50%);
     bottom: auto;
     transform: translateY(-50%);
-    opacity: 0.9;
   }
 
   .fx-neutral-tick--left  { left: 0; }
@@ -529,7 +530,15 @@
     }
   }
 
+  /* Taille de la poignée : une seule valeur, lue aussi par le script pour placer les
+     repères du neutre au centre de la poignée (fx-overlay.svelte.ts) */
+  .fx-slider.vol-slider {
+    --fx-thumb-size: 24px;
+  }
+
   .fx-slider.vol-slider::-webkit-slider-thumb {
+    width: var(--fx-thumb-size);
+    height: var(--fx-thumb-size);
     margin-top: -6px;
     border-color: var(--fx-slider-accent);
     box-shadow: 0 0 8px var(--fx-slider-accent);
@@ -556,6 +565,8 @@
   }
 
   .fx-slider.vol-slider::-moz-range-thumb {
+    width: var(--fx-thumb-size);
+    height: var(--fx-thumb-size);
     border-color: var(--fx-slider-accent);
     box-shadow: 0 0 8px var(--fx-slider-accent);
   }
@@ -601,16 +612,16 @@
       height: 40px;
     }
 
+    .fx-slider.vol-slider {
+      --fx-thumb-size: 20px;
+    }
+
     .fx-slider.vol-slider::-webkit-slider-thumb {
-      width: 20px;
-      height: 20px;
       margin-top: -4px;
       border-width: 2px;
     }
 
     .fx-slider.vol-slider::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
       border-width: 2px;
     }
   }
@@ -630,16 +641,16 @@
       height: 38px;
     }
 
+    .fx-slider.vol-slider {
+      --fx-thumb-size: 20px;
+    }
+
     .fx-slider.vol-slider::-webkit-slider-thumb {
-      width: 20px;
-      height: 20px;
       margin-top: -4px;
       border-width: 2px;
     }
 
     .fx-slider.vol-slider::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
       border-width: 2px;
     }
 
