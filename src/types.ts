@@ -78,6 +78,8 @@ export interface AudioItem {
   end?: number;
   /** Infobulle (par défaut : `name`) */
   title?: string;
+  /** Pas de fondu d'entrée : le son démarre tout de suite au volume choisi (bruitage qui commence net) */
+  noFade?: boolean;
   /** Classe CSS de couleur de catégorie (onglet animaux) */
   catClass?: string;
 }

@@ -199,6 +199,7 @@ export const AUDIO_TABS: AudioTab[] = [
             // start: 12.5,                     // Start time in seconds
             // end: 45.0,                       // End time in seconds
             // title: 'Custom tooltip',         // Tooltip text
+            // noFade: true,                    // No fade-in: starts at once at the chosen volume
             // catClass: 'animaux-ferme',       // CSS class for category color
           },
         ]
@@ -507,6 +508,7 @@ export const AUDIO_TABS: AudioTab[] = [
             // start: 12.5,                     // Temps de départ en secondes
             // end: 45.0,                       // Temps de fin en secondes
             // title: 'Tooltip personnalisé',   // Texte du tooltip
+            // noFade: true,                    // Pas de fondu d'entrée : démarre tout de suite au volume choisi
             // catClass: 'animaux-ferme',       // Classe CSS pour couleur de catégorie
           },
         ]
