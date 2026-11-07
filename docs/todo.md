@@ -10,9 +10,18 @@ Idées et évolutions demandées par l'utilisateur, pas encore planifiées. Les 
 
 Chaque onglet est une entrée de `AUDIO_TABS` (`src/config/audio.config.ts`), avec ses fichiers dans `public/sounds/<onglet>/`. Les ids suivent les règles du README (slug stable, unique). Penser au poids des fichiers : tout part dans le cache hors ligne (« Télécharger tous les sons »).
 
-- [ ] **Bruits** : clavier d'ordinateur, etc.
-- [ ] **Ambiances** : nature, ville, café, etc.
-- [ ] **Musiques cultes**, qui ne sont pas propres à un film (les musiques de film restent dans l'onglet Films). Par exemple : *You Can Leave Your Hat On*, Strauss *Ainsi parlait Zarathoustra*, Carl Orff *O Fortuna*.
+- [ ] **Compléter l'onglet Bruits** (32 boutons sur 32 places depuis la 1.10.0 : pour en ajouter, il faut en retirer ; la perceuse est déjà en commentaire dans la config). Idées de bruitages pas encore reprises (sans doublon avec les sons MIDI : le piano a déjà rire, cri, pas, applaudissements, téléphones, porte qui grince ou claque, voiture, sirène, train, avion, laser, coup de feu, coup de poing, explosion, pluie, tonnerre, vent, chien, galop…) :
+  - Maison : toc-toc à la porte, clés / serrure, chasse d'eau, robinet, réveil, tic-tac d'horloge / coucou, aspirateur, sèche-cheveux.
+  - Bureau : imprimante / photocopieuse, caisse enregistreuse, ascenseur « ding ».
+  - Action : verre brisé, gifle, fouet, chute / glissade, marteau.
+  - Transports : sifflet de train ou d'arbitre.
+  - Gags : prout, rot, boing / ressort, course de dessin animé, rire de sitcom, « ta-dam » de fanfare, cri de Wilhelm.
+  - Corps : éternuement, toux, ronflement, bâillement, huées du public, sifflement de drague, baiser.
+  - Fête : bouchon de champagne, canette qu'on ouvre, gorgée.
+- [ ] **Compléter l'onglet Animaux** : sons connus qui manquent dans l'onglet (pour remplir les cases libres si des sons passent dans Ambiances) : oie, perroquet, phoque / otarie, souris / rat, hippopotame, poussin, pie / geai. Un cheval au galop existe déjà en fichier (`animaux/cheval_galop.ogg`, ligne commentée) mais le MIDI a un « Galop cheval ».
+- [ ] **Bruitages sans fondu d'entrée** : l'option `noFade: true` existe (mise sur `sonnette-porte`). La passer sur les autres bruitages qui démarrent net, après essai à l'oreille (roulement de tambour, buzzers, ba-dum-tss, verre brisé…).
+- [ ] **Musiques cultes**, qui ne sont pas propres à un film (les musiques de film restent dans l'onglet Films). L'onglet Musiques existe depuis la 1.10.0 mais ne contient que la musique d'ascenseur : il manque les fichiers de *You Can Leave Your Hat On*, de Strauss *Ainsi parlait Zarathoustra* et de Carl Orff *O Fortuna*.
+- [ ] **Poids des sons** : `public/sounds/` fait environ 150 Mo (films 95, ambiances 42, bruits 8, animaux 5). Tout part dans le cache hors ligne : voir si les ambiances (les plus lourdes) peuvent être allégées.
 
 ## Looper (version 2.0)
 

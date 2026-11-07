@@ -2,6 +2,29 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.10.0 — 2026-11-07
+
+### Nouveautés
+
+- **Trois nouveaux onglets de sons**, avec la même grille que les Animaux (32 boutons, 8 par ligne en paysage, 4 en portrait) :
+  - **Bruits** (32 boutons) : bureau et technologie (clavier, machine à écrire, modem 56k, erreur Windows, notification, bip morse, appareil photo, machine à café), téléphone et sonnettes (sonnerie, vibreur, tonalités, sonnette de porte et de vélo, annonce SNCF, foule « Amen »), gags (roulement de tambour, ba-dum-tss, buzzers bonne et mauvaise réponse, bébé qui pleure ou rit, verre d'eau, briquet), feu, lames et outils (prend feu, épées, meurtre au couteau, tronçonneuse, scies, klaxon, tic-tac de bombe).
+  - **Ambiances** (26 boutons) : ville et lieux publics (ville, travaux, manifestation, gare, café, restaurant, discussions dehors et dedans, salle d'arcade, récréation, maternité, feux d'artifice), mer et nature (plage, mer, vagues et mouettes, mouettes, forêt, mare, troupeau, nuit à la campagne, vent, orage, feu de cheminée), peur (grotte, nuit angoissante, zombies).
+  - **Musiques** : pour l'instant un seul bouton, la musique d'ascenseur. Les musiques cultes prévues (*You Can Leave Your Hat On*, *Ainsi parlait Zarathoustra*, *O Fortuna*) n'ont pas encore leur fichier.
+- **Bruitages sans fondu d'entrée.** Un son peut démarrer net, tout de suite au volume choisi, au lieu de monter en 0,3 seconde. Utile pour un bruitage qui commence dès le début du fichier : la sonnette de porte est la première à en profiter.
+
+### À savoir
+
+- Les nouveaux sons s'ajoutent au cache hors ligne : `public/sounds/` fait maintenant environ 150 Mo (les ambiances, 42 Mo, sont les plus lourdes). Après la mise à jour, « Télécharger tous les sons » (popup À propos) les met en cache.
+- Dans l'onglet Animaux, le fichier de la cigale est renommé (`cigales_chant.mp3`) ; le bouton est inchangé.
+- Pour les développeurs : les sons de Bruits, d'Ambiances et de Musiques sont rangés dans `public/sounds/bruits/`, `ambiances/` et `musiques/`, les anciens fichiers à la racine de `sounds/` ont disparu. L'option `noFade: true` est documentée dans le README.
+
+### À vérifier sur la tablette
+
+- Les trois onglets : le nombre d'onglets dans la barre du haut (deux de plus qu'avant), les noms longs dans les boutons (« Mauvaise réponse », « Roulement de tambour », « Discussions dedans »), en paysage et en portrait.
+- L'onglet Musiques, avec son bouton unique.
+- La sonnette de porte démarre bien net, sans « clic » désagréable.
+- Hors ligne, après « Télécharger tous les sons » : tous les nouveaux sons jouent.
+
 ## 1.9.1 — 2026-11-06
 
 ### Corrections
