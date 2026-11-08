@@ -10,10 +10,11 @@ Production: https://cestymour.github.io/fp30-midi-soundboard/ (GitHub Pages). Hi
 
 ## Working rules
 
-- **Browser support**: everything must work on **Chrome 106** (106.0.5249.126, the stage tablet, Android 6.0, which cannot update Chrome). Before using a CSS or JS feature, check that it exists in Chrome 106; if it does not, add a fallback and check it. Known cases:
-  - `color-mix()` (Chrome 111): with `var()`, a fallback declaration placed before it does not work: the browser keeps `color-mix()` and drops it when computing values. Use `@supports not (color: color-mix(in srgb, red 50%, blue))` (see the end of `SoundButton.svelte`, bug n° 26).
+- **Browser support**: everything must work, and look the same, on **Chrome 106** (106.0.5249.126, the stage tablet, Android 6.0, which cannot update Chrome). Before using a CSS or JS feature, check that it exists in Chrome 106; if it does not, add a fallback and check it. Known cases:
+  - `color-mix()` (Chrome 111): keep writing it in the sources. At build time, the PostCSS plugin `tools/color-mix-compat.ts` (in `vite.config.ts`) rewrites each `color-mix(in srgb, …)` into `rgb(calc(…))` / `rgba(…)` on channel variables (`--name-r`, `-g`, `-b`, `-a`). A color variable declared in CSS as hex gets its channels automatically. A color variable set by script (`style:--panel-accent`, `style:--cat-accent`) must set its channels too, with `colorChannels()` (`src/ui/color-channels.ts`). An unsupported form (named color, another color space) fails the build. A fallback declaration placed before a `color-mix()` with `var()` does not work: the browser keeps `color-mix()` and drops it when computing values (bug n° 26).
   - `dvh` (Chrome 108): put a `vh` declaration before it.
   - Available: `:has()` and container queries (`cqh`, `cqw`) since Chrome 105.
+  - To check on a real Chrome 106 without the tablet: Chromium snapshot 1036838 (106.0.5249.0), `https://storage.googleapis.com/chromium-browser-snapshots/Win_x64/1036838/chrome-win.zip`, run with `--headless` (not `--headless=new`) and a fresh `--user-data-dir` (the Service Worker of a reused profile serves the previous build).
 - **Production**: every push to `main` deploys, and the app is used on stage. Never merge into or push `main` without the user's explicit approval. The user does the `git push` themselves unless they explicitly allow it for one task.
 - Small commits in French, in the style of the history, one commit per topic (one per bug fix).
 - **To-do**: `docs/todo.md` lists the user's planned ideas and features (preset review, new sound tabs, looper for 2.0, themes tab). Add new ideas there; when one is done, remove it and describe it in `CHANGELOG.md`.
