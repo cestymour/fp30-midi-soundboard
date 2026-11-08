@@ -10,6 +10,10 @@ Production: https://cestymour.github.io/fp30-midi-soundboard/ (GitHub Pages). Hi
 
 ## Working rules
 
+- **Browser support**: everything must work on **Chrome 106** (106.0.5249.126, the stage tablet, Android 6.0, which cannot update Chrome). Before using a CSS or JS feature, check that it exists in Chrome 106; if it does not, add a fallback and check it. Known cases:
+  - `color-mix()` (Chrome 111): with `var()`, a fallback declaration placed before it does not work: the browser keeps `color-mix()` and drops it when computing values. Use `@supports not (color: color-mix(in srgb, red 50%, blue))` (see the end of `SoundButton.svelte`, bug n° 26).
+  - `dvh` (Chrome 108): put a `vh` declaration before it.
+  - Available: `:has()` and container queries (`cqh`, `cqw`) since Chrome 105.
 - **Production**: every push to `main` deploys, and the app is used on stage. Never merge into or push `main` without the user's explicit approval. The user does the `git push` themselves unless they explicitly allow it for one task.
 - Small commits in French, in the style of the history, one commit per topic (one per bug fix).
 - **To-do**: `docs/todo.md` lists the user's planned ideas and features (preset review, new sound tabs, looper for 2.0, themes tab). Add new ideas there; when one is done, remove it and describe it in `CHANGELOG.md`.
