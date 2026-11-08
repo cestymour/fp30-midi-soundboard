@@ -451,4 +451,58 @@
     line-height: 1.1;
     color: color-mix(in srgb, var(--cat-accent, var(--text-secondary)) 55%, var(--text-secondary));
   }
+
+  /* ═══════════════════════════════════════════════════════
+    REPLI SANS color-mix() (Chrome < 111, ex. la tablette en Chrome 106, bug n° 26)
+    Un repli placé avant la déclaration ne sert à rien : avec var(), le navigateur
+    garde color-mix() puis l'abandonne au calcul (fond transparent, bordure blanche).
+    Ici, le bouton prend la couleur pure, et le calque ::after (fond gris) la laisse
+    transparaître par son opacité : opacité 0.78 = 22 % de couleur. Bordure en couleur pure.
+    Ce bloc ne s'applique pas aux navigateurs récents.
+  ════════════════════════════════════════════════════════ */
+  @supports not (color: color-mix(in srgb, red 50%, blue)) {
+    /* Barre de progression et lecture, tous les onglets audio */
+    .sound-btn::before {
+      background: var(--panel-accent);
+      opacity: 0.25;
+    }
+    .sound-btn.playing { background: var(--panel-accent); }
+    .sound-btn.playing::after { background: var(--bg-card); opacity: 0.9; }
+
+    /* Grille Animaux, Bruits, Ambiances (sans catClass : pas de --cat-accent, tuile grise) */
+    :global(.animals-grid) .sound-btn {
+      border-color: var(--cat-accent, var(--border));
+      background: var(--cat-accent, var(--bg-card));
+    }
+    :global(.animals-grid) .sound-btn:hover {
+      border-color: var(--cat-accent, var(--border-glow));
+      background: var(--cat-accent, var(--bg-card-hover));
+    }
+    :global(.animals-grid) .sound-btn.playing {
+      border-color: var(--cat-accent, var(--panel-accent));
+      background: var(--cat-accent, var(--panel-accent));
+      animation: none;
+    }
+    :global(.animals-grid) .sound-btn::after { background: var(--bg-card); opacity: 0.92; }
+    :global(.animals-grid) .sound-btn:hover::after { background: var(--bg-card-hover); opacity: 0.85; }
+    :global(.animals-grid) .sound-btn.playing::after { background: var(--bg-card); opacity: 0.8; }
+    :global(.animals-grid) .sound-btn::before {
+      background: var(--cat-accent, var(--panel-accent));
+      opacity: 0.3;
+    }
+
+    /* Onglet Musiques */
+    .sound-btn.musique-tuile {
+      border-color: var(--cat-accent);
+      background: var(--cat-accent);
+    }
+    .sound-btn.musique-tuile::after { background: var(--bg-card); opacity: 0.78; }
+    .sound-btn.musique-tuile:hover::after { background: var(--bg-card-hover); }
+    .sound-btn.musique-tuile.playing::after { opacity: 0.68; }
+    .sound-btn.musique-tuile::before {
+      background: var(--cat-accent);
+      opacity: 0.35;
+    }
+    .btn-sub { color: var(--cat-accent, var(--text-secondary)); }
+  }
 </style>
