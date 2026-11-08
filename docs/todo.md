@@ -20,8 +20,9 @@ Chaque onglet est une entrée de `AUDIO_TABS` (`src/config/audio.config.ts`), av
   - Fête : bouchon de champagne, canette qu'on ouvre, gorgée.
 - [ ] **Compléter l'onglet Animaux** : sons connus qui manquent dans l'onglet (pour remplir les cases libres si des sons passent dans Ambiances) : oie, perroquet, phoque / otarie, souris / rat, hippopotame, poussin, pie / geai. Un cheval au galop existe déjà en fichier (`animaux/cheval_galop.ogg`, ligne commentée) mais le MIDI a un « Galop cheval ».
 - [ ] **Bruitages sans fondu d'entrée** : l'option `noFade: true` existe (mise sur `sonnette-porte`). La passer sur les autres bruitages qui démarrent net, après essai à l'oreille (roulement de tambour, buzzers, ba-dum-tss, verre brisé…).
-- [ ] **Musiques : finir la maquette** (état actuel dans `docs/onglet-musique.md`). L'onglet est en 8 familles visibles, disposition de Films. Reste à :
-  - revoir l'organisation : les familles ne conviennent pas encore tout à fait ;
+- [ ] **Musiques : finir la maquette** (état actuel dans `docs/onglet-musique.md`). L'organisation en 11 familles est arrêtée (2026-11-08). Reste à :
+  - trouver la bonne place de Dr. Dre (scène de banlieue), et trancher pour Soul Bossa Nova (thème d'Austin Powers, donc musique de film) ;
+  - déplacer Noël (en commentaire dans Musiques) dans l'onglet Ambiances ;
   - revoir le visuel et les libellés (premier jet, pas définitif) ;
   - Mario et Tetris font peut-être doublon : en retirer un si la place manque ;
   - avant de publier : remettre `activeTab: 0` dans `src/ui/layout.svelte.ts` (l'appli s'ouvre temporairement sur Musiques ; ce changement n'est pas commité).
