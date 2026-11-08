@@ -2,6 +2,21 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.10.1 — 2026-11-08
+
+### Corrections
+
+- **Couleurs sur les vieilles tablettes (Chrome 106).** Sur une tablette dont Chrome ne peut plus être mis à jour (Android 6.0), les couleurs mélangées ne s'affichaient pas : tuiles des Animaux, Bruits, Ambiances et Musiques noires avec une bordure blanche, popups des effets transparentes (on voyait la grille derrière), presets sans contour, cadres des panneaux et boutons Effets/Reset sans teinte. Tout s'affiche maintenant comme sur un Chrome récent, où rien ne change (bug n° 26).
+
+### À savoir
+
+- L'application doit désormais rester compatible avec Chrome 106, la version de la tablette de scène.
+
+### À vérifier sur la tablette
+
+- Sur la tablette en Chrome 106 : les tuiles de chaque onglet de sons ont la couleur de leur famille ; le cadre des panneaux, les boutons Effets/Reset et le preset actif sont teintés ; la popup des effets a un fond opaque ; la barre de progression d'un son en lecture est colorée.
+- Sur un appareil récent : rien n'a changé.
+
 ## 1.10.0 — 2026-11-08
 
 ### Nouveautés
