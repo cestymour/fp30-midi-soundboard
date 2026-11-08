@@ -225,8 +225,8 @@ export const AUDIO_TABS: AudioTab[] = [
       {
         id: 'guerre', label: 'Guerre', icon: '🪖', color: '#a8b85a',
         items: [
-          { id: 'bomb-run',         name: 'Bombardier',         subtitle: 'Bomb Run (Docteur Folamour)',  icon: '💣', file: 'sounds/musiques/bomb_run_dr_folamour.mp3',               start: 54.5, catClass: 'musique-tuile', title: 'Bomb Run (Docteur Folamour)' },
-          { id: 'fortunate-son',    name: 'Vietnam',            subtitle: 'Creedence, Fortunate Son',     icon: '🎸', file: 'sounds/musiques/fortunate_son.mp3',                      start: 4, catClass: 'musique-tuile', title: 'Fortunate Son (Creedence Clearwater Revival)' },
+          { id: 'bomb-run',         name: 'Soldat en marche',   subtitle: 'Bomb Run (Docteur Folamour)',  icon: '🫡', file: 'sounds/musiques/bomb_run_dr_folamour.mp3',               start: 54.5, catClass: 'musique-tuile', title: 'Bomb Run (Docteur Folamour)' },
+          { id: 'fortunate-son',    name: 'Vietnam',            subtitle: 'Fortunate Son',                icon: '😎', file: 'sounds/musiques/fortunate_son.mp3',                      start: 4, catClass: 'musique-tuile', title: 'Fortunate Son (Creedence Clearwater Revival)' },
         ]
       },
       // ── Colonne 2 : comique ──
@@ -241,7 +241,7 @@ export const AUDIO_TABS: AudioTab[] = [
         id: 'burlesque', label: 'Burlesque, agitation', icon: '🏃', color: '#ffd23f',
         items: [
           { id: 'guillaume-tell',   name: 'Galop burlesque',    subtitle: 'tout finira bien (Guillaume Tell)', icon: '🏇', file: 'sounds/musiques/guillaume_tell_finale.mp3',         start: 0.2, catClass: 'musique-tuile', title: 'Ouverture de Guillaume Tell, finale (Rossini)' },
-          { id: 'danse-sabre',      name: 'Danse du sabre',     subtitle: 'frénésie, tout s\'emballe',    icon: '🤹', file: 'sounds/musiques/danse_du_sabre.mp3',                                 catClass: 'musique-tuile', title: 'Danse du sabre (Khatchatourian)' },
+          //{ id: 'danse-sabre',      name: 'Danse du sabre',     subtitle: 'frénésie, tout s\'emballe',    icon: '🤹', file: 'sounds/musiques/danse_du_sabre.mp3',                                 catClass: 'musique-tuile', title: 'Danse du sabre (Khatchatourian)' },
           { id: 'danse-hongroise',  name: 'Danse hongroise',    subtitle: 'Brahms, Chaplin barbier',      icon: '🪒', file: 'sounds/musiques/danse_hongroise_brahms.mp3',             start: 3.7, catClass: 'musique-tuile', title: 'Danse hongroise n° 5 (Brahms)' },
           { id: 'roi-montagne',     name: 'Roi de la montagne', subtitle: 'pas feutrés qui s\'emballent', icon: '🤫', file: 'sounds/musiques/dans_l_antre_du_roi_de_la_montagne.mp3', start: 72.5, catClass: 'musique-tuile', title: 'Dans l\'antre du roi de la montagne (Grieg)' },
           //{ id: 'radetzky',         name: 'Marche de Radetzky', subtitle: 'parade pompeuse, on tape des mains', icon: '🎺', file: 'sounds/musiques/marche_de_radetzky.mp3',           start: 4.3, catClass: 'musique-tuile', title: 'Marche de Radetzky (Johann Strauss père)' },

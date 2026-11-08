@@ -13,9 +13,9 @@ Règle : l'onglet Musiques ne reçoit que des **musiques cultes** (hors film), c
 | Tuile | Un emoji. En gros (`name`), ce qui identifie le mieux la musique pour le commun des gens : titre, artiste ou usage. En petit (`subtitle`), ce qu'elle fait entendre ou la situation. |
 | Fichiers | Gardés entiers ; le moment marquant est réglé avec `start` / `end`. Une coupe ne se fait qu'à la demande, et c'est une coupe nette, sans fondu (les fondus sont gérés par l'appli). |
 | Volume | Tous les fichiers de l'onglet sont à −18 LUFS, crête ≤ −1,5 dBTP (`ffmpeg`, `loudnorm` en deux passes). MP3 80 kb/s, 44,1 kHz stéréo, sans image de couverture. `musique_ascenseur.mp3` a été remplacé le 2026-11-08 par une version de 57 s, traitée de la même façon. |
-| Lignes commentées | Une tuile en commentaire est mise de côté, pas supprimée : la ligne et son mp3 restent (Marche de Radetzky, We Are the Champions, et Noël, à déplacer dans Ambiances). |
+| Lignes commentées | Une tuile en commentaire est mise de côté, pas supprimée : la ligne et son mp3 restent (Danse du sabre, Marche de Radetzky, We Are the Champions, et Noël, à déplacer dans Ambiances). |
 
-## 2. Les familles (35 tuiles affichées)
+## 2. Les familles (34 tuiles affichées)
 
 Organisation retenue le 2026-11-08, après quatre propositions comparées dans des onglets temporaires (supprimés depuis).
 
@@ -23,14 +23,14 @@ Organisation retenue le 2026-11-08, après quatre propositions comparées dans d
 |---|---|---|
 | 1 | 🔥 Épique | Zarathoustra, Walkyries, O Fortuna |
 | 1 | 🦇 Sombre, menace | Danse des chevaliers, Dies irae, Toccata de Bach, Lacrimosa |
-| 1 | 🪖 Guerre | Bombardier (Bomb Run), Vietnam (Fortunate Son) *(We Are the Champions en commentaire)* |
-| 2 | 🤡 Cirque, cabaret | Entrée du cirque, French cancan *(Radetzky en commentaire)* |
-| 2 | 🏃 Burlesque, agitation | Galop burlesque (Guillaume Tell), Danse du sabre, Danse hongroise, Roi de la montagne |
-| 2 | 👣 Démarches | Filature (Peter Gunn), Baby Elephant Walk, Dr. Dre |
-| 3 | 🎤 Tubes pop, rock, rap | Strip-tease, Careless Whisper, Pretty Woman, All by Myself, Dancing Queen, I Feel Good |
-| 3 | 🌤️ Douceur, sérénité | Réveil (Peer Gynt), Wonderful World |
+| 1 | 🪖 Guerre | Soldat en marche (Bomb Run), Vietnam (Fortunate Son) |
+| 2 | 🤡 Cirque, cabaret | Entrée du cirque, French cancan |
+| 2 | 🏃 Burlesque, agitation | Galop burlesque (Guillaume Tell), Danse hongroise, Roi de la montagne *(Danse du sabre et Radetzky en commentaire)* |
+| 2 | 👣 Démarches | Filature (Peter Gunn), Dr. Dre, Baby Elephant Walk, Soul Bossa Nova |
+| 3 | 🎤 Tubes pop, rock, rap | Strip-tease, Careless Whisper, Pretty Woman, All by Myself, Dancing Queen, I Feel Good *(We Are the Champions en commentaire)* |
+| 3 | 🍹 Lounge, bossa nova | Bar lounge (Ipanema), Ascenseur |
 | 4 | 🎻 Élégance classique | Bal viennois (Beau Danube bleu), Duo des fleurs |
-| 4 | 🍹 Lounge, bossa nova | Bar lounge (Ipanema), Ascenseur, Soul Bossa Nova |
+| 4 | 🌤️ Douceur, sérénité | Réveil (Peer Gynt), Wonderful World |
 | 4 | 🎮 Jeux, télé, saloon | Qui veut gagner…, Mario, Tetris, Saloon (Maple Leaf Rag) |
 
 Points ouverts :
@@ -38,7 +38,7 @@ Points ouverts :
 - **Soul Bossa Nova** est surtout connu comme thème d'Austin Powers : exception à la règle « hors film », à confirmer.
 - **Noël** est en commentaire, à déplacer dans l'onglet Ambiances.
 
-Les fichiers sont dans `public/sounds/musiques/` (≈ 62 Mo, 38 fichiers dont les 3 en commentaire). Ajoutés le 2026-11-08 : Dancing Queen (ABBA), I Feel Good (James Brown), Baby Elephant Walk (Mancini), Soul Bossa Nova (Quincy Jones). Leurs originaux sont dans `public/sounds/musiques/new_tmp/`, à supprimer avant le commit.
+Les fichiers sont dans `public/sounds/musiques/` (≈ 62 Mo, 38 fichiers dont les 4 en commentaire). Ajoutés le 2026-11-08 : Dancing Queen (ABBA), I Feel Good (James Brown), Baby Elephant Walk (Mancini), Soul Bossa Nova (Quincy Jones).
 
 ## 3. Fichiers coupés ou retouchés
 
