@@ -185,7 +185,8 @@ export async function playSound(item: AudioItem): Promise<void> {
 
   const audio = AudioEngineAPI.createTrack(src);
   audio.setPlaybackRange(startOffset, endOffset);
-  audio.volume = 0;
+  // Sans fondu d'entrée (`noFade`), le son part directement au volume choisi
+  audio.volume = item.noFade ? STATE.audioVolume : 0;
 
   STATE.currentAudio = audio;
   STATE.currentSoundItem = item;
@@ -211,7 +212,7 @@ export async function playSound(item: AudioItem): Promise<void> {
       return;
     }
 
-    fadeAudio(audio, 0, STATE.audioVolume, 300, null);
+    if (!item.noFade) fadeAudio(audio, 0, STATE.audioVolume, 300, null);
     startProgressLoop(audio, item, startOffset, endOffset);
   } catch (err) {
     console.warn('Fichier introuvable ou illisible :', src, err);

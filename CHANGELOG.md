@@ -2,6 +2,32 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.10.0 — 2026-11-08
+
+### Nouveautés
+
+- **Trois nouveaux onglets de sons** :
+  - **Bruits** (32 boutons, même grille que les Animaux : 8 par ligne en paysage, 4 en portrait) : bureau et technologie (clavier, machine à écrire, modem 56k, erreur Windows, notification, bip morse, appareil photo, machine à café), téléphone et sonnettes (sonnerie, vibreur, tonalités, sonnette de porte et de vélo, annonce SNCF, foule « Amen »), gags (roulement de tambour, ba-dum-tss, buzzers bonne et mauvaise réponse, bébé qui pleure ou rit, verre d'eau, briquet), feu, lames et outils (prend feu, épées, meurtre au couteau, tronçonneuse, scies, klaxon, tic-tac de bombe).
+  - **Ambiances** (26 boutons, même grille) : ville et lieux publics (ville, travaux, manifestation, gare, café, restaurant, discussions dehors et dedans, salle d'arcade, récréation, maternité, feux d'artifice), mer et nature (plage, mer, vagues et mouettes, mouettes, forêt, mare, troupeau, nuit à la campagne, vent, orage, feu de cheminée), peur (grotte, nuit angoissante, zombies).
+  - **Musiques** (34 musiques cultes, hors films) en 11 familles colorées sur 4 colonnes, deux tuiles par ligne : Épique, Sombre et menace, Guerre, Cirque et cabaret, Burlesque, Démarches, Tubes pop rock rap, Lounge et bossa nova, Élégance classique, Douceur, Jeux télé et saloon. Chaque tuile a un emoji, un nom en gros (titre, artiste ou usage) et en petit ce qu'elle fait entendre. Chaque musique démarre directement sur son passage le plus connu.
+- **Bruitages sans fondu d'entrée.** Un son peut démarrer net, tout de suite au volume choisi, au lieu de monter en 0,3 seconde. Utile pour un bruitage qui commence dès le début du fichier : la sonnette de porte est la première à en profiter.
+- **Volume nivelé** dans les trois nouveaux onglets : les bruits et les musiques sont au même niveau entre eux, les ambiances un peu plus bas (elles restent en fond). Quelques sons aux crêtes très fortes restent un peu en dessous (feu de cheminée, prend feu, machine à écrire…). Dans *Dans l'antre du roi de la montagne*, le début, très doux, a été remonté pour s'entendre dès le départ de la tuile.
+
+### À savoir
+
+- Les nouveaux sons s'ajoutent au cache hors ligne : `public/sounds/` fait maintenant environ 190 Mo (films 94 Mo, musiques 62 Mo, ambiances 24 Mo). Après la mise à jour, « Télécharger tous les sons » (popup À propos) les met en cache.
+- Dans l'onglet Animaux, le fichier de la cigale est renommé (`cigales_chant.mp3`) ; le bouton est inchangé.
+- L'onglet Musiques est une première version : le visuel et les libellés seront encore revus.
+- Pour les développeurs : les sons de Bruits, d'Ambiances et de Musiques sont rangés dans `public/sounds/bruits/`, `ambiances/` et `musiques/`, les anciens fichiers à la racine de `sounds/` ont disparu. Les options `noFade: true` (son) et `colSizes` (onglet en colonnes : nombre de familles par colonne) sont documentées dans le README.
+
+### À vérifier sur la tablette
+
+- Les trois onglets : le nombre d'onglets dans la barre du haut, les noms longs dans les boutons (« Mauvaise réponse », « Roulement de tambour », « Discussions dedans »), en paysage et en portrait.
+- L'onglet Musiques : les 4 colonnes et leurs familles, la lisibilité des tuiles, en paysage et en portrait. Chaque musique part au bon endroit.
+- Les volumes : passer d'un bruit à une musique ou à une ambiance ne fait pas de saut de volume gênant.
+- La sonnette de porte démarre bien net, sans « clic » désagréable.
+- Hors ligne, après « Télécharger tous les sons » : tous les nouveaux sons jouent.
+
 ## 1.9.1 — 2026-11-06
 
 ### Corrections

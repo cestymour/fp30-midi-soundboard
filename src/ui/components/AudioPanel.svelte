@@ -23,6 +23,11 @@
   /** Catégories réparties en colonnes (onglets avec `cols`) */
   const columns = $derived.by((): Category<AudioItem>[][] => {
     if (!tab.cols || tab.cols <= 1) return [];
+    // Répartition donnée par l'onglet : colSizes[i] catégories dans la colonne i
+    if (tab.colSizes) {
+      let next = 0;
+      return tab.colSizes.map(size => tab.categories.slice(next, next += size));
+    }
     const colCount     = tab.cols;
     const blocksPerCol = Math.ceil(tab.categories.length / colCount);
     const cols: Category<AudioItem>[][] = Array.from({ length: colCount }, () => []);
@@ -66,9 +71,13 @@
       {#each columns as col, colIdx (colIdx)}
         <div class="audio-col">
           {#each col as cat (cat.id)}
-            <div class="audio-cat-block">
+            <div class="audio-cat-block" style:--cat-accent={tab.catCols ? cat.color : undefined}>
               <CategoryTitle {cat} />
-              <div class="audio-cat-grid">
+              <div
+                class="audio-cat-grid"
+                data-cols={tab.catCols}
+                style:grid-template-columns={tab.catCols ? `repeat(${tab.catCols}, 1fr)` : undefined}
+              >
                 {#each cat.items as item (item.id)}
                   <SoundButton {item} />
                 {/each}

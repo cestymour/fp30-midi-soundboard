@@ -78,6 +78,20 @@ describe('changement de son', () => {
   });
 });
 
+describe("fondu d'entrée", () => {
+  it('par défaut, le son démarre au silence puis monte', async () => {
+    const a = await play(A);
+    expect(a.volume).toBe(0);
+    vi.advanceTimersByTime(1000);
+    expect(a.volume).toBe(STATE.audioVolume);
+  });
+
+  it('`noFade` : le son démarre tout de suite au volume choisi', async () => {
+    const a = await play({ ...A, noFade: true });
+    expect(a.volume).toBe(STATE.audioVolume);
+  });
+});
+
 describe('fondus simultanés', () => {
   it('une pause pendant le fondu d\'entrée met bien le son en pause', async () => {
     const a = await play(A);
