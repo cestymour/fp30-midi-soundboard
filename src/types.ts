@@ -78,6 +78,8 @@ export interface AudioItem {
   end?: number;
   /** Infobulle (par défaut : `name`) */
   title?: string;
+  /** Ligne en petit sous le nom (ce que la musique fait entendre, ou la situation) */
+  subtitle?: string;
   /** Pas de fondu d'entrée : le son démarre tout de suite au volume choisi (bruitage qui commence net) */
   noFade?: boolean;
   /** Classe CSS de couleur de catégorie (onglet animaux) */
@@ -89,6 +91,9 @@ export type AudioCategory = Category<AudioItem>;
 export interface AudioTab extends TabBase<AudioItem> {
   /** Affichage en colonnes avec titres de catégorie (si > 1) */
   cols?: number;
+  /** Mode colonnes : nombre de tuiles par ligne dans une catégorie (3 par défaut).
+   *  Les tuiles prennent alors la couleur de leur catégorie (variable --cat-accent). */
+  catCols?: number;
   /** Grille spéciale animaux (4×8 en paysage, 8×4 en portrait) */
   gridType?: 'animals';
 }

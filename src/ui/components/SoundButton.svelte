@@ -51,7 +51,7 @@
   style:--progress-transition={buttonState.transition}
   title={item.title ?? item.name}
   onclick={handleClick}
->{#if imageSrc}<span class="btn-icon"><img src={imageSrc} alt={item.name} /></span>{:else}<span class="btn-icon">{item.icon ?? '▶'}</span>{/if}<span class="btn-label">{item.name}</span></button>
+>{#if imageSrc}<span class="btn-icon"><img src={imageSrc} alt={item.name} /></span>{:else if item.icon || !item.subtitle}<span class="btn-icon">{item.icon ?? '▶'}</span>{/if}<span class="btn-label">{item.name}</span>{#if item.subtitle}<span class="btn-sub">{item.subtitle}</span>{/if}</button>
 
 <style>
   /* Toutes les règles qui visent .sound-btn sont ici, dans leur ordre d'origine,
@@ -391,5 +391,64 @@
 
   :global(.animals-grid) .sound-btn.playing::after {
     background: color-mix(in srgb, var(--cat-accent, transparent) 20%, var(--bg-card));
+  }
+
+  /* ═══════════════════════════════════════════════════════
+    ONGLET MUSIQUES (mode colonnes, catCols) — classes posées par catClass
+    musique-tuile    : tuile teintée de la couleur de sa famille (--cat-accent, posée
+                       par AudioPanel sur la catégorie), nom en gros, sous-titre en petit
+    musique-manquant : bordure rouge en pointillés et tuile estompée, le fichier mp3
+                       n'est pas encore ajouté (la tuile garde la couleur de sa famille)
+  ════════════════════════════════════════════════════════ */
+  .sound-btn.musique-tuile {
+    gap: 2px;
+    padding: 4px 6px;
+    border-color: color-mix(in srgb, var(--cat-accent) 60%, var(--border));
+  }
+  .sound-btn.musique-tuile::after {
+    background: color-mix(in srgb, var(--cat-accent) 22%, var(--bg-card));
+  }
+  .sound-btn.musique-tuile.musique-manquant {
+    border: 2px dashed #ff3b3b;
+    opacity: 0.55;
+  }
+  .sound-btn.musique-tuile.playing {
+    border-color: var(--cat-accent);
+  }
+  .sound-btn.musique-tuile.playing::after {
+    background: color-mix(in srgb, var(--cat-accent) 32%, var(--bg-card));
+  }
+  .sound-btn.musique-tuile::before {
+    background: color-mix(in srgb, var(--cat-accent) 35%, transparent);
+  }
+
+  .musique-tuile .btn-icon {
+    font-size: clamp(14px, 30cqh, 40px);
+  }
+  /* En lecture, l'emoji garde sa place (masqué) : le carré stop s'affiche à sa place,
+     sans faire remonter le nom et le sous-titre sous le carré */
+  .sound-btn.musique-tuile.playing .btn-icon {
+    font-size: clamp(14px, 30cqh, 40px);
+    visibility: hidden;
+  }
+  .sound-btn.musique-tuile.playing .btn-icon::after {
+    visibility: visible;
+  }
+  .musique-tuile .btn-label {
+    font-size: clamp(11px, min(17cqh, 11cqw), 20px);
+    color: var(--text-primary);
+  }
+  /* Sans emoji (variante texte) : le nom prend la place */
+  .musique-tuile:not(:has(.btn-icon)) .btn-label {
+    font-size: clamp(12px, min(22cqh, 13cqw), 24px);
+  }
+  .musique-tuile.playing .btn-label { color: var(--cat-accent); }
+
+  .btn-sub {
+    font-size: clamp(9px, min(12cqh, 8.5cqw), 14px);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    color: color-mix(in srgb, var(--cat-accent, var(--text-secondary)) 55%, var(--text-secondary));
   }
 </style>

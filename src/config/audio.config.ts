@@ -24,7 +24,7 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'poule-cot-cot',     name: 'Poule : Cot-cot',     icon: '🐔',   file: 'sounds/animaux/poule_gloussement.mp3',                              catClass: 'animaux-ferme',      title: 'Poule Gloussement' },
           { id: 'coq-cocorico',      name: 'Coq : Cocorico',      icon: '🐓',   file: 'sounds/animaux/coq_cocorico.ogg',                                   catClass: 'animaux-ferme',      title: 'Coq Cocorico' },
           { id: 'oiseau-cui-cui',    name: 'Oiseau : Cui-cui',    icon: '🐦',   file: 'sounds/animaux/chant_des_oiseaux.mp3',                              catClass: 'animaux-oiseau',     title: 'Chant des oiseaux Gazouillement' },
-          { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️',  file: 'sounds/animaux/pigeon_roucoulement.mp3',                            catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
+          { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️',   file: 'sounds/animaux/pigeon_roucoulement.mp3',                            catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
           { id: 'lion-tigre-roarrr', name: 'Lion/tigre : Roarrr', icon: '🦁',   file: 'sounds/animaux/lion_tigre_rugissement.mp3',                         catClass: 'animaux-savane',     title: 'Lion/tigre Rugissement' },
           { id: 'hyene-hi-hi',       name: 'Hyène : Hi-hi',       icon: '🐆',   file: 'sounds/animaux/hyene_rire.mp3',                                     catClass: 'animaux-savane',     title: 'Hyène Rire' },
 
@@ -33,7 +33,7 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'ane-i-an',          name: 'Âne : I-An',          icon: '🫏',   file: 'sounds/animaux/ane_braiement.mp3',                                  catClass: 'animaux-ferme',      title: 'Âne Braiement' },
           { id: 'dindon-glouglou',   name: 'Dindon : Glouglou',   icon: '🦃',   file: 'sounds/animaux/dindon_glouglou.mp3',                                catClass: 'animaux-ferme',      title: 'Dindon Glouglou' },
           { id: 'canard-coin-coin',  name: 'Canard : Coin-coin',  icon: '🦆',   file: 'sounds/animaux/canard_cancanement.mp3',                             catClass: 'animaux-ferme',      title: 'Canard Cancanement' },
-          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛', file: 'sounds/animaux/corbeau_croassement.mp3',                            catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
+          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛',   file: 'sounds/animaux/corbeau_croassement.mp3',                            catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
           { id: 'aigle-cri-percant', name: 'Aigle : Cri perçant', icon: '🦅',   file: 'sounds/animaux/aigle_faucon_cri_percant.mp3',                       catClass: 'animaux-oiseau',     title: 'Aigle / Faucon Cri perçant' },
           { id: 'elephant',          name: 'Éléphant',            icon: '🐘',   file: 'sounds/animaux/elephant_barrissement.mp3',      start: 0.5, end: 6, catClass: 'animaux-savane',     title: 'Éléphant Barrissement' },
           { id: 'singe-ouh-ouh',     name: 'Singe : Ouh-ouh',     icon: '🐒',   file: 'sounds/animaux/singe_cris.mp3',                                     catClass: 'animaux-savane',     title: 'Singe Cris' },
@@ -113,8 +113,8 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'scie-egoine',             name: 'Scie égoïne',          icon: '🪚', file: 'sounds/bruits/scie_egoine.mp3' },
 
           // ── Ajouts récents ──
-          { id: 'klaxon',                  name: 'Klaxon',               icon: '🚗', file: 'sounds/bruits/klaxon-voiture.mp3' },
-          { id: 'tic-tac-bombe',           name: 'Tic-tac bombe',        icon: '💣', file: 'sounds/bruits/tic-tac-bombe.mp3' },
+          { id: 'klaxon',                  name: 'Klaxon',               icon: '🚗', file: 'sounds/bruits/klaxon-voiture.mp3',                                  noFade: true },
+          { id: 'tic-tac-bombe',           name: 'Tic-tac bombe',        icon: '💣', file: 'sounds/bruits/tic-tac-bombe.ogg' },
           { id: 'tronconneuse',            name: 'Tronçonneuse',         icon: '🪚', file: 'sounds/bruits/bruit_tronconneuse.ogg' },
           //{ id: 'perceuse',                name: 'Perceuse',             icon: '🔧', file: 'sounds/bruits/bruit-perceuse.mp3' },
         ]
@@ -172,21 +172,114 @@ export const AUDIO_TABS: AudioTab[] = [
   },
 
   // ════════════════════════════════════════════════════════
-  // ONGLET — Musiques (musiques cultes, hors films ; même grille que les Animaux)
+  // ONGLET — Musiques (musiques cultes, hors films ; même disposition que Films)
   // ════════════════════════════════════════════════════════
+  // Une famille = une catégorie visible (titre, emoji et couleur ; les tuiles prennent la couleur
+  // de leur famille, classe musique-tuile). Les familles comiques et dramatiques ne se mélangent pas.
+  // Sur la tuile : en gros, ce qui identifie la musique pour le commun des gens (`name`) ; en petit,
+  // ce qu'elle fait entendre ou la situation (`subtitle`). Tuile en pointillés rouges (classe
+  // musique-manquant) = le mp3 n'est pas encore dans public/sounds/musiques/ : un clic ne joue rien.
+  // Quand le fichier est ajouté, retirer musique-manquant de catClass.
+  // MAQUETTE : 8 familles réparties sur 4 colonnes (2 familles par colonne, dans l'ordre ci-dessous).
+  //
+  // Retirés (ids gardés, à ne pas réutiliser) :
+  //   { id: 'bolero',           name: 'Boléro',            file: 'sounds/musiques/bolero_ravel.mp3' },             // montée trop longue
+  //   { id: 'hallelujah',       name: 'Hallelujah',        file: 'sounds/musiques/hallelujah_leonard_cohen.mp3' }, // au piano
+  //   { id: 'canon-pachelbel',  name: 'Canon',             file: 'sounds/musiques/canon_pachelbel.mp3' },          // au piano
+  //   { id: 'final-countdown',  name: 'Final Countdown',   file: 'sounds/musiques/the_final_countdown.mp3' },      // pas de scène évidente
+  //   { id: 'dont-stop-me-now', name: 'Don\'t Stop Me Now', file: 'sounds/musiques/dont_stop_me_now.mp3' },
+  //   { id: 'marseillaise',     name: 'Marseillaise',      file: 'sounds/musiques/la_marseillaise.mp3' },          // trop politique
+  //   { id: 'looney-tunes',     name: 'Looney Tunes',      file: 'sounds/musiques/looney_tunes.mp3' },
+  //   { id: 'moonwalk',         name: 'Billie Jean',       file: 'sounds/musiques/billie_jean.mp3' },
+  //   { id: 'vol-bourdon',      name: 'Vol du bourdon',    file: 'sounds/musiques/vol_du_bourdon.mp3' },           // déjà dans Kill Bill (Films)
+  //   { id: 'stayin-alive',     name: 'Stayin\' Alive',    file: 'sounds/musiques/stayin_alive.mp3' },
+  //   { id: 'remise-diplome',   name: 'Remise de diplôme', file: 'sounds/musiques/pomp_and_circumstance.mp3' },
   {
     id: 'musique',
     label: 'Musiques',
     icon: '🎵',
     accent: '#ffcc55',
-    gridType: 'animals',
+    cols: 4,
+    catCols: 2,
     categories: [
+      // ── Colonne 1 : dramatique ──
       {
-        id: 'toutes-les-musiques', label: 'Toutes les musiques', icon: '🔊', color: '#ffcc55',
+        id: 'epique', label: 'Épique, drame', icon: '🔥', color: '#ff6a4d',
         items: [
-          { id: 'ascenseur', name: 'Ascenseur', icon: '🛗', file: 'sounds/musiques/musique_ascenseur.mp3' },
+          { id: 'o-fortuna',        name: 'O Fortuna',          subtitle: 'chœur apocalyptique',          icon: '😱', file: 'sounds/musiques/o_fortuna_carmina_burana.mp3',           start: 1.2, end:315, catClass: 'musique-tuile', title: 'O Fortuna (Carmina Burana, Orff)' },
+          { id: 'zarathoustra',     name: 'Zarathoustra',       subtitle: '« 2001 », révélation',         icon: '🌅', file: 'sounds/musiques/ainsi_parlait_zarathoustra.mp3',         start: 57, catClass: 'musique-tuile', title: 'Ainsi parlait Zarathoustra (Strauss)' },
+          { id: 'toccata-bach',     name: 'Toccata de Bach',    subtitle: 'orgue de Dracula',             icon: '🦇', file: 'sounds/musiques/toccata_fugue_bach.mp3',                 start: 1.5, catClass: 'musique-tuile', title: 'Toccata et fugue en ré mineur (Bach), les 68 premières secondes' },
+          { id: 'dies-irae',        name: 'Dies irae',          subtitle: 'Verdi, colère divine',         icon: '⚡', file: 'sounds/musiques/dies_irae_verdi.mp3',                    start: 7.4, catClass: 'musique-tuile', title: 'Requiem, Dies irae (Verdi)' },
+          { id: 'danse-chevaliers', name: 'Danse des chevaliers', subtitle: 'Prokofiev, le puissant arrive', icon: '👑', file: 'sounds/musiques/danse_des_chevaliers_prokofiev.mp3',  start: 9.2, catClass: 'musique-tuile', title: 'Roméo et Juliette, Danse des chevaliers (Prokofiev)' },
+          { id: 'lacrimosa',        name: 'Lacrimosa',          subtitle: 'Requiem de Mozart, deuil',     icon: '🕯️', file: 'sounds/musiques/lacrimosa_mozart.mp3',                   start: 1, end: 233, catClass: 'musique-tuile', title: 'Requiem, Lacrimosa (Mozart)' },
         ]
-      }
+      },
+      {
+        id: 'guerre', label: 'Guerre', icon: '🪖', color: '#a8b85a',
+        items: [
+          { id: 'bomb-run',         name: 'Bombardier',         subtitle: 'Bomb Run (Docteur Folamour)',  icon: '💣', file: 'sounds/musiques/bomb_run_dr_folamour.mp3',               start: 54.5, catClass: 'musique-tuile', title: 'Bomb Run (Docteur Folamour)' },
+          { id: 'walkyries',        name: 'Walkyries',          subtitle: 'Wagner, charge des hélicos',   icon: '🚁', file: 'sounds/musiques/chevauchee_des_walkyries.mp3',           start: 130.5, catClass: 'musique-tuile', title: 'La Chevauchée des Walkyries (Wagner)' },
+          { id: 'fortunate-son',    name: 'Vietnam',            subtitle: 'Creedence, Fortunate Son',     icon: '🎸', file: 'sounds/musiques/fortunate_son.mp3',                      start: 4, catClass: 'musique-tuile', title: 'Fortunate Son (Creedence Clearwater Revival)' },
+        ]
+      },
+      // ── Colonne 2 : comique ──
+      {
+        id: 'poursuite-comique', label: 'Poursuite, filature (comique)', icon: '🏃', color: '#ffd23f',
+        items: [
+          { id: 'guillaume-tell',   name: 'Galop burlesque',    subtitle: 'tout finira bien (Guillaume Tell)', icon: '🏇', file: 'sounds/musiques/guillaume_tell_finale.mp3',         start: 0.2, catClass: 'musique-tuile', title: 'Ouverture de Guillaume Tell, finale (Rossini)' },
+          { id: 'peter-gunn',       name: 'Filature',           subtitle: 'riff de guitare, Peter Gunn',  icon: '🕵️', file: 'sounds/musiques/peter_gunn.mp3',                         start: 4.5, catClass: 'musique-tuile', title: 'Peter Gunn (Henry Mancini)' },
+          { id: 'roi-montagne',     name: 'Roi de la montagne', subtitle: 'pas feutrés qui s\'emballent', icon: '🤫', file: 'sounds/musiques/dans_l_antre_du_roi_de_la_montagne.mp3', start: 72.5, catClass: 'musique-tuile', title: 'Dans l\'antre du roi de la montagne (Grieg)' },
+          { id: 'danse-sabre',      name: 'Danse du sabre',     subtitle: 'frénésie, tout s\'emballe',    icon: '🤹', file: 'sounds/musiques/danse_du_sabre.mp3',                                 catClass: 'musique-tuile', title: 'Danse du sabre (Khatchatourian)' },
+          { id: 'danse-hongroise',  name: 'Danse hongroise',    subtitle: 'Brahms, Chaplin barbier',      icon: '🪒', file: 'sounds/musiques/danse_hongroise_brahms.mp3',             start: 3.7, catClass: 'musique-tuile', title: 'Danse hongroise n° 5 (Brahms)' },
+        ]
+      },
+      {
+        id: 'cirque-fanfare', label: 'Cirque, fanfare (comique)', icon: '🤡', color: '#ff9a1f',
+        items: [
+          { id: 'gladiators',       name: 'Entrée du cirque',   subtitle: 'clowns, fanfare',              icon: '🎪', file: 'sounds/musiques/entry_of_the_gladiators.mp3',            start: 13.7, end:175, catClass: 'musique-tuile', title: 'Entry of the Gladiators (Fučík)' },
+          { id: 'can-can',          name: 'French cancan',      subtitle: 'Offenbach, fête folle',        icon: '💃', file: 'sounds/musiques/can_can_offenbach.mp3',                  start: 42, catClass: 'musique-tuile', title: 'Can-can (Orphée aux Enfers, Offenbach)' },
+          //{ id: 'radetzky',         name: 'Marche de Radetzky', subtitle: 'parade pompeuse, on tape des mains', icon: '🎺', file: 'sounds/musiques/marche_de_radetzky.mp3',           start: 4.3, catClass: 'musique-tuile', title: 'Marche de Radetzky (Johann Strauss père)' },
+        ]
+      },
+      // ── Colonne 3 : amour, victoire ──
+      {
+        id: 'amour-larmes', label: 'Amour et larmes', icon: '💋', color: '#ff5fa8',
+        items: [
+          { id: 'careless-whisper', name: 'Careless Whisper',   subtitle: 'saxo de séduction',            icon: '😏', file: 'sounds/musiques/careless_whisper.mp3',                             catClass: 'musique-tuile', title: 'Careless Whisper (George Michael)' },
+          { id: 'hat-on',           name: 'Strip-tease',        subtitle: 'Joe Cocker',                   icon: '🎩', file: 'sounds/musiques/you_can_leave_your_hat_on.mp3',          start: 1, catClass: 'musique-tuile', title: 'You Can Leave Your Hat On (Joe Cocker)' },
+          { id: 'all-by-myself',    name: 'All by Myself',      subtitle: 'Céline Dion, seul et triste',  icon: '😭', file: 'sounds/musiques/all_by_myself.mp3',                      start: 26, catClass: 'musique-tuile', title: 'All by Myself (Céline Dion)' },
+          { id: 'wonderful-world',  name: 'Wonderful World',    subtitle: 'Armstrong, tendresse',         icon: '🌍', file: 'sounds/musiques/what_a_wonderful_world.mp3',             start: 0.5, catClass: 'musique-tuile', title: 'What a Wonderful World (Louis Armstrong)' },
+          { id: 'duo-des-fleurs',   name: 'Duo des fleurs',     subtitle: 'Lakmé, grâce et envol',        icon: '🌸', file: 'sounds/musiques/duo_des_fleurs_lakme.mp3',               start: 2, catClass: 'musique-tuile', title: 'Lakmé, Duo des fleurs (Delibes), de 1:04 à 2:28' },
+        ]
+      },
+      {
+        id: 'victoire-frime', label: 'Victoire, frime', icon: '🏆', color: '#3fd98a',
+        items: [
+          //{ id: 'champions',        name: 'We Are the Champions', subtitle: 'Queen, victoire',            icon: '🏆', file: 'sounds/musiques/we_are_the_champions.mp3',               start: 28, catClass: 'musique-tuile', title: 'We Are the Champions (Queen)' },
+          { id: 'still-dre',        name: 'Dr. Dre',            subtitle: 'frime de caïd',                icon: '🏙️', file: 'sounds/musiques/still_dre.mp3',                                   catClass: 'musique-tuile', title: 'Still D.R.E. (Dr. Dre)' },
+          { id: 'pretty-woman',     name: 'Pretty Woman',       subtitle: 'Roy Orbison, essayage/défilé', icon: '😍', file: 'sounds/musiques/oh_pretty_woman.mp3',                             catClass: 'musique-tuile', title: 'Oh, Pretty Woman (Roy Orbison)' },
+        ]
+      },
+      // ── Colonne 4 : entendu sur place, jeux ──
+      {
+        id: 'lieux', label: 'Lieux, moments (entendu sur place)', icon: '📍', color: '#3fcfe0',
+        items: [
+          { id: 'ascenseur',        name: 'Ascenseur',          subtitle: 'attente gênée',                icon: '🛗', file: 'sounds/musiques/musique_ascenseur.mp3',                            catClass: 'musique-tuile', title: 'Musique d\'ascenseur' },
+          { id: 'ipanema',          name: 'Bar lounge',         subtitle: 'bossa nova, Ipanema',          icon: '🍹', file: 'sounds/musiques/girl_from_ipanema.mp3',                            catClass: 'musique-tuile', title: 'The Girl from Ipanema' },
+          { id: 'maple-leaf-rag',   name: 'Saloon',             subtitle: 'piano ragtime',                icon: '🤠', file: 'sounds/musiques/maple_leaf_rag.mp3',                     start: 2, catClass: 'musique-tuile', title: 'Maple Leaf Rag (Scott Joplin)' },
+          { id: 'danube-bleu',      name: 'Bal viennois',       subtitle: 'valse, Beau Danube bleu',      icon: '🩰', file: 'sounds/musiques/beau_danube_bleu.mp3',                   start: 1.3, catClass: 'musique-tuile', title: 'Le Beau Danube bleu (Strauss II)' },
+          { id: 'peer-gynt',        name: 'Réveil',             subtitle: 'flûte du matin, Peer Gynt',    icon: '🌄', file: 'sounds/musiques/peer_gynt_morning_mood.mp3',             start: 2.2, catClass: 'musique-tuile', title: 'Peer Gynt, Morning Mood (Grieg)' },
+          { id: 'noel',             name: 'Noël',               subtitle: 'Jingle Bells',                 icon: '🎄', file: 'sounds/musiques/noel.mp3',                               start: 1.5, catClass: 'musique-tuile', title: 'Jingle Bells' },
+        ]
+      },
+      {
+        id: 'jeux', label: 'Jeux', icon: '🎮', color: '#6f8fff',
+        items: [
+          { id: 'mario',            name: 'Mario',              subtitle: 'jeu vidéo, sauts',             icon: '🍄', file: 'sounds/musiques/super_mario_bros_theme.mp3',                       catClass: 'musique-tuile', title: 'Super Mario Bros (Koji Kondo)' },
+          { id: 'tetris',           name: 'Tetris',             subtitle: 'jeu vidéo russe',              icon: '🧱', file: 'sounds/musiques/tetris_theme.mp3',                                 catClass: 'musique-tuile', title: 'Thème de Tetris' },
+          { id: 'qui-veut-gagner',  name: 'Qui veut gagner…',   subtitle: 'jeu télé, suspense',           icon: '💰', file: 'sounds/musiques/qui_veut_gagner_des_millions.mp3',                 catClass: 'musique-tuile', title: 'Qui veut gagner des millions (générique)' },
+        ]
+      },
     ]
   },
 
@@ -277,7 +370,7 @@ export const AUDIO_TABS: AudioTab[] = [
         items: [
           { id: 'rocky-eye-tiger',    name: 'Motivation Combat',    img: 'images/films/rocky-eye-tiger.jpg',    file: 'sounds/films/(Rocky) Eye Of The Tiger - Survivor.mp3',                       start: 0.2,             title: 'Rocky (Eye of the Tiger)' },
           { id: 'rocky-fly-now',      name: 'Victoire Triomphe',    img: 'images/films/rocky-fly-now.jpg',      file: 'sounds/films/(Rocky) Gonna Fly Now - Bill Conti.mp3',                        start: 1.2,             title: 'Rocky (Gonna Fly Now)' },
-          { id: 'chariots-de-feu',    name: 'Ralenti Dépassement',  img: 'images/films/chariots-de-feu.jpg',    file: 'sounds/films/(Les chariots de feu) Vangelis.mp3',                            start: 28.5,            title: 'Les Chariots de Feu' }, // TODO:: Changer, prendre cette vidéo à la palce : https://www.youtube.com/watch?v=1eYGl8PNjlU&list=RD1eYGl8PNjlU
+          { id: 'chariots-de-feu',    name: 'Ralenti Dépassement',  img: 'images/films/chariots-de-feu.jpg',    file: 'sounds/films/(Les chariots de feu) Vangelis.mp3',                            start: 28.5,            title: 'Les Chariots de Feu' },
         ]
       },
       {

@@ -101,8 +101,10 @@ function equalizeColumnButtons(cfg: EqualizeConfig): void {
 
     grid.querySelectorAll<HTMLElement>(cfg.colSelector).forEach(col => {
       let totalRows = 0;
-      col.querySelectorAll(cfg.btnGridSelector).forEach(btnGrid => {
-        totalRows += Math.ceil(btnGrid.children.length / cfg.colsPerRow);
+      col.querySelectorAll<HTMLElement>(cfg.btnGridSelector).forEach(btnGrid => {
+        // data-cols : nombre de tuiles par ligne propre à l'onglet (catCols), sinon la valeur par défaut
+        const perRow = Number(btnGrid.dataset.cols) || cfg.colsPerRow;
+        totalRows += Math.ceil(btnGrid.children.length / perRow);
       });
 
       const catCount   = col.querySelectorAll(cfg.catBlockSelector).length;

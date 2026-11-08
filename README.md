@@ -181,6 +181,7 @@ export const AUDIO_TABS: AudioTab[] = [
     accent: '#4cffaa',
     // Optional layout options:
     // cols: 3,              // Multi-column layout (Films tab)
+    // catCols: 2,           // With cols: tiles per row in a category (default 3); tiles take the category color
     // gridType: 'animals',  // Special grid layout (Animals tab)
     categories: [
       {
@@ -198,6 +199,7 @@ export const AUDIO_TABS: AudioTab[] = [
             // img: 'images/films/cover.jpg',   // Cover image (overrides icon)
             // start: 12.5,                     // Start time in seconds
             // end: 45.0,                       // End time in seconds
+            // subtitle: 'tender moment',       // Small line under the name
             // title: 'Custom tooltip',         // Tooltip text
             // noFade: true,                    // No fade-in: starts at once at the chosen volume
             // catClass: 'animaux-ferme',       // CSS class for category color
@@ -490,6 +492,7 @@ export const AUDIO_TABS: AudioTab[] = [
     accent: '#4cffaa',
     // Options de layout optionnelles :
     // cols: 3,              // Affichage multi-colonnes (onglet Films)
+    // catCols: 2,           // Avec cols : tuiles par ligne dans une catégorie (défaut 3) ; les tuiles prennent la couleur de la catégorie
     // gridType: 'animals',  // Grille spéciale (onglet Animaux)
     categories: [
       {
@@ -507,6 +510,7 @@ export const AUDIO_TABS: AudioTab[] = [
             // img: 'images/films/cover.jpg',   // Image de couverture (remplace icon)
             // start: 12.5,                     // Temps de départ en secondes
             // end: 45.0,                       // Temps de fin en secondes
+            // subtitle: 'tendresse',           // Ligne en petit sous le nom
             // title: 'Tooltip personnalisé',   // Texte du tooltip
             // noFade: true,                    // Pas de fondu d'entrée : démarre tout de suite au volume choisi
             // catClass: 'animaux-ferme',       // Classe CSS pour couleur de catégorie

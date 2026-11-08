@@ -66,9 +66,13 @@
       {#each columns as col, colIdx (colIdx)}
         <div class="audio-col">
           {#each col as cat (cat.id)}
-            <div class="audio-cat-block">
+            <div class="audio-cat-block" style:--cat-accent={tab.catCols ? cat.color : undefined}>
               <CategoryTitle {cat} />
-              <div class="audio-cat-grid">
+              <div
+                class="audio-cat-grid"
+                data-cols={tab.catCols}
+                style:grid-template-columns={tab.catCols ? `repeat(${tab.catCols}, 1fr)` : undefined}
+              >
                 {#each cat.items as item (item.id)}
                   <SoundButton {item} />
                 {/each}
