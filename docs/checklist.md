@@ -25,6 +25,7 @@
 - [ ] Onglet animaux (`gridType: 'animals'`) et onglets avec `cols`
 - [ ] Mode **paysage** et mode **portrait** : mise en page, hauteurs de boutons égalisées, réorganisation des grilles MIDI en portrait
 - [ ] Dans un **onglet Chrome** (pas l'application installée) : la dernière rangée de boutons est entièrement visible, en paysage et en portrait
+- [ ] Sur la **tablette de scène (Chrome 106)** : mêmes couleurs que sur un Chrome récent (tuiles teintées par famille, cadres des panneaux, boutons Effets/Reset, fond opaque des popups d'effets, barre de progression d'un son)
 - [ ] Popup « À propos » et numéro de version ; « Stockage : protégé ✓ » dans l'application installée ; Wake Lock « actif ✓ » (et plus « actif » si la demande a échoué)
 - [ ] « Plein écran » (popup À propos) dans un onglet Chrome : barres masquées ; le bouton devient « Quitter le plein écran » et en sort ; une sortie par le geste ou la touche Retour remet le bouton à « Plein écran »
 - [ ] Sur un **téléphone en paysage** : popups des effets (chaque carte a son reset, son curseur et son nom entier) et popup À propos (défile, « Fermer » accessible)

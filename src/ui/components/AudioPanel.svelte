@@ -14,6 +14,7 @@
   import FxToolbar from './FxToolbar.svelte';
   import EmergencyStopButton from './EmergencyStopButton.svelte';
   import VolumeControl from './VolumeControl.svelte';
+  import { colorChannels } from '../color-channels.ts';
 
   let { tab, index }: { tab: AudioTab; index: number } = $props();
 
@@ -71,7 +72,15 @@
       {#each columns as col, colIdx (colIdx)}
         <div class="audio-col">
           {#each col as cat (cat.id)}
-            <div class="audio-cat-block" style:--cat-accent={tab.catCols ? cat.color : undefined}>
+            {@const catRgb = tab.catCols ? colorChannels(cat.color) : undefined}
+            <div
+              class="audio-cat-block"
+              style:--cat-accent={tab.catCols ? cat.color : undefined}
+              style:--cat-accent-r={catRgb?.r}
+              style:--cat-accent-g={catRgb?.g}
+              style:--cat-accent-b={catRgb?.b}
+              style:--cat-accent-a={catRgb ? 1 : undefined}
+            >
               <CategoryTitle {cat} />
               <div
                 class="audio-cat-grid"

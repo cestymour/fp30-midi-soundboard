@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'node:fs';
+import { colorMixCompat } from './tools/color-mix-compat';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
@@ -11,6 +12,13 @@ export default defineConfig({
   define: {
     // Version affichée dans la popup « À propos »
     __APP_VERSION__: JSON.stringify(pkg.version),
+  },
+  css: {
+    postcss: {
+      // color-mix() réécrit en rgb() / rgba() : la tablette de scène est en Chrome 106
+      // (color-mix() depuis Chrome 111). Voir tools/color-mix-compat.ts
+      plugins: [colorMixCompat()],
+    },
   },
   plugins: [
     svelte(),

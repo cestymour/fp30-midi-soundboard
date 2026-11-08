@@ -7,6 +7,7 @@
   import { onMount } from 'svelte';
   import { clampFxValue, isFxControlModified } from '../fx/fx-presets.ts';
   import type { FxOverlayController } from './fx-overlay.svelte.ts';
+  import { colorChannels } from './color-channels.ts';
 
   let { controller }: { controller: FxOverlayController<Key, Settings> } = $props();
 
@@ -37,6 +38,8 @@
     controller.build();
     return () => railResizeObserver.disconnect();
   });
+
+  const accentRgb = $derived(colorChannels(controller.layout?.accent));
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
@@ -51,6 +54,9 @@
   style:width={controller.layout?.width}
   style:height={controller.layout?.height}
   style:--panel-accent={controller.layout?.accent ?? undefined}
+  style:--panel-accent-r={accentRgb?.r}
+  style:--panel-accent-g={accentRgb?.g}
+  style:--panel-accent-b={accentRgb?.b}
 >
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions (fermeture au clavier par Échap) -->
   <div class="fx-overlay__backdrop" onclick={() => controller.close()}></div>

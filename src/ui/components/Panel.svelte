@@ -5,6 +5,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { layout } from '../layout.svelte.ts';
+  import { colorChannels } from '../color-channels.ts';
 
   let { type, index, accent, isPlaying = false, isPaused = false, left, right, children }: {
     type:       'midi' | 'audio';
@@ -17,6 +18,8 @@
     right:      Snippet;
     children:   Snippet;
   } = $props();
+
+  const accentRgb = $derived(colorChannels(accent));
 </script>
 
 <section
@@ -27,6 +30,9 @@
   data-panel={index}
   data-type={type}
   style:--panel-accent={accent}
+  style:--panel-accent-r={accentRgb?.r}
+  style:--panel-accent-g={accentRgb?.g}
+  style:--panel-accent-b={accentRgb?.b}
 >
   <div class="panel-controls">
     <div class="controls-left">
