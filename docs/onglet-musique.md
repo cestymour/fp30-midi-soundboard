@@ -49,6 +49,7 @@ Les autres fichiers sont entiers.
 - **Duo des fleurs (Lakmé)** : de 1:04 à 2:28.
 - **Bomb Run** : partie du milieu retirée (de 1:11.1 à 1:48.4), avec un fondu enchaîné de 1 s entre les deux parties ; 1:37 au lieu de 2:15.
 - **Peer Gynt (Morning Mood)** : coupé à 3:58, la fin est retirée.
+- **Dans l'antre du roi de la montagne (Grieg)** : début remonté (2026-11-08), le crescendo le rendait presque inaudible à la tuile (`start` 72,5 s, −35 LUFS). Gain de +12 dB jusqu'à 1:25, puis rampe jusqu'à 0 dB à 1:40 ; la fin est intacte. Le passage de la tuile est maintenant vers −24 LUFS, le crescendo reste audible. Réencodé depuis la version 80 kb/s (pas d'original gardé).
 
 ## 4. Retirés de la liste
 
