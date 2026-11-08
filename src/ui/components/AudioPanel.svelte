@@ -23,6 +23,11 @@
   /** Catégories réparties en colonnes (onglets avec `cols`) */
   const columns = $derived.by((): Category<AudioItem>[][] => {
     if (!tab.cols || tab.cols <= 1) return [];
+    // Répartition donnée par l'onglet : colSizes[i] catégories dans la colonne i
+    if (tab.colSizes) {
+      let next = 0;
+      return tab.colSizes.map(size => tab.categories.slice(next, next += size));
+    }
     const colCount     = tab.cols;
     const blocksPerCol = Math.ceil(tab.categories.length / colCount);
     const cols: Category<AudioItem>[][] = Array.from({ length: colCount }, () => []);

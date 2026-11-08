@@ -182,6 +182,7 @@ export const AUDIO_TABS: AudioTab[] = [
     // Optional layout options:
     // cols: 3,              // Multi-column layout (Films tab)
     // catCols: 2,           // With cols: tiles per row in a category (default 3); tiles take the category color
+    // colSizes: [3, 3, 2, 3], // With cols: categories in each column, in order (default: ceil(categories / cols) per column)
     // gridType: 'animals',  // Special grid layout (Animals tab)
     categories: [
       {
@@ -493,6 +494,7 @@ export const AUDIO_TABS: AudioTab[] = [
     // Options de layout optionnelles :
     // cols: 3,              // Affichage multi-colonnes (onglet Films)
     // catCols: 2,           // Avec cols : tuiles par ligne dans une catégorie (défaut 3) ; les tuiles prennent la couleur de la catégorie
+    // colSizes: [3, 3, 2, 3], // Avec cols : nombre de catégories dans chaque colonne, dans l'ordre (défaut : ceil(catégories / cols) par colonne)
     // gridType: 'animals',  // Grille spéciale (onglet Animaux)
     categories: [
       {
