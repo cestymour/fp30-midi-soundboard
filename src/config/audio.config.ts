@@ -38,13 +38,13 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'elephant',          name: 'Éléphant',            icon: '🐘',   file: 'sounds/animaux/elephant_barrissement.mp3',      start: 0.5, end: 6, catClass: 'animaux-savane',     title: 'Éléphant Barrissement' },
           { id: 'singe-ouh-ouh',     name: 'Singe : Ouh-ouh',     icon: '🐒',   file: 'sounds/animaux/singe_cris.mp3',                                     catClass: 'animaux-savane',     title: 'Singe Cris' },
 
-          // ── Ligne 3 ──
+          // ── Ligne 3 (et suivantes : Grillon et Cigale sont passés dans Ambiances, les tuiles
+          //    suivantes remontent d'une ou deux places ; 30 sons, 2 places libres en fin de grille) ──
           { id: 'chat-miaou',        name: 'Chat : Miaou',        icon: '🐱',   file: 'sounds/animaux/chat_miaulement.mp3',                                catClass: 'animaux-domestique', title: 'Chat Miaulement' },
           { id: 'chat-ronron',       name: 'Chat : Ronron',       icon: '🐈',   file: 'sounds/animaux/chat_ronronnement.ogg',                              catClass: 'animaux-domestique', title: 'Chat Ronronnement' },
           { id: 'mouton-beee',       name: 'Mouton : Bêêê',       icon: '🐑',   file: 'sounds/animaux/mouton_chevre_belement.ogg',                         catClass: 'animaux-ferme',      title: 'Mouton/Chèvre Bêlement' },
           { id: 'cochon-groin',      name: 'Cochon : Groin',      icon: '🐷',   file: 'sounds/animaux/cochon_grognement.mp3',                              catClass: 'animaux-ferme',      title: 'Cochon Grognement / Couinement' },
           { id: 'chouette-hou-hou',  name: 'Chouette : Hou-hou',  icon: '🦉',   file: 'sounds/animaux/chouette_hibou_hululements.mp3', end: 2.6,           catClass: 'animaux-oiseau',     title: 'Chouette / Hibou Hululements' },
-          { id: 'grillon-zzzzz',     name: 'Grillon : Zzzzz',     icon: '🦗',   file: 'sounds/animaux/grillon_gresillement.mp3',                           catClass: 'animaux-insecte',    title: 'Grillon Grésillement' },
           { id: 'serpent-sssss',     name: 'Serpent : Sssss',     icon: '🐍',   file: 'sounds/animaux/serpent_sifflement.mp3',                             catClass: 'animaux-savane',     title: 'Serpent Sifflement' },
           { id: 'grenouille-coaa',   name: 'Grenouille : Coââ',   icon: '🐸',   file: 'sounds/animaux/grenouille_coassement.mp3',                          catClass: 'animaux-aquatique',  title: 'Grenouille Coassement' },
 
@@ -53,7 +53,6 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'chien-grrr',        name: 'Chien : Grrr',        icon: '🐕',   file: 'sounds/animaux/chien_grognement.mp3',                               catClass: 'animaux-domestique', title: 'Chien Grognement' },
           { id: 'loup-aouuuuh',      name: 'Loup : Aouuuuh',      icon: '🐺',   file: 'sounds/animaux/loup_hurlement.mp3',             end: 5.1,           catClass: 'animaux-foret',      title: 'Loup Hurlement' },
           { id: 'ours-grrr',         name: 'Ours : Grrr',         icon: '🐻',   file: 'sounds/animaux/ours_grognement.mp3',                                catClass: 'animaux-foret',      title: 'Ours Grognement' },
-          { id: 'cigale-tszzzz',     name: 'Cigale : Tszzzz',     icon: '🦗',   file: 'sounds/animaux/cigales_chant.mp3',                                  catClass: 'animaux-insecte',    title: 'Cigale Chant' },
           { id: 'abeille-bzzzz',     name: 'Abeille : Bzzzz',     icon: '🐝',   file: 'sounds/animaux/moustique_bourdonnement.mp3',                        catClass: 'animaux-insecte',    title: 'Abeille / Mouche / Moustique Bourdonnement' },
           { id: 'dauphin-i-i-i-i',   name: 'Dauphin : I i i i',   icon: '🐬',   file: 'sounds/animaux/dauphin_sifflements.mp3',                            catClass: 'animaux-aquatique',  title: 'Dauphin Clics et sifflements' },
           { id: 'baleine-chant',     name: 'Baleine : Chant',     icon: '🐋',   file: 'sounds/animaux/baleine_chant.mp3',              end: 3.2,           catClass: 'animaux-aquatique',  title: 'Baleine Chant' },
@@ -158,6 +157,8 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'mare',               name: 'Mare',               icon: '🐸', file: 'sounds/ambiances/mare_grenouilles.mp3' },
           { id: 'troupeau',           name: 'Troupeau',           icon: '🐄', file: 'sounds/ambiances/troupeau_cloche.mp3' },
           { id: 'nuit-campagne',      name: 'Nuit à la campagne', icon: '🌙', file: 'sounds/ambiances/nuit_campagne.mp3' },
+          { id: 'grillon-zzzzz',      name: 'Grillons',           icon: '🦗', file: 'sounds/animaux/grillon_gresillement.mp3', title: 'Grillon Grésillement' },
+          { id: 'cigale-tszzzz',      name: 'Cigales',            icon: '☀️', file: 'sounds/animaux/cigales_chant.mp3',       title: 'Cigale Chant' },
           { id: 'vent',               name: 'Vent',               icon: '💨', file: 'sounds/ambiances/vent.mp3' },
           { id: 'orage',              name: 'Orage',              icon: '⛈️', file: 'sounds/ambiances/pluie_tonnerre.mp3' },
           { id: 'feu',                name: 'Feu de cheminée',    icon: '🔥', file: 'sounds/ambiances/feu_cheminee.ogg' },
