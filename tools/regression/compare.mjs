@@ -27,9 +27,10 @@ for (const [name, vp] of [['land', { width: 1280, height: 800 }], ['port', { wid
   await page.click('#midi-fx-overlay [data-midi-preset="hall"]'); await page.waitForTimeout(600);
   await page.screenshot({ path: `${outDir}/${name}-midifx.png` });
   await page.click('.panel.active .midi-fx-open-btn'); await page.waitForTimeout(200);
-  // FX audio sur premier onglet audio
-  const firstAudio = await page.$eval('.tab-btn[data-type="audio"]', b => b.dataset.tab);
-  await page.click(`.tab-btn[data-tab="${firstAudio}"]`); await page.waitForTimeout(200);
+  // FX audio sur le dernier onglet audio (Films : un onglet musiques, avec Effets et transport ;
+  // depuis la 1.11.0, les premiers onglets audio sont des onglets sons, sans l'un ni l'autre)
+  const lastAudio = await page.$$eval('.tab-btn[data-type="audio"]', bs => bs[bs.length - 1].dataset.tab);
+  await page.click(`.tab-btn[data-tab="${lastAudio}"]`); await page.waitForTimeout(200);
   await page.click('.panel.active .audio-fx-open-btn'); await page.waitForTimeout(300);
   await page.click('#audio-fx-overlay [data-preset="radio"]'); await page.waitForTimeout(600);
   await page.screenshot({ path: `${outDir}/${name}-audiofx.png` });
