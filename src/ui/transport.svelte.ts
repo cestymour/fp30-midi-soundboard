@@ -1,12 +1,14 @@
 /* ================================================================
    transport.svelte.ts — État d'affichage de la lecture audio :
-   progression de chaque bouton de son, barre de transport (temps,
-   remplissage). Mis à jour par playbackEvents (audio/playback.ts).
+   progression de chaque bouton de son, barre de transport des
+   musiques (temps, remplissage). Mis à jour par playbackEvents
+   (musiques, audio/playback.ts) et soundEvents (sons, audio/sounds.ts).
 ================================================================ */
 
 import type { AudioItem } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import { hasCurrentSound, playbackEvents } from '../audio/playback.ts';
+import { getSoundProgress, soundEvents } from '../audio/sounds.ts';
 import { formatTime, getPlaybackProgress } from '../audio/timing.ts';
 import { audioFxOverlay } from './fx-overlays.svelte.ts';
 
@@ -21,6 +23,8 @@ export class SoundButtonState {
   transition = $state<string | undefined>(undefined);
   /** Fichier introuvable ou illisible au dernier essai */
   missing    = $state(false);
+  /** Onglets sons : au moins une voix de ce son est en cours */
+  playing    = $state(false);
 }
 
 const soundButtonStates = new Map<AudioItem, SoundButtonState>();
@@ -77,6 +81,42 @@ function getProgressTransition(playableDuration: number | null): string | undefi
   if (playableDuration < 3)  return '0.05s';
   if (playableDuration < 10) return '0.15s';
   return '0.30s';
+}
+
+/** Sons en cours (onglets sons), pour suivre leur progression */
+const playingSounds = new Set<AudioItem>();
+
+/** Répercute les événements des sons sur leurs boutons */
+export function bindSoundsUI(): void {
+  soundEvents.on(event => {
+    switch (event.type) {
+      case 'start': {
+        const state = getSoundButtonState(event.item);
+        state.missing = false;
+        state.playing = true;
+        // Son relancé par-dessus lui-même : la progression suit le dernier lancé
+        state.progress = '0%';
+        state.transition = getProgressTransition(event.duration);
+        playingSounds.add(event.item);
+        break;
+      }
+      case 'end':
+        if (event.remaining > 0) break;
+        getSoundButtonState(event.item).playing = false;
+        getSoundButtonState(event.item).progress = '0%';
+        playingSounds.delete(event.item);
+        break;
+      case 'progress':
+        for (const item of playingSounds) {
+          const ratio = getSoundProgress(item);
+          if (ratio !== null) getSoundButtonState(item).progress = (ratio * 100).toFixed(2) + '%';
+        }
+        break;
+      case 'missing':
+        getSoundButtonState(event.item).missing = true;
+        break;
+    }
+  });
 }
 
 /** Répercute les événements de lecture sur les boutons, la barre de transport et la popup FX */

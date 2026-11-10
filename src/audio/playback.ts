@@ -1,7 +1,9 @@
 /* ================================================================
-   playback.ts — Lecture des sons : play, stop, pause, seek, fondus
-   et boucle de progression. Aucun accès au DOM : l'interface suit
-   la lecture via `playbackEvents`.
+   playback.ts — Lecture des musiques (onglets musiques : Ambiances,
+   Musiques, Films) : play, stop, pause, seek, fondus et boucle de
+   progression. Une seule musique à la fois, qui passe par les effets
+   audio. Les sons des onglets sons sont dans sounds.ts.
+   Aucun accès au DOM : l'interface suit la lecture via `playbackEvents`.
 ================================================================ */
 
 import type { AudioItem } from '../types.ts';
@@ -158,10 +160,6 @@ export function stopSound(fade = false): void {
   playbackEvents.emit({ type: 'stop', item: stoppedItem });
 }
 
-export function emergencyStopAudio(): void {
-  stopSound(true);
-}
-
 // ================================================================
 // PLAY
 // ================================================================
@@ -186,7 +184,7 @@ export async function playSound(item: AudioItem): Promise<void> {
   const audio = AudioEngineAPI.createTrack(src);
   audio.setPlaybackRange(startOffset, endOffset);
   // Sans fondu d'entrée (`noFade`), le son part directement au volume choisi
-  audio.volume = item.noFade ? STATE.audioVolume : 0;
+  audio.volume = item.noFade ? STATE.musicVolume : 0;
 
   STATE.currentAudio = audio;
   STATE.currentSoundItem = item;
@@ -212,7 +210,7 @@ export async function playSound(item: AudioItem): Promise<void> {
       return;
     }
 
-    if (!item.noFade) fadeAudio(audio, 0, STATE.audioVolume, 300, null);
+    if (!item.noFade) fadeAudio(audio, 0, STATE.musicVolume, 300, null);
     startProgressLoop(audio, item, startOffset, endOffset);
   } catch (err) {
     console.warn('Fichier introuvable ou illisible :', src, err);
@@ -240,7 +238,7 @@ export function togglePlayPause(): void {
     audio.play().then(() => {
       if (STATE.currentAudio !== audio) return;
       STATE.isPaused = false;
-      fadeAudio(audio, 0, STATE.audioVolume, 150, null);
+      fadeAudio(audio, 0, STATE.musicVolume, 150, null);
       const { startOffset, endOffset } = getPlaybackRange(item);
       startProgressLoop(audio, item, startOffset, endOffset);
       playbackEvents.emit({ type: 'resume' });
@@ -269,11 +267,11 @@ export function seekToRatio(ratio: number): void {
   playbackEvents.emit({ type: 'progress' });
 }
 
-/** Volume de lecture des sons (0-1) */
-export function setAudioVolume(volume: number): void {
-  STATE.audioVolume = volume;
+/** Volume des musiques (0-1) */
+export function setMusicVolume(volume: number): void {
+  STATE.musicVolume = volume;
   // Fondu d'entrée en cours : il s'arrête là, sinon il écraserait le volume choisi (bug n° 11).
   // Un fondu de sortie (pause, STOP) continue jusqu'au silence.
   if (_fadingIn && _fadingAudio === STATE.currentAudio) cancelFade();
-  if (STATE.currentAudio) STATE.currentAudio.volume = STATE.audioVolume;
+  if (STATE.currentAudio) STATE.currentAudio.volume = STATE.musicVolume;
 }

@@ -31,13 +31,20 @@ class AppState {
   currentConnectionType = $state<'usb' | 'bt' | null>(null);
   isSwitchingToUsb      = false;
 
-  // ── Audio ──
+  // ── Musique (onglets musiques : une seule à la fois, audio/playback.ts) ──
   currentAudio          = $state.raw<MediaElementTrack | null>(null);
-  /** Son en cours (en lecture ou en pause) */
+  /** Musique en cours (en lecture ou en pause) */
   currentSoundItem      = $state.raw<AudioItem | null>(null);
   progressRAF: number | null = null;
-  audioVolume           = $state(1);
+  /** Volume des musiques (0-1), commun aux onglets musiques */
+  musicVolume           = $state(1);
   isPaused              = $state(false);
+
+  // ── Sons (onglets sons : superposés, audio/sounds.ts) ──
+  /** Nombre de sons en cours */
+  soundVoices           = $state(0);
+  /** Volume des sons (0-1), commun aux onglets sons */
+  soundVolume           = $state(1);
 
   // ── Divers ──
   wakeLock              = $state.raw<WakeLockSentinel | null>(null);

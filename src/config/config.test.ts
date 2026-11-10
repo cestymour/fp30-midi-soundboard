@@ -43,3 +43,19 @@ describe('identifiants de la configuration', () => {
     expect(ids.filter(id => !ID_FORMAT.test(id))).toEqual([]);
   });
 });
+
+describe('onglets sons', () => {
+  const soundTabs = AUDIO_TABS.filter(tab => tab.kind === 'sounds');
+
+  it('il y a des onglets sons et des onglets musiques', () => {
+    expect(soundTabs.length).toBeGreaterThan(0);
+    expect(AUDIO_TABS.some(tab => tab.kind === 'music')).toBe(true);
+  });
+
+  it("aucun son n'a l'option noFade (les sons n'ont jamais de fondu)", () => {
+    const withNoFade = soundTabs.flatMap(tab => tab.categories.flatMap(category => category.items))
+      .filter(item => item.noFade !== undefined)
+      .map(item => item.id);
+    expect(withNoFade).toEqual([]);
+  });
+});

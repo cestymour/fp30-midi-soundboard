@@ -9,7 +9,6 @@ export const MIDI_TABS: MidiTab[] = [
     id: 'instruments',
     label: 'Instruments',
     icon: '🎹',
-    accent: '#d946ef',
     cols: 6,
     categories: [
 
@@ -147,7 +146,6 @@ export const MIDI_TABS: MidiTab[] = [
     id: 'sons-midi',
     label: 'Sons MIDI',
     icon: '🔊',
-    accent: '#a855f7',
     cols: 5,
     categories: [
 

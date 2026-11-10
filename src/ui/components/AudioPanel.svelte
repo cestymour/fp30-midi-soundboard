@@ -1,11 +1,14 @@
 <!--
-  AudioPanel.svelte — Panneau d'un onglet audio : barre de contrôles
-  (transport, effets, stop, volume) et grille de sons
+  AudioPanel.svelte — Panneau d'un onglet audio : barre de contrôles et grille de sons.
+  Onglets musiques : transport, effets, arrêt d'urgence, volume des musiques.
+  Onglets sons : bouton qui coupe les sons, arrêt d'urgence, volume des sons.
 -->
 <script lang="ts">
   import type { AudioTab, Category, AudioItem } from '../../types.ts';
   import { STATE } from '../../state.svelte.ts';
-  import { hasCurrentSound, setAudioVolume } from '../../audio/playback.ts';
+  import { hasCurrentSound, setMusicVolume } from '../../audio/playback.ts';
+  import { setSoundVolume } from '../../audio/sounds.ts';
+  import { TAB_ACCENTS } from '../../config/tabs.ts';
   import { audioFxOverlay, fxToolbar } from '../fx-overlays.svelte.ts';
   import Transport from './Transport.svelte';
   import SoundButton from './SoundButton.svelte';
@@ -14,12 +17,16 @@
   import FxToolbar from './FxToolbar.svelte';
   import EmergencyStopButton from './EmergencyStopButton.svelte';
   import VolumeControl from './VolumeControl.svelte';
+  import StopSoundsButton from './StopSoundsButton.svelte';
   import { colorChannels } from '../color-channels.ts';
 
   let { tab, index }: { tab: AudioTab; index: number } = $props();
 
+  const isSounds  = $derived(tab.kind === 'sounds');
   const hasSound  = $derived(hasCurrentSound());
-  const volumePct = $derived(Math.round(STATE.audioVolume * 100));
+  const isPlaying = $derived(isSounds ? STATE.soundVoices > 0 : hasSound && !STATE.isPaused);
+  const isPaused  = $derived(!isSounds && hasSound && STATE.isPaused);
+  const volumePct = $derived(Math.round((isSounds ? STATE.soundVolume : STATE.musicVolume) * 100));
 
   /** Catégories réparties en colonnes (onglets avec `cols`) */
   const columns = $derived.by((): Category<AudioItem>[][] => {
@@ -37,24 +44,34 @@
   });
 
   function handleVolume(raw: number): void {
-    setAudioVolume(raw / 100);
+    if (isSounds) {
+      setSoundVolume(raw / 100);
+      return;
+    }
+    setMusicVolume(raw / 100);
     if (audioFxOverlay.isOpen) audioFxOverlay.sync();
   }
 </script>
 
-<Panel type="audio" {index} accent={tab.accent} isPlaying={hasSound && !STATE.isPaused} isPaused={hasSound && STATE.isPaused}>
+<Panel type="audio" kind={tab.kind} {index} accent={TAB_ACCENTS[tab.kind]} {isPlaying} {isPaused}>
   {#snippet left()}
-    <Transport />
+    {#if isSounds}
+      <StopSoundsButton />
+    {:else}
+      <Transport />
+    {/if}
   {/snippet}
   {#snippet right()}
-    <FxToolbar
-      kind="audio" openTitle="Mixer audio" resetTitle="Réinitialiser les effets audio"
-      isOpen={audioFxOverlay.isOpen} anyFx={fxToolbar.anyAudioFx}
-      onopen={() => audioFxOverlay.open()} onreset={() => audioFxOverlay.reset()}
-    />
+    {#if !isSounds}
+      <FxToolbar
+        kind="audio" openTitle="Mixer audio" resetTitle="Réinitialiser les effets audio"
+        isOpen={audioFxOverlay.isOpen} anyFx={fxToolbar.anyAudioFx}
+        onopen={() => audioFxOverlay.open()} onreset={() => audioFxOverlay.reset()}
+      />
+    {/if}
     <EmergencyStopButton extraClass="audio-stop-btn" />
     <VolumeControl
-      sliderClass="audio-vol" max={100} value={volumePct} volPct={volumePct + '%'}
+      sliderClass={isSounds ? 'audio-vol sounds-vol' : 'audio-vol'} max={100} value={volumePct} volPct={volumePct + '%'}
       valueText={volumePct + '%'} onvolume={handleVolume}
     />
   {/snippet}
@@ -63,7 +80,7 @@
     <div class="audio-grid animals-grid">
       {#each tab.categories as cat (cat.id)}
         {#each cat.items as item (item.id)}
-          <SoundButton {item} />
+          <SoundButton {item} kind={tab.kind} />
         {/each}
       {/each}
     </div>
@@ -88,7 +105,7 @@
                 style:grid-template-columns={tab.catCols ? `repeat(${tab.catCols}, 1fr)` : undefined}
               >
                 {#each cat.items as item (item.id)}
-                  <SoundButton {item} />
+                  <SoundButton {item} kind={tab.kind} />
                 {/each}
               </div>
             </div>
@@ -100,7 +117,7 @@
     <div class="audio-grid">
       {#each tab.categories as cat (cat.id)}
         {#each cat.items as item (item.id)}
-          <SoundButton {item} />
+          <SoundButton {item} kind={tab.kind} />
         {/each}
       {/each}
     </div>

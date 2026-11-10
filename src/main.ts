@@ -14,13 +14,14 @@ import { mount } from 'svelte';
 import App from './App.svelte';
 import { initBluetooth, initWebMidi } from './midi/connection.ts';
 import { bindMidiConnectionUI } from './ui/midi-ui.svelte.ts';
-import { bindPlaybackUI } from './ui/transport.svelte.ts';
+import { bindPlaybackUI, bindSoundsUI } from './ui/transport.svelte.ts';
 import { initWakeLock } from './wake-lock.ts';
 import { requestPersistentStorage } from './offline.ts';
 
 // L'interface suit les moteurs MIDI et audio
 bindMidiConnectionUI();
 bindPlaybackUI();
+bindSoundsUI();
 
 mount(App, { target: document.getElementById('app')! });
 

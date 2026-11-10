@@ -1,8 +1,11 @@
 /* ================================================================
    audio-engine.ts - Moteur audio Web Audio API (MP3 / OGG / WAV)
    Un seul graphe : EQ → filtres → compresseur → distorsion →
-   delay / reverb → master. Chaque son est une MediaElementTrack
-   branchée en entrée du graphe. Aucun accès au DOM.
+   delay / reverb → master → limiteur. Chaque musique est une
+   MediaElementTrack branchée en entrée du graphe. Les sons (onglets
+   sons, audio/sounds.ts) passent par une sortie à part, `soundsBus`,
+   branchée directement sur le limiteur : ni effets ni volume des
+   musiques. Aucun accès au DOM.
 ================================================================ */
 
 // ================================================================
@@ -56,6 +59,8 @@ class AudioEngine {
   context: AudioContext | null;
   tracks: Set<MediaElementTrack>;
   canUseMediaElementSource: boolean;
+  /** Volume des sons (0-1), gardé même avant la création du contexte */
+  soundsVolume: number;
 
   // Nœuds du graphe Web Audio : créés par ensureContext(), au premier son joué
   masterGain!: GainNode;
@@ -79,6 +84,8 @@ class AudioEngine {
   dryGain!: GainNode;
   limiter!: DynamicsCompressorNode;
   limiterTrim!: GainNode;
+  /** Entrée des sons des onglets sons : après les effets, directement sur le limiteur */
+  soundsBus!: GainNode;
 
   constructor() {
     this.defaultState = {
@@ -108,6 +115,7 @@ class AudioEngine {
     this.tracks = new Set();
 
     this.state = { ...this.defaultState };
+    this.soundsVolume = 1;
 
     this.canUseMediaElementSource = window.location.protocol !== 'file:';
   }
@@ -194,6 +202,10 @@ class AudioEngine {
     this.masterGain.connect(this.limiter);
     this.limiter.connect(this.limiterTrim);
     this.limiterTrim.connect(ctx.destination);
+    // Les sons s'empilent (jusqu'à 8 à la fois) : le limiteur évite qu'ils saturent
+    this.soundsBus = ctx.createGain();
+    this.soundsBus.gain.value = this.soundsVolume;
+    this.soundsBus.connect(this.limiter);
     this.reverb.buffer = this.createImpulseResponse(ctx, 4.8, 3.8);
     this.reverbPreDelay.delayTime.value = 0.035;
 
@@ -288,6 +300,17 @@ class AudioEngine {
     this.tracks.forEach(track => {
       track.audio.volume = this.state.volume;
     });
+  }
+
+  /** Volume des sons des onglets sons (0-1), indépendant de celui des musiques */
+  setSoundsVolume(value: number): void {
+    this.soundsVolume = Math.max(0, Math.min(1, value));
+    if (this.soundsBus && this.context) {
+      const now = this.context.currentTime;
+      this.soundsBus.gain.cancelScheduledValues(now);
+      this.soundsBus.gain.setValueAtTime(this.soundsBus.gain.value, now);
+      this.soundsBus.gain.linearRampToValueAtTime(this.soundsVolume, now + 0.02);
+    }
   }
 
   setLowPassFrequency(value: number): void {
@@ -693,6 +716,12 @@ export const AudioEngineAPI = {
   resume: () => AUDIO_ENGINE.resume(),
   load: (src: string) => AUDIO_ENGINE.createTrack(src).load(),
   createTrack: (src: string) => AUDIO_ENGINE.createTrack(src),
+  /** Contexte et entrée des sons (créés au besoin) */
+  getSoundsOutput: (): { context: AudioContext; input: GainNode } => {
+    const context = AUDIO_ENGINE.ensureContext();
+    return { context, input: AUDIO_ENGINE.soundsBus };
+  },
+  setSoundsVolume: (value: number) => AUDIO_ENGINE.setSoundsVolume(value),
   setMasterVolume: (value: number) => AUDIO_ENGINE.setMasterVolume(value),
   setBassGain: (value: number) => AUDIO_ENGINE.setBassGain(value),
   setMidGain: (value: number) => AUDIO_ENGINE.setMidGain(value),

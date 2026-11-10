@@ -1,17 +1,23 @@
 <!--
-  SoundButton.svelte — Bouton d'un son : lecture / arrêt, progression, image ou emoji
+  SoundButton.svelte — Bouton d'un son ou d'une musique : lecture / arrêt, progression, image ou emoji.
+  Onglets musiques : un clic lance la musique (et coupe la précédente), un 2e clic l'arrête ;
+  pendant la lecture, un carré stop remplace l'image ou l'emoji.
+  Onglets sons : chaque clic lance le son, par-dessus tout le reste (même par-dessus lui-même) ;
+  pendant la lecture, une double flèche « repeat » remplace l'emoji.
 -->
 <script lang="ts">
-  import type { AudioItem } from '../../types.ts';
+  import type { AudioItem, AudioTabKind } from '../../types.ts';
   import { STATE } from '../../state.svelte.ts';
   import { playSound, stopSound } from '../../audio/playback.ts';
+  import { playOneShot } from '../../audio/sounds.ts';
   import { getSoundButtonState } from '../transport.svelte.ts';
   import { getSoundImage } from '../../config/tabs.ts';
 
-  let { item }: { item: AudioItem } = $props();
+  let { item, kind }: { item: AudioItem; kind: AudioTabKind } = $props();
 
+  const isOneShot   = $derived(kind === 'sounds');
   const buttonState = $derived(getSoundButtonState(item));
-  const isPlaying   = $derived(item === STATE.currentSoundItem);
+  const isPlaying   = $derived(isOneShot ? buttonState.playing : item === STATE.currentSoundItem);
 
   /** Image de couverture : `img`, ou `icon` si c'est un chemin d'image */
   const imageSrc = $derived(getSoundImage(item));
@@ -21,6 +27,11 @@
   );
 
   function handleClick(): void {
+    if (isOneShot) {
+      // Son : relancé depuis le début par-dessus le précédent, sans le couper
+      void playOneShot(item);
+      return;
+    }
     if (item === STATE.currentSoundItem) {
       // Ce bouton est actif → stop (ou restart si en pause)
       if (STATE.isPaused) {
@@ -41,6 +52,7 @@
 
 <button
   class={baseClass}
+  class:oneshot={isOneShot}
   class:playing={isPlaying}
   class:missing={buttonState.missing}
   data-audio={item.file}
@@ -51,7 +63,10 @@
   style:--progress-transition={buttonState.transition}
   title={item.title ?? item.name}
   onclick={handleClick}
->{#if imageSrc}<span class="btn-icon"><img src={imageSrc} alt={item.name} /></span>{:else if item.icon || !item.subtitle}<span class="btn-icon">{item.icon ?? '▶'}</span>{/if}<span class="btn-label">{item.name}</span>{#if item.subtitle}<span class="btn-sub">{item.subtitle}</span>{/if}</button>
+>{#if imageSrc}<span class="btn-icon"><img src={imageSrc} alt={item.name} />{#if isOneShot && isPlaying}{@render repeatIcon()}{/if}</span>{:else if item.icon || !item.subtitle}<span class="btn-icon">{item.icon ?? '▶'}{#if isOneShot && isPlaying}{@render repeatIcon()}{/if}</span>{/if}<span class="btn-label">{item.name}</span>{#if item.subtitle}<span class="btn-sub">{item.subtitle}</span>{/if}</button>
+
+<!-- Double flèche « repeat » (pictogramme Material « repeat ») : un clic relance le son par-dessus -->
+{#snippet repeatIcon()}<svg class="repeat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" /></svg>{/snippet}
 
 <style>
   /* Toutes les règles qui visent .sound-btn sont ici, dans leur ordre d'origine,
@@ -265,6 +280,24 @@
     border-radius: 3px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.8),
                 0 0 16px var(--panel-accent);
+    z-index: 3;
+  }
+
+  /* Onglets sons : la double flèche « repeat » (SVG) remplace le carré stop */
+  .sound-btn.oneshot.playing .btn-icon::after { content: none; }
+  /* L'emoji garde sa place (masqué) : le nom ne bouge pas sous la double flèche */
+  .sound-btn.oneshot.playing .btn-icon { visibility: hidden; }
+  .repeat-icon {
+    visibility: visible;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+    width: clamp(26px, 3.6vw, 38px);
+    height: clamp(26px, 3.6vw, 38px);
+    fill: currentColor;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 8px var(--panel-accent));
     z-index: 3;
   }
 

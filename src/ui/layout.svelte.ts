@@ -5,8 +5,8 @@
 ================================================================ */
 
 import { flushSync } from 'svelte';
-import { getAudioTabs, getMidiTabs } from '../config/tabs.ts';
-import type { AudioTab, MidiTab } from '../types.ts';
+import { TAB_ACCENTS, getAudioTabs, getMidiTabs } from '../config/tabs.ts';
+import type { AudioTab, MidiTab, TabKind } from '../types.ts';
 import { audioFxOverlay, midiFxOverlay, refreshFxToolbarButtons } from './fx-overlays.svelte.ts';
 
 export type TabWithType = (MidiTab & { type: 'midi' }) | (AudioTab & { type: 'audio' });
@@ -17,6 +17,16 @@ export function getAllTabs(): TabWithType[] {
     ...getMidiTabs().map(tab => ({ ...tab, type: 'midi' as const })),
     ...getAudioTabs().map(tab => ({ ...tab, type: 'audio' as const })),
   ];
+}
+
+/** Type d'un onglet : MIDI, sons ou musiques */
+export function getTabKind(tab: TabWithType): TabKind {
+  return tab.type === 'midi' ? 'midi' : tab.kind;
+}
+
+/** Couleur d'accent d'un onglet, donnée par son type */
+export function getTabAccent(tab: TabWithType): string {
+  return TAB_ACCENTS[getTabKind(tab)];
 }
 
 const portraitQuery = window.matchMedia('(orientation: portrait)');
