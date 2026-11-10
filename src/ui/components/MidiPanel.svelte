@@ -11,6 +11,7 @@
   import { instruments, midiSelects, registerMidiSelect, selectInstrument } from '../midi-ui.svelte.ts';
   import { fxToolbar, midiFxOverlay } from '../fx-overlays.svelte.ts';
   import { layout } from '../layout.svelte.ts';
+  import { TAB_ACCENTS } from '../../config/tabs.ts';
   import CategoryTitle from './CategoryTitle.svelte';
   import Panel from './Panel.svelte';
   import FxToolbar from './FxToolbar.svelte';
@@ -61,7 +62,7 @@
   }
 </script>
 
-<Panel type="midi" {index} accent={tab.accent}>
+<Panel type="midi" kind="midi" {index} accent={TAB_ACCENTS.midi}>
   {#snippet left()}
     <div class="midi-connect">
       <select

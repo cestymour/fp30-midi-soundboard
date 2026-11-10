@@ -1,8 +1,10 @@
 <!--
-  EmergencyStopButton.svelte — Arrêt d'urgence (MIDI + audio), pictogramme hazard
+  EmergencyStopButton.svelte — Arrêt d'urgence, commun à tous les onglets : piano (MIDI),
+  musique (avec un court fondu) et tous les sons en cours ; pictogramme hazard
 -->
 <script lang="ts">
-  import { emergencyStopAudio } from '../../audio/playback.ts';
+  import { stopSound } from '../../audio/playback.ts';
+  import { stopAllSounds } from '../../audio/sounds.ts';
   import { sendEmergencyStopMidi } from '../../midi/midi.ts';
 
   let { extraClass }: { extraClass?: string } = $props();
@@ -10,9 +12,10 @@
   /** Identifiant propre à chaque bouton pour les motifs SVG */
   const uid = Math.random().toString(36).substring(2, 11);
 
-  /** Arrêt d'urgence total — coupe MIDI + Audio */
+  /** Arrêt d'urgence total — coupe le piano, la musique et les sons */
   function emergencyStopAll(): void {
-    emergencyStopAudio();
+    stopSound(true);
+    stopAllSounds();
     sendEmergencyStopMidi();
   }
 </script>

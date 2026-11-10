@@ -27,10 +27,8 @@ export interface Category<Item> {
 interface TabBase<Item> {
   id: ConfigId;
   label: string;
-  /** Emoji affiché dans l'onglet */
+  /** Emoji affiché dans l'onglet (la couleur vient du type d'onglet : voir TAB_ACCENTS) */
   icon: string;
-  /** Couleur d'accent de l'onglet et de son panneau */
-  accent: string;
   categories: Category<Item>[];
 }
 
@@ -80,7 +78,8 @@ export interface AudioItem {
   title?: string;
   /** Ligne en petit sous le nom (ce que la musique fait entendre, ou la situation) */
   subtitle?: string;
-  /** Pas de fondu d'entrée : le son démarre tout de suite au volume choisi (bruitage qui commence net) */
+  /** Onglets musiques : pas de fondu d'entrée, la musique démarre tout de suite au volume choisi.
+   *  Inutile dans les onglets sons, qui n'ont jamais de fondu. */
   noFade?: boolean;
   /** Classe CSS de couleur de catégorie (onglet animaux) */
   catClass?: string;
@@ -88,7 +87,20 @@ export interface AudioItem {
 
 export type AudioCategory = Category<AudioItem>;
 
+/**
+ * Type d'un onglet audio :
+ * - `sounds` (sons courts : Animaux, Bruits) : chaque clic lance une nouvelle voix, qui se
+ *   superpose à la musique et aux autres sons ; ni fondu, ni effets ; volume des sons ;
+ * - `music` (musiques : Ambiances, Musiques, Films) : une seule musique à la fois, commune
+ *   aux onglets musiques, avec fondus, effets audio et volume des musiques.
+ */
+export type AudioTabKind = 'sounds' | 'music';
+
+/** Type d'onglet : décide de la couleur de l'onglet et de son panneau */
+export type TabKind = 'midi' | AudioTabKind;
+
 export interface AudioTab extends TabBase<AudioItem> {
+  kind: AudioTabKind;
   /** Affichage en colonnes avec titres de catégorie (si > 1) */
   cols?: number;
   /** Mode colonnes : nombre de tuiles par ligne dans une catégorie (3 par défaut).

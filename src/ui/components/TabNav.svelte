@@ -2,7 +2,7 @@
   TabNav.svelte — Onglets (MIDI puis audio)
 -->
 <script lang="ts">
-  import { activateTab, getAllTabs, layout } from '../layout.svelte.ts';
+  import { activateTab, getAllTabs, getTabAccent, getTabKind, layout } from '../layout.svelte.ts';
 
   const tabs = getAllTabs();
 </script>
@@ -14,7 +14,8 @@
       class:active={layout.activeTab === idx}
       data-tab={idx}
       data-type={tab.type}
-      style:--tab-accent={tab.accent}
+      data-kind={getTabKind(tab)}
+      style:--tab-accent={getTabAccent(tab)}
       onclick={() => activateTab(idx)}
     >
       <span class="tab-icon">{tab.icon}</span>

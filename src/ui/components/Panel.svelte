@@ -4,14 +4,18 @@
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { TabKind } from '../../types.ts';
   import { layout } from '../layout.svelte.ts';
   import { colorChannels } from '../color-channels.ts';
 
-  let { type, index, accent, isPlaying = false, isPaused = false, left, right, children }: {
+  let { type, kind, index, accent, isPlaying = false, isPaused = false, left, right, children }: {
     type:       'midi' | 'audio';
+    /** Type d'onglet (MIDI, sons, musiques) */
+    kind:       TabKind;
     index:      number;
+    /** Couleur du type d'onglet (TAB_ACCENTS) */
     accent:     string;
-    /** Panneau audio : un son est en lecture / en pause */
+    /** Panneau audio : une musique (ou, dans un onglet sons, un son) est en lecture / en pause */
     isPlaying?: boolean;
     isPaused?:  boolean;
     left:       Snippet;
@@ -29,6 +33,7 @@
   class:is-paused={isPaused}
   data-panel={index}
   data-type={type}
+  data-kind={kind}
   style:--panel-accent={accent}
   style:--panel-accent-r={accentRgb?.r}
   style:--panel-accent-g={accentRgb?.g}

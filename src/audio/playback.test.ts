@@ -27,7 +27,7 @@ vi.mock('./audio-engine.ts', () => ({
 }));
 
 import { STATE } from '../state.svelte.ts';
-import { playbackEvents, playSound, setAudioVolume, stopSound, togglePlayPause } from './playback.ts';
+import { playbackEvents, playSound, setMusicVolume, stopSound, togglePlayPause } from './playback.ts';
 
 type Track = InstanceType<typeof FakeTrack>;
 
@@ -83,12 +83,12 @@ describe("fondu d'entrée", () => {
     const a = await play(A);
     expect(a.volume).toBe(0);
     vi.advanceTimersByTime(1000);
-    expect(a.volume).toBe(STATE.audioVolume);
+    expect(a.volume).toBe(STATE.musicVolume);
   });
 
   it('`noFade` : le son démarre tout de suite au volume choisi', async () => {
     const a = await play({ ...A, noFade: true });
-    expect(a.volume).toBe(STATE.audioVolume);
+    expect(a.volume).toBe(STATE.musicVolume);
   });
 });
 
@@ -171,7 +171,7 @@ describe('reprise après pause (bug n° 10)', () => {
 
     expect(events).not.toContain('resume');
     expect(STATE.currentAudio).toBe(b);
-    expect(b.volume).toBe(STATE.audioVolume);
+    expect(b.volume).toBe(STATE.musicVolume);
   });
 
   it('play() refusé : le son reste en pause, sans promesse rejetée non gérée', async () => {
@@ -190,11 +190,11 @@ describe('reprise après pause (bug n° 10)', () => {
 
 describe('volume pendant un fondu (bug n° 11)', () => {
   it("volume baissé pendant le fondu d'entrée : le son reste au volume choisi", async () => {
-    STATE.audioVolume = 0.8;
+    STATE.musicVolume = 0.8;
     const a = await play(A);
     vi.advanceTimersByTime(100);
 
-    setAudioVolume(0.2);
+    setMusicVolume(0.2);
     vi.advanceTimersByTime(1000);
 
     expect(a.volume).toBe(0.2);
@@ -202,13 +202,13 @@ describe('volume pendant un fondu (bug n° 11)', () => {
   });
 
   it('volume déplacé pendant le fondu de pause : le son finit quand même en pause, au silence', async () => {
-    STATE.audioVolume = 0.8;
+    STATE.musicVolume = 0.8;
     const a = await play(A);
     vi.advanceTimersByTime(1000);
 
     togglePlayPause();
     vi.advanceTimersByTime(50);
-    setAudioVolume(0.5);
+    setMusicVolume(0.5);
     vi.advanceTimersByTime(1000);
 
     expect(STATE.isPaused).toBe(true);
@@ -222,7 +222,7 @@ describe('volume pendant un fondu (bug n° 11)', () => {
 
     stopSound(true);
     vi.advanceTimersByTime(100);
-    setAudioVolume(0.5);
+    setMusicVolume(0.5);
     vi.advanceTimersByTime(1000);
 
     expect(a.disposed).toBe(true);
