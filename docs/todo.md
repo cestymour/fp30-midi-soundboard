@@ -4,14 +4,13 @@ Idées et évolutions demandées par l'utilisateur, pas encore planifiées. Les 
 
 ## Priorité : à faire avant tout le reste (dans cet ordre)
 
-Demandé le 2026-11-10. Le point 1 passe avant tout (le bouton est fait, il reste ses musiques) ; les points 1 à 3 se font avant les autres sections de cette liste. Sons et musiques (deux fonctionnements différents) est fait : voir `CHANGELOG.md`.
+Demandé le 2026-11-10. Le point 1 passe avant tout (le bouton est fait, il reste à compléter ses musiques) ; les points 1 à 3 se font avant les autres sections de cette liste. Sons et musiques (deux fonctionnements différents) est fait : voir `CHANGELOG.md`.
 
-### 1. Musiques de transition : finir la liste
+### 1. Musiques de transition : compléter la liste
 
-Le bouton « Transition » est fait (voir `CHANGELOG.md`). Reste :
+Le bouton de la musique de transition est fait (voir `CHANGELOG.md`), avec deux musiques (All Night et The Mojo Radio Gang, Parov Stelar). Reste :
 
-- [ ] Trouver la dizaine de musiques (fichiers à fournir) ; la liste provisoire reprend des musiques des onglets (`src/config/transition.config.ts`).
-- [ ] Régler à l'oreille le point de reprise (`restart`) de chaque musique : pour l'instant, il vaut le début.
+- [ ] Ajouter d'autres musiques (une dizaine visée), dans `public/sounds/transitions/` et `src/config/transition.config.ts`, avec leur début (`start`) et leur point de reprise (`restart`).
 
 ### 2. Réorganiser l'onglet Musiques
 
