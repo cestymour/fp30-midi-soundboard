@@ -1,7 +1,8 @@
 <!--
   TransitionPopup.svelte — Popup de la musique de transition, par-dessus les onglets
   (l'en-tête reste visible, donc le bouton pour l'arrêter aussi) : choix de la musique du
-  spectacle, progression, point de départ du prochain lancement, volume.
+  spectacle, gros bouton de lancement (qui coupe tout ce qui jouait, comme l'arrêt
+  d'urgence), progression, point de départ du prochain lancement, volume.
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
@@ -9,7 +10,7 @@
   import { getPlaybackWindow, formatTime } from '../../audio/timing.ts';
   import {
     getSelectedTransitionMusic, isTransitionCurrent, resetTransitionStart,
-    selectTransitionMusic, setTransitionVolume, toggleTransition, willRestart,
+    launchTransition, selectTransitionMusic, setTransitionVolume, stopTransition, willRestart,
   } from '../../audio/transition.ts';
   import { transport } from '../transport.svelte.ts';
   import { closeTransitionPopup, transitionPopup } from '../transition.svelte.ts';
@@ -60,7 +61,7 @@
         <span class="transition-time">{isCurrent ? transport.timeText : 'À l\'arrêt'}</span>
       </div>
 
-      <button class="transition-main" class:is-current={isCurrent} onclick={toggleTransition}>
+      <button class="transition-main" class:is-current={isCurrent} onclick={() => { if (isCurrent) stopTransition(); else void launchTransition(); }}>
         {#if isCurrent}
           <span class="icon-stop" aria-hidden="true"></span> Arrêter
         {:else if restart}

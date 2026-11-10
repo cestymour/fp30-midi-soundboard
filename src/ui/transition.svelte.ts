@@ -1,41 +1,33 @@
 /* ================================================================
    transition.svelte.ts — Popup de la musique de transition
-   Elle s'ouvre d'elle-même quand la musique de transition démarre
-   (progression par-dessus les onglets) et se referme quand elle
-   s'arrête. Ouverte à la main (▾ de l'en-tête, pour choisir la
-   musique avant le spectacle), elle reste ouverte à l'arrêt.
+   Le bouton de l'en-tête l'ouvre ; c'est elle qui lance la musique
+   (pas de lancement en un clic depuis l'en-tête : un clic raté
+   pendant une impro ne doit rien lancer). Elle se referme quand la
+   musique de transition s'arrête, ou quand une autre musique part.
 ================================================================ */
 
 import { playbackEvents } from '../audio/playback.ts';
 import { isTransitionMusic } from '../audio/transition.ts';
 
-export const transitionPopup = $state({
-  isOpen: false,
-  /** Ouverte à la main : elle ne se referme pas à l'arrêt de la musique */
-  pinned: false,
-});
+export const transitionPopup = $state({ isOpen: false });
 
 export function openTransitionPopup(): void {
   transitionPopup.isOpen = true;
-  transitionPopup.pinned = true;
 }
 
 export function closeTransitionPopup(): void {
   transitionPopup.isOpen = false;
-  transitionPopup.pinned = false;
 }
 
-/** Ouvre et ferme la popup au rythme de la musique de transition */
+/** Ferme la popup quand la musique de transition s'arrête, ou qu'une musique des onglets part */
 export function bindTransitionUI(): void {
   playbackEvents.on(event => {
     switch (event.type) {
       case 'play':
-        if (isTransitionMusic(event.item)) transitionPopup.isOpen = true;
-        // Une musique des onglets prend la place : la progression n'a plus rien à montrer
-        else closeTransitionPopup();
+        if (!isTransitionMusic(event.item)) closeTransitionPopup();
         break;
       case 'stop':
-        if (isTransitionMusic(event.item) && !transitionPopup.pinned) transitionPopup.isOpen = false;
+        if (isTransitionMusic(event.item)) closeTransitionPopup();
         break;
     }
   });

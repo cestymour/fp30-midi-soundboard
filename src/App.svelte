@@ -27,8 +27,8 @@
 </script>
 
 <header id="header">
-  <TabNav />
   <TransitionButton />
+  <TabNav />
   <button id="settings-btn" title="Paramètres" onclick={() => aboutPopup.open()} oncontextmenu={e => e.preventDefault()}>⚙</button>
 </header>
 

@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { playSound, stopSound, setTransitionVolume } = vi.hoisted(() => ({
+const { playSound, stopSound, setTransitionVolume, stopAllSounds, sendEmergencyStopMidi } = vi.hoisted(() => ({
   playSound: vi.fn(async () => {}),
   stopSound: vi.fn(),
   setTransitionVolume: vi.fn(),
+  stopAllSounds: vi.fn(),
+  sendEmergencyStopMidi: vi.fn(),
 }));
 
 vi.mock('./playback.ts', () => ({ playSound, stopSound }));
+vi.mock('./sounds.ts', () => ({ stopAllSounds }));
+vi.mock('../midi/midi.ts', () => ({ sendEmergencyStopMidi }));
 vi.mock('./audio-engine.ts', () => ({ AudioEngineAPI: { setTransitionVolume } }));
 vi.mock('../config/tabs.ts', () => ({
   getTransitionMusics: () => MUSICS,
@@ -16,7 +20,7 @@ import type { TransitionMusic } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import {
   RESTART_WINDOW_MS, getSelectedTransitionMusic, initTransition, launchTransition,
-  resetTransitionStart, selectTransitionMusic, toggleTransition, willRestart,
+  resetTransitionStart, selectTransitionMusic, stopTransition, willRestart,
 } from './transition.ts';
 
 const MUSICS: TransitionMusic[] = [
@@ -40,6 +44,8 @@ beforeEach(() => {
   vi.unstubAllGlobals();
   playSound.mockClear();
   stopSound.mockClear();
+  stopAllSounds.mockClear();
+  sendEmergencyStopMidi.mockClear();
   setTransitionVolume.mockClear();
   STATE.currentSoundItem = null;
   stubStorage();
@@ -78,22 +84,24 @@ describe('point de départ', () => {
   });
 });
 
-describe('bouton', () => {
-  it('lance la musique, puis l\'arrête en fondu si elle est en cours', () => {
-    toggleTransition();
-    expect(playSound).toHaveBeenCalledTimes(1);
-
-    STATE.currentSoundItem = MUSICS[0];
-    toggleTransition();
-    expect(stopSound).toHaveBeenCalledWith(true);
+describe('lancement et arrêt', () => {
+  it('le lancement coupe tout, comme l\'arrêt d\'urgence : sons et piano (la musique est coupée par playSound)', async () => {
+    await launchTransition(T0);
+    expect(stopAllSounds).toHaveBeenCalledTimes(1);
+    expect(sendEmergencyStopMidi).toHaveBeenCalledTimes(1);
     expect(playSound).toHaveBeenCalledTimes(1);
   });
 
-  it('une musique des onglets en cours : le bouton lance la transition (qui la coupe)', () => {
+  it("l'arrêt coupe la musique de transition en fondu, et rien d'autre", () => {
+    STATE.currentSoundItem = MUSICS[0];
+    stopTransition();
+    expect(stopSound).toHaveBeenCalledWith(true);
+  });
+
+  it("l'arrêt ne coupe pas une musique des onglets", () => {
     STATE.currentSoundItem = { id: 'x', name: 'X', file: 'sounds/x.mp3' };
-    toggleTransition();
+    stopTransition();
     expect(stopSound).not.toHaveBeenCalled();
-    expect(playSound).toHaveBeenCalledTimes(1);
   });
 
   it('changer de musique pendant la lecture lance la nouvelle, depuis son début', () => {

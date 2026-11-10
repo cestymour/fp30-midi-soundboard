@@ -3,9 +3,10 @@
    Entre deux impros, une musique rythmée relance l'énergie du public.
    La même sert tout le spectacle, choisie avant le début.
 
-   C'est une musique comme les autres (playback.ts) : elle coupe la
-   musique des onglets, et inversement. Mais elle passe par sa propre
-   sortie, sans effets audio, avec son propre volume.
+   C'est une musique comme les autres (playback.ts), qui passe par sa
+   propre sortie, sans effets audio, avec son propre volume. La lancer
+   coupe tout ce qui jouait, comme l'arrêt d'urgence : musique, sons et
+   piano. Une musique des onglets la coupe, elle aussi.
 
    Premier lancement : depuis le début (`start`). Lancements suivants :
    depuis le point de reprise de la musique (`restart`), tant que le
@@ -22,6 +23,8 @@ import { STATE } from '../state.svelte.ts';
 import { getTransitionMusics } from '../config/tabs.ts';
 import { AudioEngineAPI } from './audio-engine.ts';
 import { playSound, stopSound } from './playback.ts';
+import { stopAllSounds } from './sounds.ts';
+import { sendEmergencyStopMidi } from '../midi/midi.ts';
 
 const STORAGE_KEY = 'fp30-soundboard.transition';
 
@@ -89,19 +92,24 @@ export function getNextStartTime(now: number = Date.now()): number {
   return willRestart(now) ? music.restart : (music.start ?? 0);
 }
 
-/** Lance la musique choisie : du début la première fois, puis depuis son point de reprise */
+/**
+ * Lance la musique choisie : du début la première fois, puis depuis son point de reprise.
+ * Coupe d'abord tout ce qui jouait, comme l'arrêt d'urgence : sons et piano ; la musique
+ * en cours, elle, est coupée net par playSound.
+ */
 export function launchTransition(now: number = Date.now()): Promise<void> {
   const music = getSelectedTransitionMusic();
   const startAt = getNextStartTime(now);
   STATE.transitionLastLaunch = now;
   save();
+  stopAllSounds();
+  sendEmergencyStopMidi();
   return playSound(music, { route: 'transition', startAt });
 }
 
-/** Bouton de l'en-tête : arrête la musique de transition (court fondu), ou la lance */
-export function toggleTransition(): void {
+/** Arrête la musique de transition (court fondu) ; ne fait rien si elle ne joue pas */
+export function stopTransition(): void {
   if (isTransitionCurrent()) stopSound(true);
-  else void launchTransition();
 }
 
 /**
