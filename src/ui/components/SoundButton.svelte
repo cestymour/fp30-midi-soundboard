@@ -285,7 +285,10 @@
 
   /* Onglets sons : la double flèche « repeat » (SVG) remplace le carré stop */
   .sound-btn.oneshot.playing .btn-icon::after { content: none; }
+  /* L'emoji garde sa place (masqué) : le nom ne bouge pas sous la double flèche */
+  .sound-btn.oneshot.playing .btn-icon { visibility: hidden; }
   .repeat-icon {
+    visibility: visible;
     position: absolute;
     top: 50%;
     left: 50%;
