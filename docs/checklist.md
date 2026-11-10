@@ -17,21 +17,24 @@
 - [ ] Barre des panneaux sur téléphone en paysage : « FX » et « RAZ » lisibles, rien de coupé (valeur du volume comprise)
 - [ ] Popup FX MIDI : sliders, presets (Studio : son sec, brillant, notes courtes), reset, surbrillance du preset après fermeture/réouverture et après changement d'onglet ; les curseurs glissent sans à-coups pendant l'animation d'un preset, réverbération comprise ; nom sous chaque curseur lisible, sans valeur chiffrée
 - [ ] Reset séparés : avec un preset piano et un preset audio actifs, le Reset d'un onglet MIDI ne remet à zéro que les effets piano (le Reset des onglets de sons reste allumé), et inversement
-- [ ] Lecture de clips audio, y compris ceux avec `start` / `end`
-- [ ] Fades, stop, lecture/pause, seek par clic et par glisser, barre de progression
+- [ ] Lecture des musiques (onglets musiques) et des sons (onglets sons), y compris ceux avec `start` / `end`
+- [ ] Musiques : fades, stop, lecture/pause, seek par clic et par glisser, barre de progression ; une musique lancée dans Films coupe celle de Musiques
+- [ ] Sons : une musique en cours, puis plusieurs sons d'Animaux et de Bruits par-dessus : la musique continue, les sons s'entendent ensemble, sans fondu ; un son recliqué repart par-dessus lui-même (double flèche sur la tuile, progression du dernier lancé) ; « Couper les sons » coupe tous les sons et laisse la musique ; l'arrêt d'urgence coupe tout
+- [ ] Sons : premier clic sur un son jamais joué depuis le lancement de l'appli, délai acceptable ; les suivants partent tout de suite ; neuf sons longs en même temps : pas de saturation, le 9e part
+- [ ] Deux volumes séparés (sons, musiques) ; les effets audio ne touchent que la musique
 - [ ] Popup FX audio : sliders, presets, reset, surbrillance, effet audible ; un son fort, volume à 100 %, réverbération, delay et basses à fond : pas de grésillement, et sans effet le son n'a pas changé
-- [ ] Volume audio baissé juste après avoir lancé un son (pendant le fondu d'entrée) : le son reste au volume choisi
+- [ ] Volume des musiques baissé juste après avoir lancé une musique (pendant le fondu d'entrée) : elle reste au volume choisi
 - [ ] Une longue série de sons (une cinquantaine) : chacun démarre
 - [ ] Onglet animaux (`gridType: 'animals'`) et onglets avec `cols`
 - [ ] Mode **paysage** et mode **portrait** : mise en page, hauteurs de boutons égalisées, réorganisation des grilles MIDI en portrait
 - [ ] Dans un **onglet Chrome** (pas l'application installée) : la dernière rangée de boutons est entièrement visible, en paysage et en portrait
-- [ ] Sur la **tablette de scène (Chrome 106)** : mêmes couleurs que sur un Chrome récent (tuiles teintées par famille, cadres des panneaux, boutons Effets/Reset, fond opaque des popups d'effets, barre de progression d'un son)
+- [ ] Sur la **tablette de scène (Chrome 106)** : mêmes couleurs que sur un Chrome récent (tuiles teintées par famille, cadres des panneaux, couleur de chaque type d'onglet, boutons Effets/Reset, fond opaque des popups d'effets, barre de progression d'un son, double flèche d'un son en cours)
 - [ ] Popup « À propos » et numéro de version ; « Stockage : protégé ✓ » dans l'application installée ; Wake Lock « actif ✓ » (et plus « actif » si la demande a échoué)
 - [ ] « Plein écran » (popup À propos) dans un onglet Chrome : barres masquées ; le bouton devient « Quitter le plein écran » et en sort ; une sortie par le geste ou la touche Retour remet le bouton à « Plein écran »
 - [ ] Sur un **téléphone en paysage** : popups des effets (chaque carte a son reset, son curseur et son nom entier) et popup À propos (défile, « Fermer » accessible)
 - [ ] « ⬇ Télécharger tous les sons » : le compteur arrive au total (aujourd'hui « 68 / 68 sons, 36 / 36 images »), puis le bouton disparaît
 - [ ] Wake Lock : l'écran ne se met pas en veille
-- [ ] **Hors ligne** (mode avion) : l'app se lance, avec ses polices ; après « Télécharger tous les sons », un son jamais joué se lance ; « Mettre à jour l'application » affiche « Hors ligne : mise à jour impossible » et ne recharge rien
+- [ ] **Hors ligne** (mode avion) : l'app se lance, avec ses polices ; après « Télécharger tous les sons », une musique et un son jamais joués se lancent ; « Mettre à jour l'application » affiche « Hors ligne : mise à jour impossible » et ne recharge rien
 - [ ] Mise à jour : après un déploiement, la tablette récupère la nouvelle version ; si elle affiche encore l'ancien numéro, « ⟳ Mettre à jour l'application » passe au nouveau sans retélécharger les sons (le compteur hors ligne ne redescend pas)
 
 ## Tester sur la tablette pendant le développement

@@ -2,6 +2,37 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.11.0 — 2026-11-10
+
+### Nouveautés
+
+- **Sons et musiques fonctionnent différemment.** Un son est court, une musique est longue :
+  - **Onglets sons (Animaux, Bruits)** : un son se superpose à tout le reste. Il ne coupe plus la musique en cours, ni un autre son : deux sons lancés vite l'un après l'autre, du même onglet ou non, s'entendent ensemble (jusqu'à 8 à la fois ; un 9e prend la place du plus ancien). Un nouveau clic sur un son en cours le relance depuis le début **par-dessus** le premier, sans le couper (mitrailler l'appareil photo pour des paparazzis) ; pendant qu'il joue, une double flèche remplace son emoji, et la barre de progression de la tuile suit le dernier lancé. Un son part et s'arrête net, sans fondu, et les effets audio ne s'y appliquent pas.
+  - **Onglets musiques (Ambiances, Musiques, Films)** : comme avant, une seule musique à la fois, commune aux trois onglets, avec fondus, effets audio (Effets, Reset) et carré stop sur la tuile.
+- **Barre du haut des onglets sons** : un bouton « ⏹ Couper les sons » qui coupe tous les sons en cours, quel que soit l'onglet son d'où ils viennent (la musique continue), le bouton d'arrêt d'urgence et le volume des sons. Pas de barre de lecture, ni de boutons Effets et Reset.
+- **Deux volumes** : un pour les sons (commun à Animaux et Bruits), un pour les musiques (commun aux trois onglets musiques). Par exemple : une musique de fond douce, puis un bruit fort par-dessus.
+- **Une couleur par type d'onglet** au lieu d'une par onglet : violet pour le piano (onglets MIDI), vert pour les sons, jaune pour les musiques. La couleur dit ce que pilote la barre du haut.
+- **Grillons et Cigales** passent d'Animaux à Ambiances : trop longs, ils sonnent comme des ambiances (ils ont maintenant fondus et effets).
+
+### À savoir
+
+- L'arrêt d'urgence coupe toujours tout, depuis n'importe quel onglet : le piano, la musique et tous les sons en cours.
+- Un son est lu en entier une première fois au premier clic (depuis le cache hors ligne), puis gardé en mémoire : les clics suivants partent tout de suite. Changer d'onglet ne charge rien. Les sons gardés en mémoire sont limités à environ 50 Mo ; au-delà, les sons joués il y a le plus longtemps sont oubliés (ils seront relus au prochain clic).
+- Animaux a désormais 30 sons sur 32 places : les tuiles après le grillon et la cigale ont remonté d'une ou deux places, et les deux dernières cases sont vides.
+- Pour les développeurs : chaque onglet audio déclare `kind: 'sounds'` ou `kind: 'music'` ; l'option `accent` des onglets disparaît (couleurs dans `TAB_ACCENTS`, `src/config/tabs.ts`) ; `noFade` ne sert plus que dans les onglets musiques (retirée des Bruits). Les sons passent par `src/audio/sounds.ts` (AudioBuffer, une voix par clic), branchés après les effets, directement sur le limiteur.
+
+### À vérifier sur la tablette
+
+- **Délai du premier clic** sur un son jamais joué depuis le lancement de l'appli (le fichier est lu puis décodé) : il doit rester comparable à avant. Les clics suivants doivent partir instantanément. Si le premier clic traîne, le signaler (solution de repli prévue : jouer ce premier clic autrement pendant le décodage).
+- Une musique lancée (Musiques ou Films), puis plusieurs sons d'Animaux et de Bruits par-dessus : la musique continue, les sons s'entendent ensemble ; « Couper les sons » les coupe et laisse la musique ; l'arrêt d'urgence coupe tout.
+- Appareil photo cliqué très vite plusieurs fois : chaque clic s'entend, sans couper les précédents ; pas de claquement à l'arrêt d'un son.
+- Huit sons longs ou plus en même temps (Tronçonneuse, Roulement de tambour, Annonce SNCF…) : pas de saturation, un 9e son part toujours.
+- Les deux volumes : baisser l'un ne change pas l'autre ; passer d'Animaux à Bruits ne bouge pas le curseur des sons.
+- Popup Effets sur une musique : les effets ne changent pas les sons lancés par-dessus.
+- Barre du haut des onglets sons en paysage et en portrait (en portrait : « Couper les sons » à gauche de l'arrêt d'urgence, volume en dessous).
+- Couleurs des onglets et des barres sur la tablette en Chrome 106.
+- Hors ligne (mode avion), après « Télécharger tous les sons » : un son jamais joué se lance.
+
 ## 1.10.1 — 2026-11-08
 
 ### Corrections
