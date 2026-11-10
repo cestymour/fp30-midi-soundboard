@@ -14,6 +14,17 @@ Comment le musicien (ou DJ) utilise l'application pendant un spectacle d'improvi
 
 Cette distinction vaut dans les deux façons d'accompagner une scène.
 
+## Sons et musiques : deux fonctionnements
+
+Un son est court, une musique est longue. L'application les traite différemment :
+
+- **Onglets sons** (Animaux, Bruits) : un son se superpose à tout le reste. Il ne coupe ni la musique en cours ni un autre son, et un nouveau clic sur la même tuile le relance depuis le début, par-dessus le premier (mitrailler l'appareil photo pour des paparazzis). Il part et s'arrête net, sans fondu, et sans les effets audio. Jusqu'à 8 sons à la fois.
+- **Onglets musiques** (Ambiances, Musiques, Films) : une seule musique à la fois, commune aux trois onglets (lancer une musique dans Films coupe celle de Musiques). Elle démarre et s'arrête en fondu, et les effets audio (popup Effets) ne s'appliquent qu'à elle.
+
+Chacun a son volume : une musique de fond douce, puis un bruit fort par-dessus. La couleur de la barre du haut dit ce qu'elle pilote : le piano (onglets MIDI), les sons ou la musique. Dans les onglets sons, le bouton ⏹ coupe tous les sons en cours et laisse la musique ; l'arrêt d'urgence, présent dans tous les onglets, coupe tout (piano, musique et sons).
+
+Un son trop long, qui sonne comme une ambiance (grillons, cigales), va dans l'onglet Ambiances : il y devient une musique, avec fondus et effets.
+
 ## Le rôle du piano
 
 Quand le musicien propose (façon 1), il joue de préférence au piano : c'est la raison d'être de l'onglet Instruments, et de venir sur scène avec un piano. Lancer à la place des musiques d'ambiance déjà enregistrées (un musicien sans piano le ferait très bien, avec des instrumentaux pris par exemple sur Spotify) retirerait l'intérêt du piano.

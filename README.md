@@ -25,13 +25,16 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 
 - Instantly switch between instruments and sound effects during a live performance
 - **MIDI instruments** — sends Bank Select + Program Change patches to a digital piano (Roland FP-30X or any GM2-compatible instrument)
-- **Audio soundboard** — plays MP3 / OGG / WAV files with fade in/out and progress bar
+- **Two kinds of audio tabs**:
+  - **Music tabs** (Ambiances, Musiques, Films) — one music at a time, shared by the three tabs, with fade in/out, progress bar, audio FX and their own volume
+  - **Sound tabs** (Animaux, Bruits) — short sounds that play over everything else (the music and other sounds, up to 8 at once), with no fade and no FX, and their own volume
 - **Film soundboard** — movie themes organized by genre with cover images
 - **Animal soundboard** — 4×8 color-coded grid with category accents
 - Organized by cinematic universe (classical, western, medieval, jazz, sci-fi, horror, world music...) and sound category (nature, animals, vehicles, human, SFX...)
 - Auto-connects to the Roland FP-30X on page load
-- Volume control directly from the interface (MIDI CC7 and audio volume, independently)
-- **Emergency Stop** — All Notes Off button to silence the piano instantly
+- Volume control directly from the interface (MIDI CC7, music volume and sound volume, independently)
+- **One color per kind of tab** (MIDI, sounds, music): it tells what the panel bar controls
+- **Emergency Stop** — silences everything at once, from any tab: the piano (All Notes Off), the music and every sound
 - **Wake Lock** — prevents screen sleep during a performance
 - **Responsive layout** — automatic grid reorganization in portrait mode
 - **About popup** — shows the version, Service Worker and Wake Lock status, and an « update » button that installs the latest published version and reloads (sounds stay cached; nothing is reloaded when offline)
@@ -46,11 +49,18 @@ Click a button → the instrument or sound is selected on the piano → play the
 
 Use **Effets** / **Reset** in the MIDI panel header to open the piano FX overlay or reset those CCs to their default values.
 
-#### Audio tabs
-Click a button → the sound plays immediately from the device speakers.  
-Click again → the sound fades out and stops.
+#### Music tabs (Ambiances, Musiques, Films)
+Click a button → the music plays immediately from the device speakers, with a short fade-in; it stops the music that was playing, whichever music tab it came from.  
+Click again → the music fades out and stops. A stop square replaces the tile's image or emoji while it plays.
 
-Use **Effets** / **Reset** in the audio panel header to open the FX overlay (over the sound grid) or restore default processing. Processing runs through the Web Audio chain in `src/audio/audio-engine.ts`; the overlay is the shared FX popup (`src/ui/FxOverlay.svelte`).
+The panel bar holds play/pause and seek, **Effets** / **Reset**, the emergency stop and the music volume (shared by the three music tabs). **Effets** opens the FX overlay (over the grid); processing runs through the Web Audio chain in `src/audio/audio-engine.ts` and only applies to the music.
+
+#### Sound tabs (Animaux, Bruits)
+Click a button → the sound plays at once, over the music and over any other sound; it never stops anything. Click it again → it starts again from the beginning, over the first one (a double arrow replaces the emoji while it plays). Sounds start and stop dead, with no fade and no FX. Up to 8 sounds at once: a 9th one takes the place of the oldest.
+
+The panel bar holds a ⏹ button that stops every sound (the music goes on), the emergency stop and the sound volume (shared by the two sound tabs).
+
+Each sound file is decoded on its first click (read from the offline cache), then kept in memory within a 50 MB budget, so the following clicks start instantly (`src/audio/sounds.ts`).
 
 ### Notes
 
@@ -142,8 +152,7 @@ export const MIDI_TABS: MidiTab[] = [
   {
     id: 'instruments',      // Stable identifier (see below)
     label: 'Instruments',   // Tab name
-    icon: '🎹',             // Emoji displayed in the tab
-    accent: '#7c9cff',      // Tab accent color
+    icon: '🎹',             // Emoji displayed in the tab (the color comes from the kind of tab: TAB_ACCENTS in src/config/tabs.ts)
     cols: 7,                // Number of columns (optional, default: 5)
     categories: [
       {
@@ -178,7 +187,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'nature',
     label: 'Nature',
     icon: '🌿',
-    accent: '#4cffaa',
+    kind: 'music',           // 'music' (one music at a time, fades, FX) or 'sounds' (short sounds played over everything)
     // Optional layout options:
     // cols: 3,              // Multi-column layout (Films tab)
     // catCols: 2,           // With cols: tiles per row in a category (default 3); tiles take the category color
@@ -202,7 +211,7 @@ export const AUDIO_TABS: AudioTab[] = [
             // end: 45.0,                       // End time in seconds
             // subtitle: 'tender moment',       // Small line under the name
             // title: 'Custom tooltip',         // Tooltip text
-            // noFade: true,                    // No fade-in: starts at once at the chosen volume
+            // noFade: true,                    // Music tabs only: no fade-in, starts at once at the chosen volume
             // catClass: 'animaux-ferme',       // CSS class for category color
           },
         ]
@@ -337,13 +346,16 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 
 - Changer instantanément d'instrument ou d'effet sonore pendant un spectacle
 - **Instruments MIDI** — envoie des patches Bank Select + Program Change vers un piano numérique (Roland FP-30X ou tout instrument compatible GM2)
-- **Soundboard audio** — lecture de fichiers MP3 / OGG / WAV avec fondu d'entrée/sortie et barre de progression
+- **Deux types d'onglets audio** :
+  - **Onglets musiques** (Ambiances, Musiques, Films) — une seule musique à la fois, commune aux trois onglets, avec fondus, barre de progression, effets audio et son propre volume
+  - **Onglets sons** (Animaux, Bruits) — des sons courts qui se superposent à tout le reste (la musique et les autres sons, jusqu'à 8 à la fois), sans fondu ni effets, avec leur propre volume
 - **Soundboard films** — thèmes de films organisés par genre avec images de couverture
 - **Soundboard animaux** — grille 4×8 avec couleurs par catégorie d'animal
 - Organisé par univers cinématographique (classique, western, médiéval, jazz, SF, horreur, musique du monde...) et catégorie sonore (nature, animaux, véhicules, humain, effets spéciaux...)
 - Connexion automatique au Roland FP-30X au chargement de la page
-- Contrôle du volume directement depuis l'interface (MIDI CC7 et volume audio, indépendants)
-- **Arrêt d'urgence** — bouton All Notes Off pour couper le piano instantanément
+- Contrôle du volume directement depuis l'interface (MIDI CC7, volume des musiques et volume des sons, indépendants)
+- **Une couleur par type d'onglet** (MIDI, sons, musiques) : elle dit ce que pilote la barre du panneau
+- **Arrêt d'urgence** — coupe tout d'un coup, depuis n'importe quel onglet : le piano (All Notes Off), la musique et tous les sons
 - **Wake Lock** — empêche la mise en veille de l'écran pendant le spectacle
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
 - **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
@@ -358,11 +370,18 @@ Cliquer sur un bouton → l'instrument ou le son est sélectionné sur le piano 
 
 Les boutons **Effets** / **Reset** de la barre du panneau MIDI ouvrent la popup d’effets piano ou rétablissent les CC concernés à leurs valeurs par défaut.
 
-#### Onglets Audio
-Cliquer sur un bouton → le son se joue immédiatement depuis les haut-parleurs de l'appareil.  
-Cliquer à nouveau → le son s'éteint en fondu et s'arrête.
+#### Onglets musiques (Ambiances, Musiques, Films)
+Cliquer sur un bouton → la musique se joue immédiatement depuis les haut-parleurs de l'appareil, avec un court fondu d'entrée ; elle coupe la musique en cours, quel que soit l'onglet musiques d'où elle vient.  
+Cliquer à nouveau → la musique s'éteint en fondu et s'arrête. Pendant la lecture, un carré stop remplace l'image ou l'emoji de la tuile.
 
-Les boutons **Effets** / **Reset** de la barre du panneau audio ouvrent la popup d’effets (au-dessus de la grille de sons) ou rétablissent le traitement par défaut. Le traitement passe par la chaîne Web Audio dans `src/audio/audio-engine.ts` ; la popup est la popup d’effets commune (`src/ui/FxOverlay.svelte`).
+La barre du panneau porte lecture/pause et la barre de lecture, **Effets** / **Reset**, l'arrêt d'urgence et le volume des musiques (commun aux trois onglets musiques). **Effets** ouvre la popup d'effets (au-dessus de la grille) ; le traitement passe par la chaîne Web Audio de `src/audio/audio-engine.ts` et ne s'applique qu'à la musique.
+
+#### Onglets sons (Animaux, Bruits)
+Cliquer sur un bouton → le son part tout de suite, par-dessus la musique et par-dessus les autres sons ; il ne coupe jamais rien. Cliquer à nouveau → il repart du début, par-dessus le premier (pendant la lecture, une double flèche remplace l'emoji). Un son part et s'arrête net, sans fondu ni effets. Jusqu'à 8 sons à la fois : un 9e prend la place du plus ancien.
+
+La barre du panneau porte un bouton ⏹ qui coupe tous les sons (la musique continue), l'arrêt d'urgence et le volume des sons (commun aux deux onglets sons).
+
+Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), puis gardé en mémoire dans la limite de 50 Mo : les clics suivants partent instantanément (`src/audio/sounds.ts`).
 
 ### Notes
 
@@ -454,8 +473,7 @@ export const MIDI_TABS: MidiTab[] = [
   {
     id: 'instruments',      // Identifiant stable (voir plus bas)
     label: 'Instruments',   // Nom de l'onglet
-    icon: '🎹',             // Emoji affiché dans l'onglet
-    accent: '#7c9cff',      // Couleur de l'onglet
+    icon: '🎹',             // Emoji affiché dans l'onglet (la couleur vient du type d'onglet : TAB_ACCENTS dans src/config/tabs.ts)
     cols: 7,                // Nombre de colonnes (optionnel, défaut : 5)
     categories: [
       {
@@ -490,7 +508,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'nature',
     label: 'Nature',
     icon: '🌿',
-    accent: '#4cffaa',
+    kind: 'music',           // 'music' (une musique à la fois, fondus, effets) ou 'sounds' (sons courts, superposés à tout)
     // Options de layout optionnelles :
     // cols: 3,              // Affichage multi-colonnes (onglet Films)
     // catCols: 2,           // Avec cols : tuiles par ligne dans une catégorie (défaut 3) ; les tuiles prennent la couleur de la catégorie
@@ -514,7 +532,7 @@ export const AUDIO_TABS: AudioTab[] = [
             // end: 45.0,                       // Temps de fin en secondes
             // subtitle: 'tendresse',           // Ligne en petit sous le nom
             // title: 'Tooltip personnalisé',   // Texte du tooltip
-            // noFade: true,                    // Pas de fondu d'entrée : démarre tout de suite au volume choisi
+            // noFade: true,                    // Onglets musiques seulement : pas de fondu d'entrée, démarre tout de suite au volume choisi
             // catClass: 'animaux-ferme',       // Classe CSS pour couleur de catégorie
           },
         ]
