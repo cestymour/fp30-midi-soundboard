@@ -2,6 +2,27 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.12.0 — 2026-11-10
+
+### Nouveautés
+
+- **Barre de contrôles réorganisée.** Effets et Reset passent à la fin de la moitié gauche, le volume gagne leur place, et le bouton stop est toujours à droite du volume. Peu de place : icônes seules (les libellés courts FX et RAZ disparaissent). En portrait, deux lignes (transport et effets, puis volume et stop) ; les onglets sons tiennent sur une seule ligne. Dans les onglets sons, sous 600 px de large, les boutons n'ont plus de texte, quelle que soit l'orientation.
+- **Animaux : 32 sons sur 32 places.** Les Grillons reviennent dans Animaux, et une nouvelle tuile **Mouette : Kriaa** y prend place. La grille est pleine.
+- **Ambiances.** Nouvelle tuile **Noël** (Jingle Bells). Les Cigales restent dans Ambiances ; la tuile « Mouettes » n'y est plus (elle est dans Animaux ; « Vagues et mouettes » reste). La Grotte passe dans le groupe « Mer et nature ».
+- **Débuts et fins de sons ajustés** d'après la mesure des silences (Animaux et Bruits) : moins de blanc avant et après les sons.
+
+### À savoir
+
+- **Fichiers renommés.** Les noms des 36 films et de 6 bruits ont changé (plus d'espaces, de parenthèses ni d'accents). Après la mise à jour, utiliser « Télécharger tous les sons » dans « À propos » (environ 100 Mo) pour les avoir hors ligne ; sinon ils se chargent au premier clic. Les anciens fichiers restent dans le cache de Chrome jusqu'à ce qu'il le nettoie.
+- Pour les développeurs : les `id` des tuiles ne changent pas, seuls les chemins `file:` ; les lignes commentées dont le mp3 n'existe plus sont supprimées (leurs `id` restent dans l'historique git, à ne pas réutiliser) ; les colonnes de `audio.config.ts` sont réalignées.
+
+### À vérifier sur la tablette
+
+- La barre de contrôles en paysage et en portrait, sur les onglets musiques, sons et piano (Chrome 106) : Effets, Reset, volume et stop bien placés, rien ne déborde.
+- Une tuile de chaque onglet renommé : un film (par exemple Star Wars) et un bruit (par exemple le Clavier), y compris en mode avion après « Télécharger tous les sons ».
+- Les tuiles déplacées : Grillons et Mouette dans Animaux, Noël et Cigales dans Ambiances.
+- Quelques sons dont le début ou la fin ont changé : pas de coupure trop tôt.
+
 ## 1.11.0 — 2026-11-10
 
 ### Nouveautés
