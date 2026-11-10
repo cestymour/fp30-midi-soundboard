@@ -74,9 +74,6 @@
     flex-shrink: 0;
   }
 
-  /* Paysage étroit : le carré seul */
-  @media (orientation: landscape) and (max-width: 700px) {
-    .stop-sounds-btn__label { display: none; }
-    .stop-sounds-btn { padding: 0; justify-content: center; width: 44px; }
-  }
+  /* Largeur étroite : le carré seul, quelle que soit l'orientation
+     (la règle est dans Panel.svelte, avec celle du bouton STOP) */
 </style>

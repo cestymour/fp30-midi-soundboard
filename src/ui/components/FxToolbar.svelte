@@ -20,11 +20,11 @@
 <div class="fx-btn-group">
   <button type="button" class="{kind}-fx-open-btn" class:is-active={isOpen} title={openTitle} onclick={onopen}>
     <span class="{kind}-fx-open-btn__icon">🎚️</span>
-    <span class="{kind}-fx-open-btn__label"><span class="label-long">Effets</span><span class="label-short">FX</span></span>
+    <span class="{kind}-fx-open-btn__label">Effets</span>
   </button>
   <button type="button" class="{kind}-fx-reset-btn" class:is-active={anyFx} title={resetTitle} onclick={onreset}>
     <span class="{kind}-fx-reset-btn__icon">↺</span>
-    <span class="{kind}-fx-reset-btn__label"><span class="label-long">Reset</span><span class="label-short">RAZ</span></span>
+    <span class="{kind}-fx-reset-btn__label">Reset</span>
   </button>
 </div>
 
@@ -38,6 +38,9 @@
   .fx-btn-group {
     display: inline-flex;
     align-items: stretch;
+    /* Au bout de la moitié gauche de la barre */
+    margin-left: auto;
+    flex-shrink: 0;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--bg-card);
@@ -193,19 +196,13 @@
 
   /* ── Responsive ─────────────────────────────────────────────── */
 
-  .label-short {
-    display: none;
-  }
-
-  /* Paysage étroit ou peu haut (téléphone) : libellés courts, « FX » et « RAZ » (remise à zéro),
-     au lieu de les masquer. En portrait, la barre peut passer sur plusieurs lignes : libellés entiers. */
-  @media (orientation: landscape) and (max-width: 900px), (orientation: landscape) and (max-height: 500px) {
-    .label-long {
+  /* Peu de place (paysage étroit ou peu haut, portrait de téléphone) : les icônes seules. */
+  @media (orientation: landscape) and (max-width: 900px), (orientation: landscape) and (max-height: 500px), (orientation: portrait) and (max-width: 600px) {
+    .audio-fx-open-btn__label,
+    .audio-fx-reset-btn__label,
+    .midi-fx-open-btn__label,
+    .midi-fx-reset-btn__label {
       display: none;
-    }
-
-    .label-short {
-      display: inline;
     }
 
     .audio-fx-open-btn,

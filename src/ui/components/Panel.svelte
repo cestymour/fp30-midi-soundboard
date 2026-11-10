@@ -107,32 +107,47 @@
       gap: 6px;
       height: auto;
       min-height: unset;
-      position: relative;
-      padding-bottom: 56px;
     }
 
+    /* Deux lignes : transport (ou connexion) et effets, puis volume et stop */
     .controls-left {
-      flex: 1 1 auto;
+      flex: 1 1 100%;
       min-width: 0;
       max-width: none;
       order: 1;
     }
 
     .controls-right {
-      flex: 0 0 auto;
+      flex: 1 1 100%;
       max-width: none;
       order: 2;
     }
 
-    /* Volume positionné en absolu sur toute la largeur */
-    .controls-right :global(.volume-wrap) {
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      bottom: 6px;
-      width: calc(100% - 20px);
-      max-width: none;
-      height: 44px;
+    /* Onglets sons : « Couper les sons », volume et stop sur une seule ligne */
+    .panel[data-kind='sounds'] .controls-left {
+      flex: 0 0 auto;
+    }
+
+    .panel[data-kind='sounds'] .controls-right {
+      flex: 1 1 0;
+    }
+  }
+
+  /* Onglets sons, largeur étroite (paysage ou portrait) : les boutons seuls, sans texte.
+     Un seuil unique, pour que les libellés ne disparaissent pas puis ne reviennent pas
+     quand l'orientation bascule. */
+  @media (max-width: 600px) {
+    .panel[data-kind='sounds'] :global(.stop-sounds-btn__label),
+    .panel[data-kind='sounds'] :global(.emergency-stop-btn__label) {
+      display: none;
+    }
+
+    .panel[data-kind='sounds'] :global(.stop-sounds-btn),
+    .panel[data-kind='sounds'] :global(.emergency-stop-btn) {
+      padding: 0;
+      justify-content: center;
+      width: 44px;
+      min-width: 44px;
     }
   }
 </style>

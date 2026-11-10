@@ -76,19 +76,19 @@
       </select>
       <span class={badge.className}>{badge.text}</span>
     </div>
-  {/snippet}
-  {#snippet right()}
     <FxToolbar
       kind="midi" openTitle="Effets piano" resetTitle="Réinitialiser les effets piano"
       isOpen={midiFxOverlay.isOpen} anyFx={fxToolbar.anyMidiFx}
       onopen={() => midiFxOverlay.open()} onreset={() => midiFxOverlay.reset()}
     />
-    <EmergencyStopButton />
+  {/snippet}
+  {#snippet right()}
     <VolumeControl
       sliderClass="midi-vol" max={127} value={STATE.midiVolume}
       volPct={(STATE.midiVolume / 127 * 100).toFixed(1) + '%'}
       valueText={String(STATE.midiVolume)} onvolume={handleVolume}
     />
+    <EmergencyStopButton />
   {/snippet}
 
   <div class="midi-grid">

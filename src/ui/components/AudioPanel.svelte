@@ -59,21 +59,19 @@
       <StopSoundsButton />
     {:else}
       <Transport />
-    {/if}
-  {/snippet}
-  {#snippet right()}
-    {#if !isSounds}
       <FxToolbar
         kind="audio" openTitle="Mixer audio" resetTitle="Réinitialiser les effets audio"
         isOpen={audioFxOverlay.isOpen} anyFx={fxToolbar.anyAudioFx}
         onopen={() => audioFxOverlay.open()} onreset={() => audioFxOverlay.reset()}
       />
     {/if}
-    <EmergencyStopButton extraClass="audio-stop-btn" />
+  {/snippet}
+  {#snippet right()}
     <VolumeControl
       sliderClass={isSounds ? 'audio-vol sounds-vol' : 'audio-vol'} max={100} value={volumePct} volPct={volumePct + '%'}
       valueText={volumePct + '%'} onvolume={handleVolume}
     />
+    <EmergencyStopButton extraClass="audio-stop-btn" />
   {/snippet}
 
   {#if tab.gridType === 'animals'}
