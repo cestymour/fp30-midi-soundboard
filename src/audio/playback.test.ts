@@ -11,7 +11,7 @@ const { FakeTrack, liveTracks } = vi.hoisted(() => {
     paused = true;
     disposed = false;
     onended: (() => void) | null = null;
-    constructor(public src: string) { liveTracks.add(this); }
+    constructor(public src: string, public route: string = 'effects') { liveTracks.add(this); }
     setPlaybackRange(): void {}
     async load(): Promise<this> { return this; }
     async play(): Promise<this> { this.paused = false; return this; }
@@ -23,7 +23,7 @@ const { FakeTrack, liveTracks } = vi.hoisted(() => {
 });
 
 vi.mock('./audio-engine.ts', () => ({
-  AudioEngineAPI: { createTrack: (src: string) => new FakeTrack(src) },
+  AudioEngineAPI: { createTrack: (src: string, route?: string) => new FakeTrack(src, route) },
 }));
 
 import { STATE } from '../state.svelte.ts';
@@ -226,5 +226,29 @@ describe('volume pendant un fondu (bug n° 11)', () => {
     vi.advanceTimersByTime(1000);
 
     expect(a.disposed).toBe(true);
+  });
+});
+
+describe('musique de transition (sortie à part)', () => {
+  it('part de `startAt`, et son fondu monte à 1 : son volume est réglé sur sa sortie', async () => {
+    STATE.musicVolume = 0.4;
+    const done = playSound(A, { route: 'transition', startAt: 30 });
+    const t = STATE.currentAudio as unknown as Track;
+    await done;
+    expect(t.route).toBe('transition');
+    expect(t.currentTime).toBe(30);
+    vi.advanceTimersByTime(1000);
+    expect(t.volume).toBe(1);
+    STATE.musicVolume = 1;
+  });
+
+  it('le volume des musiques ne la touche pas', async () => {
+    const done = playSound(A, { route: 'transition' });
+    const t = STATE.currentAudio as unknown as Track;
+    await done;
+    vi.advanceTimersByTime(1000);
+    setMusicVolume(0.2);
+    expect(t.volume).toBe(1);
+    setMusicVolume(1);
   });
 });
