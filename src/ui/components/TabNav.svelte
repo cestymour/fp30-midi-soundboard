@@ -150,12 +150,13 @@
   /* ── Tablette portrait ── */
   @media (max-width: 1024px) and (orientation: portrait) {
     .tab-label { font-size: 11px; }
-    .tab-btn { min-width: 70px; }
+    /* Marges réduites : place pour le bouton de la musique de transition */
+    .tab-btn { min-width: 70px; padding: 0 6px; gap: 4px; }
   }
 
   /* ── Mobile ── */
   @media (max-width: 600px) {
     .tab-label { display: none; }
-    .tab-btn { min-width: 48px; }
+    .tab-btn { min-width: 40px; }
   }
 </style>

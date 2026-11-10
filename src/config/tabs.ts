@@ -6,9 +6,10 @@
    Pour l'instant, la configuration est renvoyée telle quelle.
 ================================================================ */
 
-import type { AudioItem, AudioTab, MidiTab, TabKind } from '../types.ts';
+import type { AudioItem, AudioTab, MidiTab, TabKind, TransitionMusic } from '../types.ts';
 import { MIDI_TABS } from './midi.config.ts';
 import { AUDIO_TABS } from './audio.config.ts';
+import { TRANSITION_MUSICS } from './transition.config.ts';
 
 /**
  * Couleur d'accent par type d'onglet (onglet, cadre et barre du panneau) : elle dit ce que
@@ -26,6 +27,11 @@ export function getMidiTabs(): MidiTab[] {
 
 export function getAudioTabs(): AudioTab[] {
   return AUDIO_TABS;
+}
+
+/** Musiques proposées pour la musique de transition (bouton de l'en-tête) */
+export function getTransitionMusics(): TransitionMusic[] {
+  return TRANSITION_MUSICS;
 }
 
 /** Image de couverture d'un son : `img`, ou `icon` si c'est un chemin d'image */

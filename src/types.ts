@@ -114,6 +114,19 @@ export interface AudioTab extends TabBase<AudioItem> {
 }
 
 // ═══════════════════════════════════════════════════════
+// MUSIQUE DE TRANSITION
+// ═══════════════════════════════════════════════════════
+
+/**
+ * Une musique de transition (entre deux impros) : une seule sert tout le spectacle.
+ * Le premier lancement part de `start` (ou du début du fichier), les suivants de `restart`.
+ */
+export interface TransitionMusic extends AudioItem {
+  /** Point de reprise, en secondes : où repartent les lancements après le premier */
+  restart: number;
+}
+
+// ═══════════════════════════════════════════════════════
 // POPUPS D'EFFETS
 // ═══════════════════════════════════════════════════════
 

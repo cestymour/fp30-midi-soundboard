@@ -4,26 +4,14 @@ Idées et évolutions demandées par l'utilisateur, pas encore planifiées. Les 
 
 ## Priorité : à faire avant tout le reste (dans cet ordre)
 
-Demandé le 2026-11-10. Le point 1 passe avant tout ; les points 1 à 3 se font avant les autres sections de cette liste. Sons et musiques (deux fonctionnements différents) est fait : voir `CHANGELOG.md`.
+Demandé le 2026-11-10. Le point 1 passe avant tout (le bouton est fait, il reste ses musiques) ; les points 1 à 3 se font avant les autres sections de cette liste. Sons et musiques (deux fonctionnements différents) est fait : voir `CHANGELOG.md`.
 
-### 1. Bouton « musique de transition »
+### 1. Musiques de transition : finir la liste
 
-Entre deux impros, il faut lancer tout de suite une musique rythmée pour remonter l'énergie du public. La même musique sert tout le spectacle, choisie avant le début parmi une dizaine.
+Le bouton « Transition » est fait (voir `CHANGELOG.md`). Reste :
 
-Déroulé : avant le spectacle, on choisit la musique (liste déroulante ?). Au début, on la lance une trentaine de secondes, puis on l'arrête pour que le MC présente et lance la première impro. À la fin de l'impro, on la relance en un clic, idéalement là où on l'avait arrêtée ; on l'arrête quelques secondes plus tard, le MC introduit l'impro suivante, et ainsi de suite.
-
-- [ ] Bouton toujours visible (dans l'en-tête, quel que soit l'onglet) ; pendant la lecture, une popup par-dessus les onglets montre la progression.
-- [ ] Choix de la musique avant le spectacle, mémorisé (`localStorage`).
-- [ ] Reprise là où on s'était arrêté (position mémorisée).
-- [ ] Trouver la dizaine de musiques (fichiers à fournir).
-
-Faisabilité : rien de bloquant. Retenu (2026-11-10) : c'est une musique comme les autres (elle coupe la musique des onglets musiques, et inversement : une seule musique à la fois, voir `src/audio/playback.ts`), avec des fondus courts à la reprise et à l'arrêt, et la position mémorisée survit à un rechargement de l'appli en plein spectacle.
-
-À définir pendant la réalisation :
-- Fin du morceau : boucler au début, s'arrêter, ou enchaîner sur une autre musique de la liste ?
-- La liste des morceaux à charger.
-- Effets audio appliqués ou non ; volume des musiques ou à part.
-- Où se fait le choix : popup À propos / réglages, ou dans la popup du bouton.
+- [ ] Trouver la dizaine de musiques (fichiers à fournir) ; la liste provisoire reprend des musiques des onglets (`src/config/transition.config.ts`).
+- [ ] Régler à l'oreille le point de reprise (`restart`) de chaque musique : pour l'instant, il vaut le début.
 
 ### 2. Réorganiser l'onglet Musiques
 

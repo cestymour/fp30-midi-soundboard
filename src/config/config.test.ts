@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { MIDI_TABS } from './midi.config.ts';
 import { AUDIO_TABS } from './audio.config.ts';
+import { TRANSITION_MUSICS } from './transition.config.ts';
 
 /** Renvoie les id présents plusieurs fois dans la liste */
 function findDuplicateIds(entries: { id: string }[]): string[] {
@@ -57,5 +58,29 @@ describe('onglets sons', () => {
       .filter(item => item.noFade !== undefined)
       .map(item => item.id);
     expect(withNoFade).toEqual([]);
+  });
+});
+
+describe('musiques de transition', () => {
+  it('il y en a, avec des id uniques au format slug', () => {
+    expect(TRANSITION_MUSICS.length).toBeGreaterThan(0);
+    expect(findDuplicateIds(TRANSITION_MUSICS)).toEqual([]);
+    expect(TRANSITION_MUSICS.map(music => music.id).filter(id => !ID_FORMAT.test(id))).toEqual([]);
+  });
+
+  it('début et point de reprise sont des positions valides', () => {
+    const invalid = TRANSITION_MUSICS
+      .filter(music => !(music.restart >= 0) || !((music.start ?? 0) >= 0)
+        || (music.end !== undefined && music.restart >= music.end))
+      .map(music => music.id);
+    expect(invalid).toEqual([]);
+  });
+
+  it('les fichiers existent dans public/', () => {
+    // Liste des fichiers seulement : les fonctions d'import ne sont jamais appelées
+    const files = new Set(Object.keys(import.meta.glob('../../public/sounds/**/*'))
+      .map(path => path.replace('../../public/', '')));
+    const missing = TRANSITION_MUSICS.filter(music => !files.has(music.file)).map(music => music.file);
+    expect(missing).toEqual([]);
   });
 });

@@ -2,6 +2,27 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## Prochaine version (non publiée)
+
+### Nouveautés
+
+- **Bouton « Transition » dans l'en-tête**, visible depuis tous les onglets : il lance la musique de transition qui relance l'énergie du public entre deux impros. Un clic la lance, un autre l'arrête (court fondu). Pendant la lecture, une popup par-dessus les onglets montre la progression ; l'en-tête reste visible, donc le bouton pour l'arrêter aussi. Toucher à côté de la popup la ferme sans couper la musique.
+- **Une seule musique pour tout le spectacle**, choisie avant le début dans la popup (flèche ▾ à droite du bouton, qui l'ouvre sans lancer la musique). Le choix est gardé d'une fois sur l'autre.
+- **Premier lancement depuis le début, ensuite depuis le point de reprise** propre à chaque musique : la musique repart toujours au même endroit, choisi à l'avance. Un trait marque le point de reprise sur la barre de progression de la popup. Un rechargement de l'appli en plein spectacle n'y change rien ; au-delà de 6 heures sans lancement (spectacle suivant), elle repart du début. « ↺ Repartir du début » le force, par exemple après un essai avant le spectacle ; changer de musique aussi.
+- **Sans effets, avec son propre volume** (curseur dans la popup, gardé lui aussi). C'est une musique comme les autres : elle coupe la musique des onglets, et inversement ; l'arrêt d'urgence la coupe.
+
+### À savoir
+
+- Pour l'instant, la liste reprend dix musiques rythmées déjà dans l'appli (I Feel Good, Dancing Queen, Pump It, Eye of the Tiger, Still D.R.E., Peter Gunn, French cancan, Guillaume Tell, Benny Hill, Mario). Leurs points de reprise ne sont pas encore réglés : ils valent le début de la musique (`src/config/transition.config.ts`).
+- En portrait et sur téléphone, le bouton n'a que son icône (▶ orange), et les onglets sont un peu plus serrés en portrait pour que tout tienne.
+
+### À vérifier sur la tablette
+
+- Le bouton en paysage (libellé et nom de la musique) et en portrait (icône seule) : tous les onglets restent visibles.
+- Lancer, arrêter, relancer : le deuxième lancement part du point de reprise ; la popup s'ouvre et se ferme toute seule ; ▾ l'ouvre sans lancer.
+- Le volume de la transition ne change pas celui des musiques, et les effets audio ne s'y appliquent pas.
+- Recharger l'appli après un lancement : la musique choisie et la reprise sont gardées.
+
 ## 1.12.0 — 2026-11-10
 
 ### Nouveautés

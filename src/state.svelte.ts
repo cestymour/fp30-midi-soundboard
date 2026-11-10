@@ -46,6 +46,14 @@ class AppState {
   /** Volume des sons (0-1), commun aux onglets sons */
   soundVolume           = $state(1);
 
+  // ── Musique de transition (bouton de l'en-tête, audio/transition.ts) ──
+  /** Id de la musique choisie pour le spectacle (TRANSITION_MUSICS) */
+  transitionMusicId     = $state<string | null>(null);
+  /** Dernier lancement (Date.now()), null : le prochain part du début */
+  transitionLastLaunch  = $state<number | null>(null);
+  /** Volume de la musique de transition (0-1), à part de celui des musiques */
+  transitionVolume      = $state(1);
+
   // ── Divers ──
   wakeLock              = $state.raw<WakeLockSentinel | null>(null);
 }

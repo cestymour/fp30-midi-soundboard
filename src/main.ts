@@ -15,6 +15,8 @@ import App from './App.svelte';
 import { initBluetooth, initWebMidi } from './midi/connection.ts';
 import { bindMidiConnectionUI } from './ui/midi-ui.svelte.ts';
 import { bindPlaybackUI, bindSoundsUI } from './ui/transport.svelte.ts';
+import { bindTransitionUI } from './ui/transition.svelte.ts';
+import { initTransition } from './audio/transition.ts';
 import { initWakeLock } from './wake-lock.ts';
 import { requestPersistentStorage } from './offline.ts';
 
@@ -22,6 +24,10 @@ import { requestPersistentStorage } from './offline.ts';
 bindMidiConnectionUI();
 bindPlaybackUI();
 bindSoundsUI();
+bindTransitionUI();
+
+// Musique de transition : choix, dernier lancement et volume enregistrés
+initTransition();
 
 mount(App, { target: document.getElementById('app')! });
 

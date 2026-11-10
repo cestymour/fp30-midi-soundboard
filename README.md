@@ -60,6 +60,9 @@ Click a button → the sound plays at once, over the music and over any other so
 
 The panel bar holds a ⏹ button that stops every sound (the music goes on), the emergency stop and the sound volume (shared by the two sound tabs).
 
+#### Transition music (header button)
+Between two improvs, the **Transition** button (in the header, on every tab) plays a rhythmic music to lift the audience. One music serves the whole show: pick it beforehand in the button's popup (▾ opens it without playing). The first launch starts from the beginning (`start`), every later one from the music's resume point (`restart`), so it always restarts at the chosen spot; it goes back to the beginning after 6 hours without a launch, when another music is picked, or with « Repartir du début ». While it plays, a popup over the tabs shows its progress. It is a music like the others (it stops the music of the music tabs, and vice versa), but with no FX and its own volume. The choice, the last launch and the volume are kept in `localStorage`. List: `src/config/transition.config.ts` (`TRANSITION_MUSICS`: `id`, `name`, `file`, optional `start`, `restart` in seconds).
+
 Each sound file is decoded on its first click (read from the offline cache), then kept in memory within a 50 MB budget, so the following clicks start instantly (`src/audio/sounds.ts`).
 
 ### Notes
@@ -105,7 +108,8 @@ Each sound file is decoded on its first click (read from the offline cache), the
 │   │   ├── audio.config.ts         # Audio sound data (AUDIO_TABS)
 │   │   ├── midi-fx.config.ts       # MIDI FX overlay presets (MIDI_FX_PRESETS)
 │   │   ├── audio-fx.config.ts      # Audio FX overlay presets (AUDIO_FX_PRESETS)
-│   │   └── tabs.ts                 # Config access for the UI (getMidiTabs, getAudioTabs)
+│   │   ├── transition.config.ts    # Transition musics (TRANSITION_MUSICS)
+│   │   └── tabs.ts                 # Config access for the UI (getMidiTabs, getAudioTabs, getTransitionMusics)
 │   ├── midi/                       # MIDI engine (no DOM)
 │   │   ├── midi.ts                 # Sending: USB/BT routing, patch, volume, all notes off
 │   │   ├── connection.ts           # USB (Web MIDI) and Bluetooth connection
@@ -114,6 +118,7 @@ Each sound file is decoded on its first click (read from the offline cache), the
 │   ├── audio/                      # Audio engine (no DOM)
 │   │   ├── audio-engine.ts         # Web Audio effects chain
 │   │   ├── playback.ts             # Play, stop, pause, seek, fades, progress
+│   │   ├── transition.ts           # Transition music: choice, resume point, volume
 │   │   └── timing.ts               # Time helpers (range, progress, M:SS)
 │   ├── fx/                         # FX logic (no DOM)
 │   │   ├── fx-presets.ts           # Shared preset logic (targets, active preset, clamp)
@@ -381,6 +386,9 @@ Cliquer sur un bouton → le son part tout de suite, par-dessus la musique et pa
 
 La barre du panneau porte un bouton ⏹ qui coupe tous les sons (la musique continue), l'arrêt d'urgence et le volume des sons (commun aux deux onglets sons).
 
+#### Musique de transition (bouton de l'en-tête)
+Entre deux impros, le bouton **Transition** (dans l'en-tête, sur tous les onglets) lance une musique rythmée pour remonter l'énergie du public. Une seule musique sert tout le spectacle : on la choisit avant, dans la popup du bouton (▾ l'ouvre sans lancer la musique). Le premier lancement part du début (`start`), les suivants du point de reprise de la musique (`restart`) : elle repart toujours au même endroit. Elle repart du début après 6 heures sans lancement, quand on change de musique, ou avec « Repartir du début ». Pendant la lecture, une popup par-dessus les onglets montre la progression. C'est une musique comme les autres (elle coupe la musique des onglets musiques, et inversement), mais sans effets et avec son propre volume. Le choix, le dernier lancement et le volume sont gardés dans `localStorage`. Liste : `src/config/transition.config.ts` (`TRANSITION_MUSICS` : `id`, `name`, `file`, `start` facultatif, `restart` en secondes).
+
 Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), puis gardé en mémoire dans la limite de 50 Mo : les clics suivants partent instantanément (`src/audio/sounds.ts`).
 
 ### Notes
@@ -426,7 +434,8 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 │   │   ├── audio.config.ts         # Données sons audio (AUDIO_TABS)
 │   │   ├── midi-fx.config.ts       # Presets popup effets MIDI (MIDI_FX_PRESETS)
 │   │   ├── audio-fx.config.ts      # Presets popup effets audio (AUDIO_FX_PRESETS)
-│   │   └── tabs.ts                 # Accès à la config pour l'interface (getMidiTabs, getAudioTabs)
+│   │   ├── transition.config.ts    # Musiques de transition (TRANSITION_MUSICS)
+│   │   └── tabs.ts                 # Accès à la config pour l'interface (getMidiTabs, getAudioTabs, getTransitionMusics)
 │   ├── midi/                       # Moteur MIDI (sans DOM)
 │   │   ├── midi.ts                 # Envoi : routage USB/BT, patch, volume, all notes off
 │   │   ├── connection.ts           # Connexion USB (Web MIDI) et Bluetooth
@@ -435,6 +444,7 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 │   ├── audio/                      # Moteur audio (sans DOM)
 │   │   ├── audio-engine.ts         # Chaîne d'effets Web Audio
 │   │   ├── playback.ts             # Lecture, stop, pause, seek, fondus, progression
+│   │   ├── transition.ts           # Musique de transition : choix, point de reprise, volume
 │   │   └── timing.ts               # Calculs de temps (plage, progression, M:SS)
 │   ├── fx/                         # Logique des effets (sans DOM)
 │   │   ├── fx-presets.ts           # Logique commune des presets (cibles, preset actif, clamp)
