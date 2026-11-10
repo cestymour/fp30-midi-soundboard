@@ -147,6 +147,7 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'recreation',         name: 'Récréation',         icon: '🏫', file: 'sounds/ambiances/recreation_maternelle.mp3' },
           { id: 'maternite',          name: 'Maternité',          icon: '👶', file: 'sounds/ambiances/maternite_pleurs_bebe.mp3' },
           { id: 'feux-d-artifices',   name: 'Feux d\'artifices',  icon: '🎆', file: 'sounds/ambiances/feux_artifices.mp3' },
+          { id: 'noel',               name: 'Noël',               icon: '🎄', file: 'sounds/ambiances/noel.mp3', start: 1.5, title: 'Jingle Bells' },
 
           // ── Mer et nature ──
           { id: 'plage',              name: 'Plage',              icon: '🏖️', file: 'sounds/ambiances/plage_vacanciers.mp3' },
@@ -301,14 +302,6 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'maple-leaf-rag',   name: 'Saloon',             subtitle: 'piano ragtime',                icon: '🤠', file: 'sounds/musiques/maple_leaf_rag.mp3',                     start: 2, catClass: 'musique-tuile', title: 'Maple Leaf Rag (Scott Joplin)' },
         ]
       },
-      /* a déplacer dans ambiance
-      {
-        id: 'festif', label: 'Festif, léger et convivial', icon: '🎄', color: '#3fd98a',
-        items: [
-//          { id: 'noel',             name: 'Noël',               subtitle: 'Jingle Bells',                 icon: '🎄', file: 'sounds/musiques/noel.mp3',                               start: 1.5, catClass: 'musique-tuile', title: 'Jingle Bells' },
-        ]
-      },
-      */
     ]
   },
 
