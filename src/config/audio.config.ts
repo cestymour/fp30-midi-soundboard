@@ -75,9 +75,9 @@ export const AUDIO_TABS: AudioTab[] = [
         id: 'tous-les-bruits', label: 'Tous les bruits', icon: '🔊', color: '#dd66ff',
         items: [
           // ── Bureau et technologie ──
-          { id: 'clavier',                 name: 'Clavier',              icon: '⌨️', file: 'sounds/bruits/bruit-clavier-ordinateur.mp3' },
+          { id: 'clavier',                 name: 'Clavier',              icon: '⌨️', file: 'sounds/bruits/bruit_clavier_ordinateur.mp3' },
           { id: 'machine-a-ecrire',        name: 'Machine à écrire',     icon: '📝', file: 'sounds/bruits/machine_a_ecrire.ogg', start: 0.15 },
-          { id: 'modem-56k',               name: 'Modem 56k',            icon: '📠', file: 'sounds/bruits/connexion-modem-56k.mp3' },
+          { id: 'modem-56k',               name: 'Modem 56k',            icon: '📠', file: 'sounds/bruits/connexion_modem_56k.mp3' },
           { id: 'erreur-windows',          name: 'Erreur Windows',       icon: '🖥️', file: 'sounds/bruits/erreur_windows_xp.mp3',        start: 0.2 },
           { id: 'notification',            name: 'Notification',         icon: '🔔', file: 'sounds/bruits/bruit_notification.mp3',       start: 0.8 },
           { id: 'bip-morse',               name: 'Bip morse',            icon: '📡', file: 'sounds/bruits/bip_code_morse.mp3' },
@@ -102,7 +102,7 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'bebe-pleure',             name: 'Bébé pleure',          icon: '😭', file: 'sounds/bruits/bebe_pleure.mp3' },
           { id: 'bebe-rit',                name: 'Bébé rit',             icon: '👶', file: 'sounds/bruits/bebe_rit.mp3' },
           { id: 'verre-d-eau',             name: 'Verre d\'eau',         icon: '🥛', file: 'sounds/bruits/remplissage_verre_d_eau.mp3' },
-          { id: 'briquet',                 name: 'Briquet',              icon: '🚬', file: 'sounds/bruits/bruit_briquet_cirgarette.mp3'},
+          { id: 'briquet',                 name: 'Briquet',              icon: '🚬', file: 'sounds/bruits/bruit_briquet_cigarette.mp3'},
 
           // ── Feu, lames et outils ──
           { id: 'prend-feu',               name: 'Prend feu',            icon: '🔥', file: 'sounds/bruits/bruit_prend_feu.ogg' },
@@ -112,10 +112,10 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'scie-egoine',             name: 'Scie égoïne',          icon: '🪚', file: 'sounds/bruits/scie_egoine.mp3' },
 
           // ── Ajouts récents ──
-          { id: 'klaxon',                  name: 'Klaxon',               icon: '🚗', file: 'sounds/bruits/klaxon-voiture.mp3' },
-          { id: 'tic-tac-bombe',           name: 'Tic-tac bombe',        icon: '💣', file: 'sounds/bruits/tic-tac-bombe.ogg' },
+          { id: 'klaxon',                  name: 'Klaxon',               icon: '🚗', file: 'sounds/bruits/klaxon_voiture.mp3' },
+          { id: 'tic-tac-bombe',           name: 'Tic-tac bombe',        icon: '💣', file: 'sounds/bruits/tic_tac_bombe.ogg' },
           { id: 'tronconneuse',            name: 'Tronçonneuse',         icon: '🪚', file: 'sounds/bruits/bruit_tronconneuse.ogg' },
-          //{ id: 'perceuse',                name: 'Perceuse',             icon: '🔧', file: 'sounds/bruits/bruit-perceuse.mp3' },
+          //{ id: 'perceuse',                name: 'Perceuse',             icon: '🔧', file: 'sounds/bruits/bruit_perceuse.mp3' },
         ]
       }
     ]
@@ -325,97 +325,97 @@ export const AUDIO_TABS: AudioTab[] = [
       {
         id: 'horreur', label: 'Horreur', icon: '😱', color: '#ff6666',
         items: [
-          { id: 'saw',                name: 'Ambiance tendu',       img: 'images/films/saw.jpg',                file: 'sounds/films/(Saw) Theme.mp3',                                               start: 21.2,            title: 'Saw' },
-          { id: 'jaws',               name: 'Danger proche',        img: 'images/films/jaws.jpg',               file: 'sounds/films/(Les Dents De La Mer) Theme.mp3',                               start: 9.5,             title: 'Les Dents de la Mer' },
-          { id: 'psycho',             name: 'Au secours Ahhh !',    img: 'images/films/psycho.jpg',             file: 'sounds/films/(Psycho) Shower Scene.mp3',                                     start: 0.1,             title: 'Psycho (Scène Douche)' },
+          { id: 'saw',                name: 'Ambiance tendu',       img: 'images/films/saw.jpg',                file: 'sounds/films/saw_theme.mp3',                                               start: 21.2,            title: 'Saw' },
+          { id: 'jaws',               name: 'Danger proche',        img: 'images/films/jaws.jpg',               file: 'sounds/films/les_dents_de_la_mer_theme.mp3',                               start: 9.5,             title: 'Les Dents de la Mer' },
+          { id: 'psycho',             name: 'Au secours Ahhh !',    img: 'images/films/psycho.jpg',             file: 'sounds/films/psycho_shower_scene.mp3',                                     start: 0.1,             title: 'Psycho (Scène Douche)' },
         ]
       },
       {
         id: 'drame', label: 'Drame', icon: '💔', color: '#8888cc',
         items: [
-          { id: 'requiem',            name: 'Descente enfer',       img: 'images/films/requiem.jpg',            file: 'sounds/films/(Requiem for a Dream) Theme.mp3',                               start: 38.9,            title: 'Requiem for a Dream' },
-          { id: 'platoon',            name: 'Sacrifice Guerre',     img: 'images/films/platoon.jpg',            file: 'sounds/films/(Platoon) Theme.mp3',                                           end: 509, start: 285.5, title: 'Platoon' },
-          { id: 'professionel',       name: 'Adieu Poignant',       img: 'images/films/professionel.jpg',       file: 'sounds/films/(Le Professionnel) Chi Mai - Ennio Morricone.mp3',              start: 39.6,            title: 'Le Professionnel (Chi Mai)' },
+          { id: 'requiem',            name: 'Descente enfer',       img: 'images/films/requiem.jpg',            file: 'sounds/films/requiem_for_a_dream_theme.mp3',                               start: 38.9,            title: 'Requiem for a Dream' },
+          { id: 'platoon',            name: 'Sacrifice Guerre',     img: 'images/films/platoon.jpg',            file: 'sounds/films/platoon_theme.mp3',                                           end: 509, start: 285.5, title: 'Platoon' },
+          { id: 'professionel',       name: 'Adieu Poignant',       img: 'images/films/professionel.jpg',       file: 'sounds/films/le_professionnel_chi_mai_ennio_morricone.mp3',              start: 39.6,            title: 'Le Professionnel (Chi Mai)' },
         ]
       },
       {
         id: 'tragedie', label: 'Tragédie', icon: '🥀', color: '#aa88aa',
         items: [
-          { id: 'dark-vador',         name: 'Menace Imposante',     img: 'images/films/dark-vador.jpg',         file: 'sounds/films/(Star Wars) Dark Vador Theme.mp3',                              start: 9.5,             title: 'Star Wars (Thème de Dark Vador)' },
-          { id: 'star-wars-duel',     name: 'Combat Épique',        img: 'images/films/star-wars-duel.jpg',     file: 'sounds/films/(Star Wars) Duel of the Fates.mp3',                             start: 60.0,            title: 'Star Wars (Duel of the Fates)' },
-          { id: 'le-parrain',         name: 'Mafia Respect',        img: 'images/films/le_parrain.jpg',         file: 'sounds/films/(Le parrain) Love Theme.mp3',                                   start: 0.4,             title: 'Le Parrain (Love Theme)' },
+          { id: 'dark-vador',         name: 'Menace Imposante',     img: 'images/films/dark-vador.jpg',         file: 'sounds/films/star_wars_dark_vador_theme.mp3',                              start: 9.5,             title: 'Star Wars (Thème de Dark Vador)' },
+          { id: 'star-wars-duel',     name: 'Combat Épique',        img: 'images/films/star-wars-duel.jpg',     file: 'sounds/films/star_wars_duel_of_the_fates.mp3',                             start: 60.0,            title: 'Star Wars (Duel of the Fates)' },
+          { id: 'le-parrain',         name: 'Mafia Respect',        img: 'images/films/le_parrain.jpg',         file: 'sounds/films/le_parrain_love_theme.mp3',                                   start: 0.4,             title: 'Le Parrain (Love Theme)' },
         ]
       },
       {
         id: 'western', label: 'Western', icon: '🤠', color: '#cc8844',
         items: [
-          { id: 'bon-brute-truand',   name: 'Duel ',                img: 'images/films/bon-brute-truand.jpg',   file: 'sounds/films/(Le Bon la Brute et le Truand) Theme.mp3',                      start: 5.0,             title: 'Le Bon la Brute et le Truand' },
-          { id: 'guimbarde',          name: 'Chasse à l\'homme',    img: 'images/films/guimbarde.jpg',          file: 'sounds/films/(Pour quelques dollars de plus) Theme.mp3',                     start: 26.7,            title: 'Pour quelques dollars de plus' },
-          { id: 'harmonica',          name: 'Vengeance Duel Lent',  img: 'images/films/harmonica.jpg',          file: 'sounds/films/(Il était une fois dans l\'ouest) L\'homme à l\'harmonica.mp3', start: 7,               title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
+          { id: 'bon-brute-truand',   name: 'Duel ',                img: 'images/films/bon-brute-truand.jpg',   file: 'sounds/films/le_bon_la_brute_et_le_truand_theme.mp3',                      start: 5.0,             title: 'Le Bon la Brute et le Truand' },
+          { id: 'guimbarde',          name: 'Chasse à l\'homme',    img: 'images/films/guimbarde.jpg',          file: 'sounds/films/pour_quelques_dollars_de_plus_theme.mp3',                     start: 26.7,            title: 'Pour quelques dollars de plus' },
+          { id: 'harmonica',          name: 'Vengeance Duel Lent',  img: 'images/films/harmonica.jpg',          file: 'sounds/films/il_etait_une_fois_dans_l_ouest_l_homme_a_l_harmonica.mp3', start: 7,               title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
         ]
       },
       {
         id: 'espionnage-action', label: 'Espionnage / Action', icon: '🕵️‍♀️', color: '#6688aa',
         items: [
-          { id: 'mission-impossible', name: 'Mission Infilration',  img: 'images/films/mission-impossible.jpg', file: 'sounds/films/(Mission Impossible) Main Theme2.mp3',                          start: 2.8,             title: 'Mission Impossible' },
-          { id: 'james-bond',         name: '007 Agent secret',     img: 'images/films/james-bond.jpg',         file: 'sounds/films/(James Bond) Theme.mp3',                                        start: 7.0,             title: 'James Bond' },
-          { id: 'matrix',             name: 'Grave badass',         img: 'images/films/matrix.jpg',             file: 'sounds/films/(Matrix) Clubbed to Death.mp3',                                 start: 8.25,            title: 'Matrix (Clubbed to Death)' },
+          { id: 'mission-impossible', name: 'Mission Infilration',  img: 'images/films/mission-impossible.jpg', file: 'sounds/films/mission_impossible_main_theme2.mp3',                          start: 2.8,             title: 'Mission Impossible' },
+          { id: 'james-bond',         name: '007 Agent secret',     img: 'images/films/james-bond.jpg',         file: 'sounds/films/james_bond_theme.mp3',                                        start: 7.0,             title: 'James Bond' },
+          { id: 'matrix',             name: 'Grave badass',         img: 'images/films/matrix.jpg',             file: 'sounds/films/matrix_clubbed_to_death.mp3',                                 start: 8.25,            title: 'Matrix (Clubbed to Death)' },
         ]
       },
       {
         id: 'policier', label: 'Policier', icon: '🔎', color: '#88aacc',
         items: [
-          { id: 'sherlock',           name: 'Déduction Énigme',     img: 'images/films/sherlock.jpg',           file: 'sounds/films/(Sherlock Holmes) Theme.mp3',                                   start: 22.2,            title: 'Sherlock Holmes' },
-          { id: 'experts',            name: 'Scène Crime',          img: 'images/films/experts.jpg',            file: 'sounds/films/(Les Experts) generique.mp3',                                   start: 4.0,             title: 'Les Experts (Who Are You)' },
-          { id: 'x-files',            name: 'Mystère Inexpliqué',   img: 'images/films/x-files.jpg',            file: 'sounds/films/(The x files) Theme.mp3',                                       start: 0.1,             title: 'X-Files' },
+          { id: 'sherlock',           name: 'Déduction Énigme',     img: 'images/films/sherlock.jpg',           file: 'sounds/films/sherlock_holmes_theme.mp3',                                   start: 22.2,            title: 'Sherlock Holmes' },
+          { id: 'experts',            name: 'Scène Crime',          img: 'images/films/experts.jpg',            file: 'sounds/films/les_experts_generique.mp3',                                   start: 4.0,             title: 'Les Experts (Who Are You)' },
+          { id: 'x-files',            name: 'Mystère Inexpliqué',   img: 'images/films/x-files.jpg',            file: 'sounds/films/the_x_files_theme.mp3',                                       start: 0.1,             title: 'X-Files' },
         ]
       },
       {
         id: 'epopee-fantastique', label: 'Épopée / Fantastique', icon: '✨', color: '#ffdd88',
         items: [
-          { id: 'superman',           name: 'Héros Sauvetage',      img: 'images/films/superman.jpg',           file: 'sounds/films/(Superman) Theme - John Williams.mp3',                          start: 38.6,            title: 'Superman' },
-          { id: 'star-wars',          name: 'Aventure Grandiose',   img: 'images/films/star-wars.jpg',          file: 'sounds/films/(Star Wars) Main Theme.mp3',                                    start: 7.8,             title: 'Star Wars' },
-          { id: 'potter',             name: 'Magie Émerveillement', img: 'images/films/potter.jpg',             file: 'sounds/films/(Harry Potter) Theme.mp3',                                      start: 43.0,            title: 'Harry Potter' },
+          { id: 'superman',           name: 'Héros Sauvetage',      img: 'images/films/superman.jpg',           file: 'sounds/films/superman_theme_john_williams.mp3',                          start: 38.6,            title: 'Superman' },
+          { id: 'star-wars',          name: 'Aventure Grandiose',   img: 'images/films/star-wars.jpg',          file: 'sounds/films/star_wars_main_theme.mp3',                                    start: 7.8,             title: 'Star Wars' },
+          { id: 'potter',             name: 'Magie Émerveillement', img: 'images/films/potter.jpg',             file: 'sounds/films/harry_potter_theme.mp3',                                      start: 43.0,            title: 'Harry Potter' },
         ]
       },
       {
         id: 'aventure', label: 'Aventure', icon: '🗺️', color: '#88bb66',
         items: [
-          { id: 'indiana-jones',      name: 'Aventure Trépidante',  img: 'images/films/indiana-jones.jpg',      file: 'sounds/films/(Indiana Jones) Theme - John Williams.mp3',                     start: 6.8,             title: 'Indiana Jones' },
-          { id: 'pirate',             name: 'Pirate Aventure',      img: 'images/films/pirate.jpg',             file: 'sounds/films/(Pirate des Caraibes) Theme.mp3',                                                       title: 'Pirates des Caraïbes' },
-          { id: '1492',               name: 'Corsaire Voyage',      img: 'images/films/1492.jpg',               file: 'sounds/films/(1492 Conquest of Paradise) Vangelis.mp3',                      start: 15.5,            title: '1492 (Vangelis)' },
+          { id: 'indiana-jones',      name: 'Aventure Trépidante',  img: 'images/films/indiana-jones.jpg',      file: 'sounds/films/indiana_jones_theme_john_williams.mp3',                     start: 6.8,             title: 'Indiana Jones' },
+          { id: 'pirate',             name: 'Pirate Aventure',      img: 'images/films/pirate.jpg',             file: 'sounds/films/pirate_des_caraibes_theme.mp3',                                                       title: 'Pirates des Caraïbes' },
+          { id: '1492',               name: 'Corsaire Voyage',      img: 'images/films/1492.jpg',               file: 'sounds/films/1492_conquest_of_paradise_vangelis.mp3',                      start: 15.5,            title: '1492 (Vangelis)' },
         ]
       },
       {
         id: 'action-poursuite', label: 'Action / Poursuite', icon: '💥', color: '#ff8844',
         items: [
-          { id: 'kill-bill',          name: 'Préparation Duel',     img: 'images/films/kill-bill.jpg',          file: 'sounds/films/(Kill Bill) Battle Without Honor Or Humanity.mp3',              start: 1.3,             title: 'Kill Bill' }, // Attention, présence de voix de scène dans la musique TODO:: changer la musique
-          { id: 'kill-bill-hornet',   name: 'Course Poursuite',     img: 'images/films/kill-bill-hornet.jpg',   file: 'sounds/films/(Kill Bill) The Green Hornet.mp3',                              start: 0.2,             title: 'Kill Bill (The Green Hornet)' },
-          { id: 'taxi',               name: 'Course Poursuite',     img: 'images/films/taxi.jpg',               file: 'sounds/films/(Taxi) Pump It.mp3',                                                                    title: 'Taxi (Pump It)' },
+          { id: 'kill-bill',          name: 'Préparation Duel',     img: 'images/films/kill-bill.jpg',          file: 'sounds/films/kill_bill_battle_without_honor_or_humanity.mp3',              start: 1.3,             title: 'Kill Bill' }, // Attention, présence de voix de scène dans la musique TODO:: changer la musique
+          { id: 'kill-bill-hornet',   name: 'Course Poursuite',     img: 'images/films/kill-bill-hornet.jpg',   file: 'sounds/films/kill_bill_the_green_hornet.mp3',                              start: 0.2,             title: 'Kill Bill (The Green Hornet)' },
+          { id: 'taxi',               name: 'Course Poursuite',     img: 'images/films/taxi.jpg',               file: 'sounds/films/taxi_pump_it.mp3',                                                                    title: 'Taxi (Pump It)' },
         ]
       },
       {
         id: 'sport', label: 'Sport', icon: '🏆', color: '#ffaa44',
         items: [
-          { id: 'rocky-eye-tiger',    name: 'Motivation Combat',    img: 'images/films/rocky-eye-tiger.jpg',    file: 'sounds/films/(Rocky) Eye Of The Tiger - Survivor.mp3',                       start: 0.2,             title: 'Rocky (Eye of the Tiger)' },
-          { id: 'rocky-fly-now',      name: 'Victoire Triomphe',    img: 'images/films/rocky-fly-now.jpg',      file: 'sounds/films/(Rocky) Gonna Fly Now - Bill Conti.mp3',                        start: 1.2,             title: 'Rocky (Gonna Fly Now)' },
-          { id: 'chariots-de-feu',    name: 'Ralenti Dépassement',  img: 'images/films/chariots-de-feu.jpg',    file: 'sounds/films/(Les chariots de feu) Vangelis.mp3',                            start: 28.5,            title: 'Les Chariots de Feu' },
+          { id: 'rocky-eye-tiger',    name: 'Motivation Combat',    img: 'images/films/rocky-eye-tiger.jpg',    file: 'sounds/films/rocky_eye_of_the_tiger_survivor.mp3',                       start: 0.2,             title: 'Rocky (Eye of the Tiger)' },
+          { id: 'rocky-fly-now',      name: 'Victoire Triomphe',    img: 'images/films/rocky-fly-now.jpg',      file: 'sounds/films/rocky_gonna_fly_now_bill_conti.mp3',                        start: 1.2,             title: 'Rocky (Gonna Fly Now)' },
+          { id: 'chariots-de-feu',    name: 'Ralenti Dépassement',  img: 'images/films/chariots-de-feu.jpg',    file: 'sounds/films/les_chariots_de_feu_vangelis.mp3',                            start: 28.5,            title: 'Les Chariots de Feu' },
         ]
       },
       {
         id: 'romance', label: 'Romance', icon: '❤️', color: '#ff99bb',
         items: [
-          { id: 'dirty-dancing',      name: 'Dirty Dancing',        img: 'images/films/Dirty-dancing.jpg',      file: 'sounds/films/(Dirty Dancing) The Time Of My Life.mp3',                       start: 2.0,             title: 'Dirty Dancing (The Time of My Life)' },
-          { id: 'titanic',            name: 'Amour Éternel',        img: 'images/films/titanic.jpg',            file: 'sounds/films/(Titanic) My Heart Will Go On - Celine Dion.mp3',               start: 195.2,           title: 'Titanic (My Heart Will Go On)' },
-          { id: 'love-actually',      name: 'Amour Léger',          img: 'images/films/love-actually.jpg',      file: 'sounds/films/(Love Actually) - Craig Armstrong.mp3',                         start: 319.0,           title: 'Love Actually' },
+          { id: 'dirty-dancing',      name: 'Dirty Dancing',        img: 'images/films/Dirty-dancing.jpg',      file: 'sounds/films/dirty_dancing_the_time_of_my_life.mp3',                       start: 2.0,             title: 'Dirty Dancing (The Time of My Life)' },
+          { id: 'titanic',            name: 'Amour Éternel',        img: 'images/films/titanic.jpg',            file: 'sounds/films/titanic_my_heart_will_go_on_celine_dion.mp3',               start: 195.2,           title: 'Titanic (My Heart Will Go On)' },
+          { id: 'love-actually',      name: 'Amour Léger',          img: 'images/films/love-actually.jpg',      file: 'sounds/films/love_actually_craig_armstrong.mp3',                         start: 319.0,           title: 'Love Actually' },
         ]
       },
       {
         id: 'comedie', label: 'Comédie', icon: '😂', color: '#ffcc66',
         items: [
-          { id: 'curb-your',          name: 'Malaise Absurde',      img: 'images/films/curb-your.jpg',          file: 'sounds/films/(Curb Your Enthusiasm) Theme.mp3',                              start: 0.5,             title: 'Curb Your Enthusiasm' },
-          { id: 'pink-panthere',      name: 'Enquête Maladroite',   img: 'images/films/pink-panthere.jpg',      file: 'sounds/films/(The Pink Panther) Theme.mp3',                                  start: 6.3,             title: 'The Pink Panther' },
-          { id: 'benny',              name: 'Poursuite Burlesque',  img: 'images/films/benny.jpg',              file: 'sounds/films/(Benny Hill) Theme.mp3',                                        start: 3.2,             title: 'Benny Hill' },
+          { id: 'curb-your',          name: 'Malaise Absurde',      img: 'images/films/curb-your.jpg',          file: 'sounds/films/curb_your_enthusiasm_theme.mp3',                              start: 0.5,             title: 'Curb Your Enthusiasm' },
+          { id: 'pink-panthere',      name: 'Enquête Maladroite',   img: 'images/films/pink-panthere.jpg',      file: 'sounds/films/the_pink_panther_theme.mp3',                                  start: 6.3,             title: 'The Pink Panther' },
+          { id: 'benny',              name: 'Poursuite Burlesque',  img: 'images/films/benny.jpg',              file: 'sounds/films/benny_hill_theme.mp3',                                        start: 3.2,             title: 'Benny Hill' },
         ]
       },
     ]
