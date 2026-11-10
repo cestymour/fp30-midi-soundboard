@@ -22,9 +22,9 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'cheval-souffle',    name: 'Cheval : Souffle',    icon: '🐎',   file: 'sounds/animaux/cheval_souffle.ogg',                                 catClass: 'animaux-ferme',      title: 'Cheval Souffle' },
        // { id: 'galop-cheval',      name: 'Galop Cheval',        icon: '🐎',   file: 'sounds/animaux/cheval_galop.ogg',                                   catClass: 'animaux-ferme',      title: 'Cheval Galop' },
           { id: 'poule-cot-cot',     name: 'Poule : Cot-cot',     icon: '🐔',   file: 'sounds/animaux/poule_gloussement.mp3',                              catClass: 'animaux-ferme',      title: 'Poule Gloussement' },
-          { id: 'coq-cocorico',      name: 'Coq : Cocorico',      icon: '🐓',   file: 'sounds/animaux/coq_cocorico.ogg',                                   catClass: 'animaux-ferme',      title: 'Coq Cocorico' },
+          { id: 'coq-cocorico',      name: 'Coq : Cocorico',      icon: '🐓',   file: 'sounds/animaux/coq_cocorico.ogg', start: 0.17,                                   catClass: 'animaux-ferme',      title: 'Coq Cocorico' },
           { id: 'oiseau-cui-cui',    name: 'Oiseau : Cui-cui',    icon: '🐦',   file: 'sounds/animaux/chant_des_oiseaux.mp3',                              catClass: 'animaux-oiseau',     title: 'Chant des oiseaux Gazouillement' },
-          { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️',   file: 'sounds/animaux/pigeon_roucoulement.mp3',                            catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
+          { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️',   file: 'sounds/animaux/pigeon_roucoulement.mp3', end: 7.65,                            catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
           { id: 'lion-tigre-roarrr', name: 'Lion/tigre : Roarrr', icon: '🦁',   file: 'sounds/animaux/lion_tigre_rugissement.mp3',                         catClass: 'animaux-savane',     title: 'Lion/tigre Rugissement' },
           { id: 'hyene-hi-hi',       name: 'Hyène : Hi-hi',       icon: '🐆',   file: 'sounds/animaux/hyene_rire.mp3',                                     catClass: 'animaux-savane',     title: 'Hyène Rire' },
 
@@ -33,29 +33,29 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'ane-i-an',          name: 'Âne : I-An',          icon: '🫏',   file: 'sounds/animaux/ane_braiement.mp3',                                  catClass: 'animaux-ferme',      title: 'Âne Braiement' },
           { id: 'dindon-glouglou',   name: 'Dindon : Glouglou',   icon: '🦃',   file: 'sounds/animaux/dindon_glouglou.mp3',                                catClass: 'animaux-ferme',      title: 'Dindon Glouglou' },
           { id: 'canard-coin-coin',  name: 'Canard : Coin-coin',  icon: '🦆',   file: 'sounds/animaux/canard_cancanement.mp3',                             catClass: 'animaux-ferme',      title: 'Canard Cancanement' },
-          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛',   file: 'sounds/animaux/corbeau_croassement.mp3',                            catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
+          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛',   file: 'sounds/animaux/corbeau_croassement.mp3', end: 2.9,                            catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
           { id: 'aigle-cri-percant', name: 'Aigle : Cri perçant', icon: '🦅',   file: 'sounds/animaux/aigle_faucon_cri_percant.mp3',                       catClass: 'animaux-oiseau',     title: 'Aigle / Faucon Cri perçant' },
           { id: 'elephant',          name: 'Éléphant',            icon: '🐘',   file: 'sounds/animaux/elephant_barrissement.mp3',      start: 0.5, end: 6, catClass: 'animaux-savane',     title: 'Éléphant Barrissement' },
-          { id: 'singe-ouh-ouh',     name: 'Singe : Ouh-ouh',     icon: '🐒',   file: 'sounds/animaux/singe_cris.mp3',                                     catClass: 'animaux-savane',     title: 'Singe Cris' },
+          { id: 'singe-ouh-ouh',     name: 'Singe : Ouh-ouh',     icon: '🐒',   file: 'sounds/animaux/singe_cris.mp3', start: 0.4,                                     catClass: 'animaux-savane',     title: 'Singe Cris' },
 
           // ── Ligne 3 (et suivantes : Grillon et Cigale sont passés dans Ambiances, les tuiles
           //    suivantes remontent d'une ou deux places ; 30 sons, 2 places libres en fin de grille) ──
-          { id: 'chat-miaou',        name: 'Chat : Miaou',        icon: '🐱',   file: 'sounds/animaux/chat_miaulement.mp3',                                catClass: 'animaux-domestique', title: 'Chat Miaulement' },
+          { id: 'chat-miaou',        name: 'Chat : Miaou',        icon: '🐱',   file: 'sounds/animaux/chat_miaulement.mp3', start: 0.1,                                catClass: 'animaux-domestique', title: 'Chat Miaulement' },
           { id: 'chat-ronron',       name: 'Chat : Ronron',       icon: '🐈',   file: 'sounds/animaux/chat_ronronnement.ogg',                              catClass: 'animaux-domestique', title: 'Chat Ronronnement' },
           { id: 'mouton-beee',       name: 'Mouton : Bêêê',       icon: '🐑',   file: 'sounds/animaux/mouton_chevre_belement.ogg',                         catClass: 'animaux-ferme',      title: 'Mouton/Chèvre Bêlement' },
-          { id: 'cochon-groin',      name: 'Cochon : Groin',      icon: '🐷',   file: 'sounds/animaux/cochon_grognement.mp3',                              catClass: 'animaux-ferme',      title: 'Cochon Grognement / Couinement' },
-          { id: 'chouette-hou-hou',  name: 'Chouette : Hou-hou',  icon: '🦉',   file: 'sounds/animaux/chouette_hibou_hululements.mp3', end: 2.6,           catClass: 'animaux-oiseau',     title: 'Chouette / Hibou Hululements' },
-          { id: 'serpent-sssss',     name: 'Serpent : Sssss',     icon: '🐍',   file: 'sounds/animaux/serpent_sifflement.mp3',                             catClass: 'animaux-savane',     title: 'Serpent Sifflement' },
+          { id: 'cochon-groin',      name: 'Cochon : Groin',      icon: '🐷',   file: 'sounds/animaux/cochon_grognement.mp3', end: 8.65,                              catClass: 'animaux-ferme',      title: 'Cochon Grognement / Couinement' },
+          { id: 'chouette-hou-hou',  name: 'Chouette : Hou-hou',  icon: '🦉',   file: 'sounds/animaux/chouette_hibou_hululements.mp3', start: 0.1, end: 2.6,           catClass: 'animaux-oiseau',     title: 'Chouette / Hibou Hululements' },
+          { id: 'serpent-sssss',     name: 'Serpent : Sssss',     icon: '🐍',   file: 'sounds/animaux/serpent_sifflement.mp3', start: 0.17,                             catClass: 'animaux-savane',     title: 'Serpent Sifflement' },
           { id: 'grenouille-coaa',   name: 'Grenouille : Coââ',   icon: '🐸',   file: 'sounds/animaux/grenouille_coassement.mp3',                          catClass: 'animaux-aquatique',  title: 'Grenouille Coassement' },
 
           // ── Ligne 4 ──
           { id: 'chien-ouaf',        name: 'Chien : Ouaf',        icon: '🐶',   file: 'sounds/animaux/chien_aboiement.mp3',                                catClass: 'animaux-domestique', title: 'Chien Aboiement' },
           { id: 'chien-grrr',        name: 'Chien : Grrr',        icon: '🐕',   file: 'sounds/animaux/chien_grognement.mp3',                               catClass: 'animaux-domestique', title: 'Chien Grognement' },
-          { id: 'loup-aouuuuh',      name: 'Loup : Aouuuuh',      icon: '🐺',   file: 'sounds/animaux/loup_hurlement.mp3',             end: 5.1,           catClass: 'animaux-foret',      title: 'Loup Hurlement' },
+          { id: 'loup-aouuuuh',      name: 'Loup : Aouuuuh',      icon: '🐺',   file: 'sounds/animaux/loup_hurlement.mp3', start: 0.11,             end: 5.1,           catClass: 'animaux-foret',      title: 'Loup Hurlement' },
           { id: 'ours-grrr',         name: 'Ours : Grrr',         icon: '🐻',   file: 'sounds/animaux/ours_grognement.mp3',                                catClass: 'animaux-foret',      title: 'Ours Grognement' },
           { id: 'abeille-bzzzz',     name: 'Abeille : Bzzzz',     icon: '🐝',   file: 'sounds/animaux/moustique_bourdonnement.mp3',                        catClass: 'animaux-insecte',    title: 'Abeille / Mouche / Moustique Bourdonnement' },
           { id: 'dauphin-i-i-i-i',   name: 'Dauphin : I i i i',   icon: '🐬',   file: 'sounds/animaux/dauphin_sifflements.mp3',                            catClass: 'animaux-aquatique',  title: 'Dauphin Clics et sifflements' },
-          { id: 'baleine-chant',     name: 'Baleine : Chant',     icon: '🐋',   file: 'sounds/animaux/baleine_chant.mp3',              end: 3.2,           catClass: 'animaux-aquatique',  title: 'Baleine Chant' },
+          { id: 'baleine-chant',     name: 'Baleine : Chant',     icon: '🐋',   file: 'sounds/animaux/baleine_chant.mp3', start: 0.21,              end: 3.2,           catClass: 'animaux-aquatique',  title: 'Baleine Chant' },
         ]
       }
     ]
@@ -76,7 +76,7 @@ export const AUDIO_TABS: AudioTab[] = [
         items: [
           // ── Bureau et technologie ──
           { id: 'clavier',                 name: 'Clavier',              icon: '⌨️', file: 'sounds/bruits/bruit-clavier-ordinateur.mp3' },
-          { id: 'machine-a-ecrire',        name: 'Machine à écrire',     icon: '📝', file: 'sounds/bruits/machine_a_ecrire.ogg' },
+          { id: 'machine-a-ecrire',        name: 'Machine à écrire',     icon: '📝', file: 'sounds/bruits/machine_a_ecrire.ogg', start: 0.15 },
           { id: 'modem-56k',               name: 'Modem 56k',            icon: '📠', file: 'sounds/bruits/connexion-modem-56k.mp3' },
           { id: 'erreur-windows',          name: 'Erreur Windows',       icon: '🖥️', file: 'sounds/bruits/erreur_windows_xp.mp3',        start: 0.2 },
           { id: 'notification',            name: 'Notification',         icon: '🔔', file: 'sounds/bruits/bruit_notification.mp3',       start: 0.8 },
@@ -85,29 +85,29 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'machine-a-cafe',          name: 'Machine à café',       icon: '☕', file: 'sounds/bruits/bruit_machine_cafe.mp3' },
 
           // ── Téléphone, sonnettes et annonces ──
-          { id: 'sonnerie-portable',       name: 'Sonnerie portable',    icon: '📱', file: 'sounds/bruits/sonnerie_portable.mp3',        start: 0.3 },
+          { id: 'sonnerie-portable',       name: 'Sonnerie portable',    icon: '📱', file: 'sounds/bruits/sonnerie_portable.mp3',        start: 0.3, end: 30.35 },
           { id: 'vibreur',                 name: 'Vibreur',              icon: '📳', file: 'sounds/bruits/vibreur_telephone.mp3' },
-          { id: 'tonalite-appel',          name: 'Tonalité d\'appel',    icon: '📞', file: 'sounds/bruits/tonalite_appel.mp3',           start: 5.1 },
+          { id: 'tonalite-appel',          name: 'Tonalité d\'appel',    icon: '📞', file: 'sounds/bruits/tonalite_appel.mp3',           start: 5.1, end: 12.75 },
           { id: 'tonalite-raccroche',      name: 'Raccroché',            icon: '☎️', file: 'sounds/bruits/tonalite_raccroche.mp3' },
-          { id: 'sonnette-porte',          name: 'Sonnette',             icon: '🛎️', file: 'sounds/bruits/sonnette_porte.mp3' },
-          { id: 'sonnette-velo',           name: 'Sonnette vélo',        icon: '🚲', file: 'sounds/bruits/sonnette_velo.mp3',            start: 1.1 },
-          { id: 'annonce-sncf',            name: 'Annonce SNCF',         icon: '📢', file: 'sounds/bruits/annonce_sncf.mp3' },
+          { id: 'sonnette-porte',          name: 'Sonnette',             icon: '🛎️', file: 'sounds/bruits/sonnette_porte.mp3', end: 2.7 },
+          { id: 'sonnette-velo',           name: 'Sonnette vélo',        icon: '🚲', file: 'sounds/bruits/sonnette_velo.mp3',            start: 1.1, end: 4.8 },
+          { id: 'annonce-sncf',            name: 'Annonce SNCF',         icon: '📢', file: 'sounds/bruits/annonce_sncf.mp3', end: 2.3 },
           { id: 'foule-amen',              name: 'Foule : Amen',         icon: '🙏', file: 'sounds/bruits/bruit_foule_amen.mp3' },
 
           // ── Gags, bébés et petits plaisirs ──
           { id: 'roulement-tambour',       name: 'Roulement de tambour', icon: '🥁', file: 'sounds/bruits/roulement_de_tambour.mp3' },
-          { id: 'batterie-blague',         name: 'Ba-dum-tss',           icon: '🎭', file: 'sounds/bruits/batterie_blague.mp3' },
+          { id: 'batterie-blague',         name: 'Ba-dum-tss',           icon: '🎭', file: 'sounds/bruits/batterie_blague.mp3', end: 2.45 },
           { id: 'buzzer-bonne-reponse',    name: 'Bonne réponse',        icon: '✅', file: 'sounds/bruits/buzzer_bonne_reponse.mp3' },
           { id: 'buzzer-mauvaise-reponse', name: 'Mauvaise réponse',     icon: '❌', file: 'sounds/bruits/buzzer_mauvaise_reponse.mp3',  start: 0.6 },
           { id: 'bebe-pleure',             name: 'Bébé pleure',          icon: '😭', file: 'sounds/bruits/bebe_pleure.mp3' },
           { id: 'bebe-rit',                name: 'Bébé rit',             icon: '👶', file: 'sounds/bruits/bebe_rit.mp3' },
           { id: 'verre-d-eau',             name: 'Verre d\'eau',         icon: '🥛', file: 'sounds/bruits/remplissage_verre_d_eau.mp3' },
-          { id: 'briquet',                 name: 'Briquet',              icon: '🚬', file: 'sounds/bruits/bruit_briquet_cirgarette.mp3' },
+          { id: 'briquet',                 name: 'Briquet',              icon: '🚬', file: 'sounds/bruits/bruit_briquet_cirgarette.mp3'},
 
           // ── Feu, lames et outils ──
           { id: 'prend-feu',               name: 'Prend feu',            icon: '🔥', file: 'sounds/bruits/bruit_prend_feu.ogg' },
-          { id: 'epees',                   name: 'Épées',                icon: '⚔️', file: 'sounds/bruits/epee_contre_epee.mp3' },
-          { id: 'couteau',                 name: 'Meurtre au couteau',   icon: '🔪', file: 'sounds/bruits/meurtre_au_couteau.mp3' },
+          { id: 'epees',                   name: 'Épées',                icon: '⚔️', file: 'sounds/bruits/epee_contre_epee.mp3', end: 3.95 },
+          { id: 'couteau',                 name: 'Meurtre au couteau',   icon: '🔪', file: 'sounds/bruits/meurtre_au_couteau.mp3', end: 1.15 },
           { id: 'scie-a-metaux',           name: 'Scie à métaux',        icon: '🪛', file: 'sounds/bruits/scie_a_metaux.mp3' },
           { id: 'scie-egoine',             name: 'Scie égoïne',          icon: '🪚', file: 'sounds/bruits/scie_egoine.mp3' },
 
