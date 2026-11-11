@@ -73,8 +73,12 @@
     height: 100%;
     flex-shrink: 0;
     overflow: hidden;
+    /* Bordure à la couleur de sa popup sur les côtés intérieurs, coin intérieur arrondi :
+       un bouton de coin, pas un onglet */
     border: none;
-    border-right: 1px solid var(--border);
+    border-right: 1px solid var(--transition-accent);
+    border-bottom: 1px solid var(--transition-accent);
+    border-bottom-right-radius: calc(var(--radius) * 2);
     background: color-mix(in srgb, var(--transition-accent) 8%, transparent);
     color: var(--transition-accent);
     cursor: pointer;

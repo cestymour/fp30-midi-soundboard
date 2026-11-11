@@ -68,11 +68,15 @@
     width: var(--header-h);
     min-width: var(--header-h);
     height: 100%;
+    /* Bordure à la couleur de sa popup sur les côtés intérieurs, coin intérieur arrondi :
+       un bouton de coin, pas un onglet */
     border: none;
-    border-left: 1px solid var(--border);
+    border-left: 1px solid var(--current-accent);
+    border-bottom: 1px solid var(--current-accent);
+    border-bottom-left-radius: calc(var(--radius) * 2);
     background: transparent;
     color: var(--text-muted);
-    font-size: 30px;
+    font-size: 24px;
     cursor: pointer;
     flex-shrink: 0;
     transition: color 0.15s, background 0.15s;
