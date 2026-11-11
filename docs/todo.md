@@ -6,18 +6,11 @@ Idées et évolutions demandées par l'utilisateur, pas encore planifiées. Les 
 
 Demandé le 2026-11-10. Le point 1 passe avant tout (le bouton est fait, il reste à compléter ses musiques) ; les points 1 à 3 se font avant les autres sections de cette liste. Sons et musiques (deux fonctionnements différents) est fait : voir `CHANGELOG.md`.
 
-### 1. Musiques de transition : compléter la liste
-
-Le bouton de la musique de transition est fait (voir `CHANGELOG.md`), avec neuf musiques. Reste, dans `src/config/transition.config.ts` :
-
-- [ ] Régler les vrais moments de Beatophone, This Girl, Booty Swing, Catgroove, The Rockafeller Skank et Down the Road : ils ont des valeurs provisoires (`start: 5`, `restarts: [10, 15, 20]`).
-- [ ] Ajouter des moments marquants à All Night, The Mojo Radio Gang et Rasputin : elles n'ont qu'un moment après le 0, donc la même transition revient après chaque impro.
-
-### 2. Réorganiser l'onglet Musiques
+### 1. Réorganiser l'onglet Musiques
 
 - [ ] Renommage, disposition de la grille, etc. Voir aussi « Musiques : finir la maquette » plus bas.
 
-### 3. Ajouter quelques sons
+### 2. Ajouter quelques sons
 
 - [ ] Épée qu'on dégaine, bruits d'épée divers (« Épées » existe déjà : `epee_contre_epee.mp3`). Attention : Bruits est plein (32 tuiles sur 32), il faut retirer des tuiles ou agrandir la grille.
 
