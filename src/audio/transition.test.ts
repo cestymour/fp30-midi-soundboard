@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { playSound, stopSound, setTransitionVolume, stopAllSounds, sendEmergencyStopMidi } = vi.hoisted(() => ({
+const { playSound, stopSound, setTransitionVolume, setTransitionEffects, stopAllSounds, sendEmergencyStopMidi } = vi.hoisted(() => ({
+  setTransitionEffects: vi.fn(),
   playSound: vi.fn(async () => {}),
   stopSound: vi.fn(),
   setTransitionVolume: vi.fn(),
@@ -11,16 +12,17 @@ const { playSound, stopSound, setTransitionVolume, stopAllSounds, sendEmergencyS
 vi.mock('./playback.ts', () => ({ playSound, stopSound }));
 vi.mock('./sounds.ts', () => ({ stopAllSounds }));
 vi.mock('../midi/midi.ts', () => ({ sendEmergencyStopMidi }));
-vi.mock('./audio-engine.ts', () => ({ AudioEngineAPI: { setTransitionVolume } }));
+vi.mock('./audio-engine.ts', () => ({ AudioEngineAPI: { setTransitionVolume, setTransitionEffects } }));
 vi.mock('../config/tabs.ts', () => ({
   getTransitionMusics: () => MUSICS,
 }));
 
 import type { TransitionMusic } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
+import { AUDIO_FX_PRESETS } from '../config/audio-fx.config.ts';
 import {
   RESTART_WINDOW_MS, getNextMoment, getSelectedTransitionMusic, initTransition, launchTransition,
-  applyTransitionVolumeOnOpen, selectTransitionMusic, setTransitionResetVolume, setTransitionVolume as setVolume,
+  applyTransitionVolumeOnOpen, getClarityEffects, selectTransitionMusic, setTransitionClarity, setTransitionResetVolume, setTransitionVolume as setVolume,
   stopTransition,
 } from './transition.ts';
 
@@ -52,6 +54,7 @@ beforeEach(() => {
   playSound.mockClear();
   stopSound.mockClear();
   setTransitionVolume.mockClear();
+  setTransitionEffects.mockClear();
   stopAllSounds.mockClear();
   sendEmergencyStopMidi.mockClear();
   STATE.currentSoundItem = null;
@@ -196,5 +199,39 @@ describe("volume à l'ouverture de la popup", () => {
     stubStorage(Object.fromEntries(store));
     initTransition();
     expect(STATE.transitionResetVolume).toBe(true);
+  });
+});
+
+describe('Clarté Studio', () => {
+  it('reprend le préréglage des effets audio (sans vitesse ni delay, que la chaîne de la transition ignore)', () => {
+    const preset = AUDIO_FX_PRESETS.find(p => p.key === 'crystal');
+    expect(preset?.values).toBeTruthy();
+    expect(preset?.values?.speed ?? 100).toBe(100);
+    expect(preset?.values?.delay ?? 0).toBe(0);
+    expect(getClarityEffects()).toEqual({
+      bass: preset!.values!.bass ?? 0, mid: preset!.values!.mid ?? 0, treble: preset!.values!.treble ?? 0,
+      lowPass: preset!.values!.lowPass ?? 20000, highPass: preset!.values!.highPass ?? 0,
+      reverb: (preset!.values!.reverb ?? 0) / 100,
+    });
+  });
+
+  it('coupé par défaut ; le bouton applique puis retire les effets', () => {
+    expect(STATE.transitionClarity).toBe(false);
+    expect(setTransitionEffects).toHaveBeenLastCalledWith(null);
+    setTransitionClarity(true);
+    expect(setTransitionEffects).toHaveBeenLastCalledWith(getClarityEffects());
+    setTransitionClarity(false);
+    expect(setTransitionEffects).toHaveBeenLastCalledWith(null);
+  });
+
+  it('gardé après un rechargement', () => {
+    const store = stubStorage();
+    setTransitionClarity(true);
+    STATE.transitionClarity = false;
+    stubStorage(Object.fromEntries(store));
+    setTransitionEffects.mockClear();
+    initTransition();
+    expect(STATE.transitionClarity).toBe(true);
+    expect(setTransitionEffects).toHaveBeenLastCalledWith(getClarityEffects());
   });
 });

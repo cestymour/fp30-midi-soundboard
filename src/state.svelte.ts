@@ -57,6 +57,8 @@ class AppState {
   transitionVolume      = $state(1);
   /** Réglage : remettre le volume de la transition à 100 % à chaque ouverture de la popup */
   transitionResetVolume = $state(false);
+  /** Préréglage « Clarté Studio » appliqué à la musique de transition */
+  transitionClarity     = $state(false);
 
   // ── Divers ──
   wakeLock              = $state.raw<WakeLockSentinel | null>(null);

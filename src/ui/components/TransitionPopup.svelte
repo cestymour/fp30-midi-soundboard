@@ -2,7 +2,8 @@
   TransitionPopup.svelte — Popup de la musique de transition, par-dessus les onglets
   (l'en-tête reste visible, donc le bouton pour l'arrêter aussi) : choix de la musique du
   spectacle, progression (avec un repère par moment marquant), une ligne de boutons, un par
-  moment marquant (0 : début du spectacle, puis 1, 2, 3…), volume. Le moment prévu est en
+  moment marquant (0 : début du spectacle, puis 1, 2, 3…), volume, bouton « Clarté Studio »
+  (le préréglage des effets audio, appliqué à la transition seule). Le moment prévu est en
   couleur et plus large ; c'est aussi lui que lance le bouton de l'en-tête. Lancer coupe tout
   ce qui jouait, comme l'arrêt d'urgence. En lecture, la ligne devient un gros « Arrêter ».
   La popup garde toujours la même taille.
@@ -13,11 +14,15 @@
   import { getPlaybackWindow, formatTime } from '../../audio/timing.ts';
   import {
     getMomentTime, getNextMoment, getSelectedTransitionMusic, isTransitionCurrent,
-    launchTransition, selectTransitionMusic, setTransitionResetVolume, setTransitionVolume, stopTransition,
+    launchTransition, selectTransitionMusic, setTransitionClarity, setTransitionResetVolume, setTransitionVolume, stopTransition,
   } from '../../audio/transition.ts';
   import { transport } from '../transport.svelte.ts';
   import { closeTransitionPopup, transitionPopup } from '../transition.svelte.ts';
   import VolumeControl from './VolumeControl.svelte';
+  import { AUDIO_FX_PRESETS } from '../../config/audio-fx.config.ts';
+
+  /** Libellé du bouton, repris du préréglage des effets audio */
+  const clarityPreset = AUDIO_FX_PRESETS.find(preset => preset.key === 'crystal');
 
   const musics    = getTransitionMusics();
   const music     = $derived(getSelectedTransitionMusic());
@@ -118,15 +123,27 @@
         valueText={volumePct + '%'} onvolume={raw => setTransitionVolume(raw / 100)}
       />
 
-      <label class="transition-switch">
-        <input
-          type="checkbox" role="switch"
-          checked={STATE.transitionResetVolume}
-          onchange={e => setTransitionResetVolume(e.currentTarget.checked)}
-        />
-        <span class="transition-switch-track" aria-hidden="true"></span>
-        <span class="transition-switch-text">Volume remis à 100 % à chaque ouverture</span>
-      </label>
+      <div class="transition-options">
+        <label class="transition-switch">
+          <input
+            type="checkbox" role="switch"
+            checked={STATE.transitionResetVolume}
+            onchange={e => setTransitionResetVolume(e.currentTarget.checked)}
+          />
+          <span class="transition-switch-track" aria-hidden="true"></span>
+          <span class="transition-switch-text">Volume remis à 100 % à chaque ouverture</span>
+        </label>
+
+        <button
+          class="transition-clarity"
+          class:is-active={STATE.transitionClarity}
+          aria-pressed={STATE.transitionClarity}
+          title={STATE.transitionClarity ? 'Couper Clarté Studio sur la transition' : 'Appliquer Clarté Studio à la transition'}
+          onclick={() => setTransitionClarity(!STATE.transitionClarity)}
+        >
+          <span aria-hidden="true">{clarityPreset?.icon ?? '✨'}</span> {clarityPreset?.text ?? 'Clarté Studio'}
+        </button>
+      </div>
     </div>
   </div>
 {/if}
@@ -197,8 +214,48 @@
     gap: 6px;
   }
 
+  /* Interrupteur du volume et bouton Clarté Studio, sur une même ligne */
+  .transition-options {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Bouton Clarté Studio : allumé quand le préréglage est appliqué à la transition */
+  .transition-clarity {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .transition-clarity.is-active {
+    border-color: var(--transition-accent);
+    background: color-mix(in srgb, var(--transition-accent) 22%, var(--bg-card));
+    color: var(--transition-accent);
+  }
+  .transition-clarity:active {
+    transform: scale(0.97);
+  }
+  .transition-clarity:focus-visible {
+    outline: 2px solid var(--transition-accent);
+    outline-offset: -2px;
+  }
+
   /* Interrupteur : volume remis à 100 % à chaque ouverture, ou gardé comme avant */
   .transition-switch {
+    flex: 1;
+    min-width: 0;
     position: relative;
     display: flex;
     align-items: center;

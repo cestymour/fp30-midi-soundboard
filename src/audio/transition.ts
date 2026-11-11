@@ -17,15 +17,20 @@
    RESTART_WINDOW_MS (le spectacle suivant ; un rechargement en plein
    spectacle, lui, ne change rien).
 
-   Choix, dernier lancement, dernier moment joué, volume et réglage « volume remis
-   à 100 % à l'ouverture de la popup » sont gardés
-   dans localStorage. Aucun accès au DOM.
+   Le bouton « Clarté Studio » de la popup lui applique ce préréglage des
+   effets audio, sur sa propre chaîne d'effets (celle des musiques n'est
+   pas touchée).
+
+   Choix, dernier lancement, dernier moment joué, volume, réglage « volume
+   remis à 100 % à l'ouverture de la popup » et « Clarté Studio » sont
+   gardés dans localStorage. Aucun accès au DOM.
 ================================================================ */
 
 import type { AudioItem, TransitionMusic } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import { getTransitionMusics } from '../config/tabs.ts';
-import { AudioEngineAPI } from './audio-engine.ts';
+import { AUDIO_FX_PRESETS } from '../config/audio-fx.config.ts';
+import { AudioEngineAPI, type TransitionEffects } from './audio-engine.ts';
 import { playSound, stopSound } from './playback.ts';
 import { stopAllSounds } from './sounds.ts';
 import { sendEmergencyStopMidi } from '../midi/midi.ts';
@@ -41,6 +46,7 @@ interface StoredTransition {
   lastMoment: number;
   volume: number;
   resetVolume: boolean;
+  clarity: boolean;
 }
 
 function save(): void {
@@ -50,6 +56,7 @@ function save(): void {
     lastMoment: STATE.transitionLastMoment,
     volume: STATE.transitionVolume,
     resetVolume: STATE.transitionResetVolume,
+    clarity: STATE.transitionClarity,
   };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
@@ -71,7 +78,9 @@ export function initTransition(): void {
   STATE.transitionLastMoment = typeof stored.lastMoment === 'number' ? stored.lastMoment : 0;
   STATE.transitionVolume     = typeof stored.volume === 'number' ? Math.max(0, Math.min(1, stored.volume)) : 1;
   STATE.transitionResetVolume = stored.resetVolume === true;
+  STATE.transitionClarity = stored.clarity === true;
   AudioEngineAPI.setTransitionVolume(STATE.transitionVolume);
+  AudioEngineAPI.setTransitionEffects(STATE.transitionClarity ? getClarityEffects() : null);
 }
 
 /** Musique choisie (la première de la liste si aucune, ou si elle n'existe plus) */
@@ -150,6 +159,29 @@ export function selectTransitionMusic(id: string): void {
 /** Réglage : remettre le volume à 100 % à chaque ouverture de la popup (sinon il reste comme avant) */
 export function setTransitionResetVolume(enabled: boolean): void {
   STATE.transitionResetVolume = enabled;
+  save();
+}
+
+/**
+ * Réglages du préréglage « Clarté Studio » des effets audio (`crystal`), pour la chaîne de la
+ * transition. Un contrôle absent du préréglage reste neutre, comme dans la popup des effets.
+ */
+export function getClarityEffects(): TransitionEffects {
+  const values = AUDIO_FX_PRESETS.find(preset => preset.key === 'crystal')?.values ?? {};
+  return {
+    bass:     values.bass ?? 0,
+    mid:      values.mid ?? 0,
+    treble:   values.treble ?? 0,
+    lowPass:  values.lowPass ?? 20000,
+    highPass: values.highPass ?? 0,
+    reverb:   (values.reverb ?? 0) / 100,
+  };
+}
+
+/** Active ou coupe « Clarté Studio » sur la musique de transition (tout de suite, même en lecture) */
+export function setTransitionClarity(enabled: boolean): void {
+  STATE.transitionClarity = enabled;
+  AudioEngineAPI.setTransitionEffects(enabled ? getClarityEffects() : null);
   save();
 }
 

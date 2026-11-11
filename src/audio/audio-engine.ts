@@ -7,7 +7,9 @@
    branchée directement sur le limiteur : ni effets ni volume des
    musiques. La musique de transition (audio/transition.ts) est une
    piste comme les autres, mais branchée sur `transitionBus`, lui
-   aussi directement sur le limiteur. Aucun accès au DOM.
+   aussi directement sur le limiteur, sans les effets des musiques ;
+   elle a sa propre petite chaîne d'effets, coupée par défaut (bouton
+   « Clarté Studio » de sa popup). Aucun accès au DOM.
 ================================================================ */
 
 // ================================================================
@@ -44,6 +46,19 @@ type EffectSettings = Omit<AudioEngineState, 'volume'>;
  * - `transition` : musique de transition, sans effets (ni vitesse), avec son propre volume.
  */
 export type TrackRoute = 'effects' | 'transition';
+
+/**
+ * Effets de la musique de transition (préréglage « Clarté Studio » des effets audio) :
+ * égaliseur en dB, filtres en Hz, réverbération de 0 à 1. Null : sans effets.
+ */
+export interface TransitionEffects {
+  bass: number;
+  mid: number;
+  treble: number;
+  lowPass: number;
+  highPass: number;
+  reverb: number;
+}
 
 /** Limiteur de sortie : au-dessus de −2 dBFS, le niveau ne monte plus que de 1 dB pour 20 */
 const LIMITER_THRESHOLD_DB = -2;
@@ -99,6 +114,24 @@ class AudioEngine {
   soundsBus!: GainNode;
   /** Entrée de la musique de transition : sans effets, directement sur le limiteur */
   transitionBus!: GainNode;
+  /** Sortie directe de la transition (1 sans effets, 0 avec) */
+  transitionDry!: GainNode;
+  /** Chaîne d'effets de la transition, à part de celle des musiques (1 avec effets, 0 sans) */
+  transitionFxOut!: GainNode;
+  /**
+   * Sortie de la transition, après ses effets : ses fondus agissent ici, comme ceux des musiques
+   * sur `masterGain`, pour qu'un arrêt coupe aussi la queue de réverbération
+   */
+  transitionOut!: GainNode;
+  transitionBass!: BiquadFilterNode;
+  transitionMid!: BiquadFilterNode;
+  transitionTreble!: BiquadFilterNode;
+  transitionLowPass!: BiquadFilterNode;
+  transitionHighPass!: BiquadFilterNode;
+  transitionReverb!: ConvolverNode;
+  transitionReverbWet!: GainNode;
+  /** Effets de la transition, gardés même avant la création du contexte */
+  transitionEffects: TransitionEffects | null = null;
 
   constructor() {
     this.defaultState = {
@@ -222,8 +255,9 @@ class AudioEngine {
     this.soundsBus.connect(this.limiter);
     this.transitionBus = ctx.createGain();
     this.transitionBus.gain.value = this.transitionVolume;
-    this.transitionBus.connect(this.limiter);
+    this.buildTransitionEffects(ctx);
     this.reverb.buffer = this.createImpulseResponse(ctx, 4.8, 3.8);
+    this.transitionReverb.buffer = this.reverb.buffer;
     this.reverbPreDelay.delayTime.value = 0.035;
 
     this.applyState();
@@ -329,6 +363,79 @@ class AudioEngine {
   setTransitionVolume(value: number): void {
     this.transitionVolume = Math.max(0, Math.min(1, value));
     if (this.transitionBus && this.context) this.rampGain(this.transitionBus, this.transitionVolume);
+  }
+
+  /**
+   * Chaîne d'effets de la musique de transition : mêmes réglages d'égaliseur, de filtres et de
+   * réverbération que les musiques, mais à part, pour ne pas toucher aux effets des onglets.
+   * transitionBus → sortie directe, ou → égaliseur → filtres → (direct + réverbération) ; un seul
+   * des deux gains est ouvert, et les deux passent par transitionOut (fondus) puis le limiteur.
+   */
+  buildTransitionEffects(ctx: AudioContext): void {
+    this.transitionDry = ctx.createGain();
+    this.transitionFxOut = ctx.createGain();
+    this.transitionOut = ctx.createGain();
+    this.transitionBass = ctx.createBiquadFilter();
+    this.transitionMid = ctx.createBiquadFilter();
+    this.transitionTreble = ctx.createBiquadFilter();
+    this.transitionLowPass = ctx.createBiquadFilter();
+    this.transitionHighPass = ctx.createBiquadFilter();
+    this.transitionReverb = ctx.createConvolver();
+    this.transitionReverbWet = ctx.createGain();
+    const reverbPreDelay = ctx.createDelay(1);
+    reverbPreDelay.delayTime.value = 0.035;
+
+    this.transitionBass.type = 'lowshelf';
+    this.transitionBass.frequency.value = 200;
+    this.transitionMid.type = 'peaking';
+    this.transitionMid.frequency.value = 1000;
+    this.transitionMid.Q.value = 1;
+    this.transitionTreble.type = 'highshelf';
+    this.transitionTreble.frequency.value = 3000;
+    this.transitionLowPass.type = 'lowpass';
+    this.transitionHighPass.type = 'highpass';
+
+    this.transitionBus.connect(this.transitionDry);
+    this.transitionDry.connect(this.transitionOut);
+    this.transitionBus.connect(this.transitionBass);
+    this.transitionBass.connect(this.transitionMid);
+    this.transitionMid.connect(this.transitionTreble);
+    this.transitionTreble.connect(this.transitionLowPass);
+    this.transitionLowPass.connect(this.transitionHighPass);
+    this.transitionHighPass.connect(this.transitionFxOut);
+    this.transitionHighPass.connect(reverbPreDelay);
+    reverbPreDelay.connect(this.transitionReverb);
+    this.transitionReverb.connect(this.transitionReverbWet);
+    this.transitionReverbWet.connect(this.transitionFxOut);
+    this.transitionFxOut.connect(this.transitionOut);
+    this.transitionOut.connect(this.limiter);
+    this.applyTransitionEffects(false);
+  }
+
+  /** Effets de la musique de transition (null : sans effets), appliqués tout de suite, sans clic */
+  setTransitionEffects(effects: TransitionEffects | null): void {
+    this.transitionEffects = effects;
+    if (this.context && this.transitionDry) this.applyTransitionEffects(true);
+  }
+
+  applyTransitionEffects(ramp: boolean): void {
+    const effects = this.transitionEffects;
+    if (effects) {
+      this.transitionBass.gain.value = effects.bass;
+      this.transitionMid.gain.value = effects.mid;
+      this.transitionTreble.gain.value = effects.treble;
+      this.transitionLowPass.frequency.value = Math.max(10, Math.min(20000, effects.lowPass));
+      this.transitionHighPass.frequency.value = Math.max(0, effects.highPass);
+      this.transitionReverbWet.gain.value = this.getReverbWetGain(effects.reverb);
+    }
+    const dry = effects ? 0 : 1;
+    if (ramp) {
+      this.rampGain(this.transitionDry, dry);
+      this.rampGain(this.transitionFxOut, 1 - dry);
+    } else {
+      this.transitionDry.gain.value = dry;
+      this.transitionFxOut.gain.value = 1 - dry;
+    }
   }
 
   /** Change un gain en 20 ms (sans clic) */
@@ -561,7 +668,7 @@ export class MediaElementTrack {
   _loadPromise: Promise<MediaElementTrack> | null;
   /** Termine le chargement en cours sans attendre le fichier (piste libérée) */
   _cancelLoad: (() => void) | null;
-  /** Musique de transition : volume de la piste (fondus), appliqué sur `outputGain` */
+  /** Musique de transition : volume de la piste (fondus), appliqué sur `transitionOut`, après les effets */
   _ownVolume = 1;
 
   constructor(engine: AudioEngine, src: string, route: TrackRoute = 'effects') {
@@ -612,10 +719,15 @@ export class MediaElementTrack {
   set volume(value: number) {
     const clamped = Math.max(0, Math.min(1, value));
     if (this.route === 'transition') {
-      // Fondus de la musique de transition : son propre gain, pas le volume des musiques
+      // Fondus de la musique de transition : sa propre sortie, pas le volume des musiques. Elle
+      // est après ses effets : un arrêt en fondu coupe aussi la queue de réverbération. Une
+      // seule musique joue à la fois (playSound libère la précédente), la sortie est donc à elle.
       this._ownVolume = clamped;
-      if (this.outputGain) this.outputGain.gain.value = clamped;
-      else if (!this.engine.canUseMediaElementSource) this.audio.volume = clamped;
+      if (this.engine.canUseMediaElementSource) {
+        if (this.engine.transitionOut) this.engine.transitionOut.gain.value = clamped;
+      } else {
+        this.audio.volume = clamped;
+      }
       return;
     }
     if (this.engine.canUseMediaElementSource) {
@@ -742,7 +854,6 @@ export class MediaElementTrack {
     this.outputGain = context.createGain();
     this.sourceNode.connect(this.outputGain);
     if (this.route === 'transition') {
-      this.outputGain.gain.value = this._ownVolume;
       this.outputGain.connect(this.engine.transitionBus);
     } else {
       this.outputGain.connect(this.engine.bassFilter);
@@ -772,6 +883,7 @@ export const AudioEngineAPI = {
   },
   setSoundsVolume: (value: number) => AUDIO_ENGINE.setSoundsVolume(value),
   setTransitionVolume: (value: number) => AUDIO_ENGINE.setTransitionVolume(value),
+  setTransitionEffects: (effects: TransitionEffects | null) => AUDIO_ENGINE.setTransitionEffects(effects),
   setMasterVolume: (value: number) => AUDIO_ENGINE.setMasterVolume(value),
   setBassGain: (value: number) => AUDIO_ENGINE.setBassGain(value),
   setMidGain: (value: number) => AUDIO_ENGINE.setMidGain(value),
