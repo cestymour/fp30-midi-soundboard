@@ -8,7 +8,7 @@ Demandé le 2026-11-10. Le point 1 passe avant tout (le bouton est fait, il rest
 
 ### 1. Musiques de transition : compléter la liste
 
-Le bouton de la musique de transition est fait (voir `CHANGELOG.md`), avec deux musiques (All Night et The Mojo Radio Gang, Parov Stelar). Reste :
+Le bouton de la musique de transition est fait (voir `CHANGELOG.md`), avec trois musiques (All Night et The Mojo Radio Gang de Parov Stelar, Rasputin de Boney M.). Reste :
 
 - [ ] Ajouter d'autres musiques (une dizaine visée), dans `public/sounds/transitions/` et `src/config/transition.config.ts`, avec leur début (`start`) et leur point de reprise (`restart`).
 
