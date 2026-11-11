@@ -6,6 +6,18 @@ Les diagnostics complets des bugs fermés restent dans l'historique git : `git s
 
 ## Ouverts
 
+### 28. Tablette Android 6 : l'appli ne s'ouvre pas hors ligne
+
+- **Scénario** : sur la tablette de scène (Android 6, Chrome 106), l'appli installée est ouverte en mode avion. Chrome affiche le dinosaure et « Aucun accès à Internet ». Sur un téléphone récent, la même appli s'ouvre hors ligne.
+- **Ce qui est vérifié** (2026-11-11) : le code n'est pas en cause a priori. Sur Chromium 106 (snapshot 1036838, Windows, sans interface), la build 1.15.0 et le site de production s'ouvrent hors ligne. Le Service Worker s'enregistre, prend la main, précache les 24 fichiers de l'appli, puis sert `…/` et `…/index.html` hors ligne (réponses 200 venues du Service Worker). Le `sw.js` construit n'utilise pas de syntaxe inconnue de Chrome 106. Le stockage persistant n'est pas accordé (`false`).
+- **Causes possibles**, à départager sur la tablette :
+  1. Service Worker absent ou effacé : sur une tablette presque pleine, sans stockage persistant, Chrome peut effacer toutes les données du site, Service Worker compris.
+  2. L'icône de l'écran d'accueil pointe vers une autre adresse que la production (par exemple `localhost` via `adb reverse`, ou une ancienne URL) : le Service Worker de la production ne la couvre pas.
+  3. Lancement depuis l'icône en mode avion qui échoue sur Android 6 (moins probable).
+- **Conséquences** : sans réseau, l'appli est inutilisable en spectacle sur la tablette de scène.
+- **À faire pour le diagnostic** : 1) en ligne, lire les lignes Service Worker et Stockage de la section « Hors ligne » de la popup ⚙ ; 2) en ligne, regarder dans `chrome://serviceworker-internals` si le Service Worker de `cestymour.github.io/fp30-midi-soundboard/` est activé ; 3) en mode avion, ouvrir l'adresse de production dans un onglet Chrome normal plutôt que par l'icône. Si l'onglet marche et pas l'icône, réinstaller l'icône depuis la production (cause 2). Si rien ne marche, c'est la cause 1 : vérifier l'espace libre de la tablette ; 4) au besoin, inspecter la tablette depuis le PC (`chrome://inspect`, `adb` à installer).
+- **Correctif proposé** : selon la cause trouvée. Pour la cause 1, faire de l'état du Service Worker et du stockage persistant un point de `docs/checklist.md` à vérifier avant chaque spectacle.
+
 ## Décisions (comportements voulus)
 
 - **Changer de musique coupe la précédente net**, sans fondu de sortie : la suivante doit partir tout de suite (n° 1).
