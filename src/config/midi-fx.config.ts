@@ -1,6 +1,6 @@
 import type { FxPreset, MidiFxKey } from '../types.ts';
 
-// reverb : Ambiance du piano, 0 à 10 (valeurs converties depuis l'ancien CC91 0-127, à ajuster à l'oreille)
+// reverb : Ambiance du piano, 0 à 10 (SysEx Roland, voir docs/fp30x-midi.md)
 export const MIDI_FX_PRESETS: FxPreset<MidiFxKey>[] = [
   { key: 'reset',     icon: '\u21BA', text: 'Reset',       values: null },
   { key: 'hall',      icon: '🏛️',   text: 'Salle',       values: { reverb: 6, chorus:  0, cutoff: 74, resonance: 60, attack:  64, release:  90, decay: 64 } },

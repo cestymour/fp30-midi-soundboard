@@ -25,8 +25,8 @@
     seekToRatio(getSeekRatioFromEvent(e));
   }
 
-  // Drag sur la barre de seek : écouteurs posés à la main pour garder les options
-  // d'origine (touchstart non passif, pour pouvoir empêcher le défilement)
+  // Drag sur la barre de seek : écouteurs posés à la main pour leurs options
+  // (touchstart non passif, pour pouvoir empêcher le défilement)
   onMount(() => {
     let isDragging = false;
 

@@ -60,7 +60,7 @@
 >
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions (fermeture au clavier par Échap) -->
   <div class="fx-overlay__backdrop" onclick={() => controller.close()}></div>
-  <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role (balisage d'origine conservé) -->
+  <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role (dialogue modal sur la section) -->
   <section class="fx-popup" role="dialog" aria-modal="true" aria-label={config.ariaLabel}>
     <header class="fx-popup__header">
       <div class="fx-presets">
@@ -196,7 +196,7 @@
     min-width: 0;
   }
 
-  /* Ancien bloc piste (Track / canal) : styles conservés si tu réactives le HTML */
+  /* Bloc piste (Track / canal) : aucun balisage ne l'utilise (code mort, voir docs/todo.md) */
   :global(.fx-track) {
     flex: 1 1 140px;
     min-width: 0;

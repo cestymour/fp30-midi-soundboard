@@ -1,276 +1,49 @@
 # Bugs
 
-Journal des bugs repérés, avec leur diagnostic. Un bug trouvé en chemin est d'abord noté ici ; l'utilisateur décide ensuite s'il faut le corriger, et quand. Les n° 1 à 6 ont été trouvés pendant la refonte (voir `docs/refonte.md`), qui ne devait changer aucun comportement : ils ont été notés sans être corrigés, puis corrigés après la fusion dans `main` (version 1.7.1). Les « Où » donnent l'emplacement dans la v1 (tag `v1-vanilla`) et dans le code de la refonte, avant le correctif.
+Journal des bugs repérés. Un bug trouvé en chemin est d'abord noté ici, dans « Ouverts », avec son diagnostic : scénario, cause, conséquences, correctif proposé. L'utilisateur décide ensuite s'il faut le corriger, et quand. Une fois corrigé (un commit par bug), il passe dans « Fermés » en une ligne. Les numéros ne sont jamais réutilisés : le code et les tests y renvoient (« bug n° 11 »).
 
-Statuts : **ouvert**, **corrigé** (correctif ciblé, daté), **corrigé par la refonte** (le nouveau code se comporte autrement par construction, sans correctif ciblé).
+Les diagnostics complets des bugs fermés restent dans l'historique git : `git show e90747e:docs/bugs.md`.
 
-**Décision de l'utilisateur (2026-10-13, phase 6)** : corriger les n° 1, 2, 3, 5 et 6, **après** la fusion de la refonte dans `main`, un commit par bug. Le n° 5 est bien un bug (pas un repère « déjà joué » à garder). Fait le 2026-10-14 (version 1.7.1).
+## Ouverts
 
----
+Aucun.
 
-## 1. Changement de son direct : pas de fondu de sortie, ancienne piste jamais libérée
+## Décisions (comportements voulus)
 
-- **Statut** : corrigé (2026-10-14) : `cancelFade()` libère (`dispose()`) la piste dont le fondu de sortie est interrompu. Le changement de son reste sans fondu croisé : l'ancien son est coupé net, **voulu** (décision de l'utilisateur, 2026-10-14 : un fondu de sortie retarderait le son suivant, qui doit partir tout de suite)
-- **Constaté** : phase 1 (2026-10-13), à la lecture du code
-- **Où** : v1 : `js/audio.js` (`stopSound()`, `playSound()`), clic dans `js/app.js` (`buildSoundBtn`) ; refonte : `src/audio/playback.ts` (`stopSound()`, `playSound()`, `cancelFade()`), clic dans `src/ui/components/SoundButton.svelte`
-- **Scénario** : un son joue, on clique sur un **autre** bouton son.
-- **Diagnostic** :
-  1. Le clic appelle `stopSound(true)` puis `playSound(btn)` immédiatement.
-  2. `stopSound(true)` lance un fondu de 400 ms sur l'ancienne piste (`fadeAudio`, qui mémorise la piste dans `_fadingAudio`), dont le callback de fin doit appeler `dispose()`.
-  3. `playSound()` commence par `cancelFade()` : le timer du fondu est arrêté et l'ancienne piste est mise en pause et remise à 0, mais `dispose()` n'est jamais appelé.
-- **Conséquences** :
-  - pas de fondu entre deux sons : l'ancien est coupé net ;
-  - l'ancienne piste reste dans `AudioEngine.tracks`, avec son élément `<audio>` et ses nœuds Web Audio (`MediaElementSource`, `GainNode`) toujours connectés au graphe. Fuite lente au fil d'un spectacle ; `setMasterVolume()` et `setPlaybackRate()` continuent à parcourir ces pistes mortes.
-- **Piste de correction** : dans `cancelFade()`, appeler `dispose()` sur `_fadingAudio` plutôt que `pause()` + `currentTime = 0`. Si un vrai fondu croisé est souhaité, c'est un changement de comportement à décider à part.
+- **Changer de musique coupe la précédente net**, sans fondu de sortie : la suivante doit partir tout de suite (n° 1).
+- **Les sons ne sont jamais remplacés sous le même nom** : un fichier modifié prend un nouveau nom, sinon la tablette garde l'ancien dans son cache (n° 14, règle dans `docs/sons.md`).
+- **Court fondu de sortie des musiques à l'arrêt d'urgence** (n° 18).
+- **Un curseur de volume saute à l'endroit touché** : glisser et toucher doivent marcher tous les deux.
+- **Pas de connexion Bluetooth automatique au lancement** : ouvrir l'appli sur un second appareil ne doit pas prendre le piano au premier.
+- **La fin d'une musique avec `end` n'est pas détectée quand la page est en arrière-plan** (boucle `requestAnimationFrame` arrêtée) : pas de correctif à base de minuterie, le Wake Lock rend le cas rare.
 
-## 2. Timer de fondu global partagé entre deux fondus simultanés
+## Fermés
 
-- **Statut** : corrigé (2026-10-14) : `fadeAudio()` annule le fondu en cours avant d'en lancer un autre, et chaque intervalle s'arrête lui-même (timer local)
-- **Constaté** : phase 3 (2026-10-13), à la lecture du code
-- **Où** : v1 : `js/audio.js` ; refonte : `src/audio/playback.ts`, `fadeAudio()` (variables de module `_fadeTimer` et `_fadingAudio`)
-- **Scénario** : un fondu démarre alors qu'un autre est en cours sans passer par `cancelFade()`, par exemple deux clics rapides sur pause (fondu de 150 ms) : `togglePlayPause()` n'appelle pas `cancelFade()`, et `STATE.isPaused` ne passe à `true` qu'à la fin du premier fondu.
-- **Diagnostic** : le second `fadeAudio()` écrase `_fadeTimer` sans arrêter le premier intervalle. Quand le premier atteint sa cible, il fait `clearInterval(_fadeTimer)`, ce qui arrête **le second** fondu, et seul le callback du premier est appelé.
-- **Conséquences** : volume ou état de pause incohérents dans des cas de clics très rapides. Pas observé en usage. Cas reproduit par test (`src/audio/playback.test.ts`) : une pause pendant le fondu d'entrée (300 ms après le lancement d'un son) n'aboutit jamais, le son continue à jouer et le fondu d'entrée remonte le volume.
-- **Piste de correction** : chaque fondu garde son propre timer dans une variable locale, et `fadeAudio()` annule le fondu en cours avant d'en démarrer un nouveau.
-
-## 3. L'auto-connexion USB au piano au chargement ne se fait pas
-
-- **Statut** : corrigé (2026-10-14) : au premier accès Web MIDI, `autoConnectUsbPiano()` (`src/midi/connection.ts`) appelle `selectMidiConnection()` sur la première sortie dont le nom contient « piano » (le FP-30X se présente comme « Roland Digital Piano »), si aucune connexion n'est active. Toutes les listes affichent le piano et le badge passe à « ● USB »
-- **Constaté** : phase 3 (2026-10-13), à la lecture du code ; correctif vérifié le 2026-10-14 dans Edge sous Windows, piano branché en USB avant le chargement
-- **Où** : v1 : `js/midi.js`, `populateMidiSelects(true)`, et l'écouteur `change` délégué sur `#panels` dans `js/app.js` (`initMidiSelectDelegation`) ; refonte : `src/ui/midi-ui.svelte.ts`, `populateMidiSelects(true)`, qui reproduit le comportement (piano affiché dans la liste, sans connexion)
-- **Diagnostic** : au premier chargement, si une sortie MIDI dont le nom contient « piano » existe, le code la sélectionne dans la liste puis fait `sel.dispatchEvent(new Event('change'))`. Cet événement est créé **sans `bubbles: true`** : il ne remonte pas jusqu'à `#panels`, où se trouve le seul écouteur. `handleMidiSelectChange()` n'est donc jamais appelé.
-- **Symptôme attendu** : la liste affiche le piano mais le badge reste « Non connecté », et les boutons d'instruments n'ont aucun effet (« Pas de connexion MIDI active » dans la console) tant qu'on ne resélectionne pas le piano à la main.
-- **Piste de correction** : `new Event('change', { bubbles: true })`. Le README annonce cette auto-connexion (« Auto-connects to the Roland FP-30X on page load »).
-
-## 4. Ancien Service Worker : les sons ne sont pas mis en cache sur GitHub Pages
-
-- **Statut** : corrigé par la refonte (phase 2) ; en production depuis la 1.7.0
-- **Constaté** : phase 2 (2026-10-13), test en Chromium headless + `curl` sur la production
-- **Où** : ancien `sw.js` (tag `v1-vanilla`), fonction `handleAudio()`
-- **Diagnostic** : les éléments `<audio>` envoient des requêtes `Range` (`bytes=0-`), auxquelles GitHub Pages répond `206 Partial Content` (vérifié avec `curl -H "Range: bytes=0-"`). L'ancien SW fait `cache.put(request, response)` sur cette réponse 206, ce que l'API Cache refuse (promesse rejetée, non attendue, donc silencieuse). En test, le cache `impro-audio-1.6.4` reste vide après lecture de sons.
-- **Conséquence** : en production actuelle, le hors ligne des sons ne repose que sur le cache HTTP du navigateur, sans garantie. La consigne « jouer chaque son une fois avant le spectacle » ne protège donc pas vraiment.
-- **Dans la refonte** : le nouveau SW (`src/sw.ts`) télécharge le fichier entier sans en-tête `Range` au premier accès, le met en cache (200), puis sert les plages demandées depuis le cache (`RangeRequestsPlugin`). Vérifié hors ligne, seek compris.
-
-## 5. La barre de progression d'un bouton de son reste affichée après l'arrêt
-
-- **Statut** : corrigé (2026-10-14) : `bindPlaybackUI()` remet `progress` à `'0%'` sur l'événement `stop`, pour le son arrêté (la barre se vide avec la transition CSS)
-- **Constaté** : phase 5 (2026-10-13), à la lecture du code, confirmé par le scénario de `tools/regression` sur `v1-vanilla`
-- **Où** : v1 : `updateTransportUI()` (`js/app.js`) ; refonte : `SoundButtonState.progress` dans `src/ui/transport.svelte.ts`
-- **Diagnostic** : la progression est dessinée par le pseudo-élément `.sound-btn::before`, de largeur `var(--progress)`, visible quel que soit l'état du bouton. À l'arrêt, le code prévu pour la remettre à zéro cherche `.sound-btn.playing, .sound-btn.paused`, mais `stopSound()` a déjà retiré ces classes : il ne trouve rien, et `--progress` garde sa dernière valeur (la classe `paused` n'est d'ailleurs jamais posée).
-- **Conséquences** : chaque son joué puis arrêté garde un remplissage partiel (teinte d'accent à 25 %) jusqu'à sa prochaine lecture ; au relancement, la barre repart de cette position avec la transition CSS (0,05 à 0,3 s) au lieu de partir de zéro. Peut aussi être vu comme un repère « déjà joué », d'où la question : bug ou fonctionnalité ?
-- **Piste de correction** : remettre `progress` à `'0%'` sur l'événement `stop` (pour le son arrêté).
-
-## 6. Icône de volume : seul le panneau manipulé est mis à jour
-
-- **Statut** : corrigé (2026-10-14) : dans `VolumeControl.svelte`, l'icône est dérivée de la valeur partagée (`$derived`), donc identique sur tous les panneaux du même type
-- **Constaté** : phase 5 (2026-10-13), à la lecture du code, confirmé par le scénario de `tools/regression` sur `v1-vanilla` (volume MIDI à 20 : 🔈 sur le premier panneau, 🔊 sur le second)
-- **Où** : v1 : `buildMidiControls()` / `buildAudioControls()` et `syncMidiSliders()` / `syncAudioSliders()` ; refonte : `src/ui/components/VolumeControl.svelte`
-- **Diagnostic** : le volume (MIDI ou audio) est partagé entre tous les panneaux du même type : curseur, pourcentage et valeur sont synchronisés. Mais l'emoji (🔇 🔈 🔉 🔊) n'est recalculé que sur le panneau où l'on a bougé le curseur ; il vaut 🔊 au départ sur tous les panneaux.
-- **Conséquences** : après avoir baissé le volume audio à 0 sur l'onglet Films, l'onglet Animaux affiche 🔊 avec un curseur à 0 %.
-- **Piste de correction** : calculer l'emoji à partir de la valeur partagée (`STATE.midiVolume`, `STATE.audioVolume`) plutôt que dans un état local au panneau.
-
-## 7. Bouton « Vider le cache et recharger » : il ne vide aucun cache
-
-- **Statut** : corrigé (2026-11-05) : le bouton s'appelle « ⟳ Mettre à jour l'application » (`src/app-update.ts`). Il ne désinscrit plus le Service Worker : il lui fait chercher la dernière version (`registration.update()`), attend qu'elle soit active, puis recharge. Hors ligne, il ne recharge rien et l'affiche. Aucun cache n'est vidé. Tests dans `app-update.test.ts` ; vérifié dans Chromium headless : site arrêté (pas de rechargement, message), et nouvelle version publiée pendant que l'application est ouverte (la page rechargée affiche encore l'ancien numéro, le bouton passe au nouveau)
-- **Constaté** : 2026-10-14, à la lecture du code (revue de la 1.7.2)
-- **Où** : `src/ui/components/AboutPopup.svelte`, `reloadWithoutCache()` et le libellé de `#about-reload-btn`
-- **Diagnostic** : le bouton désinscrit le Service Worker (`reg.unregister()`) puis recharge la page. Désinscrire un SW ne supprime pas ses caches : `impro-audio`, `impro-images`, les polices et le precache Workbox restent, de même que d'éventuels caches de la 1.6.x (`impro-app-*`, `impro-audio-*`, plus nettoyés depuis la 1.7.2). Garder `impro-audio` est souhaitable (pas de retéléchargement des sons, hors ligne préservé) ; c'est le libellé qui est trompeur.
-- **Conséquences** : l'utilisateur croit repartir d'un cache vide alors que non. Ce que le bouton fait vraiment : recharger l'application depuis le réseau, sans passer par le SW, donc récupérer la dernière version publiée.
-- **Hors ligne** (2026-11-05, revue de la 1.8.0) : le Service Worker est désinscrit **avant** de savoir si le réseau répond. Hors ligne, la page rechargée n'est plus servie par le Service Worker : l'application ne s'ouvre plus tant que le réseau n'est pas revenu.
-- **But du bouton** (précisé par l'utilisateur, 2026-11-05) : forcer la mise à jour quand la tablette affiche encore l'ancienne version (numéro de version de la popup À propos). Les sons ne doivent pas être retéléchargés.
-- **Piste de correction** : renommer le bouton selon ce qu'il fait, par exemple « ⟳ Mettre à jour et recharger » (et le commentaire d'en-tête du composant, « rechargement sans cache »). Ne pas ajouter de suppression des caches : on perdrait les sons hors ligne. Ne pas désinscrire le Service Worker : lui demander de chercher la nouvelle version (`registration.update()`), attendre qu'elle soit installée, puis recharger ; si le réseau ne répond pas, ne rien recharger et le dire.
-
-## 8. Parseur BLE MIDI : les messages de 1 ou 2 octets décalent la lecture du paquet
-
-- **Statut** : corrigé par suppression du loopback (2026-11-05, branche `canal-4` ; vérifié le même jour sur le PC, Edge, en Bluetooth et en USB : plus de note tenue, réverbération par l'Ambiance ; reste à vérifier sur la tablette) : patchs et effets partent sur le canal 4, celui du son du clavier, si bien que l'application ne renvoie plus aucune note au piano (voir « Précisions du 2026-11-05 » ci-dessous et `docs/fp30x-midi.md`). Historique : parseur corrigé le 2026-10-14 (version 1.7.3) : chaque statut a sa longueur de données (`getDataLength()`), une donnée n'est lue que si son bit 7 est à 0, le running status survit aux messages temps réel et passe d'un paquet au suivant (`parsePacket(packet, runningStatus)`, mémorisé dans `BluetoothMIDI`). Tests ajoutés dans `ble-midi-parser.test.ts`. **Le symptôme persiste en 1.7.3** (testé par l'utilisateur sur la tablette, 2026-10-14) : les défauts du parseur étaient réels, mais ce n'est pas la cause, ou pas la seule. Piste la plus probable : le Note Off arrive bien, mais son renvoi au piano se perd (une écriture GATT par message, abandonnée en cas d'échec, voir « Autre cause possible » plus bas). Diagnostic en cours : relevé des paquets BLE bruts reçus et envoyés sur la tablette. Tag `v1.7.3` en attente de la vraie correction
-- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 1), confirmé en faisant tourner `parsePacket` sur des paquets construits à la main. Le même jour, l'utilisateur rapporte le symptôme, **en Bluetooth uniquement** : avec un son tenu comme l'orgue, quand on joue beaucoup de notes à la fois, une ou plusieurs notes continuent de sonner après qu'on a relâché les touches (le relâchement n'est pas pris en compte)
-- **Où** : `src/midi/ble-midi-parser.ts`, `parseFullMidiMessage()` et `parseRunningStatusMidiMessage()` ; conséquence dans le loopback de `src/midi/bluetoothMIDI.ts`
-- **Diagnostic** : en Bluetooth, chaque note jouée sur le piano revient à l'application, qui la renvoie au piano (loopback) ; un Note Off mal décodé n'est donc jamais renvoyé, et la note renvoyée reste tenue. Trois défauts du parseur peuvent faire perdre un Note Off :
-  1. il lit toujours deux octets de données après un statut. Program Change (`C0`) et Channel Pressure (`D0`) n'en ont qu'un, les messages temps réel (`F8`–`FF`, dont Active Sensing) aucun. Dans un paquet qui contient un message après ceux-là, l'octet d'horodatage suivant est pris pour une donnée et le reste du paquet est mal décodé. Défaut hérité du paquet `ble-midi` d'origine ;
-  2. un message temps réel remplace le running status : les Note Off qui suivent sans statut prennent celui du message temps réel et sont écartés ;
-  3. le running status repart de zéro à chaque paquet : si le relâchement d'un accord est découpé en plusieurs paquets et que le suivant commence sans statut, ses Note Off ont le statut -1 et sont écartés. C'est le scénario qui colle le mieux au symptôme (beaucoup de notes relâchées à la fois).
-- **Scénarios** :
-  - `[80 80 C0 05 80 90 3C 64]` (Program Change puis Note On) : le loopback renvoie `C0 3C` au piano, qui change de son, et la note est perdue ;
-  - `[80 80 FE 80 80 3C 00]` (Active Sensing puis Note Off en running status) : le Note Off est perdu, et la note reste bloquée ;
-  - `[80 80 3C 00 3E 00]` juste après un paquet de Note On : les deux Note Off sont perdus.
-- **Pourquoi l'orgue** : un son de piano s'éteint de lui-même, une note bloquée passe inaperçue ; un orgue tient la note indéfiniment.
-- **Autre cause possible, non corrigée** : une écriture GATT qui échoue est abandonnée (`MIDI OUT (BT) échoué` dans la console), et le relâchement d'un accord produit une rafale d'écritures, une par note. Si des notes restent encore bloquées en 1.7.3, chercher ce message dans la console.
-- **Pistes de la revue 1.7.3** (`git show 3583b57:docs/revue-code-1.7.3.md`, n° 1) : le repli sur `writeValueWithResponse` échoue probablement aussi (la norme BLE MIDI n'impose que l'écriture sans réponse), donc un échec perd le message. Correctif proposé : renvoyer au piano le paquet reçu **tel quel** (une écriture par notification au lieu d'une par message, sans passer par le parseur, comme le loopback USB), et réessayer une écriture échouée. Hypothèse à vérifier : sur Android avant la version 13, notifications et écritures sur la même caractéristique partagent un tampon. À relever sur la tablette : `characteristic.properties`, les messages d'échec, le nombre de Note Off reçus et réécrits, la version d'Android.
-- **Défaut mineur restant** : `parseSysex` n'annule pas le running status, alors qu'un SysEx devrait le faire. Sans effet ici (le piano n'envoie pas de SysEx pendant le jeu).
-- **Précisions du 2026-11-05** (utilisateur, et implémentation MIDI du FP-30X dans `docs/DOC_FP30X/FP-30X_MIDI_Imple_eng01_W.pdf`) :
-  - **pourquoi le loopback** : le Program Change de l'application règle une partie GM2 du piano (canal 1), distincte du son du clavier. Pour ne pas entendre les deux à la fois, l'utilisateur coupe le son du clavier **à la main** (Local Off : Function + fa le plus grave) à chaque mise sous tension, et l'application renvoie les touches au piano. Sans loopback, le piano est muet (essai d'avril 2026, commit `4d548ec`). Le loopback est donc indispensable tant que le Local Off est en place ;
-  - **l'application ne peut pas faire le Local Off elle-même par CC122** : le tableau d'implémentation (p. 17) indique Local On/Off « Transmitted : O, Recognized : X ». Le piano envoie le CC122 quand on fait le raccourci, mais ne le reçoit pas ;
-  - **la pédale n'est pas la seule cause** : les notes restent tenues même sans toucher la pédale de sustain (CC64, que le piano envoie aussi et qui passe par le même loopback : un relâchement de pédale perdu bloquerait toutes les notes). Au relevé sur la tablette, compter aussi les CC64 ;
-  - le piano n'envoie pas d'Active Sensing (p. 17) : le scénario `[80 80 FE …]` ne se produit pas avec le FP-30X ;
-  - **essai du canal 4 (2026-11-05, Edge sous Windows, piano en BLE, son du clavier actif)** : d'après le support Roland, le son choisi sur le piano se joue sur le canal 4. Un Bank Select + Program Change envoyé sur le **canal 4** change bien le son du clavier lui-même, et le voyant de catégorie du piano suit : sons GM2 (trompette, chien, orgue d'église, harpe), sons Roland (Jazz Scat, Pipe Organ, Harpiness), batterie (`msb:120`). Après un choix de son sur le piano, un nouveau patch reprend la main. Sur le canal 4, le volume (CC7) et le filtre (CC74) agissent ; la réverbération (CC91) est **sans effet** : celle du clavier est le réglage Ambiance du piano, que l'application peut régler par SysEx Roland (vérifié, voir `docs/fp30x-midi.md`). Conséquence : en envoyant les patchs sur le canal 4, le Local Off et le loopback deviennent inutiles, et ce bug disparaît avec eux (changement de fonctionnement, à décider) ;
-  - effet de bord du loopback actuel, vu pendant l'essai : après un choix de son sur le piano, la partie du canal 1 joue elle aussi ce son (piano « normal » entendu en double, à la place du violon choisi dans l'application). Le piano émet sans doute un Program Change quand on change son son (« Transmitted : O »), que le loopback lui renvoie sur le canal 1. À confirmer par le log `MIDI IN (BT)`.
-
-## 9. Animation des effets piano : les 7 CC sont renvoyés à chaque frame
-
-- **Statut** : corrigé (2026-11-05, branche `canal-4`) : pendant une animation, chaque contrôle n'est envoyé que si sa valeur (alignée sur le pas) change, et rien n'est animé ni envoyé quand les cibles sont déjà atteintes (`animateToValues()` dans `src/ui/fx-overlay.svelte.ts`, test dans `fx-overlay.test.ts`). Vaut aussi pour la popup audio. Depuis le passage au canal 4, la réverbération est un SysEx : sans ce correctif, il en partait un à chaque frame
-- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 2) ; retard non mesuré
-- **Où** : `src/ui/fx-overlay.svelte.ts`, `animateToValues()` (rappel `onFrame`), puis `applyMidiFxValue()` (`src/fx/midi-fx.ts`)
-- **Diagnostic** : à chaque frame d'une animation (preset, Reset, ↺), `setControlValue(…, true)` est appelé pour chacun des 7 contrôles, que sa valeur ait changé ou non, et chaque appel envoie un CC : environ 140 messages pour une animation de 320 ms. Le Reset en envoie autant quand tout est déjà au neutre.
-- **Conséquences** : en BLE, chaque message est une écriture GATT, faite l'une après l'autre et affichée dans la console. Si la liaison suit moins vite que l'animation, la file grossit, et un changement d'instrument ou un arrêt d'urgence appuyé juste après attend qu'elle se vide. Sans effet notable en USB.
-- **Piste de correction** : n'envoyer un CC que si la valeur arrondie diffère de `MIDI_FX_STATE` ; ne pas animer quand les cibles sont déjà atteintes. Ce que reçoit le piano ne change pas.
-
-## 10. Reprise après pause, puis Stop rapide : `TypeError`
-
-- **Statut** : corrigé (2026-11-05) : `togglePlayPause()` mémorise la piste et le son avant `play()`, la reprise ne fait rien si la piste n'est plus la piste courante, et un échec de `play()` laisse le son en pause (`.catch()`). Tests dans `playback.test.ts`
-- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 5)
-- **Où** : `src/audio/playback.ts`, `togglePlayPause()`, callback `.then()` de la reprise
-- **Scénario** : un son en pause ; ▶, puis STOP (ou un autre son) avant que `play()` ne soit résolu.
-- **Diagnostic** : le callback relit `STATE.currentAudio!` et `STATE.currentSoundItem!` sans vérifier qu'ils sont encore là : après un Stop, `getPlaybackRange(null)` lève une `TypeError`. Si un autre son a été lancé, il reçoit un fondu de 150 ms et un événement `resume` qui ne le concernent pas. Pas de `.catch()` sur `play()`.
-- **Conséquences** : erreur dans la console ; petit creux de volume possible sur le nouveau son.
-- **Piste de correction** : mémoriser la piste et le son avant `play()`, vérifier `STATE.currentAudio === audio` dans le `.then()` (comme `playSound`), ajouter un `.catch()`.
-
-## 11. Volume déplacé pendant un fondu d'entrée : ignoré
-
-- **Statut** : corrigé (2026-11-05) : `setAudioVolume()` arrête le fondu d'entrée en cours (lancement ou reprise), et le volume choisi s'applique tout de suite. Un fondu de sortie (pause, STOP) n'est pas touché. Tests dans `playback.test.ts`
-- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 6)
-- **Où** : `src/audio/playback.ts`, `fadeAudio()` et `setAudioVolume()`
-- **Scénario** : on lance un son et on baisse le volume dans les 300 ms du fondu d'entrée (150 ms pour une reprise).
-- **Diagnostic** : `setAudioVolume` applique la valeur, mais le fondu en cours l'écrase à la frame suivante et termine sur la cible fixée à son lancement.
-- **Conséquences** : le curseur affiche la nouvelle valeur, le son reste à l'ancienne jusqu'au prochain mouvement du curseur.
-- **Piste de correction** : dans `setAudioVolume`, annuler un fondu d'entrée en cours (pas un fondu de sortie), ou faire lire `STATE.audioVolume` au fondu d'entrée à chaque pas.
-
-## 12. Statut Wake Lock « actif » après sa libération
-
-- **Statut** : corrigé (2026-11-05) : `STATE.wakeLock` est remis à `null` sur l'événement `release` du verrou. Test dans `wake-lock.test.ts`
-- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 9)
-- **Où** : `src/wake-lock.ts`, lu par `src/ui/components/AboutPopup.svelte`
-- **Diagnostic** : le navigateur libère le verrou quand la page passe en arrière-plan. `STATE.wakeLock` garde l'objet libéré : si la nouvelle demande échoue au retour au premier plan, la popup À propos affiche toujours « Wake Lock : actif ✓ ».
-- **Piste de correction** : tester `!STATE.wakeLock.released`, ou remettre `STATE.wakeLock` à `null` sur l'événement `release`.
-
-## 13. Instrument et effets non renvoyés au piano à la connexion ou à la reconnexion
-
-- **Statut** : corrigé (2026-11-05, branche `canal-4`) : à chaque connexion (USB, Bluetooth, reconnexion automatique), l'application envoie le contrôle à distance Roland et le volume, puis l'événement `connected`, sur lequel `bindMidiConnectionUI()` renvoie l'instrument surligné et tous les effets (`sendAllMidiFx()`). Test dans `src/midi/connection.test.ts`
-- **Constaté** : 2026-11-05, revue de code de la 1.7.3 (`git show 3583b57:docs/revue-code-1.7.3.md`, n° 2)
-- **Où** : `src/midi/connection.ts` (`onStatusChange` à `connected`, branche USB de `selectMidiConnection`), `src/ui/midi-ui.svelte.ts` (`selectInstrument`)
-- **Scénarios** :
-  - en Bluetooth, la liaison tombe (piano éteint puis rallumé) et on se reconnecte : seul le volume (CC7) est renvoyé ;
-  - on appuie sur un instrument avant d'être connecté : il est surligné, mais rien n'est envoyé.
-- **Diagnostic** : à la connexion, l'application ne renvoie que le volume. L'instrument surligné (`instruments.active`) et les effets affichés (`MIDI_FX_STATE`) ne sont pas renvoyés au piano.
-- **Conséquences** : l'interface affiche un instrument et des effets que le piano n'applique pas, jusqu'à ce qu'on réappuie sur le bouton.
-- **Piste de correction** : sur l'événement `status` passé à connecté (dans `bindMidiConnectionUI()`, pour garder les moteurs indépendants de l'interface), renvoyer l'instrument actif, puis les CC d'effets qui ne sont pas au neutre. À traiter avec le suivi du débranchement USB (revue 1.7.2, n° 4).
-
-## 14. Un son remplacé sous le même nom n'est jamais mis à jour sur la tablette
-
-- **Statut** : non corrigé, **décision de l'utilisateur** (2026-11-05) : les sons ne sont jamais remplacés sous le même nom
-- **Constaté** : 2026-11-05, revue de code de la 1.7.3 (`git show 3583b57:docs/revue-code-1.7.3.md`, n° 3)
-- **Où** : `src/sw.ts`, route `/sounds/` (`CacheFirst` dans `impro-audio`, sans révision) ; même chose pour `/images/`
-- **Scénario** : on remplace un fichier de `public/sounds/` par une autre version sous le même nom, et on ajuste son `start` / `end` dans la configuration, puis on publie.
-- **Diagnostic** : la configuration est mise à jour (precache), mais le Service Worker sert l'ancien fichier depuis `impro-audio` sans interroger le réseau. Le bouton « Vider le cache et recharger » ne vide pas ce cache (bug n° 7).
-- **Conséquences** : les nouveaux repères s'appliquent à l'ancien fichier : le son démarre ou s'arrête au mauvais endroit, sans message d'erreur. Seul l'effacement des données du site rétablit le bon fichier, ce qui vide aussi le cache de tous les autres sons.
-- **Piste de correction** : au minimum, une règle écrite dans le README (un fichier modifié change de nom). Sinon, versionner l'URL dans la configuration (`?v=2`), ou renouveler le cache audio en recopiant les entrées inchangées.
-
-## 15. Une connexion Bluetooth en cours n'est pas annulée par un autre choix de connexion
-
-- **Statut** : corrigé (2026-11-05, branche `canal-4`) : `disconnect()` incrémente le compteur de tentatives, `selectMidiConnection` déconnecte le Bluetooth quel que soit son état, et une connexion Bluetooth qui aboutit après un autre choix ne l'écrase plus (`selectionId`). Tests dans `bluetoothMIDI.test.ts` et `connection.test.ts`
-- **Constaté** : 2026-11-05, à la lecture du code (comparaison avec `chord-finder-midi`, `src/useBluetoothMIDI.js`)
-- **Où** : `src/midi/bluetoothMIDI.ts` (`connect()`, `disconnect()`), `src/midi/connection.ts` (`selectMidiConnection`)
-- **Scénario** : on choisit « Bluetooth MIDI », on choisit le piano dans le sélecteur ; pendant la connexion (statut `connecting`, jusqu'à 3 essais espacés), on choisit le piano USB ou « — Connexion MIDI — » dans la liste d'un autre panneau.
-- **Diagnostic** :
-  1. `selectMidiConnection` ne déconnecte le Bluetooth que si son statut est déjà `connected` : une connexion en cours n'est pas arrêtée ;
-  2. même appelé, `disconnect()` n'incrémente pas `#attemptId` : la tentative en cours ne voit pas qu'elle est périmée, termine `gatt.connect()` et passe à `connected`.
-- **Conséquences** : quelques instants après le choix de l'USB (ou de « aucune connexion »), l'application repasse d'elle-même en Bluetooth (`STATE.midiOutput = null`, badge « BT ») : le choix de l'utilisateur est écrasé sans qu'il l'ait demandé.
-- **Piste de correction** : `disconnect()` incrémente le compteur de tentatives (comme `ctx.attempt` dans chord-finder) ; `selectMidiConnection` appelle `disconnect()` quel que soit le statut Bluetooth.
-
-## 16. Lien GATT laissé ouvert après un échec de connexion Bluetooth
-
-- **Statut** : corrigé (2026-11-05, branche `canal-4`) : nouveau contrôleur repris de chord-finder (`#target`, `disconnectGatt()`) : un échec après l'ouverture du lien, ou une tentative périmée qui ne vise plus ce piano, referme le lien GATT. Tests dans `bluetoothMIDI.test.ts`
-- **Constaté** : 2026-11-05, à la lecture du code (comparaison avec `chord-finder-midi`, qui a corrigé le même défaut en 0.6.x)
-- **Où** : `src/midi/bluetoothMIDI.ts`, `connect()`
-- **Scénario** : `gatt.connect()` réussit, puis `getPrimaryService`, `getCharacteristic` ou `startNotifications` échoue (ou les 3 essais échouent) ; ou bien une tentative devenue périmée (nouvelle connexion lancée entre-temps) termine son `gatt.connect()`.
-- **Diagnostic** : l'erreur remonte au `catch`, qui passe au statut `error` sans fermer le lien GATT ; une tentative périmée fait `return` sans le fermer non plus. Le lien n'est refermé qu'au `#cleanup()` de la connexion suivante, s'il y en a une.
-- **Conséquences** : le piano reste connecté à la tablette sans que personne n'écoute ses notifications. Un FP-30X n'accepte qu'une connexion BLE MIDI : aucun autre appareil (téléphone avec l'application Roland, par exemple) ne peut s'y connecter, et l'interface affiche une erreur alors que le piano se croit connecté.
-- **Piste de correction** : en cas d'échec, et dans une tentative périmée qui ne vise plus ce piano, appeler `device.gatt.disconnect()` (comme `disconnectGatt()` et `ctx.target` dans chord-finder).
-
-## 17. Câble USB débranché ou branché après le lancement : non suivi
-
-- **Statut** : corrigé (2026-11-05, branche `canal-4`) : un port débranché est oublié (badge « Non connecté »), et un piano branché après le lancement est connecté automatiquement, comme au chargement, si aucune autre connexion n'est active. Tests dans `src/midi/connection.test.ts`
-- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (`git show f79519d:docs/revue-code.md`, n° 4) ; inscrit ici au moment du correctif
-- **Où** : `src/midi/connection.ts` (`onstatechange`, `autoConnectUsbPiano`)
-- **Diagnostic** : au débranchement, `onstatechange` ne faisait que reconstruire la liste : `STATE.midiOutput` gardait le port et le badge restait « ● USB ». Un piano branché après le lancement n'était pas connecté automatiquement (seulement au premier accès Web MIDI).
-- **Conséquences** : badge trompeur après un débranchement ; après un rebranchement, il fallait choisir le piano à la main dans la liste.
-
-## 18. Arrêt d'urgence : un orgue continue de s'entendre avec beaucoup d'effet
-
-- **Statut** : corrigé par la 1.8.0 (constaté par l'utilisateur le 2026-11-05 : le STOP coupe les sons d'orgue, même avec du delay ou de la réverbération dans le preset). Le court fondu de sortie des **sons** au STOP est voulu
-- **Constaté** : 2026-11-05, par l'utilisateur sur le PC (branche `canal-4`, piano en Bluetooth) : avec un orgue et un effet réglé haut (« Delay » d'après l'utilisateur ; la popup des effets piano n'a pas de Delay, mais Release, Decay et la réverbération), l'arrêt d'urgence n'empêche pas d'entendre l'orgue « dans l'église » après l'appui
-- **Où** : `src/midi/midi.ts`, `sendEmergencyStopMidi()` (All Sound Off, All Notes Off, Reset All Controllers)
-- **Hypothèses** :
-  1. **queue de réverbération (Ambiance)** : All Sound Off coupe les notes du canal, mais la réverbération du piano est un effet général, hors canal ; ce qui est déjà dans la réverbération continue de sonner plusieurs secondes avec une Ambiance à 9 ou 10 (preset Cathédrale) ;
-  2. **Release (CC72) élevé** : les notes s'éteindraient lentement si le piano traite All Sound Off comme un relâchement (la documentation dit « turned off immediately », à vérifier).
-- **Test proposé** (sur le PC, orgue sur une tuile, popup des effets piano) : REV à 10 et REL au neutre, accord tenu, STOP : la queue continue-t-elle ? Puis REV à 0 et REL à fond, même essai. Pendant une queue de réverbération, descendre REV à 0 : la queue s'arrête-t-elle net ? (lors des essais du canal 4, passer l'Ambiance de 10 à 0 supprimait la réverbération)
-- **Pistes de correction** selon le résultat : couper l'Ambiance (0) à l'arrêt d'urgence, puis la rétablir quelques secondes plus tard ou au prochain instrument choisi ; et/ou remettre Release au neutre (CC72 = 64) avant All Sound Off.
-
-## 19. Reset des effets : un seul bouton remet à zéro les effets piano et les effets audio
-
-- **Statut** : corrigé (2026-11-05) : le Reset d'un onglet MIDI ne remet à zéro que les effets piano, celui d'un onglet de sons que les effets audio, et chacun a son témoin (`fxToolbar.anyMidiFx`, `fxToolbar.anyAudioFx`). `resetAllFXEffects()` est supprimé
-- **Constaté** : 2026-11-05, par l'utilisateur
-- **Où** : `src/ui/fx-overlays.svelte.ts` (`resetAllFXEffects()`, `fxToolbar.anyFx`), appelé par `MidiPanel.svelte` et `AudioPanel.svelte`
-- **Scénario** : un preset d'effets piano et un preset d'effets audio sont actifs ; on appuie sur Reset dans un onglet de sons.
-- **Diagnostic** : les deux boutons Reset appellent `resetAllFXEffects()`, qui remet à zéro les deux popups. Leur témoin jaune est aussi commun (`anyFx` : un effet piano **ou** audio actif). Historique : à leur création (2026-04-26, `ff55921`), chaque bouton ne remettait à zéro que ses effets. Le commit `78bbbd7` du 2026-04-29 (« maj bouton reset », version vanilla) les a branchés tous les deux sur `resetAllFXEffects()` et a fusionné les témoins. La refonte (1.7.0) l'a gardé tel quel.
-- **Conséquences** : couper la réverbération d'un son coupe aussi celle du piano, et inversement ; le témoin d'un panneau s'allume pour des effets qui ne le concernent pas.
-- **Piste de correction** : un Reset par panneau, qui ne remet à zéro que ses effets (`midiFxOverlay.reset()` ou `audioFxOverlay.reset()`), et un témoin par type (`anyMidiFx`, `anyAudioFx`).
-
-## 20. `MediaElementTrack.load()` rend la main avant la fin du chargement
-
-- **Statut** : corrigé (2026-11-05) : `load()` renvoie la promesse de chargement. Une piste libérée pendant son chargement tient cette promesse tout de suite (`_cancelLoad`), et `playSound()` voit qu'elle n'est plus la piste courante. Tests dans `audio-engine.test.ts`
-- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (n° 7 de la revue de la 1.8.0)
-- **Où** : `src/audio/audio-engine.ts`, `load()` (renvoie `this` au lieu de la promesse de chargement), appelé par `playSound()`
-- **Diagnostic** : `await audio.load()` n'attend rien. C'est l'appel suivant, dans `play()`, qui attend vraiment le chargement. Si le fichier échoue avant cet appel, la première promesse est rejetée sans personne pour l'attendre (« Uncaught (in promise) » dans la console), et le fichier est redemandé.
-- **Conséquences** : erreur dans la console et requête en double pour un fichier manquant. Le son est quand même signalé manquant.
-- **Piste de correction** : `return this._loadPromise;`
-
-## 21. Son qui grésille avec des effets audio réglés à fond
-
-- **Statut** : corrigé (2026-11-05) : limiteur entre `masterGain` et la sortie (`DynamicsCompressorNode`, seuil −2 dB, ratio 20, genou 0, attaque 3 ms), suivi d'un gain qui annule la compensation automatique du compresseur (`limiterTrimGain()`). Mesuré dans Chromium : sous −2 dBFS le son ne change pas (−30 dB en entrée, −30 dB en sortie), et +20 dB en entrée ressort à −0,6 dBFS. **À vérifier à l'oreille** sur la tablette : un son fort, volume à 100 %, réverbération et basses à fond
-- **Constaté** : par l'utilisateur, avec certains réglages (musiques de film), curseurs à fond ; revue de code de la 1.7.2 (n° 9 de la revue de la 1.8.0)
-- **Où** : `src/audio/audio-engine.ts`, `masterGain → destination`
-- **Diagnostic** : la réverbération (gain jusqu'à ×1,38), le delay (réinjection jusqu'à 0,95) et les boosts d'égaliseur (jusqu'à +15 dB) s'ajoutent au signal sec, et rien ne limite la sortie. Le compresseur du graphe a un ratio de 1 : il ne fait rien. Au-delà de 0 dBFS, la carte son écrête : c'est le grésillement.
-- **Piste de correction** : un limiteur (`DynamicsCompressorNode` : seuil −1 dB, ratio 20, genou 0, attaque 3 ms) entre `masterGain` et la sortie.
-
-## 22. Une piste libérée garde son élément `<audio>` et son décodeur
-
-- **Statut** : corrigé (2026-11-05) : `dispose()` vide la source de l'élément (`removeAttribute('src')` puis `load()`). Test dans `audio-engine.test.ts`. À vérifier sur la tablette : une longue série de sons, sans son qui refuse de démarrer
-- **Constaté** : 2026-10-14, revue de code de la 1.7.2 (n° 10 de la revue de la 1.8.0)
-- **Où** : `src/audio/audio-engine.ts`, `MediaElementTrack.dispose()`
-- **Diagnostic** : `dispose()` met en pause et déconnecte la piste du graphe, mais garde la source de l'élément `<audio>`. Son décodeur reste alloué jusqu'au passage du ramasse-miettes, à chaque son joué. Chrome Android limite le nombre de lecteurs média simultanés.
-- **Conséquences** (non constatées) : mémoire qui grimpe pendant un long spectacle, et peut-être un son qui refuse de démarrer.
-- **Piste de correction** : à la fin de `dispose()`, `this.audio.removeAttribute('src'); this.audio.load();`
-
-## 23. Bas de l'écran coupé dans un onglet Chrome
-
-- **Statut** : corrigé (2026-11-05) : `#app` en `height: 100dvh`, après `100vh` en repli. À vérifier sur la tablette, dans un onglet Chrome, dans les deux orientations
-- **Constaté** : par l'utilisateur, souvent ; revue de code de la 1.7.2 (n° 11 de la revue de la 1.8.0)
-- **Où** : `src/css/global.css`, `#app { height: 100vh }`
-- **Diagnostic** : dans un onglet Chrome Android, `100vh` compte aussi la barre d'adresse : la page est plus haute que la partie visible, et la dernière rangée de boutons passe sous le bas de l'écran. L'application installée (sans barre d'adresse) n'est pas touchée.
-- **Piste de correction** : `height: 100dvh` (hauteur réellement visible), précédé de `100vh` pour les navigateurs qui ne le connaissent pas.
-
-## 24. Barre d'un panneau MIDI : « Reset » et la valeur du volume coupés sur téléphone en paysage
-
-- **Statut** : corrigé (2026-11-05) : en paysage étroit (moins de 900 px de large) ou peu haut (moins de 500 px), les libellés deviennent « FX » et « RAZ » (remise à zéro), au lieu d'être masqués sous 900 px et entiers au-dessus. Vérifié en 915 × 412 et 740 × 360 : la barre tient, valeur du volume comprise
-- **Constaté** : 2026-11-05, sur une capture en 915 × 412 (Chromium headless, téléphone en paysage), en corrigeant la popup des effets
-- **Où** : barre du panneau MIDI (`Panel.svelte`, `FxToolbar.svelte`, `VolumeControl.svelte`) ; les libellés ne sont masqués qu'en dessous de 900 px de large (`@media (orientation: portrait), (max-width: 900px)` dans `FxToolbar.svelte`)
-- **Diagnostic** : entre 900 et environ 1000 px de large, la barre affiche la liste de connexion, le badge, « Effets » / « Reset » avec leurs libellés, le STOP et le volume : elle déborde, le texte « Reset » touche le bord de son bouton et la valeur « 100 » du volume est coupée à droite.
-- **Conséquences** : purement visuel, les boutons restent utilisables.
-- **Piste de correction** : masquer aussi les libellés « Effets » / « Reset » quand l'écran est peu haut en paysage (`max-height: 500px`), comme sous 900 px.
-
-## 25. Popups des effets : repères du neutre peu visibles, et à moitié coupés aux extrémités
-
-- **Statut** : corrigé (2026-11-06)
-- **Constaté** : 2026-11-06, par l'utilisateur (« niveaux 0 » des curseurs qu'il ne voyait plus)
-- **Où** : `src/ui/FxOverlay.svelte` (`.fx-neutral-tick`), `src/ui/fx-overlay.svelte.ts` (`updateNeutralRailMarks()`)
-- **Diagnostic** : les repères étaient fins (2 px) et gris foncé, donc peu visibles, surtout depuis que la valeur chiffrée ne s'affiche plus. Leur position ne tenait pas compte de la largeur de la poignée : un neutre à une extrémité (0 en bas pour Chorus, High-pass, Reverb, Delay ; 20 kHz en haut pour Low-pass) tombait au bout du rail, au-delà de la course du centre de la poignée, à moitié coupé par le bord.
-- **Correction** : repères plus épais (3 px), plus longs et plus clairs, avec un léger halo ; placés au centre de la poignée au neutre. La taille de la poignée est une variable CSS (`--fx-thumb-size`) lue par le script, au lieu d'être répétée.
-
-## 26. Vieux Chrome : couleurs mélangées absentes (tuiles noires à bordure blanche, popups transparentes)
-
-- **Statut** : corrigé (2026-11-08, version 1.10.1) dans toute l'appli : à la build, un plugin PostCSS (`tools/color-mix-compat.ts`) réécrit chaque `color-mix()` en `rgb(calc(…))` / `rgba(…)` sur des variables de canaux (`--nom-r`, `-g`, `-b`, `-a`), compris par Chrome 106 ; les variables posées par le script posent aussi leurs canaux (`src/ui/color-channels.ts`). Le même CSS sert à tous les navigateurs. Vérifié par captures (10 écrans : 7 onglets, 2 popups d'effets, À propos) : sur Chrome récent, identique à la version 1.10.0 à 1 niveau de couleur près ; sur un Chromium 106.0.5249.0, même rendu que sur Chrome récent. Un premier correctif limité aux tuiles (bloc `@supports not`, rendu approché) a été remplacé par celui-ci avant publication. Chrome 106 est désormais la version minimale à garder compatible (`CLAUDE.md`)
-- **Constaté** : 2026-11-08, par l'utilisateur, sur la tablette de scène : Chrome 106.0.5249.126, Android 6.0, Chrome impossible à mettre à jour
-- **Où** : `src/ui/components/SoundButton.svelte` (`.musique-tuile`, `.animals-grid .sound-btn`, `.btn-sub`), et plus largement tous les `color-mix()` de l'appli (environ 70, dans `FxOverlay.svelte`, `Panel.svelte`, `FxToolbar.svelte`, `MidiPanel.svelte`, `Transport.svelte`, `AboutPopup.svelte`, `EmergencyStopButton.svelte`)
-- **Diagnostic** : la couleur de la tuile vient de `color-mix(in srgb, var(--cat-accent) 22%, var(--bg-card))`. `color-mix()` n'existe que depuis Chrome 111 (mars 2023). Comme la valeur contient un `var()`, un Chrome plus ancien accepte la déclaration à la lecture, puis la juge invalide au calcul : la propriété prend sa valeur par défaut. Le fond (`::after`) devient transparent, donc noir (le fond de la page), et la bordure prend `currentColor`, le blanc du texte. La couleur de la famille n'apparaît plus nulle part, sauf en lecture (`border-color: var(--cat-accent)` sans mélange).
-- **Conséquences** : visuel seulement, les sons jouent. Toutes les familles se ressemblent ; sur le même appareil, d'autres teintes manquent aussi : cadre et reflet des panneaux, boutons Effets/Reset, popups des effets (fond transparent, presets sans contour, preset actif non signalé), barre de progression des sons.
-- **Piste de correction** : avant chaque `color-mix()` qui compte, une déclaration de repli que les vieux navigateurs comprennent, par exemple `border-color: var(--cat-accent)` (couleur pure), et pour le fond un calque `::after` teinté avec `opacity`. Autre piste : calculer les couleurs mélangées en JS (`AudioPanel.svelte` pose déjà `--cat-accent`) et les poser en variables (`--cat-bg`, `--cat-border`). Ou mettre à jour Chrome / Android System WebView sur la tablette, si elle l'accepte.
+| N° | Bug | Correction | Version |
+|---|---|---|---|
+| 1 | Changement de musique : ancienne piste jamais libérée | `cancelFade()` libère la piste dont le fondu est interrompu | 1.7.1 |
+| 2 | Un seul minuteur partagé entre deux fondus simultanés | un fondu annule le précédent, minuteur local | 1.7.1 |
+| 3 | Pas de connexion USB automatique au piano au chargement | `autoConnectUsbPiano()` | 1.7.1 |
+| 4 | Ancien Service Worker : sons jamais mis en cache sur GitHub Pages | nouveau Service Worker (Workbox) | 1.7.0 |
+| 5 | Barre de progression d'un son affichée après l'arrêt | remise à 0 sur l'événement `stop` | 1.7.1 |
+| 6 | Icône de volume mise à jour sur un seul panneau | icône dérivée du volume partagé | 1.7.1 |
+| 7 | « Vider le cache et recharger » ne vidait aucun cache | « Mettre à jour l'application » (`src/app-update.ts`) | 1.9.0 |
+| 8 | Bluetooth : notes qui restent tenues (parseur BLE, renvoi des notes au piano) | patchs et effets sur le canal 4 : plus de Local Off ni de renvoi des notes | 1.8.0 |
+| 9 | Animation des effets piano : les 7 CC renvoyés à chaque image | seules les valeurs qui changent sont envoyées | 1.8.0 |
+| 10 | Reprise après pause puis Stop rapide : `TypeError` | la reprise vérifie que la piste est toujours la courante | 1.9.0 |
+| 11 | Volume déplacé pendant un fondu d'entrée : ignoré | le fondu d'entrée s'arrête | 1.9.0 |
+| 12 | Wake Lock affiché « actif » après sa libération | `STATE.wakeLock` remis à `null` sur `release` | 1.9.0 |
+| 13 | Instrument et effets non renvoyés au piano à la connexion | renvoyés à chaque connexion (événement `connected`) | 1.8.0 |
+| 14 | Son remplacé sous le même nom jamais mis à jour sur la tablette | non corrigé : voir « Décisions » | — |
+| 15 | Connexion Bluetooth en cours non annulée par un autre choix | compteur de tentatives, `selectionId` | 1.8.0 |
+| 16 | Lien GATT laissé ouvert après un échec de connexion | le lien est refermé | 1.8.0 |
+| 17 | Câble USB débranché ou branché après le lancement : non suivi | port débranché oublié, piano branché connecté | 1.8.0 |
+| 18 | Arrêt d'urgence : un orgue avec beaucoup d'effet continue de sonner | All Sound Off en premier sur le canal du clavier | 1.8.0 |
+| 19 | Un seul Reset remettait à zéro effets piano et effets audio | un Reset et un témoin par type d'effets | 1.9.0 |
+| 20 | `MediaElementTrack.load()` rendait la main avant la fin du chargement | `load()` renvoie la promesse de chargement | 1.9.0 |
+| 21 | Son qui grésille avec les effets audio à fond | limiteur en sortie (−2 dBFS), transparent en dessous | 1.9.0 |
+| 22 | Une piste libérée gardait son élément `<audio>` et son décodeur | `dispose()` vide la source | 1.9.0 |
+| 23 | Bas de l'écran coupé dans un onglet Chrome (`100vh`) | `100dvh`, après `100vh` en repli | 1.9.0 |
+| 24 | Téléphone en paysage : « Reset » et volume coupés dans la barre MIDI | barre réorganisée (icônes seules depuis la 1.12.0) | 1.9.0 |
+| 25 | Popups des effets : repères du neutre peu visibles, coupés aux extrémités | repères redessinés | 1.9.1 |
+| 26 | Chrome 106 : couleurs mélangées absentes (`color-mix()`) | `color-mix()` réécrit en `rgb()` à la build (`tools/color-mix-compat.ts`) | 1.10.1 |

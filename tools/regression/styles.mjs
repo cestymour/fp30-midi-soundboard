@@ -72,6 +72,16 @@ await dump('focus clavier');
 
 for (const t of audioTabs) {
   await tab(t);
+  // Onglet sons : pas d'effets ni de transport ; un son lancé, puis l'arrêt d'urgence
+  if (!await page.$('.panel.active .audio-fx-open-btn')) {
+    await page.hover('.panel.active .sound-btn >> nth=1'); await page.waitForTimeout(300);
+    await dump('survol d\'un son, onglet ' + t);
+    await page.click('.panel.active .sound-btn >> nth=0'); await page.waitForTimeout(800);
+    await dump('son en cours, onglet ' + t);
+    await page.click('.panel.active .emergency-stop-btn'); await page.waitForTimeout(800);
+    await dump('arrêté, onglet ' + t);
+    continue;
+  }
   await page.click('.panel.active .audio-fx-open-btn'); await page.waitForTimeout(400);
   await page.click('#audio-fx-overlay .fx-preset-btn >> nth=3'); await page.waitForTimeout(800);
   await dump('popup audio, preset 3, onglet ' + t);

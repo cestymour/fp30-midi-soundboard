@@ -19,4 +19,4 @@ http.createServer((req, res) => {
       fs.createReadStream(f).pipe(res);
     }
   });
-}).listen(+port);
+}).listen(+port, () => console.log(`prêt sur le port ${port}`));

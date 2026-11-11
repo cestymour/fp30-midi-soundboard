@@ -44,7 +44,7 @@ describe('parsePacket', () => {
   });
 });
 
-// Bug n° 8 (docs/bugs.md) : l'ancien parseur lisait toujours 2 octets de données
+// Chaque statut a sa longueur de données ; le paquet npm d'origine en lisait toujours 2 (bug n° 8)
 describe('parsePacket : longueur des messages et running status', () => {
   const bytes = (ev: unknown) => {
     const { midiStatus, midiOne, midiTwo } = ev as MessageMidi;

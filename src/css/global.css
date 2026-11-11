@@ -56,7 +56,7 @@ html, body {
   flex-direction: column;
   width: 100%; height: 100vh;
   /* Hauteur réellement visible : dans un onglet Chrome, 100vh compte aussi la barre
-     d'adresse, et la dernière rangée de boutons passait sous l'écran (bug n° 23) */
+     d'adresse, et la dernière rangée de boutons passerait sous l'écran (bug n° 23) */
   height: 100dvh;
 }
 

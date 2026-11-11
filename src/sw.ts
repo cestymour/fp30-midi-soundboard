@@ -75,10 +75,11 @@ registerRoute(
 );
 
 // ═══════════════════════════════════════════════════════
-// ANCIENS CACHES DES POLICES GOOGLE (jusqu'à la 1.8.0)
+// CACHES DES POLICES GOOGLE
 // ═══════════════════════════════════════════════════════
 
-// Les polices sont désormais dans le precache : les caches Google Fonts ne servent plus
+// Les polices sont dans le precache : les caches Google Fonts laissés par les versions
+// jusqu'à la 1.8.0 ne servent à rien, et sont effacés
 self.addEventListener('activate', event => {
   event.waitUntil(Promise.all(['impro-fonts-css', 'impro-fonts'].map(name => caches.delete(name))));
 });
