@@ -1,6 +1,7 @@
 <!--
-  TransitionPopup.svelte — Popup de la musique de transition, par-dessus les onglets
-  (l'en-tête reste visible, donc le bouton pour l'arrêter aussi) : choix de la musique du
+  TransitionPopup.svelte — Popup de la musique de transition. Son voile couvre tout l'écran,
+  en-tête compris, sauf le bouton de transition, qui passe au-dessus (pour lancer ou arrêter
+  la musique) ; un clic ailleurs que dans la popup la ferme. Contenu : choix de la musique du
   spectacle, progression (avec un repère par moment marquant), une ligne de boutons, un par
   moment marquant (0 : début du spectacle, puis 1, 2, 3…), volume, bouton « Clarté Studio »
   (le préréglage des effets audio, appliqué à la transition seule). Le moment prévu est en
@@ -152,13 +153,14 @@
 <style>
   #transition-overlay {
     position: fixed;
-    top: var(--header-h);
-    left: 0; right: 0; bottom: 0;
+    inset: 0;
     z-index: 150;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 16px;
+    /* La popup reste sous l'en-tête, pour ne jamais cacher le bouton de transition */
+    padding-top: calc(var(--header-h) + 16px);
     background: rgba(0, 0, 0, 0.6);
   }
 
@@ -482,5 +484,14 @@
     inset: 1px;
     background: currentColor;
     border-radius: 2px;
+  }
+
+  /* ── Téléphone en paysage : popup resserrée, centrée sur tout l'écran. Elle peut passer
+     sur l'en-tête voilé ; centrée et large de 480 px au plus, elle n'atteint jamais le
+     bouton de transition dans le coin. ── */
+  @media (orientation: landscape) and (max-height: 500px) {
+    #transition-overlay { padding: 8px; }
+    #transition-card { gap: 8px; padding: 12px 16px; }
+    .transition-close { width: 32px; height: 32px; }
   }
 </style>

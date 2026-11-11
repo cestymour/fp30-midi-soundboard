@@ -99,6 +99,11 @@
   #transition-btn:hover .corner-pill {
     background: color-mix(in srgb, var(--transition-accent) 25%, transparent);
   }
+  /* Popup ouverte : seul bouton au-dessus du voile de la popup (#transition-overlay,
+     z-index 150), qui couvre le reste de l'en-tête */
+  #transition-btn.is-open {
+    z-index: 151;
+  }
   #transition-btn:active .corner-pill {
     background: color-mix(in srgb, var(--transition-accent) 35%, transparent);
   }

@@ -12,6 +12,7 @@
   import FxOverlay from './ui/FxOverlay.svelte';
   import TransitionButton from './ui/components/TransitionButton.svelte';
   import TransitionPopup from './ui/components/TransitionPopup.svelte';
+  import { transitionPopup } from './ui/transition.svelte.ts';
 
   const tabs = getAllTabs();
 
@@ -26,7 +27,7 @@
   });
 </script>
 
-<header id="header">
+<header id="header" class:transition-open={transitionPopup.isOpen}>
   <TransitionButton />
   <TabNav />
   <button id="settings-btn" title="Paramètres" onclick={() => settingsPopup.open()} oncontextmenu={e => e.preventDefault()}>
@@ -67,6 +68,12 @@
     background: var(--bg-surface);
     border-bottom: 2px solid var(--border);
     z-index: 10;
+  }
+  /* Popup de transition ouverte : son voile couvre aussi l'en-tête. Sans z-index ici,
+     l'en-tête ne forme plus de contexte d'empilement, et le bouton de transition
+     (TransitionButton) peut passer seul au-dessus du voile. */
+  #header.transition-open {
+    z-index: auto;
   }
 
   #settings-btn {
