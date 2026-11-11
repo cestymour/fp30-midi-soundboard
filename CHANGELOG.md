@@ -2,6 +2,26 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.14.0 — 2026-11-11
+
+### Nouveautés
+
+- **Films et Animaux au même volume que le reste.** Jusqu'ici, un thème de film pouvait sonner 20 dB plus fort qu'un autre (Taxi contre Les Chariots de feu), et pareil pour les animaux (le lion contre le grillon). Ils sont maintenant tous au niveau des onglets Musiques et Bruits, mesuré sur le passage qui joue vraiment (à partir du moment de départ de la tuile). Le curseur de volume n'a plus à être rattrapé d'une tuile à l'autre.
+- **Fichiers plus légers** : les films passent de 94 à 76 Mo, les animaux de 5,5 à 3,2 Mo (même encodage que l'onglet Musiques).
+- **Moins de calcul pour la tablette** : la réverbération et l'écho des effets audio ne tournent plus quand ils sont coupés, et deux traitements inutilisés (compresseur, distorsion) sont retirés. Le son ne change pas (mesuré : 0,07 dB, inaudible).
+
+### À savoir
+
+- **Après la mise à jour, utiliser « Télécharger tous les sons »** (popup À propos) : les films et les animaux ont de nouveaux fichiers (environ 80 Mo à télécharger). Sinon, ils se chargent au premier clic. Les anciens fichiers restent dans le cache de Chrome (bug n° 27 de `docs/bugs.md`, à corriger plus tard).
+- Quatre sons restent un peu moins forts que les autres, pour ne pas les écraser : Harry Potter, Dirty Dancing, Ronronnement, et le cheval au galop (tuile en commentaire).
+- Pour les développeurs : fins de ligne en LF partout, Vite 8 (cible gardée pour Chrome 106, vérifiée sur un Chromium 106), outil de non-régression sous Windows (`npm run regression`), code mort retiré.
+
+### À vérifier sur la tablette
+
+- Quelques films (Taxi, Titanic, Les Chariots de feu, Star Wars) et quelques animaux (lion, grillon, cheval) : volume semblable d'une tuile à l'autre, et chaque tuile démarre au bon moment.
+- Effets audio sur une musique : un preset avec réverbération ou écho (Église, Cave) s'entend, puis Reset le coupe.
+- Hors ligne, après « Télécharger tous les sons » : un film et un animal se lancent.
+
 ## 1.13.0 — 2026-11-11
 
 ### Nouveautés
