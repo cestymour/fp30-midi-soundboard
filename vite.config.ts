@@ -2,11 +2,13 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { colorMixCompat } from './tools/color-mix-compat.ts';
+import { hashPublicAssets } from './tools/asset-hashes.ts';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   // Chemins relatifs : le site est servi sous /fp30-midi-soundboard/ sur GitHub Pages
   base: './',
   build: {
@@ -21,6 +23,9 @@ export default defineConfig({
   define: {
     // Version affichée dans la popup « Paramètres »
     __APP_VERSION__: JSON.stringify(pkg.version),
+    // Empreinte de chaque son et image, ajoutée à leur adresse (src/asset-url.ts) : à la build
+    // seulement ; en dev et dans les tests, les adresses restent les chemins de la config
+    __ASSET_HASHES__: JSON.stringify(command === 'build' ? hashPublicAssets(fileURLToPath(new URL('./public', import.meta.url))) : {}),
   },
   css: {
     postcss: {
@@ -49,4 +54,4 @@ export default defineConfig({
       },
     }),
   ],
-});
+}));

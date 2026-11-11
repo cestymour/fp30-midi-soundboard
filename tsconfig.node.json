@@ -10,5 +10,5 @@
     "allowImportingTsExtensions": true,
     "skipLibCheck": true
   },
-  "include": ["vite.config.ts", "tools/color-mix-compat.ts", "tools/color-mix-compat.test.ts"]
+  "include": ["vite.config.ts", "tools/color-mix-compat.ts", "tools/color-mix-compat.test.ts", "tools/asset-hashes.ts", "tools/asset-hashes.test.ts"]
 }

@@ -27,7 +27,7 @@ Les styles qui se jouent bien au piano (tango, ragtime, valse, boogie, les class
 
 - **Emplacement** : `public/sounds/<onglet>/` (`animaux`, `bruits`, `ambiances`, `musiques`, `films`, `transitions`), affiches dans `public/images/films/`.
 - **Nom** : minuscules, mots séparés par `_`, sans espace, accent ni parenthèse (`il_etait_une_fois_dans_l_ouest_l_homme_a_l_harmonica.mp3`). Musiques de transition : `auteur_titre.mp3`. Affiche d'un film : même nom que l'`id` de la tuile.
-- **Ne jamais remplacer un fichier sous le même nom** : la tablette garde l'ancien dans son cache hors ligne, sans jamais le mettre à jour, et le nouveau `start` s'appliquerait à l'ancien son. Un fichier modifié prend un nouveau nom : suffixe `_v2`, puis `_v3`… (`star_wars_main_theme_v2.mp3`), et la config suit. Les anciennes versions restent dans le cache de la tablette (voir le bug n° 27 de `docs/bugs.md`).
+- **Remplacer un fichier sous le même nom est possible** : à la build, chaque son et chaque image reçoit une empreinte de son contenu, ajoutée à son adresse (`?v=…`, `src/asset-url.ts`). Un fichier modifié change d'adresse : la tablette le télécharge (« Télécharger tous les sons »), puis efface l'ancienne version de son cache. Les suffixes `_v2` des fichiers existants restent tels quels ; inutile d'en ajouter.
 - **Une tuile en commentaire est mise de côté, pas supprimée** : la ligne et son mp3 restent. Une ligne dont le mp3 n'existe plus est supprimée ; son `id` reste réservé (historique git) et n'est jamais réutilisé.
 - **Poids** : tout part dans le cache hors ligne de la tablette (« Télécharger tous les sons »). Environ 195 Mo aujourd'hui : Films 73 Mo, Musiques 61 Mo, Transitions 27 Mo, Ambiances 25 Mo, Bruits 4,4 Mo, Animaux 3,2 Mo, affiches 2,5 Mo.
 

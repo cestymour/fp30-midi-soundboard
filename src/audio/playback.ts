@@ -14,6 +14,7 @@ import { createEmitter } from '../events.ts';
 import { AudioEngineAPI } from './audio-engine.ts';
 import type { MediaElementTrack, TrackRoute } from './audio-engine.ts';
 import { getPlayableDuration, getPlaybackRange, getSeekTime } from './timing.ts';
+import { assetUrl } from '../asset-url.ts';
 
 export type PlaybackEvent =
   /** Un son démarre (avant même la fin de son chargement) */
@@ -184,8 +185,8 @@ export interface PlayOptions {
 }
 
 export async function playSound(item: AudioItem, options: PlayOptions = {}): Promise<void> {
-  const src = item.file;
-  if (!src) return;
+  if (!item.file) return;
+  const src = assetUrl(item.file);
 
   const requestId = ++_playRequestId;
 

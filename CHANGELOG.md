@@ -14,8 +14,19 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
   - Elle se ferme par la croix ✕ en haut à droite, comme la popup de la musique de transition, ou par un appui à côté. Le bouton « Fermer » du bas disparaît.
 - **Petits écrans (téléphone) : la grille défile.** Quand les tuiles ne tiennent pas en hauteur, la grille se fait défiler au doigt au lieu de couper la dernière rangée (onglets d'instruments, Musiques, Films). La barre d'onglets et la barre de contrôles (volume, arrêt d'urgence…) restent en place. Sur la tablette, où tout tient, rien ne change : pas de défilement.
 
+### Corrections
+
+- **Les anciennes versions des sons sont effacées** (bug n° 27). Chaque fois qu'un son ou une affiche était renommé ou retiré, l'ancien fichier restait pour toujours dans la mémoire de la tablette (jusqu'à environ 180 Mo perdus). « Télécharger tous les sons » efface maintenant ce qui ne sert plus, une fois tout le reste téléchargé, et dit la place libérée. S'il ne manque rien mais qu'il reste d'anciens fichiers, le bouton devient « ♻ Libérer la place des anciens fichiers ».
+- **Un son remplacé sous le même nom est mis à jour sur la tablette** (bug n° 14). Chaque son et chaque affiche porte maintenant une empreinte de son contenu dans son adresse : un fichier modifié change d'adresse, et la tablette le télécharge à nouveau. Plus besoin de renommer un son modifié (`_v2`).
+
+### À savoir
+
+- **Au premier lancement de cette version, tous les sons comptent comme manquants** (le compteur hors ligne repart de 0) : leurs adresses ont toutes changé. Faire « ⬇ Télécharger tous les sons » **en wifi** (environ 195 Mo), puis la place des anciennes copies est libérée. En attendant, hors ligne, les sons déjà téléchargés jouent toujours : l'ancienne copie est utilisée à la place de la nouvelle.
+- Si un téléchargement échoue (réseau coupé), rien n'est effacé : relancer « Télécharger tous les sons » plus tard.
+
 ### À vérifier sur la tablette
 
+- Après la mise à jour, en mode avion **avant** de retélécharger : une musique et un son déjà joués se lancent encore. Puis, en wifi, « ⬇ Télécharger tous les sons » : le compteur arrive au total et le message donne la place libérée.
 - Ouvrir ⚙ dans l'application installée : toutes les pastilles doivent être vertes avant un spectacle.
 - « Plein écran » dans un onglet Chrome, puis « Quitter le plein écran ».
 - Dans les deux orientations, aucun onglet ne doit défiler. Sur un téléphone en portrait, l'onglet Instruments défile, et un glissement qui part d'une tuile ne la déclenche pas.

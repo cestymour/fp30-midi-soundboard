@@ -65,21 +65,6 @@ Morceaux écartés de l'onglet Musiques parce qu'ils se jouent au clavier plutô
 
   À concevoir : le format de configuration d'un thème (instrument : `pc` / `msb` / `lsb`, preset d'effets, texte d'aide, gamme) et la présentation des indications de jeu.
 
-## Cache des sons : empreintes et nettoyage (bug n° 27)
-
-Durée estimée : 30 à 45 minutes (sans la comparaison des styles, inutile ici : aucun CSS touché). À faire sur la branche `dette-technique` (version 1.14.0, pas encore fusionnée), ou sur une nouvelle branche si elle est fusionnée entre-temps. Règle de travail, avant de coder : décider avec l'utilisateur si la version complète ou le nettoyage seul.
-
-But : corriger le bug n° 27 (anciennes versions jamais effacées) **et** permettre de remplacer un son sous le même nom (bug n° 14 : aujourd'hui la tablette garde l'ancienne version, d'où la règle des noms `_v2`).
-
-- [ ] **1. Empreinte par fichier.** À la build, calculer une empreinte (hash du contenu) de chaque fichier de `public/sounds/` et `public/images/`, et l'exposer à l'appli (module généré ou `define`, comme `__APP_VERSION__`). Partout où l'appli lit un son ou une affiche (`<audio src>`, `fetch` des sons dans `src/audio/sounds.ts`, affiches, `src/offline.ts`), ajouter `?v=<empreinte>` à l'adresse. Un fichier modifié, même sous le même nom, a une autre adresse : la tablette le télécharge. En dev (sans build), pas d'empreinte nécessaire.
-- [ ] **2. Nettoyage (bug n° 27).** « Télécharger tous les sons » (`src/offline.ts`) efface aussi de `impro-audio` et `impro-images` les entrées qui ne correspondent plus à aucune adresse de la config (fichier retiré, ancienne empreinte), **après** avoir téléchargé ce qui manque, et seulement si les téléchargements ont réussi. Afficher la place libérée dans la popup Paramètres.
-- [ ] **3. Sécurité hors ligne** (`src/sw.ts`) : si la nouvelle adresse (`?v=…`) n'est pas en cache et que le réseau échoue, répondre avec l'ancienne version du même fichier restée en cache (même chemin, autre empreinte), plutôt que rien. À tester avec le Service Worker et le mode hors ligne.
-- [ ] **4. Tests** : empreinte dans les adresses (`listOfflineFiles`), nettoyage (ne retire que l'obsolète, ne retire rien si un téléchargement échoue), repli du Service Worker si testable.
-- [ ] **5. Docs** : `docs/sons.md` (supprimer la règle « jamais le même nom » et les `_v2` comme obligation), `docs/bugs.md` (n° 27 fermé, n° 14 corrigé, retirer la décision correspondante), `CLAUDE.md` (section cache : adresses avec empreinte, nettoyage), `CHANGELOG.md` (à vérifier : au premier passage, toutes les adresses changent, la tablette retélécharge tout, environ 195 Mo, en wifi, avec « Télécharger tous les sons » ; les anciens fichiers restent jouables hors ligne en attendant), `docs/checklist.md` (test sur la tablette : remplacer un son sous le même nom, le voir mis à jour).
-- [ ] **6. Vérifications** : `npm run typecheck`, `npm test`, `npm run build`, `npm run regression` une fois, un essai en Chromium 106 et en mode hors ligne. Pas de comparaison des styles.
-
-Version plus courte (environ 15 minutes) : seulement le point 2, avec la règle `_v2` conservée.
-
 ## Dette technique
 
 Repris de la dernière revue de code (version 1.8.0, 2026-11-05) : ce qui n'a pas été traité. Rien de bloquant.

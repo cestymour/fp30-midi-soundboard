@@ -11,6 +11,7 @@
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
   import { getTransitionMusics } from '../../config/tabs.ts';
+  import { assetUrl } from '../../asset-url.ts';
   import { getPlaybackWindow, formatTime } from '../../audio/timing.ts';
   import {
     getMomentTime, getNextMoment, getSelectedTransitionMusic, isTransitionCurrent,
@@ -43,7 +44,7 @@
     probe.onloadedmetadata = () => {
       if (isFinite(probe.duration)) knownDurations[target.id] = probe.duration;
     };
-    probe.src = target.file;
+    probe.src = assetUrl(target.file);
     return () => { probe.onloadedmetadata = null; probe.removeAttribute('src'); probe.load(); };
   });
 

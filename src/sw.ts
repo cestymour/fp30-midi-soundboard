@@ -6,6 +6,10 @@
    - Fichiers audio (sounds/) : Cache First dans un cache stable
      (non versionné), mis en cache au premier accès
    - Images (images/) : Cache First, mises en cache au premier accès
+   - Sons et images sont demandés avec l'empreinte du fichier
+     (`?v=…`, voir asset-url.ts) : hors ligne, si la version demandée
+     manque, l'ancienne version du même fichier restée en cache est
+     servie à sa place
    - Polices : embarquées dans l'application (precache)
 ================================================================ */
 
@@ -13,7 +17,7 @@ import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { CacheFirst } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
-import { RangeRequestsPlugin } from 'workbox-range-requests';
+import { RangeRequestsPlugin, createPartialResponse } from 'workbox-range-requests';
 import { clientsClaim } from 'workbox-core';
 import type { WorkboxPlugin } from 'workbox-core/types';
 import type { PrecacheEntry } from 'workbox-precaching';
@@ -51,6 +55,24 @@ const fetchWholeFilePlugin: WorkboxPlugin = {
   }),
 };
 
+/**
+ * Version demandée absente du cache et réseau en échec (hors ligne) : sert une autre
+ * version du même fichier restée en cache (même chemin, autre empreinte `?v=…`).
+ * Après une mise à jour qui remplace un son, il reste ainsi jouable hors ligne tant que
+ * « Télécharger tous les sons » n'a pas été fait. Une requête Range (élément <audio>)
+ * reçoit la plage demandée.
+ */
+function previousVersionPlugin(cacheName: string): WorkboxPlugin {
+  return {
+    handlerDidError: async ({ request }) => {
+      const cache = await caches.open(cacheName);
+      const previous = await cache.match(request.url, { ignoreSearch: true });
+      if (!previous) return undefined;
+      return request.headers.has('range') ? createPartialResponse(request, previous) : previous;
+    },
+  };
+}
+
 registerRoute(
   ({ url }) => url.pathname.includes('/sounds/'),
   new CacheFirst({
@@ -59,6 +81,7 @@ registerRoute(
       fetchWholeFilePlugin,
       new CacheableResponsePlugin({ statuses: [200] }),
       new RangeRequestsPlugin(),
+      previousVersionPlugin(AUDIO_CACHE),
     ],
   }),
 );
@@ -70,7 +93,7 @@ registerRoute(
   ({ url }) => url.pathname.includes('/images/'),
   new CacheFirst({
     cacheName: IMAGES_CACHE,
-    plugins: [new CacheableResponsePlugin({ statuses: [200] })],
+    plugins: [new CacheableResponsePlugin({ statuses: [200] }), previousVersionPlugin(IMAGES_CACHE)],
   }),
 );
 

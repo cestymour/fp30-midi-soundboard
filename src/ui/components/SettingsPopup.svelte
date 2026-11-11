@@ -2,7 +2,8 @@
   SettingsPopup.svelte — Popup « Paramètres » (bouton ⚙ de l'en-tête), de haut en bas :
   - Écran : le bouton Plein écran, mis en avant, et « Écran toujours allumé » (Wake Lock) ;
   - Hors ligne : sons et images en cache, stockage protégé, Service Worker,
-    et « Télécharger tous les sons » tant qu'il en manque ;
+    et « Télécharger tous les sons » tant qu'il en manque ou qu'il reste
+    d'anciens fichiers à effacer (« Libérer la place des anciens fichiers » s'il ne manque rien) ;
   - Application : version et « Mettre à jour l'application » ;
   - nom de l'application et crédit ; le bouton ✕ ferme, en haut à droite.
   Chaque état est une ligne « libellé — valeur » avec une pastille : vert (prêt),
@@ -53,6 +54,14 @@
   const allCached = $derived(!!offline
     && offline.sounds.cached === offline.sounds.total
     && offline.images.cached === offline.images.total);
+  /** Entrées des caches qui ne servent plus (fichier retiré, renommé ou remplacé) */
+  const obsolete = $derived(offline ? offline.sounds.obsolete + offline.images.obsolete : 0);
+
+  /** Taille à la française : « 12,3 Mo », ou en Ko sous 1 Mo (« 30 Ko », jamais « 0,0 Mo ») */
+  function formatSize(bytes: number): string {
+    if (bytes < 1e6) return Math.max(1, Math.round(bytes / 1e3)) + ' Ko';
+    return (bytes / 1e6).toFixed(1).replace('.', ',') + ' Mo';
+  }
 
   function countStatus(count: { cached: number; total: number } | undefined): Status {
     if (count) return { value: `${count.cached} / ${count.total}`, tone: count.cached === count.total ? 'ok' : 'warn' };
@@ -76,11 +85,11 @@
   async function downloadAll(): Promise<void> {
     downloadResult = '';
     download = { done: 0, total: 0 };
-    let failed: string[];
+    let failed: string[] = [];
+    let freed = 0;
     try {
-      failed = await downloadAllForOffline((done, total) => { download = { done, total }; });
+      ({ failed, freed } = await downloadAllForOffline((done, total) => { download = { done, total }; }));
     } catch {
-      failed = [];
       downloadResult = 'Téléchargement impossible.';
     }
     download = null;
@@ -88,6 +97,7 @@
       downloadResult = failed.length === 0 ? 'Tout est disponible hors ligne.'
         : failed.length === 1 ? "1 fichier n'a pas pu être téléchargé (réseau ?)."
         : `${failed.length} fichiers n'ont pas pu être téléchargés (réseau ?).`;
+      if (freed > 0) downloadResult += ` ${formatSize(freed)} libérés.`;
     }
     await requestPersistentStorage();
     await refreshOffline();
@@ -199,9 +209,9 @@
       {:else if downloadResult}
         <p class="settings-message" role="status">{downloadResult}</p>
       {/if}
-      {#if offline && !allCached}
+      {#if offline && (!allCached || obsolete > 0)}
         <button id="settings-download-btn" class="settings-btn" onclick={downloadAll} disabled={!!download}>
-          ⬇ Télécharger tous les sons
+          {allCached ? '♻ Libérer la place des anciens fichiers' : '⬇ Télécharger tous les sons'}
         </button>
       {/if}
     </section>

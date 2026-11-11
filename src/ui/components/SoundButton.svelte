@@ -12,6 +12,7 @@
   import { playOneShot } from '../../audio/sounds.ts';
   import { getSoundButtonState } from '../transport.svelte.ts';
   import { getSoundImage } from '../../config/tabs.ts';
+  import { assetUrl } from '../../asset-url.ts';
 
   let { item, kind }: { item: AudioItem; kind: AudioTabKind } = $props();
 
@@ -20,7 +21,8 @@
   const isPlaying   = $derived(isOneShot ? buttonState.playing : item === STATE.currentSoundItem);
 
   /** Image de couverture : `img`, ou `icon` si c'est un chemin d'image */
-  const imageSrc = $derived(getSoundImage(item));
+  const imagePath = $derived(getSoundImage(item));
+  const imageSrc  = $derived(imagePath && assetUrl(imagePath));
 
   const baseClass = $derived(
     'sound-btn' + (item.catClass ? ' ' + item.catClass : '') + (imageSrc ? ' sound-btn--img' : ''),

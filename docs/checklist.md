@@ -33,10 +33,11 @@
 - [ ] Popup « Paramètres » et numéro de version ; pastilles vertes dans l'application installée : « Écran toujours allumé : oui » (« non » en orange si la demande a échoué), « Stockage : protégé » ; le bouton « Plein écran » est le plus visible de la popup
 - [ ] « Plein écran » (popup Paramètres) dans un onglet Chrome : barres masquées ; le bouton devient « Quitter le plein écran » et en sort ; une sortie par le geste ou la touche Retour remet le bouton à « Plein écran »
 - [ ] Sur un **téléphone en paysage** : popups des effets (chaque carte a son reset, son curseur et son nom entier) et popup Paramètres (défile ; la croix ✕ en haut à droite et un appui hors de la popup la ferment)
-- [ ] « ⬇ Télécharger tous les sons » : le compteur arrive au total (sons et images), puis le bouton disparaît
+- [ ] « ⬇ Télécharger tous les sons » : le compteur arrive au total (sons et images), puis le bouton disparaît ; s'il restait d'anciens fichiers, le message donne la place libérée (« … Mo libérés »)
+- [ ] Son remplacé sous le même nom (après un déploiement qui en modifie un) : le compteur des sons redescend d'un fichier ; avant « Télécharger tous les sons », en mode avion, le son joue encore (ancienne version) ; après, la nouvelle version joue
 - [ ] Wake Lock : l'écran ne se met pas en veille
 - [ ] **Hors ligne** (mode avion) : l'app se lance, avec ses polices ; après « Télécharger tous les sons », une musique et un son jamais joués se lancent ; « Mettre à jour l'application » affiche « Hors ligne : mise à jour impossible » et ne recharge rien
-- [ ] Mise à jour : après un déploiement, la tablette récupère la nouvelle version ; si elle affiche encore l'ancien numéro, « ⟳ Mettre à jour l'application » passe au nouveau sans retélécharger les sons (le compteur hors ligne ne redescend pas)
+- [ ] Mise à jour : après un déploiement, la tablette récupère la nouvelle version ; si elle affiche encore l'ancien numéro, « ⟳ Mettre à jour l'application » passe au nouveau sans retélécharger les sons (le compteur hors ligne ne redescend que pour les sons et images modifiés)
 
 ## Tester sur la tablette pendant le développement
 

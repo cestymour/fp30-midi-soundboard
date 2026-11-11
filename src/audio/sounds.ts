@@ -20,6 +20,7 @@ import { STATE } from '../state.svelte.ts';
 import { createEmitter } from '../events.ts';
 import { AudioEngineAPI } from './audio-engine.ts';
 import { getPlaybackRange } from './timing.ts';
+import { assetUrl } from '../asset-url.ts';
 
 /** Nombre de voix simultanées au plus */
 export const MAX_SOUND_VOICES = 8;
@@ -79,7 +80,7 @@ function rememberBuffer(file: string, buffer: AudioBuffer): void {
 }
 
 async function decodeFile(file: string, context: AudioContext): Promise<AudioBuffer> {
-  const response = await fetch(file);
+  const response = await fetch(assetUrl(file));
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const data = await response.arrayBuffer();
   return context.decodeAudioData(data);
