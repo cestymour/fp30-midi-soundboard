@@ -1,5 +1,5 @@
 <!--
-  App.svelte — Racine de l'interface : onglets, bouton de la musique de transition, panneaux, popups
+  App.svelte — Racine de l'interface : onglets, bouton de la musique de transition, panneaux, popups (paramètres, transition, effets)
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -8,7 +8,7 @@
   import TabNav from './ui/components/TabNav.svelte';
   import MidiPanel from './ui/components/MidiPanel.svelte';
   import AudioPanel from './ui/components/AudioPanel.svelte';
-  import AboutPopup from './ui/components/AboutPopup.svelte';
+  import SettingsPopup from './ui/components/SettingsPopup.svelte';
   import FxOverlay from './ui/FxOverlay.svelte';
   import TransitionButton from './ui/components/TransitionButton.svelte';
   import TransitionPopup from './ui/components/TransitionPopup.svelte';
@@ -16,7 +16,7 @@
   const tabs = getAllTabs();
 
   let panels: HTMLElement;
-  let aboutPopup: AboutPopup;
+  let settingsPopup: SettingsPopup;
 
   onMount(() => {
     // Hauteur des boutons : au premier affichage, puis à chaque redimensionnement
@@ -29,7 +29,7 @@
 <header id="header">
   <TransitionButton />
   <TabNav />
-  <button id="settings-btn" title="Paramètres" onclick={() => aboutPopup.open()} oncontextmenu={e => e.preventDefault()}>⚙</button>
+  <button id="settings-btn" title="Paramètres" onclick={() => settingsPopup.open()} oncontextmenu={e => e.preventDefault()}>⚙</button>
 </header>
 
 <main id="panels" bind:this={panels}>
@@ -43,7 +43,7 @@
 </main>
 
 <TransitionPopup />
-<AboutPopup bind:this={aboutPopup} />
+<SettingsPopup bind:this={settingsPopup} />
 <FxOverlay controller={midiFxOverlay} />
 <FxOverlay controller={audioFxOverlay} />
 

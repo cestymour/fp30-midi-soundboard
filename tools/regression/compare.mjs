@@ -44,7 +44,7 @@ for (const [name, vp] of [['land', { width: 1280, height: 800 }], ['port', { wid
   }));
   await page.screenshot({ path: `${outDir}/${name}-playing.png`, animations: 'disabled' });
   await page.click('#settings-btn'); await page.waitForTimeout(200);
-  const about = await page.$eval('#about-card', e => e.innerText);
+  const about = await page.$eval('#settings-card, #about-card', e => e.innerText);
   await page.screenshot({ path: `${outDir}/${name}-about.png`, animations: 'disabled' });
   results[name] = { tabs, errors, playing, about };
   await ctx.close();

@@ -37,7 +37,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Emergency Stop** — silences everything at once, from any tab: the piano (All Sound Off), the music and every sound
 - **Wake Lock** — prevents screen sleep during a performance
 - **Responsive layout** — automatic grid reorganization in portrait mode
-- **About popup** — shows the version, Service Worker and Wake Lock status, and an « update » button that installs the latest published version and reloads (sounds stay cached; nothing is reloaded when offline)
+- **Settings popup** (⚙) — a highlighted « Plein écran » button, the Wake Lock, the offline status (cached sounds and images, protected storage, Service Worker, « Télécharger tous les sons »), the version, and an « update » button that installs the latest published version and reloads (sounds stay cached; nothing is reloaded when offline)
 - **Live audio FX mixer** — full overlay on the audio panel to shape the sound in real time (EQ, filters, tempo, delay, reverb) while a clip plays or before the next one; presets with smooth transitions, global reset, and quick per-control recall
 - **MIDI piano FX** — on every MIDI tab, **Effets** / **Reset** opens an overlay (same layout language as the audio mixer) over the instrument grid; sliders send standard MIDI CCs on channel 4 to the connected piano (chorus, cutoff, resonance, attack, release, decay), and the reverb slider sets the piano’s Ambience (0–10) with a Roland SysEx message, via `sendMidi()` in `src/midi/midi.ts`. Both FX popups share one implementation (the `src/ui/FxOverlay.svelte` component, preset logic in `src/fx/fx-presets.ts`). Slider positions reflect what the app last sent, not a read-back from the instrument.
 
@@ -70,7 +70,7 @@ Each sound file is decoded on its first click (read from the offline cache), the
 - GM2 sounds will work on any GM2-compatible instrument.
 - Roland-specific sounds (Roland sound banks) are designed for the FP-30X and may not work as expected on other devices.
 - Patches and MIDI piano FX go to channel 4, the channel of the FP-30X’s own keyboard sound: the keys play the chosen instrument directly, with no Local Off on the piano. FX use common CC numbers (93 chorus, 74 cutoff…); reverb is the piano’s Ambience setting (Roland SysEx), because channel 4 ignores CC91. Over USB, Chrome asks once for MIDI SysEx access. Details in `docs/fp30x-midi.md`.
-- Audio files are cached on first play. Before a show, open the About popup (⚙) and use « ⬇ Télécharger tous les sons » with an internet connection: every sound and cover image is then available offline (the popup counts them). It also tells whether storage is protected from automatic eviction by Chrome (usually granted to the installed app).
+- Audio files are cached on first play. Before a show, open the settings popup (⚙) and use « ⬇ Télécharger tous les sons » with an internet connection: every sound and cover image is then available offline (the popup counts them). It also tells whether storage is protected from automatic eviction by Chrome (usually granted to the installed app).
 
 ---
 
@@ -103,7 +103,7 @@ Each sound file is decoded on its first click (read from the offline cache), the
 │   ├── App.svelte                  # Header, one panel per tab, About and FX popups
 │   ├── state.svelte.ts             # Shared state (STATE, Svelte runes)
 │   ├── wake-lock.ts                # Keeps the screen on
-│   ├── app-update.ts               # « Update the app » button (About popup)
+│   ├── app-update.ts               # « Update the app » button (settings popup)
 │   ├── offline.ts                  # Persistent storage, « download every sound »
 │   ├── cache-names.ts              # Cache names shared by the page and the Service Worker
 │   ├── types.ts                    # Shared types (config schema, FX controls and presets)
@@ -320,7 +320,7 @@ Documentation, in French, in `docs/`: `usage-scene.md` (how the app is used duri
 
 Nothing to do by hand: the Service Worker precache list and file revisions are generated at build time, so installed clients pick up the new version after each deployment. Audio files are kept in a stable cache (`impro-audio`) and are not downloaded again after an update.
 
-The version number shown in the About popup is the `version` field of `package.json`: bump it for each release, to tell which version runs on the tablet.
+The version number shown in the settings popup is the `version` field of `package.json`: bump it for each release, to tell which version runs on the tablet.
 
 ---
 
@@ -373,7 +373,7 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 - **Arrêt d'urgence** — coupe tout d'un coup, depuis n'importe quel onglet : le piano (All Sound Off), la musique et tous les sons
 - **Wake Lock** — empêche la mise en veille de l'écran pendant le spectacle
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
-- **Popup À propos** — affiche la version, le statut du Service Worker et du Wake Lock, et un bouton « Mettre à jour l'application » qui installe la dernière version publiée et recharge (les sons restent en cache ; hors ligne, rien n'est rechargé)
+- **Popup Paramètres** (⚙) — un bouton « Plein écran » mis en avant, l'écran toujours allumé (Wake Lock), l'état hors ligne (sons et images en cache, stockage protégé, Service Worker, « Télécharger tous les sons »), la version, et un bouton « Mettre à jour l'application » qui installe la dernière version publiée et recharge (les sons restent en cache ; hors ligne, rien n'est rechargé)
 - **Mixeur d’effets audio en direct** — grande popup sur le panneau audio pour façonner le son en temps réel (égalisation, filtres, tempo, delay, reverb) pendant la lecture ou avant le morceau suivant ; presets avec transitions en douceur, reset global et rappel rapide par curseur
 - **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards sur le canal 4 vers le piano connecté (chorus, cutoff, résonance, attaque, relâchement, decay), et le curseur de réverbération règle l’Ambiance du piano (0 à 10) par un message SysEx Roland, via `sendMidi()` dans `src/midi/midi.ts`. Les deux popups d’effets partagent une seule implémentation (le composant `src/ui/FxOverlay.svelte`, logique des presets dans `src/fx/fx-presets.ts`). Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
 
@@ -406,7 +406,7 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 - Les sons GM2 fonctionnent sur tout instrument compatible GM2.
 - Les sons spécifiques Roland (banques Roland) sont conçus pour le FP-30X et peuvent ne pas fonctionner correctement sur d'autres appareils.
 - Les patchs et les effets piano MIDI partent sur le canal 4, celui du son du clavier du FP-30X : les touches jouent directement l’instrument choisi, sans Local Off sur le piano. Les effets utilisent des numéros de CC courants (93 chorus, 74 cutoff…) ; la réverbération est le réglage Ambiance du piano (SysEx Roland), car le canal 4 ignore le CC91. En USB, Chrome demande une fois l’accès SysEx MIDI. Détails dans `docs/fp30x-midi.md`.
-- Les fichiers audio sont mis en cache au premier clic. Avant un spectacle, ouvrir la popup À propos (⚙) et utiliser « ⬇ Télécharger tous les sons » avec une connexion internet : tous les sons et toutes les affiches sont alors disponibles hors ligne (la popup les compte). Elle indique aussi si le stockage est protégé contre l'effacement automatique par Chrome (en général accordé à l'application installée).
+- Les fichiers audio sont mis en cache au premier clic. Avant un spectacle, ouvrir la popup Paramètres (⚙) et utiliser « ⬇ Télécharger tous les sons » avec une connexion internet : tous les sons et toutes les affiches sont alors disponibles hors ligne (la popup les compte). Elle indique aussi si le stockage est protégé contre l'effacement automatique par Chrome (en général accordé à l'application installée).
 
 ---
 
@@ -436,10 +436,10 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 ├── tools/regression/               # Comparaison automatique avec la dernière version publiée (Chrome headless, voir son README)
 ├── src/
 │   ├── main.ts                     # Entrée : styles globaux, montage d'App, MIDI, Wake Lock, Service Worker
-│   ├── App.svelte                  # En-tête, un panneau par onglet, popups À propos et effets
+│   ├── App.svelte                  # En-tête, un panneau par onglet, popups Paramètres, transition et effets
 │   ├── state.svelte.ts             # État partagé (STATE, runes Svelte)
 │   ├── wake-lock.ts                # Garde l'écran allumé
-│   ├── app-update.ts               # Bouton « Mettre à jour l'application » (popup À propos)
+│   ├── app-update.ts               # Bouton « Mettre à jour l'application » (popup Paramètres)
 │   ├── offline.ts                  # Stockage persistant, « Télécharger tous les sons »
 │   ├── cache-names.ts              # Noms des caches, communs à la page et au Service Worker
 │   ├── types.ts                    # Types partagés (schéma de config, contrôles et presets FX)
@@ -656,7 +656,7 @@ Documentation dans `docs/` : `usage-scene.md` (l'appli pendant un spectacle), `s
 
 Rien à faire à la main : la liste des fichiers précachés par le Service Worker et leurs révisions sont générées au build, donc les appareils installés récupèrent la nouvelle version après chaque déploiement. Les sons sont dans un cache stable (`impro-audio`) et ne sont pas retéléchargés après une mise à jour.
 
-Le numéro de version affiché dans la popup « À propos » est le champ `version` de `package.json` : l'incrémenter à chaque publication, pour savoir quelle version tourne sur la tablette.
+Le numéro de version affiché dans la popup « Paramètres » est le champ `version` de `package.json` : l'incrémenter à chaque publication, pour savoir quelle version tourne sur la tablette.
 
 ---
 

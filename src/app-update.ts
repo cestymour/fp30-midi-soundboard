@@ -1,6 +1,6 @@
 /* ================================================================
    app-update.ts — Mise à jour de l'application à la demande
-   (bouton de la popup À propos)
+   (bouton de la popup Paramètres)
 
    Une nouvelle version publiée est installée par le Service Worker au
    lancement, en arrière-plan, et ne s'affiche qu'au lancement suivant.

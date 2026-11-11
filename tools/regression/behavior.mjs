@@ -39,7 +39,7 @@ const snap = async (label) => {
       instActive: [...document.querySelectorAll('.inst-btn.active')].map(b => b.title),
       vols: [...document.querySelectorAll('.vol-slider.midi-vol, .vol-slider.audio-vol')].map(s => s.value + '|' + s.style.getPropertyValue('--vol-pct') + '|' + s.closest('.panel-controls').querySelector('.vol-value').textContent + '|' + s.closest('.panel-controls').querySelector('.vol-icon').textContent),
       badges: [...document.querySelectorAll('.midi-badge')].map(b => cn(b) + ':' + b.textContent),
-      about: document.getElementById('about-overlay')?.style.display,
+      about: (document.getElementById('settings-overlay') ?? document.getElementById('about-overlay'))?.style.display,
       bodySeeking: document.body.classList.contains('is-seeking'),
     };
   });

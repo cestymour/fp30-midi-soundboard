@@ -19,7 +19,7 @@ export default defineConfig({
     cssMinify: 'esbuild',
   },
   define: {
-    // Version affichée dans la popup « À propos »
+    // Version affichée dans la popup « Paramètres »
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
   css: {

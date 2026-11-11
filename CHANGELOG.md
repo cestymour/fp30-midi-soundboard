@@ -2,6 +2,22 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## Prochaine version (non publiée)
+
+### Nouveautés
+
+- **Popup Paramètres (⚙) réorganisée.** Elle est rangée par ordre d'importance, tout en français :
+  - **Écran** : le bouton **Plein écran** en premier, grand et en couleur, puis « Écran toujours allumé » (oui / non).
+  - **Hors ligne** : nombre de sons et d'images disponibles hors ligne, stockage protégé, Service Worker, et « ⬇ Télécharger tous les sons » tant qu'il manque des fichiers.
+  - **Application** : version et « ⟳ Mettre à jour l'application ».
+  - Chaque état a une pastille : verte quand c'est prêt, orange quand c'est à vérifier avant un spectacle, grise quand l'appareil ne le permet pas.
+  - Elle se ferme par la croix ✕ en haut à droite, comme la popup de la musique de transition, ou par un appui à côté. Le bouton « Fermer » du bas disparaît.
+
+### À vérifier sur la tablette
+
+- Ouvrir ⚙ dans l'application installée : toutes les pastilles doivent être vertes avant un spectacle.
+- « Plein écran » dans un onglet Chrome, puis « Quitter le plein écran ».
+
 ## 1.14.0 — 2026-11-11
 
 ### Nouveautés

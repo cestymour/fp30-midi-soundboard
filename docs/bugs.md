@@ -15,7 +15,7 @@ Les diagnostics complets des bugs fermés restent dans l'historique git : `git s
   2. Un fichier est remplacé sous le même nom : la tablette garde l'ancienne version et ne charge jamais la nouvelle (voir le n° 14). La règle des nouveaux noms (`docs/sons.md`) l'évite ; pas encore arrivé en production (Bruits et Ambiances ont été nivelés avant leur première publication, en 1.10.0).
 - **Conséquences** : stockage de la tablette qui grossit à chaque changement de sons (jusqu'à environ 180 Mo inutiles, si elle avait tout téléchargé avant chaque changement). Rien ne casse : chaque son joue.
 - **Vérification possible** : sur la tablette, `chrome://inspect` → Application → Cache Storage → `impro-audio` : compter les entrées (68 sons + 36 affiches en usage, sans les transitions).
-- **Correctif proposé** (à décider) : « Télécharger tous les sons » efface aussi de `impro-audio` (et `impro-images`) les entrées qui ne sont plus dans la config, sans retélécharger ce qui est à jour. Le compteur de la popup À propos peut afficher la place libérée.
+- **Correctif proposé** (à décider) : « Télécharger tous les sons » efface aussi de `impro-audio` (et `impro-images`) les entrées qui ne sont plus dans la config, sans retélécharger ce qui est à jour. Le compteur de la popup Paramètres peut afficher la place libérée.
 
 ## Décisions (comportements voulus)
 
