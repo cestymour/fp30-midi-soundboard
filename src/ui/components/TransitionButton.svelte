@@ -2,9 +2,10 @@
   TransitionButton.svelte — Bouton de la musique de transition, dans le coin haut gauche de
   l'en-tête (pendant du bouton Paramètres), visible sur tous les onglets.
   Popup fermée : il l'ouvre (jamais de lancement en un clic depuis l'en-tête : un clic raté
-  pendant une impro ne doit rien lancer). Popup ouverte : il devient un bouton play, donc un
-  double clic lance la musique. Musique en cours : bouton stop, avec la progression en fond ;
-  il arrête la musique et laisse la popup ouverte.
+  pendant une impro ne doit rien lancer). Popup ouverte : il devient un bouton play, qui
+  lance le moment marquant prévu ; un double clic ouvre donc la popup et lance la musique.
+  Musique en cours : bouton stop, avec la progression en fond ; il arrête la musique et
+  laisse la popup ouverte.
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
@@ -15,14 +16,24 @@
   const isCurrent = $derived(isTransitionCurrent());
   const isPlaying = $derived(isCurrent && !STATE.isPaused);
 
+  /**
+   * Un clic qui suit de moins de ce délai un lancement ou un arrêt depuis ce bouton est ignoré :
+   * sinon, popup ouverte, un double clic lancerait la musique puis l'arrêterait aussitôt (et un
+   * double clic sur stop la relancerait). L'ouverture de la popup n'est pas concernée.
+   */
+  const DOUBLE_TAP_GUARD_MS = 600;
+  let lastToggle = 0;
+
   function handleClick(): void {
-    if (isCurrent) {
-      stopTransition();
-    } else if (transitionPopup.isOpen) {
-      void launchTransition();
-    } else {
+    if (!isCurrent && !transitionPopup.isOpen) {
       openTransitionPopup();
+      return;
     }
+    const now = performance.now();
+    if (now - lastToggle < DOUBLE_TAP_GUARD_MS) return;
+    lastToggle = now;
+    if (isCurrent) stopTransition();
+    else void launchTransition();
   }
 
   const label = $derived(isCurrent ? 'Arrêter la musique de transition'
