@@ -1,7 +1,7 @@
 /* ================================================================
    audio-engine.ts - Moteur audio Web Audio API (MP3 / OGG / WAV)
-   Un seul graphe : EQ → filtres → compresseur → distorsion →
-   delay / reverb → master → limiteur. Chaque musique est une
+   Un seul graphe : EQ → filtres → delay / reverb → master →
+   limiteur. Chaque musique est une
    MediaElementTrack branchée en entrée du graphe. Les sons (onglets
    sons, audio/sounds.ts) passent par une sortie à part, `soundsBus`,
    branchée directement sur le limiteur : ni effets ni volume des
@@ -25,13 +25,6 @@ export interface AudioEngineState {
   lowPassFrequency: number;
   highPassFrequency: number;
   playbackRate: number;
-  distortionAmount: number;
-  compressorThreshold: number;
-  compressorKnee: number;
-  compressorRatio: number;
-  compressorAttack: number;
-  compressorRelease: number;
-  compressorMakeup: number;
   delayTime: number;
   delayFeedback: number;
   delayMix: number;
@@ -82,7 +75,6 @@ class AudioEngine {
   state: AudioEngineState;
   context: AudioContext | null;
   tracks: Set<MediaElementTrack>;
-  canUseMediaElementSource: boolean;
   /** Volume des sons (0-1), gardé même avant la création du contexte */
   soundsVolume: number;
   /** Volume de la musique de transition (0-1), gardé même avant la création du contexte */
@@ -95,11 +87,6 @@ class AudioEngine {
   trebleFilter!: BiquadFilterNode;
   lowPass!: BiquadFilterNode;
   highPass!: BiquadFilterNode;
-  compressor!: DynamicsCompressorNode;
-  compressorMakeup!: GainNode;
-  distortion!: WaveShaperNode;
-  distortionDryGain!: GainNode;
-  distortionWetGain!: GainNode;
   postEffectsInput!: GainNode;
   delayNode!: DelayNode;
   delayFeedback!: GainNode;
@@ -108,6 +95,9 @@ class AudioEngine {
   reverb!: ConvolverNode;
   reverbWet!: GainNode;
   dryGain!: GainNode;
+  /** Delay et réverbération branchés sur le son (seulement quand leur mix est au-dessus de 0) */
+  delayConnected = false;
+  reverbConnected = false;
   limiter!: DynamicsCompressorNode;
   limiterTrim!: GainNode;
   /** Entrée des sons des onglets sons : après les effets, directement sur le limiteur */
@@ -144,13 +134,6 @@ class AudioEngine {
       // 0 = pas de filtrage haut (équivalent “large bande”)
       highPassFrequency: 0,
       playbackRate: 1,
-      distortionAmount: 0,
-      compressorThreshold: -24,
-      compressorKnee: 30,
-      compressorRatio: 1,
-      compressorAttack: 0.003,
-      compressorRelease: 0.25,
-      compressorMakeup: 1,
       delayTime: 0.25,
       delayFeedback: 0.25,
       delayMix: 0,
@@ -163,19 +146,12 @@ class AudioEngine {
     this.state = { ...this.defaultState };
     this.soundsVolume = 1;
     this.transitionVolume = 1;
-
-    this.canUseMediaElementSource = window.location.protocol !== 'file:';
   }
 
   ensureContext(): AudioContext {
     if (this.context) return this.context;
 
-    // webkitAudioContext : anciens navigateurs WebKit, absent des types DOM
-    const AudioCtx: typeof AudioContext | undefined =
-      window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioCtx) throw new Error('Web Audio API non supportee.');
-
-    const ctx = new AudioCtx();
+    const ctx = new AudioContext();
     this.context = ctx;
 
     this.masterGain = ctx.createGain();
@@ -184,11 +160,6 @@ class AudioEngine {
     this.trebleFilter = ctx.createBiquadFilter();
     this.lowPass = ctx.createBiquadFilter();
     this.highPass = ctx.createBiquadFilter();
-    this.compressor = ctx.createDynamicsCompressor();
-    this.compressorMakeup = ctx.createGain();
-    this.distortion = ctx.createWaveShaper();
-    this.distortionDryGain = ctx.createGain();
-    this.distortionWetGain = ctx.createGain();
     this.postEffectsInput = ctx.createGain();
     this.delayNode = ctx.createDelay(5);
     this.delayFeedback = ctx.createGain();
@@ -207,31 +178,22 @@ class AudioEngine {
     this.trebleFilter.frequency.value = 3000;
     this.lowPass.type = 'lowpass';
     this.highPass.type = 'highpass';
-    this.distortion.oversample = '4x';
 
     this.bassFilter.connect(this.midFilter);
     this.midFilter.connect(this.trebleFilter);
     this.trebleFilter.connect(this.lowPass);
     this.lowPass.connect(this.highPass);
-    this.highPass.connect(this.compressor);
-    this.compressor.connect(this.compressorMakeup);
-    this.compressorMakeup.connect(this.distortionDryGain);
-    this.compressorMakeup.connect(this.distortion);
-    this.distortion.connect(this.distortionWetGain);
-
-    this.distortionDryGain.connect(this.postEffectsInput);
-    this.distortionWetGain.connect(this.postEffectsInput);
+    this.highPass.connect(this.postEffectsInput);
 
     this.postEffectsInput.connect(this.dryGain);
     this.dryGain.connect(this.masterGain);
 
-    this.postEffectsInput.connect(this.delayNode);
+    // Entrées du delay et de la réverbération : branchées par updateEffectBranches()
     this.delayNode.connect(this.delayFeedback);
     this.delayFeedback.connect(this.delayNode);
     this.delayNode.connect(this.delayWet);
     this.delayWet.connect(this.masterGain);
 
-    this.postEffectsInput.connect(this.reverbPreDelay);
     this.reverbPreDelay.connect(this.reverb);
     this.reverb.connect(this.reverbWet);
     this.reverbWet.connect(this.masterGain);
@@ -286,29 +248,6 @@ class AudioEngine {
     return buffer;
   }
 
-  makeDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
-    const samples = 44100;
-    const curve = new Float32Array(samples);
-    const normalizedAmount = Math.max(0, Math.min(100, amount)) / 100;
-    const drive = 1 + normalizedAmount * 12;
-    const normalizer = Math.tanh(drive);
-
-    for (let i = 0; i < samples; i++) {
-      const x = (i * 2) / samples - 1;
-      curve[i] = normalizedAmount === 0
-        ? x
-        : Math.tanh(drive * x) / normalizer;
-    }
-
-    return curve;
-  }
-
-  getDistortionMix(amount: number): number {
-    const normalizedAmount = Math.max(0, Math.min(100, amount)) / 100;
-    if (normalizedAmount <= 0) return 0;
-    return Math.min(0.68, 0.08 + normalizedAmount * 0.6);
-  }
-
   getReverbWetGain(mix: number): number {
     const normalizedMix = Math.max(0, Math.min(1, mix));
     if (normalizedMix === 0) return 0;
@@ -325,25 +264,38 @@ class AudioEngine {
     this.trebleFilter.gain.value = this.state.trebleGain;
     this.lowPass.frequency.value = Math.max(10, this.state.lowPassFrequency);
     this.highPass.frequency.value = Math.max(0, this.state.highPassFrequency);
-    this.compressor.threshold.value = this.state.compressorThreshold;
-    this.compressor.knee.value = this.state.compressorKnee;
-    this.compressor.ratio.value = this.state.compressorRatio;
-    this.compressor.attack.value = this.state.compressorAttack;
-    this.compressor.release.value = this.state.compressorRelease;
-    this.compressorMakeup.gain.value = this.state.compressorMakeup;
-    this.distortion.curve = this.makeDistortionCurve(this.state.distortionAmount);
-    this.distortionDryGain.gain.value = 1 - this.getDistortionMix(this.state.distortionAmount);
-    this.distortionWetGain.gain.value = this.getDistortionMix(this.state.distortionAmount);
     this.delayNode.delayTime.value = Math.max(0, this.state.delayTime);
     this.delayFeedback.gain.value = Math.max(0, Math.min(0.95, this.state.delayFeedback));
     this.delayWet.gain.value = Math.max(0, Math.min(1, this.state.delayMix));
     this.reverbWet.gain.value = this.getReverbWetGain(this.state.reverbMix);
     this.dryGain.gain.value = 1;
+    this.updateEffectBranches();
+  }
+
+  /**
+   * Delay et réverbération ne reçoivent le son que quand leur mix est au-dessus de 0. Sans
+   * entrée, Chrome met ces nœuds au repos une fois leur queue éteinte : la convolution de la
+   * réverbération (4,8 s, stéréo) ne coûte plus rien quand l'effet est coupé.
+   */
+  updateEffectBranches(): void {
+    if (!this.context) return;
+    const delayOn = this.state.delayMix > 0;
+    if (delayOn !== this.delayConnected) {
+      if (delayOn) this.postEffectsInput.connect(this.delayNode);
+      else this.postEffectsInput.disconnect(this.delayNode);
+      this.delayConnected = delayOn;
+    }
+    const reverbOn = this.state.reverbMix > 0;
+    if (reverbOn !== this.reverbConnected) {
+      if (reverbOn) this.postEffectsInput.connect(this.reverbPreDelay);
+      else this.postEffectsInput.disconnect(this.reverbPreDelay);
+      this.reverbConnected = reverbOn;
+    }
   }
 
   setMasterVolume(value: number): void {
     this.state.volume = Math.max(0, Math.min(1, value));
-    if (this.canUseMediaElementSource && this.masterGain && this.context) {
+    if (this.masterGain && this.context) {
       this.masterGain.gain.cancelScheduledValues(this.context.currentTime);
       this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, this.context.currentTime);
       this.masterGain.gain.linearRampToValueAtTime(this.state.volume, this.context.currentTime + 0.02);
@@ -497,58 +449,6 @@ class AudioEngine {
     });
   }
 
-  setDistortionAmount(value: number): void {
-    this.state.distortionAmount = Math.max(0, value);
-    if (this.distortion) {
-      this.distortion.curve = this.makeDistortionCurve(this.state.distortionAmount);
-      this.distortionDryGain.gain.value = 1 - this.getDistortionMix(this.state.distortionAmount);
-      this.distortionWetGain.gain.value = this.getDistortionMix(this.state.distortionAmount);
-    }
-  }
-
-  setCompressor({ threshold, knee, ratio, attack, release }: {
-    threshold?: number; knee?: number; ratio?: number; attack?: number; release?: number;
-  } = {}): void {
-    if (typeof ratio === 'number') {
-      this.state.compressorRatio = ratio;
-      const normalizedRatio = Math.max(0, Math.min(1, (ratio - 1) / 19));
-      this.state.compressorThreshold = -12 - normalizedRatio * 24;
-      this.state.compressorKnee = 18 + normalizedRatio * 12;
-      this.state.compressorAttack = 0.003 + normalizedRatio * 0.009;
-      this.state.compressorRelease = 0.16 + normalizedRatio * 0.24;
-      this.state.compressorMakeup = 1 + normalizedRatio * 0.75;
-    }
-    if (typeof threshold === 'number') {
-      this.state.compressorThreshold = threshold;
-      if (this.compressor) this.compressor.threshold.value = threshold;
-    }
-    if (typeof knee === 'number') {
-      this.state.compressorKnee = knee;
-      if (this.compressor) this.compressor.knee.value = knee;
-    }
-    if (typeof ratio === 'number') {
-      if (this.compressor) this.compressor.ratio.value = ratio;
-    }
-    if (typeof attack === 'number') {
-      this.state.compressorAttack = attack;
-      if (this.compressor) this.compressor.attack.value = attack;
-    }
-    if (typeof release === 'number') {
-      this.state.compressorRelease = release;
-      if (this.compressor) this.compressor.release.value = release;
-    }
-    if (this.compressor) {
-      this.compressor.threshold.value = this.state.compressorThreshold;
-      this.compressor.knee.value = this.state.compressorKnee;
-      this.compressor.ratio.value = this.state.compressorRatio;
-      this.compressor.attack.value = this.state.compressorAttack;
-      this.compressor.release.value = this.state.compressorRelease;
-    }
-    if (this.compressorMakeup) {
-      this.compressorMakeup.gain.value = this.state.compressorMakeup;
-    }
-  }
-
   setDelay({ time, feedback, mix }: { time?: number; feedback?: number; mix?: number } = {}): void {
     if (typeof time === 'number') {
       this.state.delayTime = time;
@@ -562,19 +462,17 @@ class AudioEngine {
       this.state.delayMix = mix;
       if (this.delayWet) this.delayWet.gain.value = Math.max(0, Math.min(1, mix));
     }
+    this.updateEffectBranches();
   }
 
   setReverbMix(value: number): void {
     this.state.reverbMix = value;
     if (this.reverbWet) this.reverbWet.gain.value = this.getReverbWetGain(value);
+    this.updateEffectBranches();
   }
 
   getCurrentSettings(): AudioEngineState {
     return { ...this.state };
-  }
-
-  getDefaultSettings(): AudioEngineState {
-    return { ...this.defaultState };
   }
 
   getEffectSettings(): EffectSettings {
@@ -587,59 +485,6 @@ class AudioEngine {
     const { volume, ...defaultEffects } = this.defaultState;
     return (Object.keys(defaultEffects) as (keyof EffectSettings)[])
       .some(key => Math.abs(effectSettings[key] - defaultEffects[key]) > 0.0001);
-  }
-
-  resetSettings(): void {
-    this.state = { ...this.defaultState };
-    if (this.context) {
-      this.applyState();
-    }
-    this.effectTracks().forEach(track => {
-      track.audio.volume = this.state.volume;
-      track.playbackRate = this.state.playbackRate;
-    });
-  }
-
-  resetEffects(): void {
-    const currentVolume = this.state.volume;
-    this.state = { ...this.defaultState, volume: currentVolume };
-    if (this.context) {
-      this.applyState();
-    }
-    this.effectTracks().forEach(track => {
-      track.audio.volume = currentVolume;
-      track.playbackRate = this.state.playbackRate;
-    });
-  }
-
-  restoreEffectSettings(settings: Partial<AudioEngineState> | null | undefined): void {
-    if (!settings) return;
-    this.setEQ({
-      bass: settings.bassGain ?? this.defaultState.bassGain,
-      mid: settings.midGain ?? this.defaultState.midGain,
-      treble: settings.trebleGain ?? this.defaultState.trebleGain,
-    });
-    this.setLowPassFrequency(settings.lowPassFrequency ?? this.defaultState.lowPassFrequency);
-    this.setHighPassFrequency(settings.highPassFrequency ?? this.defaultState.highPassFrequency);
-    this.setPlaybackRate(settings.playbackRate ?? this.defaultState.playbackRate);
-    this.setDistortionAmount(settings.distortionAmount ?? this.defaultState.distortionAmount);
-    this.setCompressor({
-      threshold: settings.compressorThreshold ?? this.defaultState.compressorThreshold,
-      knee: settings.compressorKnee ?? this.defaultState.compressorKnee,
-      ratio: settings.compressorRatio ?? this.defaultState.compressorRatio,
-      attack: settings.compressorAttack ?? this.defaultState.compressorAttack,
-      release: settings.compressorRelease ?? this.defaultState.compressorRelease,
-    });
-    this.state.compressorMakeup = settings.compressorMakeup ?? this.defaultState.compressorMakeup;
-    if (this.compressorMakeup) {
-      this.compressorMakeup.gain.value = this.state.compressorMakeup;
-    }
-    this.setDelay({
-      time: settings.delayTime ?? this.defaultState.delayTime,
-      feedback: settings.delayFeedback ?? this.defaultState.delayFeedback,
-      mix: settings.delayMix ?? this.defaultState.delayMix,
-    });
-    this.setReverbMix(settings.reverbMix ?? this.defaultState.reverbMix);
   }
 
   createTrack(src: string, route: TrackRoute = 'effects'): MediaElementTrack {
@@ -710,10 +555,7 @@ export class MediaElementTrack {
 
   get volume(): number {
     if (this.route === 'transition') return this._ownVolume;
-    if (this.engine.canUseMediaElementSource) {
-      return this.engine.getCurrentSettings().volume;
-    }
-    return this.audio.volume;
+    return this.engine.getCurrentSettings().volume;
   }
 
   set volume(value: number) {
@@ -723,16 +565,10 @@ export class MediaElementTrack {
       // est après ses effets : un arrêt en fondu coupe aussi la queue de réverbération. Une
       // seule musique joue à la fois (playSound libère la précédente), la sortie est donc à elle.
       this._ownVolume = clamped;
-      if (this.engine.canUseMediaElementSource) {
-        if (this.engine.transitionOut) this.engine.transitionOut.gain.value = clamped;
-      } else {
-        this.audio.volume = clamped;
-      }
+      if (this.engine.transitionOut) this.engine.transitionOut.gain.value = clamped;
       return;
     }
-    if (this.engine.canUseMediaElementSource) {
-      this.engine.setMasterVolume(clamped);
-    }
+    this.engine.setMasterVolume(clamped);
     this.audio.volume = clamped;
   }
 
@@ -846,7 +682,7 @@ export class MediaElementTrack {
   }
 
   connectNodes(): void {
-    if (!this.engine.canUseMediaElementSource || this.sourceNode) return;
+    if (this.sourceNode) return;
 
     // load() est toujours appelé après createTrack(), qui crée le contexte
     const context = this.engine.context!;
@@ -872,9 +708,7 @@ export class MediaElementTrack {
 const AUDIO_ENGINE = new AudioEngine();
 
 export const AudioEngineAPI = {
-  init: () => AUDIO_ENGINE.ensureContext(),
   resume: () => AUDIO_ENGINE.resume(),
-  load: (src: string) => AUDIO_ENGINE.createTrack(src).load(),
   createTrack: (src: string, route?: TrackRoute) => AUDIO_ENGINE.createTrack(src, route),
   /** Contexte et entrée des sons (créés au besoin) */
   getSoundsOutput: (): { context: AudioContext; input: GainNode } => {
@@ -890,17 +724,9 @@ export const AudioEngineAPI = {
   setTrebleGain: (value: number) => AUDIO_ENGINE.setTrebleGain(value),
   setLowPassFrequency: (value: number) => AUDIO_ENGINE.setLowPassFrequency(value),
   setHighPassFrequency: (value: number) => AUDIO_ENGINE.setHighPassFrequency(value),
-  setEQ: (options: Parameters<AudioEngine['setEQ']>[0]) => AUDIO_ENGINE.setEQ(options),
   setPlaybackRate: (value: number) => AUDIO_ENGINE.setPlaybackRate(value),
-  setDistortionAmount: (value: number) => AUDIO_ENGINE.setDistortionAmount(value),
-  setCompressor: (options: Parameters<AudioEngine['setCompressor']>[0]) => AUDIO_ENGINE.setCompressor(options),
   setDelay: (options: Parameters<AudioEngine['setDelay']>[0]) => AUDIO_ENGINE.setDelay(options),
   setReverbMix: (value: number) => AUDIO_ENGINE.setReverbMix(value),
   getCurrentSettings: () => AUDIO_ENGINE.getCurrentSettings(),
-  getDefaultSettings: () => AUDIO_ENGINE.getDefaultSettings(),
-  getEffectSettings: () => AUDIO_ENGINE.getEffectSettings(),
   hasActiveEffects: () => AUDIO_ENGINE.hasActiveEffects(),
-  resetSettings: () => AUDIO_ENGINE.resetSettings(),
-  resetEffects: () => AUDIO_ENGINE.resetEffects(),
-  restoreEffectSettings: (settings: Partial<AudioEngineState> | null | undefined) => AUDIO_ENGINE.restoreEffectSettings(settings),
 };

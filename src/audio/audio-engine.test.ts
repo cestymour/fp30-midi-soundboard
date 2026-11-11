@@ -1,10 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-// Le module crée le moteur à l'import, qui lit window.location
-vi.hoisted(() => {
-  (globalThis as { window?: unknown }).window ??= { location: { protocol: 'http:' } };
-});
-
 import { limiterTrimGain, MediaElementTrack } from './audio-engine.ts';
 
 type AudioEngine = ConstructorParameters<typeof MediaElementTrack>[0];
@@ -28,10 +22,14 @@ class FakeAudio extends EventTarget {
   removeAttribute(name: string): void { if (name === 'src') this.src = ''; }
 }
 
-/** Moteur réduit à ce dont la piste a besoin (pas de graphe Web Audio) */
+/** Nœud Web Audio factice : se branche et se débranche sans rien faire */
+const fakeNode = () => ({ connect: () => {}, disconnect: () => {} });
+
+/** Moteur réduit à ce dont la piste a besoin (graphe Web Audio factice) */
 function fakeEngine(): AudioEngine {
   return {
-    canUseMediaElementSource: false,
+    context: { createMediaElementSource: fakeNode, createGain: fakeNode },
+    bassFilter: fakeNode(),
     state: { playbackRate: 1 },
     resume: async () => {},
     unregisterTrack: () => {},
