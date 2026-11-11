@@ -10,6 +10,7 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 - **Plusieurs moments marquants par musique**, pour ne pas rejouer cinq fois de suite la même transition. Le moment **0** ouvre le spectacle ; les moments **1, 2, 3…** servent après chaque impro, à tour de rôle : 0, 1, 2, 3, 1, 2, 3, 1… La popup les montre sur une ligne de boutons, avec leur position dans la musique. Le **moment prévu** est en couleur et plus large, pour être touché sans viser : c'est lui que lance le bouton de l'en-tête. Les autres restent cliquables ; après un moment joué hors de l'ordre, le prévu devient son suivant. On revient au 0 en changeant de musique, ou au-delà de 6 heures sans lancement (le spectacle suivant) ; un rechargement de l'appli en plein spectacle ne change rien.
 - **Lancer la musique de transition coupe tout**, comme l'arrêt d'urgence : la musique des onglets, les sons en cours et le piano.
 - **Une seule musique pour tout le spectacle**, choisie avant le début dans la popup, et gardée d'une fois sur l'autre. Neuf musiques : All Night (0 à 0:09, 1 à 0:50), The Mojo Radio Gang (0 à 0:30, 1 à 0:53), Booty Swing et Catgroove de Parov Stelar, Rasputin de Boney M. (0 à 0:00, 1 à 0:36), Beatophone de Caravan Palace, This Girl de Kungs vs Cookin' on 3 Burners, The Rockafeller Skank de Fatboy Slim, Superstition de Stevie Wonder (remix C2C). Les six dernières ont des moments provisoires (0 à 0:05 ; 1, 2 et 3 à 0:10, 0:15 et 0:20), à remplacer par les vrais.
+- **Interrupteur « Volume remis à 100 % à chaque ouverture »**, sous le curseur de volume de la popup. Activé, le volume de la transition repasse à 100 % chaque fois que la popup s'ouvre ; désactivé (par défaut), il reste comme avant. Le réglage est gardé.
 - **Sans effets, avec son propre volume** (curseur dans la popup, gardé lui aussi). Une musique lancée depuis un onglet coupe la musique de transition ; l'arrêt d'urgence aussi.
 
 ### À savoir
@@ -25,6 +26,7 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 - Le bouton 🎉 en paysage et en portrait : tous les onglets restent visibles.
 - Un clic sur 🎉 ouvre la popup sans rien lancer ; un double clic la lance ; un bouton de moment la lance et coupe ce qui jouait (musique, sons, notes tenues au piano) ; le carré stop de l'en-tête et « Arrêter » l'arrêtent sans fermer la popup, qui ne change pas de taille.
 - L'ordre des moments : 0, puis 1, 2… à tour de rôle ; le bouton en couleur est bien celui que lance le double clic.
+- L'interrupteur du volume : activé, rouvrir la popup remet le curseur à 100 % ; désactivé, le volume ne bouge pas.
 - Le volume de la transition ne change pas celui des musiques, et les effets audio ne s'y appliquent pas.
 - Recharger l'appli après un lancement : la musique choisie et le moment prévu sont gardés.
 - Hors ligne, après « Télécharger tous les sons » : les neuf musiques de transition se lancent.

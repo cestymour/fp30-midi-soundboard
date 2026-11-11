@@ -8,11 +8,12 @@
 ================================================================ */
 
 import { playbackEvents } from '../audio/playback.ts';
-import { isTransitionMusic } from '../audio/transition.ts';
+import { applyTransitionVolumeOnOpen, isTransitionMusic } from '../audio/transition.ts';
 
 export const transitionPopup = $state({ isOpen: false });
 
 export function openTransitionPopup(): void {
+  if (!transitionPopup.isOpen) applyTransitionVolumeOnOpen();
   transitionPopup.isOpen = true;
 }
 

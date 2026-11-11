@@ -55,6 +55,8 @@ class AppState {
   transitionLastMoment  = $state(0);
   /** Volume de la musique de transition (0-1), à part de celui des musiques */
   transitionVolume      = $state(1);
+  /** Réglage : remettre le volume de la transition à 100 % à chaque ouverture de la popup */
+  transitionResetVolume = $state(false);
 
   // ── Divers ──
   wakeLock              = $state.raw<WakeLockSentinel | null>(null);

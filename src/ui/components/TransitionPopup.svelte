@@ -13,7 +13,7 @@
   import { getPlaybackWindow, formatTime } from '../../audio/timing.ts';
   import {
     getMomentTime, getNextMoment, getSelectedTransitionMusic, isTransitionCurrent,
-    launchTransition, selectTransitionMusic, setTransitionVolume, stopTransition,
+    launchTransition, selectTransitionMusic, setTransitionResetVolume, setTransitionVolume, stopTransition,
   } from '../../audio/transition.ts';
   import { transport } from '../transport.svelte.ts';
   import { closeTransitionPopup, transitionPopup } from '../transition.svelte.ts';
@@ -102,6 +102,16 @@
         sliderClass="transition-vol" max={100} value={volumePct} volPct={volumePct + '%'}
         valueText={volumePct + '%'} onvolume={raw => setTransitionVolume(raw / 100)}
       />
+
+      <label class="transition-switch">
+        <input
+          type="checkbox" role="switch"
+          checked={STATE.transitionResetVolume}
+          onchange={e => setTransitionResetVolume(e.currentTarget.checked)}
+        />
+        <span class="transition-switch-track" aria-hidden="true"></span>
+        <span class="transition-switch-text">Volume remis à 100 % à chaque ouverture</span>
+      </label>
     </div>
   </div>
 {/if}
@@ -170,6 +180,60 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+  }
+
+  /* Interrupteur : volume remis à 100 % à chaque ouverture, ou gardé comme avant */
+  .transition-switch {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .transition-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .transition-switch-track {
+    position: relative;
+    flex-shrink: 0;
+    width: 48px;
+    height: 26px;
+    border: 1px solid var(--border-glow);
+    border-radius: 13px;
+    background: var(--bg-card);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .transition-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .transition-switch input:checked + .transition-switch-track {
+    border-color: var(--transition-accent);
+    background: color-mix(in srgb, var(--transition-accent) 30%, var(--bg-card));
+  }
+  .transition-switch input:checked + .transition-switch-track::after {
+    transform: translateX(22px);
+    background: var(--transition-accent);
+  }
+  .transition-switch input:focus-visible + .transition-switch-track {
+    outline: 2px solid var(--transition-accent);
+    outline-offset: 2px;
+  }
+  .transition-switch-text {
+    font-size: 12px;
+    color: var(--text-secondary);
   }
 
   .transition-caption {

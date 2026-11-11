@@ -17,7 +17,8 @@
    RESTART_WINDOW_MS (le spectacle suivant ; un rechargement en plein
    spectacle, lui, ne change rien).
 
-   Choix, dernier lancement, dernier moment joué et volume sont gardés
+   Choix, dernier lancement, dernier moment joué, volume et réglage « volume remis
+   à 100 % à l'ouverture de la popup » sont gardés
    dans localStorage. Aucun accès au DOM.
 ================================================================ */
 
@@ -39,6 +40,7 @@ interface StoredTransition {
   lastLaunch: number | null;
   lastMoment: number;
   volume: number;
+  resetVolume: boolean;
 }
 
 function save(): void {
@@ -47,6 +49,7 @@ function save(): void {
     lastLaunch: STATE.transitionLastLaunch,
     lastMoment: STATE.transitionLastMoment,
     volume: STATE.transitionVolume,
+    resetVolume: STATE.transitionResetVolume,
   };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
@@ -67,6 +70,7 @@ export function initTransition(): void {
   STATE.transitionLastLaunch = typeof stored.lastLaunch === 'number' ? stored.lastLaunch : null;
   STATE.transitionLastMoment = typeof stored.lastMoment === 'number' ? stored.lastMoment : 0;
   STATE.transitionVolume     = typeof stored.volume === 'number' ? Math.max(0, Math.min(1, stored.volume)) : 1;
+  STATE.transitionResetVolume = stored.resetVolume === true;
   AudioEngineAPI.setTransitionVolume(STATE.transitionVolume);
 }
 
@@ -141,6 +145,17 @@ export function selectTransitionMusic(id: string): void {
   STATE.transitionLastMoment = 0;
   save();
   if (isTransitionCurrent()) void launchTransition(Date.now(), 0);
+}
+
+/** Réglage : remettre le volume à 100 % à chaque ouverture de la popup (sinon il reste comme avant) */
+export function setTransitionResetVolume(enabled: boolean): void {
+  STATE.transitionResetVolume = enabled;
+  save();
+}
+
+/** À l'ouverture de la popup : remet le volume à 100 % si le réglage est activé */
+export function applyTransitionVolumeOnOpen(): void {
+  if (STATE.transitionResetVolume && STATE.transitionVolume !== 1) setTransitionVolume(1);
 }
 
 /** Volume de la musique de transition (0-1) */

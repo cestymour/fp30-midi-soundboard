@@ -20,7 +20,8 @@ import type { TransitionMusic } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import {
   RESTART_WINDOW_MS, getNextMoment, getSelectedTransitionMusic, initTransition, launchTransition,
-  selectTransitionMusic, stopTransition,
+  applyTransitionVolumeOnOpen, selectTransitionMusic, setTransitionResetVolume, setTransitionVolume as setVolume,
+  stopTransition,
 } from './transition.ts';
 
 const MUSICS: TransitionMusic[] = [
@@ -170,5 +171,30 @@ describe('mémorisation', () => {
     expect(getSelectedTransitionMusic()).toBe(MUSICS[0]);
     expect(STATE.transitionVolume).toBe(1);
     expect(() => selectTransitionMusic('b')).not.toThrow();
+  });
+});
+
+describe("volume à l'ouverture de la popup", () => {
+  it('réglage désactivé (par défaut) : le volume reste comme avant', () => {
+    setVolume(0.4);
+    applyTransitionVolumeOnOpen();
+    expect(STATE.transitionVolume).toBe(0.4);
+  });
+
+  it('réglage activé : le volume est remis à 100 % à chaque ouverture', () => {
+    setTransitionResetVolume(true);
+    setVolume(0.4);
+    applyTransitionVolumeOnOpen();
+    expect(STATE.transitionVolume).toBe(1);
+    expect(setTransitionVolume).toHaveBeenLastCalledWith(1);
+  });
+
+  it('le réglage est gardé après un rechargement', () => {
+    const store = stubStorage();
+    setTransitionResetVolume(true);
+    STATE.transitionResetVolume = false;
+    stubStorage(Object.fromEntries(store));
+    initTransition();
+    expect(STATE.transitionResetVolume).toBe(true);
   });
 });
