@@ -4,13 +4,13 @@
   Popup fermée : il l'ouvre (jamais de lancement en un clic depuis l'en-tête : un clic raté
   pendant une impro ne doit rien lancer). Popup ouverte : il devient un bouton play, donc un
   double clic lance la musique. Musique en cours : bouton stop, avec la progression en fond ;
-  il arrête la musique et ferme la popup.
+  il arrête la musique et laisse la popup ouverte.
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
   import { isTransitionCurrent, launchTransition, stopTransition } from '../../audio/transition.ts';
   import { transport } from '../transport.svelte.ts';
-  import { closeTransitionPopup, openTransitionPopup, transitionPopup } from '../transition.svelte.ts';
+  import { openTransitionPopup, transitionPopup } from '../transition.svelte.ts';
 
   const isCurrent = $derived(isTransitionCurrent());
   const isPlaying = $derived(isCurrent && !STATE.isPaused);
@@ -18,7 +18,6 @@
   function handleClick(): void {
     if (isCurrent) {
       stopTransition();
-      closeTransitionPopup();
     } else if (transitionPopup.isOpen) {
       void launchTransition();
     } else {

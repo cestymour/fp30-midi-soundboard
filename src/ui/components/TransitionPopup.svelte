@@ -15,11 +15,6 @@
   import { transport } from '../transport.svelte.ts';
   import { closeTransitionPopup, transitionPopup } from '../transition.svelte.ts';
 
-  /** Arrête la musique et ferme la popup */
-  function stop(): void {
-    stopTransition();
-    closeTransitionPopup();
-  }
   import VolumeControl from './VolumeControl.svelte';
 
   const musics    = getTransitionMusics();
@@ -67,7 +62,7 @@
         <span class="transition-time">{isCurrent ? transport.timeText : 'À l\'arrêt'}</span>
       </div>
 
-      <button class="transition-main" class:is-current={isCurrent} onclick={() => { if (isCurrent) stop(); else void launchTransition(); }}>
+      <button class="transition-main" class:is-current={isCurrent} onclick={() => { if (isCurrent) stopTransition(); else void launchTransition(); }}>
         {#if isCurrent}
           <span class="icon-stop" aria-hidden="true"></span> Arrêter
         {:else if restart}
@@ -77,18 +72,23 @@
         {/if}
       </button>
 
-      {#if !isCurrent}
-        <div class="transition-next">
+      <!-- Toujours présent, sur une hauteur fixe : la popup garde la même taille quel que soit
+           l'état (en lecture, le petit bouton est masqué sans libérer sa place) -->
+      <div class="transition-next">
+        <span class="transition-next-text">
           {#if restart}
-            <span>Prochain lancement : reprise à {formatTime(music.restart)}</span>
-            <button class="transition-secondary" onclick={resetTransitionStart}>↺ Repartir du début</button>
+            Prochain lancement : reprise à {formatTime(music.restart)}
           {:else}
-            <span>Prochain lancement : depuis le début{music.start ? ` (${formatTime(music.start)})` : ''}, puis reprise à {formatTime(music.restart)}</span>
-            <!-- Secours : « Repartir du début » cliqué par erreur, on peut quand même reprendre à la reprise -->
-            <button class="transition-secondary" onclick={() => void launchTransition(Date.now(), 'restart')}>▶ Relancer à la reprise ({formatTime(music.restart)})</button>
+            Prochain lancement : depuis le début{music.start ? ` (${formatTime(music.start)})` : ''}
           {/if}
-        </div>
-      {/if}
+        </span>
+        {#if restart}
+          <button class="transition-secondary" class:is-hidden={isCurrent} disabled={isCurrent} onclick={resetTransitionStart}>↺ Repartir du début</button>
+        {:else}
+          <!-- Secours : « Repartir du début » cliqué par erreur, on peut quand même reprendre à la reprise -->
+          <button class="transition-secondary" class:is-hidden={isCurrent} disabled={isCurrent} onclick={() => void launchTransition(Date.now(), 'restart')}>▶ Relancer à la reprise ({formatTime(music.restart)})</button>
+        {/if}
+      </div>
 
       <VolumeControl
         sliderClass="transition-vol" max={100} value={volumePct} volPct={volumePct + '%'}
@@ -214,7 +214,8 @@
   }
 
   .transition-time {
-    min-width: 90px;
+    width: 90px;
+    flex-shrink: 0;
     text-align: right;
     font-size: 12px;
     color: var(--text-muted);
@@ -229,7 +230,10 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    min-height: 56px;
+    /* Hauteur fixe et une seule ligne : le libellé change sans changer la taille de la popup */
+    height: 56px;
+    white-space: nowrap;
+    overflow: hidden;
     border: 1px solid var(--transition-accent);
     border-radius: var(--radius);
     background: color-mix(in srgb, var(--transition-accent) 15%, var(--bg-card));
@@ -250,16 +254,24 @@
 
   .transition-next {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 8px;
     font-size: 11px;
     color: var(--text-secondary);
   }
 
+  .transition-next-text {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .transition-secondary {
-    padding: 8px 12px;
+    height: 34px;
+    padding: 0 12px;
+    white-space: nowrap;
     border: 1px solid var(--border-glow);
     border-radius: var(--radius);
     background: transparent;
@@ -267,6 +279,10 @@
     font-family: var(--font-mono);
     font-size: 11px;
     cursor: pointer;
+  }
+
+  .transition-secondary.is-hidden {
+    visibility: hidden;
   }
 
   .transition-close:focus-visible,
