@@ -2,7 +2,7 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
-## Prochaine version (non publiée)
+## 1.13.0 — 2026-11-11
 
 ### Nouveautés
 
