@@ -7,6 +7,7 @@
 -->
 <script lang="ts">
   import { flushSync, onMount } from 'svelte';
+  import { colorChannels } from '../color-channels.ts';
   import { activateTab, getAllTabs, getTabAccent, getTabKind, layout } from '../layout.svelte.ts';
 
   type TabNavMode = 'full' | 'compact' | 'icons';
@@ -38,6 +39,7 @@
 <nav id="tab-nav" bind:this={nav} class:compact={mode === 'compact'} class:icons={mode === 'icons'}>
   {#each tabs as tab, idx (tab.id)}
     {@const accent = getTabAccent(tab)}
+    {@const rgb = colorChannels(accent)}
     <button
       class="tab-btn"
       class:active={layout.activeTab === idx}
@@ -45,6 +47,9 @@
       data-type={tab.type}
       data-kind={getTabKind(tab)}
       style:--tab-accent={accent}
+      style:--tab-accent-r={rgb?.r}
+      style:--tab-accent-g={rgb?.g}
+      style:--tab-accent-b={rgb?.b}
       title={tab.label}
       onclick={() => activateTab(idx)}
     >
@@ -98,9 +103,10 @@
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.14);
   }
+  /* Onglet actif : fond teinté et texte dans la couleur de son type (MIDI, sons, musiques) */
   .tab-btn.active {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.18);
+    color: var(--tab-accent);
+    background: color-mix(in srgb, var(--tab-accent) 28%, transparent);
   }
 
   .tab-btn[data-type="midi"] {
@@ -141,8 +147,13 @@
     color: var(--text-primary);
   }
 
+  /* Même teinte posée sur le motif de touches */
   .tab-btn[data-type="midi"].active {
     background:
+      linear-gradient(
+        color-mix(in srgb, var(--tab-accent) 28%, transparent),
+        color-mix(in srgb, var(--tab-accent) 28%, transparent)
+      ),
       repeating-linear-gradient(
         to right,
         rgba(255, 255, 255, 0.18) 0px,
@@ -157,16 +168,16 @@
         rgba(255, 255, 255, 0.18) 50%,
         transparent 50%
       );
-    color: var(--text-primary);
+    color: var(--tab-accent);
   }
 
   .tab-btn.active::after {
     content: '';
     position: absolute;
     bottom: -2px; left: 0; right: 0;
-    height: 2px;
+    height: 4px;
     background: var(--tab-accent);
-    box-shadow: 0 0 8px var(--tab-accent);
+    box-shadow: 0 0 12px var(--tab-accent);
   }
 
   .tab-icon  { font-size: 15px; line-height: 1; }
