@@ -5,14 +5,14 @@
   pendant une impro ne doit rien lancer). Popup ouverte : il devient un bouton play, qui
   lance le moment marquant prévu ; un double clic ouvre donc la popup et lance la musique.
   Musique en cours : bouton stop, avec la progression en fond ; il arrête la musique et
-  laisse la popup ouverte.
+  ferme la popup (le bouton « Arrêter » de la popup, lui, la laisse ouverte).
   Tout le carré est cliquable ; la pastille dessinée dedans le distingue des onglets.
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
   import { isTransitionCurrent, launchTransition, stopTransition } from '../../audio/transition.ts';
   import { transport } from '../transport.svelte.ts';
-  import { openTransitionPopup, transitionPopup } from '../transition.svelte.ts';
+  import { closeTransitionPopup, openTransitionPopup, transitionPopup } from '../transition.svelte.ts';
 
   const isCurrent = $derived(isTransitionCurrent());
   const isPlaying = $derived(isCurrent && !STATE.isPaused);
@@ -20,21 +20,26 @@
   /**
    * Un clic qui suit de moins de ce délai un lancement ou un arrêt depuis ce bouton est ignoré :
    * sinon, popup ouverte, un double clic lancerait la musique puis l'arrêterait aussitôt (et un
-   * double clic sur stop la relancerait). L'ouverture de la popup n'est pas concernée.
+   * double clic sur stop fermerait la popup puis la rouvrirait). L'ouverture de la popup ne
+   * compte pas comme un lancement : un double clic sur ♫ ouvre la popup puis lance la musique.
    */
   const DOUBLE_TAP_GUARD_MS = 600;
   let lastToggle = 0;
 
   function handleClick(): void {
+    const now = performance.now();
+    if (now - lastToggle < DOUBLE_TAP_GUARD_MS) return;
     if (!isCurrent && !transitionPopup.isOpen) {
       openTransitionPopup();
       return;
     }
-    const now = performance.now();
-    if (now - lastToggle < DOUBLE_TAP_GUARD_MS) return;
     lastToggle = now;
-    if (isCurrent) stopTransition();
-    else void launchTransition();
+    if (isCurrent) {
+      stopTransition();
+      closeTransitionPopup();
+    } else {
+      void launchTransition();
+    }
   }
 
   const label = $derived(isCurrent ? 'Arrêter la musique de transition'
