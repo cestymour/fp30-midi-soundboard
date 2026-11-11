@@ -1,4 +1,4 @@
-// bluetoothMIDI.ts — Connexion Bluetooth MIDI (vanilla JS, sans React)
+// bluetoothMIDI.ts — Connexion Bluetooth MIDI (Web Bluetooth)
 
 import { parsePacket } from './ble-midi-parser.ts';
 import type { MessageMidi } from './ble-midi-parser.ts';

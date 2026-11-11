@@ -69,10 +69,10 @@
 {#snippet repeatIcon()}<svg class="repeat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" /></svg>{/snippet}
 
 <style>
-  /* Toutes les règles qui visent .sound-btn sont ici, dans leur ordre d'origine,
+  /* Toutes les règles qui visent .sound-btn sont ici, dans l'ordre où la cascade les applique,
      y compris celles qui dépendent de la grille (:global(.audio-col), :global(.animals-grid)).
-     La classe paused n'est jamais posée (voir docs/bugs.md n° 5) : ses règles sont
-     gardées en :global(.paused). */
+     La classe paused n'est jamais posée : ses règles, en :global(.paused), sont du code
+     mort (voir docs/todo.md). */
 
   /* ── Focus accessible (clavier uniquement) ── */
   .sound-btn:focus-visible {

@@ -237,7 +237,7 @@ class AudioEngine {
     this.reverbWet.connect(this.masterGain);
 
     // Limiteur en sortie : réverbération, delay et égaliseur s'ajoutent au son, et au-delà
-    // de 0 dBFS la sortie écrêtait (grésillement, bug n° 21)
+    // de 0 dBFS la sortie écrêterait (grésillement, bug n° 21)
     this.limiter = ctx.createDynamicsCompressor();
     this.limiterTrim = ctx.createGain();
     this.limiter.threshold.value = LIMITER_THRESHOLD_DB;

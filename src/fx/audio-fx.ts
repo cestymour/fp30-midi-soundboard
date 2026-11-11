@@ -54,7 +54,7 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
     max: 20000,
     step: 100,
     neutral: 20000,
-    // Anciennes versions utilisaient 22050 Hz (affichage 22,1 kHz) : on normalise pour coller au neutre UI
+    // La popup s'arrête à 20 kHz, son neutre
     read: settings => Math.min(20000, settings.lowPassFrequency),
     apply: value => AudioEngineAPI.setLowPassFrequency(value),
     formatValue: value => value >= 1000 ? `${(value / 1000).toFixed(1)} kHz` : `${Math.round(value)} Hz`,

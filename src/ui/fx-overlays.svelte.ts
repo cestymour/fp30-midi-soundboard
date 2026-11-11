@@ -56,7 +56,7 @@ export const audioFxOverlay = new FxOverlayController({
   readSettings:  () => AudioEngineAPI.getCurrentSettings(),
   applyValue:    applyAudioFxValue,
   afterSync: (settings, overlay) => {
-    // Anciennes versions : passe-bas à 22 050 Hz, ramené au neutre de l'interface (20 kHz)
+    // Passe-bas au-delà de 20 kHz ramené au neutre de l'interface (ne peut pas arriver : code mort, voir docs/todo.md)
     if (settings.lowPassFrequency > 20000) {
       overlay.setControlValue('lowPass', 20000, true);
     }

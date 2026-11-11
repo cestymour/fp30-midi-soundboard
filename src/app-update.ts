@@ -6,8 +6,8 @@
    lancement, en arrière-plan, et ne s'affiche qu'au lancement suivant.
    Ce bouton évite d'attendre : il demande au Service Worker de chercher
    la nouvelle version, attend qu'elle soit installée, puis recharge.
-   Aucun cache n'est vidé (les sons restent disponibles hors ligne), et le
-   Service Worker n'est plus désinscrit : hors ligne, rien n'est rechargé,
+   Aucun cache n'est vidé (les sons restent disponibles hors ligne) et le
+   Service Worker n'est jamais désinscrit : hors ligne, rien n'est rechargé,
    et l'application reste utilisable (bug n° 7).
 ================================================================ */
 
