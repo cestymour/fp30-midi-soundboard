@@ -196,40 +196,6 @@
     min-width: 0;
   }
 
-  /* Bloc piste (Track / canal) : aucun balisage ne l'utilise (code mort, voir docs/todo.md) */
-  :global(.fx-track) {
-    flex: 1 1 140px;
-    min-width: 0;
-    max-width: min(42vw, 280px);
-    align-self: center;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 10px;
-    border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.012);
-  }
-
-  :global(.fx-track__label) {
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0.85;
-  }
-
-  :global(.fx-track__name) {
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-weight: 500;
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   /* ── Presets (tuiles) ───────────────────────────────────────── */
 
   .fx-presets {

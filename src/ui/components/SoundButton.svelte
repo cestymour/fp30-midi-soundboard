@@ -70,9 +70,7 @@
 
 <style>
   /* Toutes les règles qui visent .sound-btn sont ici, dans l'ordre où la cascade les applique,
-     y compris celles qui dépendent de la grille (:global(.audio-col), :global(.animals-grid)).
-     La classe paused n'est jamais posée : ses règles, en :global(.paused), sont du code
-     mort (voir docs/todo.md). */
+     y compris celles qui dépendent de la grille (:global(.audio-col), :global(.animals-grid)). */
 
   /* ── Focus accessible (clavier uniquement) ── */
   .sound-btn:focus-visible {
@@ -209,18 +207,6 @@
     transition: transform 0.3s ease;
   }
 
-  .sound-btn--img:global(.paused) {
-    border-color: var(--panel-accent);
-    box-shadow: none;
-    opacity: 0.9;
-  }
-
-  .sound-btn--img:global(.paused) .btn-label {
-    background: color-mix(in srgb, var(--panel-accent) 10%, var(--bg-card));
-    color: var(--panel-accent);
-    border-top-color: var(--panel-accent);
-  }
-
   /* ═══════════════════════════════════════════════════════
     BOUTON AUDIO — progression + état playing
   ════════════════════════════════════════════════════════ */
@@ -299,40 +285,6 @@
     fill: currentColor;
     filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 8px var(--panel-accent));
     z-index: 3;
-  }
-
-
-  /* ═══════════════════════════════════════════════════════
-      BOUTON AUDIO — état PAUSE
-  ════════════════════════════════════════════════════════ */
-  .sound-btn:global(.paused) {
-    color: var(--panel-accent);
-    border-color: var(--panel-accent);
-    animation: none; /* Pas d'animation glow en pause */
-    opacity: 0.9;
-  }
-  .sound-btn:global(.paused) .btn-label { color: var(--panel-accent); }
-
-  .sound-btn:global(.paused) .btn-icon { font-size: 0; }
-  .sound-btn:global(.paused) .btn-icon::after {
-    content: '↺';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, calc(-50% + 1px));
-    display: block;
-    line-height: 1;
-    color: var(--panel-accent);
-    -webkit-text-stroke: 2px var(--panel-accent);
-    text-shadow:
-      -1px -1px 2px rgba(0, 0, 0, 0.7),
-        1px -1px 2px rgba(0, 0, 0, 0.7),
-      -1px  1px 2px rgba(0, 0, 0, 0.7),
-        1px  1px 2px rgba(0, 0, 0, 0.7),
-        0    0   6px rgba(0, 0, 0, 0.6),
-        0    0  12px rgba(0, 0, 0, 0.4);
-    z-index: 3;
-    font-size: clamp(24px, 3vw, 36px);
   }
 
   .sound-btn.missing {
