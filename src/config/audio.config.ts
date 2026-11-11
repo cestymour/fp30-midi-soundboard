@@ -18,45 +18,45 @@ export const AUDIO_TABS: AudioTab[] = [
         color: '#88ccff',
         items: [
           // ── Ligne 1 ──
-          { id: 'cheval-hiii',       name: 'Cheval : Hiii',       icon: '🐴',   file: 'sounds/animaux/cheval_hennissement.mp3',                   end: 1.9, catClass: 'animaux-ferme',      title: 'Cheval Hennissement' },
-          { id: 'cheval-souffle',    name: 'Cheval : Souffle',    icon: '🐎',   file: 'sounds/animaux/cheval_souffle.ogg',                                  catClass: 'animaux-ferme',      title: 'Cheval Souffle' },
-       // { id: 'galop-cheval',      name: 'Galop Cheval',        icon: '🐎',   file: 'sounds/animaux/cheval_galop.ogg',                                   catClass: 'animaux-ferme',      title: 'Cheval Galop' },
-          { id: 'poule-cot-cot',     name: 'Poule : Cot-cot',     icon: '🐔',   file: 'sounds/animaux/poule_gloussement.mp3',                               catClass: 'animaux-ferme',      title: 'Poule Gloussement' },
-          { id: 'coq-cocorico',      name: 'Coq : Cocorico',      icon: '🐓',   file: 'sounds/animaux/coq_cocorico.ogg',                start: 0.17,        catClass: 'animaux-ferme',      title: 'Coq Cocorico' },
-          { id: 'oiseau-cui-cui',    name: 'Oiseau : Cui-cui',    icon: '🐦',   file: 'sounds/animaux/chant_des_oiseaux.mp3',                               catClass: 'animaux-oiseau',     title: 'Chant des oiseaux Gazouillement' },
-          { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️',   file: 'sounds/animaux/pigeon_roucoulement.mp3',                  end: 7.65, catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
-          { id: 'lion-tigre-roarrr', name: 'Lion/tigre : Roarrr', icon: '🦁',   file: 'sounds/animaux/lion_tigre_rugissement.mp3',                          catClass: 'animaux-savane',     title: 'Lion/tigre Rugissement' },
-          { id: 'hyene-hi-hi',       name: 'Hyène : Hi-hi',       icon: '🐆',   file: 'sounds/animaux/hyene_rire.mp3',                                      catClass: 'animaux-savane',     title: 'Hyène Rire' },
+          { id: 'cheval-hiii',       name: 'Cheval : Hiii',       icon: '🐴',   file: 'sounds/animaux/cheval_hennissement_v2.mp3',                   end: 1.9, catClass: 'animaux-ferme',      title: 'Cheval Hennissement' },
+          { id: 'cheval-souffle',    name: 'Cheval : Souffle',    icon: '🐎',   file: 'sounds/animaux/cheval_souffle_v2.mp3',                                  catClass: 'animaux-ferme',      title: 'Cheval Souffle' },
+       // { id: 'galop-cheval',      name: 'Galop Cheval',        icon: '🐎',   file: 'sounds/animaux/cheval_galop_v2.mp3',                                   catClass: 'animaux-ferme',      title: 'Cheval Galop' },
+          { id: 'poule-cot-cot',     name: 'Poule : Cot-cot',     icon: '🐔',   file: 'sounds/animaux/poule_gloussement_v2.mp3',                               catClass: 'animaux-ferme',      title: 'Poule Gloussement' },
+          { id: 'coq-cocorico',      name: 'Coq : Cocorico',      icon: '🐓',   file: 'sounds/animaux/coq_cocorico_v2.mp3',                start: 0.17,        catClass: 'animaux-ferme',      title: 'Coq Cocorico' },
+          { id: 'oiseau-cui-cui',    name: 'Oiseau : Cui-cui',    icon: '🐦',   file: 'sounds/animaux/chant_des_oiseaux_v2.mp3',                               catClass: 'animaux-oiseau',     title: 'Chant des oiseaux Gazouillement' },
+          { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️',   file: 'sounds/animaux/pigeon_roucoulement_v2.mp3',                  end: 7.65, catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
+          { id: 'lion-tigre-roarrr', name: 'Lion/tigre : Roarrr', icon: '🦁',   file: 'sounds/animaux/lion_tigre_rugissement_v2.mp3',                          catClass: 'animaux-savane',     title: 'Lion/tigre Rugissement' },
+          { id: 'hyene-hi-hi',       name: 'Hyène : Hi-hi',       icon: '🐆',   file: 'sounds/animaux/hyene_rire_v2.mp3',                                      catClass: 'animaux-savane',     title: 'Hyène Rire' },
 
           // ── Ligne 2 ──
-          { id: 'vache-meuh',        name: 'Vache : Meuh',        icon: '🐮',   file: 'sounds/animaux/vache_meuglement.ogg',            start: 0.5,         catClass: 'animaux-ferme',      title: 'Vache Meuglement' },
-          { id: 'ane-i-an',          name: 'Âne : I-An',          icon: '🫏',   file: 'sounds/animaux/ane_braiement.mp3',                                   catClass: 'animaux-ferme',      title: 'Âne Braiement' },
-          { id: 'dindon-glouglou',   name: 'Dindon : Glouglou',   icon: '🦃',   file: 'sounds/animaux/dindon_glouglou.mp3',                                 catClass: 'animaux-ferme',      title: 'Dindon Glouglou' },
-          { id: 'canard-coin-coin',  name: 'Canard : Coin-coin',  icon: '🦆',   file: 'sounds/animaux/canard_cancanement.mp3',                              catClass: 'animaux-ferme',      title: 'Canard Cancanement' },
-          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛',   file: 'sounds/animaux/corbeau_croassement.mp3',                   end: 2.9, catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
-          { id: 'aigle-cri-percant', name: 'Aigle : Cri perçant', icon: '🦅',   file: 'sounds/animaux/aigle_faucon_cri_percant.mp3',                        catClass: 'animaux-oiseau',     title: 'Aigle / Faucon Cri perçant' },
-          { id: 'elephant',          name: 'Éléphant',            icon: '🐘',   file: 'sounds/animaux/elephant_barrissement.mp3',       start: 0.5, end: 6, catClass: 'animaux-savane',     title: 'Éléphant Barrissement' },
-          { id: 'singe-ouh-ouh',     name: 'Singe : Ouh-ouh',     icon: '🐒',   file: 'sounds/animaux/singe_cris.mp3',                  start: 0.4,         catClass: 'animaux-savane',     title: 'Singe Cris' },
+          { id: 'vache-meuh',        name: 'Vache : Meuh',        icon: '🐮',   file: 'sounds/animaux/vache_meuglement_v2.mp3',            start: 0.5,         catClass: 'animaux-ferme',      title: 'Vache Meuglement' },
+          { id: 'ane-i-an',          name: 'Âne : I-An',          icon: '🫏',   file: 'sounds/animaux/ane_braiement_v2.mp3',                                   catClass: 'animaux-ferme',      title: 'Âne Braiement' },
+          { id: 'dindon-glouglou',   name: 'Dindon : Glouglou',   icon: '🦃',   file: 'sounds/animaux/dindon_glouglou_v2.mp3',                                 catClass: 'animaux-ferme',      title: 'Dindon Glouglou' },
+          { id: 'canard-coin-coin',  name: 'Canard : Coin-coin',  icon: '🦆',   file: 'sounds/animaux/canard_cancanement_v2.mp3',                              catClass: 'animaux-ferme',      title: 'Canard Cancanement' },
+          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛',   file: 'sounds/animaux/corbeau_croassement_v2.mp3',                   end: 2.9, catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
+          { id: 'aigle-cri-percant', name: 'Aigle : Cri perçant', icon: '🦅',   file: 'sounds/animaux/aigle_faucon_cri_percant_v2.mp3',                        catClass: 'animaux-oiseau',     title: 'Aigle / Faucon Cri perçant' },
+          { id: 'elephant',          name: 'Éléphant',            icon: '🐘',   file: 'sounds/animaux/elephant_barrissement_v2.mp3',       start: 0.5, end: 6, catClass: 'animaux-savane',     title: 'Éléphant Barrissement' },
+          { id: 'singe-ouh-ouh',     name: 'Singe : Ouh-ouh',     icon: '🐒',   file: 'sounds/animaux/singe_cris_v2.mp3',                  start: 0.4,         catClass: 'animaux-savane',     title: 'Singe Cris' },
 
           // ── Ligne 3 ──
-          { id: 'chat-miaou',        name: 'Chat : Miaou',        icon: '🐱',   file: 'sounds/animaux/chat_miaulement.mp3', start: 0.1,                     catClass: 'animaux-domestique', title: 'Chat Miaulement' },
-          { id: 'chat-ronron',       name: 'Chat : Ronron',       icon: '🐈',   file: 'sounds/animaux/chat_ronronnement.ogg',                               catClass: 'animaux-domestique', title: 'Chat Ronronnement' },
-          { id: 'mouton-beee',       name: 'Mouton : Bêêê',       icon: '🐑',   file: 'sounds/animaux/mouton_chevre_belement.ogg',                          catClass: 'animaux-ferme',      title: 'Mouton/Chèvre Bêlement' },
-          { id: 'cochon-groin',      name: 'Cochon : Groin',      icon: '🐷',   file: 'sounds/animaux/cochon_grognement.mp3',                    end: 8.65, catClass: 'animaux-ferme',      title: 'Cochon Grognement / Couinement' },
-          { id: 'chouette-hou-hou',  name: 'Chouette : Hou-hou',  icon: '🦉',   file: 'sounds/animaux/chouette_hibou_hululements.mp3', start: 0.1, end: 2.6, catClass: 'animaux-oiseau',     title: 'Chouette / Hibou Hululements' },
-          { id: 'mouettes',          name: 'Mouette : Kriaa',     icon: '🦤',   file: 'sounds/animaux/mouettes.mp3',                                        catClass: 'animaux-oiseau',     title: 'Mouette Piaulement' },
-          { id: 'serpent-sssss',     name: 'Serpent : Sssss',     icon: '🐍',   file: 'sounds/animaux/serpent_sifflement.mp3',      start: 0.17,            catClass: 'animaux-savane',     title: 'Serpent Sifflement' },
-          { id: 'grenouille-coaa',   name: 'Grenouille : Coââ',   icon: '🐸',   file: 'sounds/animaux/grenouille_coassement.mp3',                           catClass: 'animaux-aquatique',  title: 'Grenouille Coassement' },
+          { id: 'chat-miaou',        name: 'Chat : Miaou',        icon: '🐱',   file: 'sounds/animaux/chat_miaulement_v2.mp3', start: 0.1,                     catClass: 'animaux-domestique', title: 'Chat Miaulement' },
+          { id: 'chat-ronron',       name: 'Chat : Ronron',       icon: '🐈',   file: 'sounds/animaux/chat_ronronnement_v2.mp3',                               catClass: 'animaux-domestique', title: 'Chat Ronronnement' },
+          { id: 'mouton-beee',       name: 'Mouton : Bêêê',       icon: '🐑',   file: 'sounds/animaux/mouton_chevre_belement_v2.mp3',                          catClass: 'animaux-ferme',      title: 'Mouton/Chèvre Bêlement' },
+          { id: 'cochon-groin',      name: 'Cochon : Groin',      icon: '🐷',   file: 'sounds/animaux/cochon_grognement_v2.mp3',                    end: 8.65, catClass: 'animaux-ferme',      title: 'Cochon Grognement / Couinement' },
+          { id: 'chouette-hou-hou',  name: 'Chouette : Hou-hou',  icon: '🦉',   file: 'sounds/animaux/chouette_hibou_hululements_v2.mp3', start: 0.1, end: 2.6, catClass: 'animaux-oiseau',     title: 'Chouette / Hibou Hululements' },
+          { id: 'mouettes',          name: 'Mouette : Kriaa',     icon: '🦤',   file: 'sounds/animaux/mouettes_v2.mp3',                                        catClass: 'animaux-oiseau',     title: 'Mouette Piaulement' },
+          { id: 'serpent-sssss',     name: 'Serpent : Sssss',     icon: '🐍',   file: 'sounds/animaux/serpent_sifflement_v2.mp3',      start: 0.17,            catClass: 'animaux-savane',     title: 'Serpent Sifflement' },
+          { id: 'grenouille-coaa',   name: 'Grenouille : Coââ',   icon: '🐸',   file: 'sounds/animaux/grenouille_coassement_v2.mp3',                           catClass: 'animaux-aquatique',  title: 'Grenouille Coassement' },
 
           // ── Ligne 4 ──
-          { id: 'chien-ouaf',        name: 'Chien : Ouaf',        icon: '🐶',   file: 'sounds/animaux/chien_aboiement.mp3',                                 catClass: 'animaux-domestique', title: 'Chien Aboiement' },
-          { id: 'chien-grrr',        name: 'Chien : Grrr',        icon: '🐕',   file: 'sounds/animaux/chien_grognement.mp3',                                catClass: 'animaux-domestique', title: 'Chien Grognement' },
-          { id: 'loup-aouuuuh',      name: 'Loup : Aouuuuh',      icon: '🐺',   file: 'sounds/animaux/loup_hurlement.mp3',          start: 0.11, end: 5.1,  catClass: 'animaux-foret',      title: 'Loup Hurlement' },
-          { id: 'ours-grrr',         name: 'Ours : Grrr',         icon: '🐻',   file: 'sounds/animaux/ours_grognement.mp3',                                 catClass: 'animaux-foret',      title: 'Ours Grognement' },
-          { id: 'abeille-bzzzz',     name: 'Abeille : Bzzzz',     icon: '🐝',   file: 'sounds/animaux/moustique_bourdonnement.mp3',                         catClass: 'animaux-insecte',    title: 'Abeille / Mouche / Moustique Bourdonnement' },
-          { id: 'grillon-zzzzz',     name: 'Grillons',            icon: '🦗',   file: 'sounds/animaux/grillon_gresillement.mp3',                            catClass: 'animaux-insecte',    title: 'Grillon Grésillement' },
-          { id: 'dauphin-i-i-i-i',   name: 'Dauphin : I i i i',   icon: '🐬',   file: 'sounds/animaux/dauphin_sifflements.mp3',                             catClass: 'animaux-aquatique',  title: 'Dauphin Clics et sifflements' },
-          { id: 'baleine-chant',     name: 'Baleine : Chant',     icon: '🐋',   file: 'sounds/animaux/baleine_chant.mp3',           start: 0.21,  end: 3.2, catClass: 'animaux-aquatique',  title: 'Baleine Chant' },
+          { id: 'chien-ouaf',        name: 'Chien : Ouaf',        icon: '🐶',   file: 'sounds/animaux/chien_aboiement_v2.mp3',                                 catClass: 'animaux-domestique', title: 'Chien Aboiement' },
+          { id: 'chien-grrr',        name: 'Chien : Grrr',        icon: '🐕',   file: 'sounds/animaux/chien_grognement_v2.mp3',                                catClass: 'animaux-domestique', title: 'Chien Grognement' },
+          { id: 'loup-aouuuuh',      name: 'Loup : Aouuuuh',      icon: '🐺',   file: 'sounds/animaux/loup_hurlement_v2.mp3',          start: 0.11, end: 5.1,  catClass: 'animaux-foret',      title: 'Loup Hurlement' },
+          { id: 'ours-grrr',         name: 'Ours : Grrr',         icon: '🐻',   file: 'sounds/animaux/ours_grognement_v2.mp3',                                 catClass: 'animaux-foret',      title: 'Ours Grognement' },
+          { id: 'abeille-bzzzz',     name: 'Abeille : Bzzzz',     icon: '🐝',   file: 'sounds/animaux/moustique_bourdonnement_v2.mp3',                         catClass: 'animaux-insecte',    title: 'Abeille / Mouche / Moustique Bourdonnement' },
+          { id: 'grillon-zzzzz',     name: 'Grillons',            icon: '🦗',   file: 'sounds/animaux/grillon_gresillement_v2.mp3',                            catClass: 'animaux-insecte',    title: 'Grillon Grésillement' },
+          { id: 'dauphin-i-i-i-i',   name: 'Dauphin : I i i i',   icon: '🐬',   file: 'sounds/animaux/dauphin_sifflements_v2.mp3',                             catClass: 'animaux-aquatique',  title: 'Dauphin Clics et sifflements' },
+          { id: 'baleine-chant',     name: 'Baleine : Chant',     icon: '🐋',   file: 'sounds/animaux/baleine_chant_v2.mp3',           start: 0.21,  end: 3.2, catClass: 'animaux-aquatique',  title: 'Baleine Chant' },
         ]
       }
     ]
@@ -307,97 +307,97 @@ export const AUDIO_TABS: AudioTab[] = [
       {
         id: 'horreur', label: 'Horreur', icon: '😱', color: '#ff6666',
         items: [
-          { id: 'saw',                name: 'Ambiance tendu',       img: 'images/films/saw.jpg',                file: 'sounds/films/saw_theme.mp3',                                            start: 21.2,            title: 'Saw' },
-          { id: 'jaws',               name: 'Danger proche',        img: 'images/films/jaws.jpg',               file: 'sounds/films/les_dents_de_la_mer_theme.mp3',                            start: 9.5,             title: 'Les Dents de la Mer' },
-          { id: 'psycho',             name: 'Au secours Ahhh !',    img: 'images/films/psycho.jpg',             file: 'sounds/films/psycho_shower_scene.mp3',                                  start: 0.1,             title: 'Psycho (Scène Douche)' },
+          { id: 'saw',                name: 'Ambiance tendu',       img: 'images/films/saw.jpg',                file: 'sounds/films/saw_theme_v2.mp3',                                            start: 21.2,            title: 'Saw' },
+          { id: 'jaws',               name: 'Danger proche',        img: 'images/films/jaws.jpg',               file: 'sounds/films/les_dents_de_la_mer_theme_v2.mp3',                            start: 9.5,             title: 'Les Dents de la Mer' },
+          { id: 'psycho',             name: 'Au secours Ahhh !',    img: 'images/films/psycho.jpg',             file: 'sounds/films/psycho_shower_scene_v2.mp3',                                  start: 0.1,             title: 'Psycho (Scène Douche)' },
         ]
       },
       {
         id: 'drame', label: 'Drame', icon: '💔', color: '#8888cc',
         items: [
-          { id: 'requiem',            name: 'Descente enfer',       img: 'images/films/requiem.jpg',            file: 'sounds/films/requiem_for_a_dream_theme.mp3',                            start: 38.9,            title: 'Requiem for a Dream' },
-          { id: 'platoon',            name: 'Sacrifice Guerre',     img: 'images/films/platoon.jpg',            file: 'sounds/films/platoon_theme.mp3',                                        start: 285.5, end: 509, title: 'Platoon' },
-          { id: 'professionel',       name: 'Adieu Poignant',       img: 'images/films/professionel.jpg',       file: 'sounds/films/le_professionnel_chi_mai_ennio_morricone.mp3',             start: 39.6,            title: 'Le Professionnel (Chi Mai)' },
+          { id: 'requiem',            name: 'Descente enfer',       img: 'images/films/requiem.jpg',            file: 'sounds/films/requiem_for_a_dream_theme_v2.mp3',                            start: 38.9,            title: 'Requiem for a Dream' },
+          { id: 'platoon',            name: 'Sacrifice Guerre',     img: 'images/films/platoon.jpg',            file: 'sounds/films/platoon_theme_v2.mp3',                                        start: 285.5, end: 509, title: 'Platoon' },
+          { id: 'professionel',       name: 'Adieu Poignant',       img: 'images/films/professionel.jpg',       file: 'sounds/films/le_professionnel_chi_mai_ennio_morricone.mp3',                start: 39.6,            title: 'Le Professionnel (Chi Mai)' },
         ]
       },
       {
         id: 'tragedie', label: 'Tragédie', icon: '🥀', color: '#aa88aa',
         items: [
-          { id: 'dark-vador',         name: 'Menace Imposante',     img: 'images/films/dark-vador.jpg',         file: 'sounds/films/star_wars_dark_vador_theme.mp3',                           start: 9.5,             title: 'Star Wars (Thème de Dark Vador)' },
-          { id: 'star-wars-duel',     name: 'Combat Épique',        img: 'images/films/star-wars-duel.jpg',     file: 'sounds/films/star_wars_duel_of_the_fates.mp3',                          start: 60.0,            title: 'Star Wars (Duel of the Fates)' },
-          { id: 'le-parrain',         name: 'Mafia Respect',        img: 'images/films/le_parrain.jpg',         file: 'sounds/films/le_parrain_love_theme.mp3',                                start: 0.4,             title: 'Le Parrain (Love Theme)' },
+          { id: 'dark-vador',         name: 'Menace Imposante',     img: 'images/films/dark-vador.jpg',         file: 'sounds/films/star_wars_dark_vador_theme_v2.mp3',                           start: 9.5,             title: 'Star Wars (Thème de Dark Vador)' },
+          { id: 'star-wars-duel',     name: 'Combat Épique',        img: 'images/films/star-wars-duel.jpg',     file: 'sounds/films/star_wars_duel_of_the_fates_v2.mp3',                          start: 60.0,            title: 'Star Wars (Duel of the Fates)' },
+          { id: 'le-parrain',         name: 'Mafia Respect',        img: 'images/films/le_parrain.jpg',         file: 'sounds/films/le_parrain_love_theme_v2.mp3',                                start: 0.4,             title: 'Le Parrain (Love Theme)' },
         ]
       },
       {
         id: 'western', label: 'Western', icon: '🤠', color: '#cc8844',
         items: [
-          { id: 'bon-brute-truand',   name: 'Duel',                 img: 'images/films/bon-brute-truand.jpg',   file: 'sounds/films/le_bon_la_brute_et_le_truand_theme.mp3',                   start: 5.0,             title: 'Le Bon la Brute et le Truand' },
-          { id: 'guimbarde',          name: 'Chasse à l\'homme',    img: 'images/films/guimbarde.jpg',          file: 'sounds/films/pour_quelques_dollars_de_plus_theme.mp3',                  start: 26.7,            title: 'Pour quelques dollars de plus' },
-          { id: 'harmonica',          name: 'Vengeance Duel Lent',  img: 'images/films/harmonica.jpg',          file: 'sounds/films/il_etait_une_fois_dans_l_ouest_l_homme_a_l_harmonica.mp3', start: 7,               title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
+          { id: 'bon-brute-truand',   name: 'Duel',                 img: 'images/films/bon-brute-truand.jpg',   file: 'sounds/films/le_bon_la_brute_et_le_truand_theme_v2.mp3',                   start: 5.0,             title: 'Le Bon la Brute et le Truand' },
+          { id: 'guimbarde',          name: 'Chasse à l\'homme',    img: 'images/films/guimbarde.jpg',          file: 'sounds/films/pour_quelques_dollars_de_plus_theme_v2.mp3',                  start: 26.7,            title: 'Pour quelques dollars de plus' },
+          { id: 'harmonica',          name: 'Vengeance Duel Lent',  img: 'images/films/harmonica.jpg',          file: 'sounds/films/il_etait_une_fois_dans_l_ouest_l_homme_a_l_harmonica_v2.mp3', start: 7,               title: 'Il était une fois dans l\'Ouest (L\'homme à l\'harmonica)' },
         ]
       },
       {
         id: 'espionnage-action', label: 'Espionnage / Action', icon: '🕵️‍♀️', color: '#6688aa',
         items: [
-          { id: 'mission-impossible', name: 'Mission Infiltration', img: 'images/films/mission-impossible.jpg', file: 'sounds/films/mission_impossible_main_theme2.mp3',                       start: 2.8,             title: 'Mission Impossible' },
-          { id: 'james-bond',         name: '007 Agent secret',     img: 'images/films/james-bond.jpg',         file: 'sounds/films/james_bond_theme.mp3',                                     start: 7.0,             title: 'James Bond' },
-          { id: 'matrix',             name: 'Grave badass',         img: 'images/films/matrix.jpg',             file: 'sounds/films/matrix_clubbed_to_death.mp3',                              start: 8.25,            title: 'Matrix (Clubbed to Death)' },
+          { id: 'mission-impossible', name: 'Mission Infiltration', img: 'images/films/mission-impossible.jpg', file: 'sounds/films/mission_impossible_main_theme2_v2.mp3',                       start: 2.8,             title: 'Mission Impossible' },
+          { id: 'james-bond',         name: '007 Agent secret',     img: 'images/films/james-bond.jpg',         file: 'sounds/films/james_bond_theme_v2.mp3',                                     start: 7.0,             title: 'James Bond' },
+          { id: 'matrix',             name: 'Grave badass',         img: 'images/films/matrix.jpg',             file: 'sounds/films/matrix_clubbed_to_death.mp3',                                 start: 8.25,            title: 'Matrix (Clubbed to Death)' },
         ]
       },
       {
         id: 'policier', label: 'Policier', icon: '🔎', color: '#88aacc',
         items: [
-          { id: 'sherlock',           name: 'Déduction Énigme',     img: 'images/films/sherlock.jpg',           file: 'sounds/films/sherlock_holmes_theme.mp3',                                start: 22.2,            title: 'Sherlock Holmes' },
-          { id: 'experts',            name: 'Scène Crime',          img: 'images/films/experts.jpg',            file: 'sounds/films/les_experts_generique.mp3',                                start: 4.0,             title: 'Les Experts (Who Are You)' },
-          { id: 'x-files',            name: 'Mystère Inexpliqué',   img: 'images/films/x-files.jpg',            file: 'sounds/films/the_x_files_theme.mp3',                                    start: 0.1,             title: 'X-Files' },
+          { id: 'sherlock',           name: 'Déduction Énigme',     img: 'images/films/sherlock.jpg',           file: 'sounds/films/sherlock_holmes_theme_v2.mp3',                                start: 22.2,            title: 'Sherlock Holmes' },
+          { id: 'experts',            name: 'Scène Crime',          img: 'images/films/experts.jpg',            file: 'sounds/films/les_experts_generique_v2.mp3',                                start: 4.0,             title: 'Les Experts (Who Are You)' },
+          { id: 'x-files',            name: 'Mystère Inexpliqué',   img: 'images/films/x-files.jpg',            file: 'sounds/films/the_x_files_theme_v2.mp3',                                    start: 0.1,             title: 'X-Files' },
         ]
       },
       {
         id: 'epopee-fantastique', label: 'Épopée / Fantastique', icon: '✨', color: '#ffdd88',
         items: [
-          { id: 'superman',           name: 'Héros Sauvetage',      img: 'images/films/superman.jpg',           file: 'sounds/films/superman_theme_john_williams.mp3',                         start: 38.6,            title: 'Superman' },
-          { id: 'star-wars',          name: 'Aventure Grandiose',   img: 'images/films/star-wars.jpg',          file: 'sounds/films/star_wars_main_theme.mp3',                                 start: 7.8,             title: 'Star Wars' },
-          { id: 'potter',             name: 'Magie Émerveillement', img: 'images/films/potter.jpg',             file: 'sounds/films/harry_potter_theme.mp3',                                   start: 43.0,            title: 'Harry Potter' },
+          { id: 'superman',           name: 'Héros Sauvetage',      img: 'images/films/superman.jpg',           file: 'sounds/films/superman_theme_john_williams_v2.mp3',                         start: 38.6,            title: 'Superman' },
+          { id: 'star-wars',          name: 'Aventure Grandiose',   img: 'images/films/star-wars.jpg',          file: 'sounds/films/star_wars_main_theme_v2.mp3',                                 start: 7.8,             title: 'Star Wars' },
+          { id: 'potter',             name: 'Magie Émerveillement', img: 'images/films/potter.jpg',             file: 'sounds/films/harry_potter_theme_v2.mp3',                                   start: 43.0,            title: 'Harry Potter' },
         ]
       },
       {
         id: 'aventure', label: 'Aventure', icon: '🗺️', color: '#88bb66',
         items: [
-          { id: 'indiana-jones',      name: 'Aventure Trépidante',  img: 'images/films/indiana-jones.jpg',      file: 'sounds/films/indiana_jones_theme_john_williams.mp3',                    start: 6.8,             title: 'Indiana Jones' },
-          { id: 'pirate',             name: 'Pirate Aventure',      img: 'images/films/pirate.jpg',             file: 'sounds/films/pirate_des_caraibes_theme.mp3',                                                    title: 'Pirates des Caraïbes' },
-          { id: '1492',               name: 'Corsaire Voyage',      img: 'images/films/1492.jpg',               file: 'sounds/films/1492_conquest_of_paradise_vangelis.mp3',                   start: 15.5,            title: '1492 (Vangelis)' },
+          { id: 'indiana-jones',      name: 'Aventure Trépidante',  img: 'images/films/indiana-jones.jpg',      file: 'sounds/films/indiana_jones_theme_john_williams_v2.mp3',                    start: 6.8,             title: 'Indiana Jones' },
+          { id: 'pirate',             name: 'Pirate Aventure',      img: 'images/films/pirate.jpg',             file: 'sounds/films/pirate_des_caraibes_theme_v2.mp3',                                                    title: 'Pirates des Caraïbes' },
+          { id: '1492',               name: 'Corsaire Voyage',      img: 'images/films/1492.jpg',               file: 'sounds/films/1492_conquest_of_paradise_vangelis.mp3',                      start: 15.5,            title: '1492 (Vangelis)' },
         ]
       },
       {
         id: 'action-poursuite', label: 'Action / Poursuite', icon: '💥', color: '#ff8844',
         items: [
-          { id: 'kill-bill',          name: 'Préparation Duel',     img: 'images/films/kill-bill.jpg',          file: 'sounds/films/kill_bill_battle_without_honor_or_humanity.mp3',           start: 1.3,             title: 'Kill Bill' },
-          { id: 'kill-bill-hornet',   name: 'Course Poursuite',     img: 'images/films/kill-bill-hornet.jpg',   file: 'sounds/films/kill_bill_the_green_hornet.mp3',                           start: 0.2,             title: 'Kill Bill (The Green Hornet)' },
-          { id: 'taxi',               name: 'Course Poursuite',     img: 'images/films/taxi.jpg',               file: 'sounds/films/taxi_pump_it.mp3',                                                                 title: 'Taxi (Pump It)' },
+          { id: 'kill-bill',          name: 'Préparation Duel',     img: 'images/films/kill-bill.jpg',          file: 'sounds/films/kill_bill_battle_without_honor_or_humanity_v2.mp3',           start: 1.3,             title: 'Kill Bill' },
+          { id: 'kill-bill-hornet',   name: 'Course Poursuite',     img: 'images/films/kill-bill-hornet.jpg',   file: 'sounds/films/kill_bill_the_green_hornet_v2.mp3',                           start: 0.2,             title: 'Kill Bill (The Green Hornet)' },
+          { id: 'taxi',               name: 'Course Poursuite',     img: 'images/films/taxi.jpg',               file: 'sounds/films/taxi_pump_it_v2.mp3',                                                                 title: 'Taxi (Pump It)' },
         ]
       },
       {
         id: 'sport', label: 'Sport', icon: '🏆', color: '#ffaa44',
         items: [
-          { id: 'rocky-eye-tiger',    name: 'Motivation Combat',    img: 'images/films/rocky-eye-tiger.jpg',    file: 'sounds/films/rocky_eye_of_the_tiger_survivor.mp3',                      start: 0.2,             title: 'Rocky (Eye of the Tiger)' },
-          { id: 'rocky-fly-now',      name: 'Victoire Triomphe',    img: 'images/films/rocky-fly-now.jpg',      file: 'sounds/films/rocky_gonna_fly_now_bill_conti.mp3',                       start: 1.2,             title: 'Rocky (Gonna Fly Now)' },
-          { id: 'chariots-de-feu',    name: 'Ralenti Dépassement',  img: 'images/films/chariots-de-feu.jpg',    file: 'sounds/films/les_chariots_de_feu_vangelis.mp3',                         start: 28.5,            title: 'Les Chariots de Feu' },
+          { id: 'rocky-eye-tiger',    name: 'Motivation Combat',    img: 'images/films/rocky-eye-tiger.jpg',    file: 'sounds/films/rocky_eye_of_the_tiger_survivor_v2.mp3',                      start: 0.2,             title: 'Rocky (Eye of the Tiger)' },
+          { id: 'rocky-fly-now',      name: 'Victoire Triomphe',    img: 'images/films/rocky-fly-now.jpg',      file: 'sounds/films/rocky_gonna_fly_now_bill_conti_v2.mp3',                       start: 1.2,             title: 'Rocky (Gonna Fly Now)' },
+          { id: 'chariots-de-feu',    name: 'Ralenti Dépassement',  img: 'images/films/chariots-de-feu.jpg',    file: 'sounds/films/les_chariots_de_feu_vangelis_v2.mp3',                         start: 28.5,            title: 'Les Chariots de Feu' },
         ]
       },
       {
         id: 'romance', label: 'Romance', icon: '❤️', color: '#ff99bb',
         items: [
-          { id: 'dirty-dancing',      name: 'Dirty Dancing',        img: 'images/films/Dirty-dancing.jpg',      file: 'sounds/films/dirty_dancing_the_time_of_my_life.mp3',                    start: 2.0,             title: 'Dirty Dancing (The Time of My Life)' },
-          { id: 'titanic',            name: 'Amour Éternel',        img: 'images/films/titanic.jpg',            file: 'sounds/films/titanic_my_heart_will_go_on_celine_dion.mp3',              start: 195.2,           title: 'Titanic (My Heart Will Go On)' },
-          { id: 'love-actually',      name: 'Amour Léger',          img: 'images/films/love-actually.jpg',      file: 'sounds/films/love_actually_craig_armstrong.mp3',                        start: 319.0,           title: 'Love Actually' },
+          { id: 'dirty-dancing',      name: 'Dirty Dancing',        img: 'images/films/Dirty-dancing.jpg',      file: 'sounds/films/dirty_dancing_the_time_of_my_life_v2.mp3',                    start: 2.0,             title: 'Dirty Dancing (The Time of My Life)' },
+          { id: 'titanic',            name: 'Amour Éternel',        img: 'images/films/titanic.jpg',            file: 'sounds/films/titanic_my_heart_will_go_on_celine_dion_v2.mp3',              start: 195.2,           title: 'Titanic (My Heart Will Go On)' },
+          { id: 'love-actually',      name: 'Amour Léger',          img: 'images/films/love-actually.jpg',      file: 'sounds/films/love_actually_craig_armstrong_v2.mp3',                        start: 319.0,           title: 'Love Actually' },
         ]
       },
       {
         id: 'comedie', label: 'Comédie', icon: '😂', color: '#ffcc66',
         items: [
-          { id: 'curb-your',          name: 'Malaise Absurde',      img: 'images/films/curb-your.jpg',          file: 'sounds/films/curb_your_enthusiasm_theme.mp3',                           start: 0.5,             title: 'Curb Your Enthusiasm' },
-          { id: 'pink-panthere',      name: 'Enquête Maladroite',   img: 'images/films/pink-panthere.jpg',      file: 'sounds/films/the_pink_panther_theme.mp3',                               start: 6.3,             title: 'The Pink Panther' },
-          { id: 'benny',              name: 'Poursuite Burlesque',  img: 'images/films/benny.jpg',              file: 'sounds/films/benny_hill_theme.mp3',                                     start: 3.2,             title: 'Benny Hill' },
+          { id: 'curb-your',          name: 'Malaise Absurde',      img: 'images/films/curb-your.jpg',          file: 'sounds/films/curb_your_enthusiasm_theme_v2.mp3',                           start: 0.5,             title: 'Curb Your Enthusiasm' },
+          { id: 'pink-panthere',      name: 'Enquête Maladroite',   img: 'images/films/pink-panthere.jpg',      file: 'sounds/films/the_pink_panther_theme_v2.mp3',                               start: 6.3,             title: 'The Pink Panther' },
+          { id: 'benny',              name: 'Poursuite Burlesque',  img: 'images/films/benny.jpg',              file: 'sounds/films/benny_hill_theme_v2.mp3',                                     start: 3.2,             title: 'Benny Hill' },
         ]
       },
     ]
