@@ -31,10 +31,10 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
 - **Film soundboard** — movie themes organized by genre with cover images
 - **Animal soundboard** — 4×8 color-coded grid with category accents
 - Organized by cinematic universe (classical, western, medieval, jazz, sci-fi, horror, world music...) and sound category (nature, animals, vehicles, human, SFX...)
-- Auto-connects to the Roland FP-30X on page load
+- Auto-connects to the Roland FP-30X over USB on page load; over Bluetooth, reconnects on its own after a dropout, and offers the last piano again after a reload
 - Volume control directly from the interface (MIDI CC7, music volume and sound volume, independently)
 - **One color per kind of tab** (MIDI, sounds, music): it tells what the panel bar controls
-- **Emergency Stop** — silences everything at once, from any tab: the piano (All Notes Off), the music and every sound
+- **Emergency Stop** — silences everything at once, from any tab: the piano (All Sound Off), the music and every sound
 - **Wake Lock** — prevents screen sleep during a performance
 - **Responsive layout** — automatic grid reorganization in portrait mode
 - **About popup** — shows the version, Service Worker and Wake Lock status, and an « update » button that installs the latest published version and reloads (sounds stay cached; nothing is reloaded when offline)
@@ -61,7 +61,7 @@ Click a button → the sound plays at once, over the music and over any other so
 The panel bar holds a ⏹ button that stops every sound (the music goes on), the emergency stop and the sound volume (shared by the two sound tabs).
 
 #### Transition music (header button)
-Between two improvs, a rhythmic music lifts the audience. The 🎉 button (top-left corner of the header, on every tab) opens its popup (never a launch in one click from the header: a stray tap during an improv must not start anything). While the popup is open, 🎉 becomes a play button, so a double tap opens the popup and starts the music. Playing it stops everything else, like the emergency stop: music, sounds and piano. While it plays, 🎉 becomes a stop square that stops it (short fade); the popup stays open and keeps the same size. One music serves the whole show, picked beforehand in the popup. Each music has several key moments, shown as a row of buttons: moment 0 (`start`) opens the show, then moments 1, 2, 3… (`restarts`) are played in turn after each improv (0, 1, 2, 3, 1, 2, 3…). The planned one is coloured and wider, and is the one the header button plays; after a moment played out of order, the planned one becomes its successor. It goes back to 0 when another music is picked, or after 6 hours without a launch. No FX, its own volume; a music tab tile stops it. The choice, the last launch, the last moment played and the volume are kept in `localStorage`. List: `src/config/transition.config.ts` (`TRANSITION_MUSICS`: `id`, `name`, `file`, optional `start`, `restarts` in seconds).
+Between two improvs, a rhythmic music lifts the audience. The 🎉 button (top-left corner of the header, on every tab) opens its popup (never a launch in one click from the header: a stray tap during an improv must not start anything). While the popup is open, 🎉 becomes a play button, so a double tap opens the popup and starts the music. Playing it stops everything else, like the emergency stop: music, sounds and piano. While it plays, 🎉 becomes a stop square that stops it (short fade); the popup stays open and keeps the same size. One music serves the whole show, picked beforehand in the popup. Each music has several key moments, shown as a row of buttons: moment 0 (`start`) opens the show, then moments 1, 2, 3… (`restarts`) are played in turn after each improv (0, 1, 2, 3, 1, 2, 3…). The planned one is coloured and wider, and is the one the header button plays; after a moment played out of order, the planned one becomes its successor. It goes back to 0 when another music is picked, or after 6 hours without a launch. The tabs' audio FX don't apply to it; it has its own volume, a switch that resets that volume to 100 % each time the popup opens, and a « ✨ Clarté Studio » button that gives it a brighter sound (the Clarté Studio audio preset, on its own small FX chain). A music tab tile stops it. The choice, the last launch, the last moment played, the volume and both settings are kept in `localStorage`. List: `src/config/transition.config.ts` (`TRANSITION_MUSICS`: `id`, `name`, `file`, optional `start`, `restarts` in seconds).
 
 Each sound file is decoded on its first click (read from the offline cache), then kept in memory within a 50 MB budget, so the following clicks start instantly (`src/audio/sounds.ts`).
 
@@ -70,7 +70,7 @@ Each sound file is decoded on its first click (read from the offline cache), the
 - GM2 sounds will work on any GM2-compatible instrument.
 - Roland-specific sounds (Roland sound banks) are designed for the FP-30X and may not work as expected on other devices.
 - Patches and MIDI piano FX go to channel 4, the channel of the FP-30X’s own keyboard sound: the keys play the chosen instrument directly, with no Local Off on the piano. FX use common CC numbers (93 chorus, 74 cutoff…); reverb is the piano’s Ambience setting (Roland SysEx), because channel 4 ignores CC91. Over USB, Chrome asks once for MIDI SysEx access. Details in `docs/fp30x-midi.md`.
-- Audio files are cached on first play. Before a show, open the About popup (⚙) and use « ⬇ Télécharger tous les sons » with an internet connection: every sound and cover image is then available offline (the popup shows « Hors ligne : 68 / 68 sons… »). It also tells whether storage is protected from automatic eviction by Chrome (usually granted to the installed app).
+- Audio files are cached on first play. Before a show, open the About popup (⚙) and use « ⬇ Télécharger tous les sons » with an internet connection: every sound and cover image is then available offline (the popup counts them). It also tells whether storage is protected from automatic eviction by Chrome (usually granted to the installed app).
 
 ---
 
@@ -94,12 +94,18 @@ Each sound file is decoded on its first click (read from the offline cache), the
 ├── index.html                      # Entry point (loads src/main.ts)
 ├── vite.config.ts                  # Vite + PWA configuration
 ├── package.json                    # Scripts, dependencies, app version
-├── tools/regression/               # Automated comparison with v1 (headless Chromium, see its README)
+├── CHANGELOG.md                    # Release notes
+├── docs/                           # Stage use, sound rules, FP-30X MIDI, to-do, bugs, tablet checklist
+├── tools/color-mix-compat.ts       # PostCSS plugin: color-mix() rewritten for Chrome 106
+├── tools/regression/               # Automated comparison with the latest release (headless Chrome, see its README)
 ├── src/
 │   ├── main.ts                     # Entry: global styles, mounts App, MIDI, Wake Lock, Service Worker
 │   ├── App.svelte                  # Header, one panel per tab, About and FX popups
 │   ├── state.svelte.ts             # Shared state (STATE, Svelte runes)
 │   ├── wake-lock.ts                # Keeps the screen on
+│   ├── app-update.ts               # « Update the app » button (About popup)
+│   ├── offline.ts                  # Persistent storage, « download every sound »
+│   ├── cache-names.ts              # Cache names shared by the page and the Service Worker
 │   ├── types.ts                    # Shared types (config schema, FX controls and presets)
 │   ├── events.ts                   # Small typed event emitter (engines → UI)
 │   ├── sw.ts                       # Service Worker (Workbox)
@@ -117,7 +123,8 @@ Each sound file is decoded on its first click (read from the offline cache), the
 │   │   └── ble-midi-parser.ts      # BLE MIDI packet parser
 │   ├── audio/                      # Audio engine (no DOM)
 │   │   ├── audio-engine.ts         # Web Audio effects chain
-│   │   ├── playback.ts             # Play, stop, pause, seek, fades, progress
+│   │   ├── playback.ts             # Music: play, stop, pause, seek, fades, progress
+│   │   ├── sounds.ts               # Sound tabs: short sounds over everything (decoded once, 8 voices)
 │   │   ├── transition.ts           # Transition music: choice, key moments, volume
 │   │   └── timing.ts               # Time helpers (range, progress, M:SS)
 │   ├── fx/                         # FX logic (no DOM)
@@ -130,16 +137,18 @@ Each sound file is decoded on its first click (read from the offline cache), the
 │   │   ├── fx-overlay.svelte.ts    # FX popup state and logic (controller)
 │   │   ├── fx-overlays.svelte.ts   # MIDI and audio FX popups, Effets/Reset state
 │   │   ├── transport.svelte.ts     # Sound buttons and transport bar state
+│   │   ├── transition.svelte.ts    # Transition popup state
+│   │   ├── color-channels.ts       # Color channels for script-set colors (Chrome 106)
 │   │   ├── midi-ui.svelte.ts       # MIDI connection selects, active instrument
 │   │   ├── layout.svelte.ts        # Active tab, orientation, button heights
-│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, SoundButton, Transport…
+│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, SoundButton, Transport, TransitionPopup…
 │   └── css/
 │       └── global.css              # Variables, reset, shared slider (other styles are in the components)
 └── public/                         # Copied as-is to the site root
     ├── manifest.json               # PWA manifest
     ├── favicon.ico, apple-touch-icon.png, pwa-*.png
     ├── images/films/*.jpg          # Cover images for film soundboard
-    └── sounds/                     # Audio files (*.mp3 / *.wav / *.ogg, animaux/, films/)
+    └── sounds/                     # Audio files, one folder per tab (animaux/, bruits/, ambiances/, musiques/, films/, transitions/)
 ```
 
 ---
@@ -240,7 +249,7 @@ Preset buttons for the MIDI and audio FX overlays. Each file exports an array �
 ```js
 {
   label: 'Films',
-  cols: 3,  // Items arranged in 3 columns with category headers
+  cols: 4,  // Items arranged in 4 columns with category headers
   // ...
 }
 ```
@@ -271,7 +280,7 @@ Preset buttons for the MIDI and audio FX overlays. Each file exports an array �
 | PWA / Service Worker | Chrome, Edge, Safari 16.4+ |
 | Wake Lock API | Chrome, Edge |
 
-> ⚠️ Optimized for **Chrome on Android**. MIDI features are not available on Firefox and Safari.
+> ⚠️ Optimized for **Chrome on Android**. MIDI features are not available on Firefox and Safari. The stage tablet runs **Chrome 106** (Android 6), the oldest version the app must keep working on.
 
 ---
 
@@ -289,7 +298,7 @@ Every push to `main` installs dependencies (`npm ci`), runs the type check and t
 
 #### Local development
 
-Requires Node.js (version in `.nvmrc`; with nvm: `nvm use`).
+Requires Node.js 24 (version in `.nvmrc`; with nvm: `nvm use`).
 
 ```bash
 npm install        # once
@@ -298,11 +307,12 @@ npm run typecheck  # TypeScript + Svelte check (app, Service Worker, Vite config
 npm test           # unit tests (Vitest)
 npm run build      # production build in dist/
 npm run preview    # serves dist/ (with the Service Worker)
+npm run regression # compares dist/ with the latest release in headless Chrome (see tools/regression/)
 ```
 
 To test on a tablet on the same network, add `-- --host` and see `docs/checklist.md`.
 
-Planned ideas and features (new sound tabs, looper, themes…) are listed in `docs/todo.md`; known bugs in `docs/bugs.md`, release notes in `CHANGELOG.md`.
+Documentation, in French, in `docs/`: `usage-scene.md` (how the app is used during a show), `sons.md` (rules for sounds and musics: tabs, tiles, files, loudness), `fp30x-midi.md` (what the piano accepts), `todo.md` (planned ideas and technical debt), `bugs.md`, `checklist.md` (manual checks on the tablet). Release notes in `CHANGELOG.md`.
 
 ---
 
@@ -319,7 +329,7 @@ The version number shown in the About popup is the `version` field of `package.j
 - **Piano**: Roland FP-30X
 - **USB connection**: USB-B → USB-A cable
 - **Bluetooth connection**: BLE MIDI (standard profile)
-- **Tablet**: Android ~11 inches, Chrome
+- **Tablet**: Android 6, ~11 inches, Chrome 106
 
 ---
 
@@ -357,13 +367,13 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
 - **Soundboard films** — thèmes de films organisés par genre avec images de couverture
 - **Soundboard animaux** — grille 4×8 avec couleurs par catégorie d'animal
 - Organisé par univers cinématographique (classique, western, médiéval, jazz, SF, horreur, musique du monde...) et catégorie sonore (nature, animaux, véhicules, humain, effets spéciaux...)
-- Connexion automatique au Roland FP-30X au chargement de la page
+- Connexion automatique au Roland FP-30X en USB au chargement de la page ; en Bluetooth, reconnexion seule après une coupure, et dernier piano reproposé après un rechargement
 - Contrôle du volume directement depuis l'interface (MIDI CC7, volume des musiques et volume des sons, indépendants)
 - **Une couleur par type d'onglet** (MIDI, sons, musiques) : elle dit ce que pilote la barre du panneau
-- **Arrêt d'urgence** — coupe tout d'un coup, depuis n'importe quel onglet : le piano (All Notes Off), la musique et tous les sons
+- **Arrêt d'urgence** — coupe tout d'un coup, depuis n'importe quel onglet : le piano (All Sound Off), la musique et tous les sons
 - **Wake Lock** — empêche la mise en veille de l'écran pendant le spectacle
 - **Layout responsive** — réorganisation automatique de la grille en mode portrait
-- **Popup À propos** — affiche le statut du Service Worker et du Wake Lock, bouton de reset du cache
+- **Popup À propos** — affiche la version, le statut du Service Worker et du Wake Lock, et un bouton « Mettre à jour l'application » qui installe la dernière version publiée et recharge (les sons restent en cache ; hors ligne, rien n'est rechargé)
 - **Mixeur d’effets audio en direct** — grande popup sur le panneau audio pour façonner le son en temps réel (égalisation, filtres, tempo, delay, reverb) pendant la lecture ou avant le morceau suivant ; presets avec transitions en douceur, reset global et rappel rapide par curseur
 - **Effets piano MIDI** — sur chaque onglet MIDI, **Effets** / **Reset** ouvre une popup (même logique visuelle que le mixeur audio) au-dessus de la grille d’instruments ; les curseurs envoient des Control Changes MIDI standards sur le canal 4 vers le piano connecté (chorus, cutoff, résonance, attaque, relâchement, decay), et le curseur de réverbération règle l’Ambiance du piano (0 à 10) par un message SysEx Roland, via `sendMidi()` dans `src/midi/midi.ts`. Les deux popups d’effets partagent une seule implémentation (le composant `src/ui/FxOverlay.svelte`, logique des presets dans `src/fx/fx-presets.ts`). Les positions des curseurs reflètent ce que l’application a envoyé en dernier, pas une relecture depuis l’instrument.
 
@@ -387,7 +397,7 @@ Cliquer sur un bouton → le son part tout de suite, par-dessus la musique et pa
 La barre du panneau porte un bouton ⏹ qui coupe tous les sons (la musique continue), l'arrêt d'urgence et le volume des sons (commun aux deux onglets sons).
 
 #### Musique de transition (bouton de l'en-tête)
-Entre deux impros, une musique rythmée remonte l'énergie du public. Le bouton 🎉 (coin haut gauche de l'en-tête, sur tous les onglets) ouvre sa popup (jamais de lancement en un clic depuis l'en-tête : un clic raté pendant une impro ne doit rien lancer). Popup ouverte, 🎉 devient un bouton play : un double clic ouvre donc la popup et lance la musique. La lancer coupe tout le reste, comme l'arrêt d'urgence : musique, sons et piano. Pendant la lecture, 🎉 devient un carré stop qui l'arrête (court fondu) ; la popup reste ouverte et garde la même taille. Une seule musique sert tout le spectacle, choisie avant dans la popup. Chaque musique a plusieurs moments marquants, sur une ligne de boutons : le moment 0 (`start`) ouvre le spectacle, puis les moments 1, 2, 3… (`restarts`) passent à tour de rôle après chaque impro (0, 1, 2, 3, 1, 2, 3…). Le moment prévu est en couleur et plus large, et c'est lui que lance le bouton de l'en-tête ; après un moment joué hors de l'ordre, le prévu devient son suivant. On revient au 0 en changeant de musique, ou après 6 heures sans lancement. Sans effets, avec son propre volume ; une tuile d'un onglet musiques la coupe. Le choix, le dernier lancement, le dernier moment joué et le volume sont gardés dans `localStorage`. Liste : `src/config/transition.config.ts` (`TRANSITION_MUSICS` : `id`, `name`, `file`, `start` facultatif, `restarts` en secondes).
+Entre deux impros, une musique rythmée remonte l'énergie du public. Le bouton 🎉 (coin haut gauche de l'en-tête, sur tous les onglets) ouvre sa popup (jamais de lancement en un clic depuis l'en-tête : un clic raté pendant une impro ne doit rien lancer). Popup ouverte, 🎉 devient un bouton play : un double clic ouvre donc la popup et lance la musique. La lancer coupe tout le reste, comme l'arrêt d'urgence : musique, sons et piano. Pendant la lecture, 🎉 devient un carré stop qui l'arrête (court fondu) ; la popup reste ouverte et garde la même taille. Une seule musique sert tout le spectacle, choisie avant dans la popup. Chaque musique a plusieurs moments marquants, sur une ligne de boutons : le moment 0 (`start`) ouvre le spectacle, puis les moments 1, 2, 3… (`restarts`) passent à tour de rôle après chaque impro (0, 1, 2, 3, 1, 2, 3…). Le moment prévu est en couleur et plus large, et c'est lui que lance le bouton de l'en-tête ; après un moment joué hors de l'ordre, le prévu devient son suivant. On revient au 0 en changeant de musique, ou après 6 heures sans lancement. Les effets audio des onglets ne s'y appliquent pas ; elle a son propre volume, un interrupteur qui le remet à 100 % à chaque ouverture de la popup, et un bouton « ✨ Clarté Studio » qui lui donne un son plus brillant (le préréglage audio Clarté Studio, sur sa propre petite chaîne d'effets). Une tuile d'un onglet musiques la coupe. Le choix, le dernier lancement, le dernier moment joué, le volume et les deux réglages sont gardés dans `localStorage`. Liste : `src/config/transition.config.ts` (`TRANSITION_MUSICS` : `id`, `name`, `file`, `start` facultatif, `restarts` en secondes).
 
 Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), puis gardé en mémoire dans la limite de 50 Mo : les clics suivants partent instantanément (`src/audio/sounds.ts`).
 
@@ -396,7 +406,7 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 - Les sons GM2 fonctionnent sur tout instrument compatible GM2.
 - Les sons spécifiques Roland (banques Roland) sont conçus pour le FP-30X et peuvent ne pas fonctionner correctement sur d'autres appareils.
 - Les patchs et les effets piano MIDI partent sur le canal 4, celui du son du clavier du FP-30X : les touches jouent directement l’instrument choisi, sans Local Off sur le piano. Les effets utilisent des numéros de CC courants (93 chorus, 74 cutoff…) ; la réverbération est le réglage Ambiance du piano (SysEx Roland), car le canal 4 ignore le CC91. En USB, Chrome demande une fois l’accès SysEx MIDI. Détails dans `docs/fp30x-midi.md`.
-- Les fichiers audio sont mis en cache dynamiquement au premier clic. Avant un spectacle, jouer chaque son une fois avec une connexion internet pour garantir le fonctionnement hors ligne.
+- Les fichiers audio sont mis en cache au premier clic. Avant un spectacle, ouvrir la popup À propos (⚙) et utiliser « ⬇ Télécharger tous les sons » avec une connexion internet : tous les sons et toutes les affiches sont alors disponibles hors ligne (la popup les compte). Elle indique aussi si le stockage est protégé contre l'effacement automatique par Chrome (en général accordé à l'application installée).
 
 ---
 
@@ -420,12 +430,18 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 ├── index.html                      # Point d'entrée (charge src/main.ts)
 ├── vite.config.ts                  # Configuration Vite + PWA
 ├── package.json                    # Scripts, dépendances, version de l'app
-├── tools/regression/               # Comparaison automatique avec la v1 (Chromium headless, voir son README)
+├── CHANGELOG.md                    # Notes de version
+├── docs/                           # Usage sur scène, règles des sons, MIDI du FP-30X, à faire, bugs, checklist tablette
+├── tools/color-mix-compat.ts       # Plugin PostCSS : color-mix() réécrit pour Chrome 106
+├── tools/regression/               # Comparaison automatique avec la dernière version publiée (Chrome headless, voir son README)
 ├── src/
 │   ├── main.ts                     # Entrée : styles globaux, montage d'App, MIDI, Wake Lock, Service Worker
 │   ├── App.svelte                  # En-tête, un panneau par onglet, popups À propos et effets
 │   ├── state.svelte.ts             # État partagé (STATE, runes Svelte)
 │   ├── wake-lock.ts                # Garde l'écran allumé
+│   ├── app-update.ts               # Bouton « Mettre à jour l'application » (popup À propos)
+│   ├── offline.ts                  # Stockage persistant, « Télécharger tous les sons »
+│   ├── cache-names.ts              # Noms des caches, communs à la page et au Service Worker
 │   ├── types.ts                    # Types partagés (schéma de config, contrôles et presets FX)
 │   ├── events.ts                   # Petit émetteur d'événements typé (moteurs → interface)
 │   ├── sw.ts                       # Service Worker (Workbox)
@@ -443,7 +459,8 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 │   │   └── ble-midi-parser.ts      # Parser paquet BLE MIDI
 │   ├── audio/                      # Moteur audio (sans DOM)
 │   │   ├── audio-engine.ts         # Chaîne d'effets Web Audio
-│   │   ├── playback.ts             # Lecture, stop, pause, seek, fondus, progression
+│   │   ├── playback.ts             # Musiques : lecture, stop, pause, seek, fondus, progression
+│   │   ├── sounds.ts               # Onglets sons : sons courts par-dessus tout (décodés une fois, 8 voix)
 │   │   ├── transition.ts           # Musique de transition : choix, moments marquants, volume
 │   │   └── timing.ts               # Calculs de temps (plage, progression, M:SS)
 │   ├── fx/                         # Logique des effets (sans DOM)
@@ -456,16 +473,18 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 │   │   ├── fx-overlay.svelte.ts    # État et logique d'une popup d'effets (contrôleur)
 │   │   ├── fx-overlays.svelte.ts   # Popups effets MIDI et audio, état Effets/Reset
 │   │   ├── transport.svelte.ts     # État des boutons de sons et de la barre de transport
+│   │   ├── transition.svelte.ts    # État de la popup de transition
+│   │   ├── color-channels.ts       # Canaux des couleurs posées par script (Chrome 106)
 │   │   ├── midi-ui.svelte.ts       # Listes de connexion MIDI, instrument actif
 │   │   ├── layout.svelte.ts        # Onglet actif, orientation, hauteur des boutons
-│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, SoundButton, Transport…
+│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, SoundButton, Transport, TransitionPopup…
 │   └── css/
 │       └── global.css              # Variables, reset, curseur partagé (le reste est dans les composants)
 └── public/                         # Copié tel quel à la racine du site
     ├── manifest.json               # Manifeste PWA
     ├── favicon.ico, apple-touch-icon.png, pwa-*.png
     ├── images/films/*.jpg          # Images de couverture pour le soundboard films
-    └── sounds/                     # Fichiers audio (*.mp3 / *.wav / *.ogg, animaux/, films/)
+    └── sounds/                     # Fichiers audio, un dossier par onglet (animaux/, bruits/, ambiances/, musiques/, films/, transitions/)
 ```
 
 ---
@@ -566,7 +585,7 @@ Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un
 ```js
 {
   label: 'Films',
-  cols: 3,  // Items répartis en 3 colonnes avec en-têtes de catégorie
+  cols: 4,  // Items répartis en 4 colonnes avec en-têtes de catégorie
   // ...
 }
 ```
@@ -597,7 +616,7 @@ Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un
 | PWA / Service Worker | Chrome, Edge, Safari 16.4+ |
 | Wake Lock API | Chrome, Edge |
 
-> ⚠️ Optimisée pour **Chrome sur Android**. Les fonctionnalités MIDI ne sont pas disponibles sur Firefox et Safari.
+> ⚠️ Optimisée pour **Chrome sur Android**. Les fonctionnalités MIDI ne sont pas disponibles sur Firefox et Safari. La tablette de scène tourne sous **Chrome 106** (Android 6), la plus vieille version sur laquelle l'application doit continuer de marcher.
 
 ---
 
@@ -615,7 +634,7 @@ Le déploiement est géré par GitHub Actions (`.github/workflows/deploy.yml`).
 
 #### En local
 
-Nécessite Node.js (version dans `.nvmrc` ; avec nvm : `nvm use`).
+Nécessite Node.js 24 (version dans `.nvmrc` ; avec nvm : `nvm use`).
 
 ```bash
 npm install        # une fois
@@ -624,11 +643,12 @@ npm run typecheck  # vérification TypeScript + Svelte (app, Service Worker, con
 npm test           # tests unitaires (Vitest)
 npm run build      # build de production dans dist/
 npm run preview    # sert dist/ (avec le Service Worker)
+npm run regression # compare dist/ à la dernière version publiée dans Chrome headless (voir tools/regression/)
 ```
 
 Pour tester sur une tablette du même réseau, ajouter `-- --host` et voir `docs/checklist.md`.
 
-Les idées et évolutions prévues (nouveaux onglets de sons, looper, thèmes…) sont listées dans `docs/todo.md` ; les bugs connus dans `docs/bugs.md`, les notes de version dans `CHANGELOG.md`.
+Documentation dans `docs/` : `usage-scene.md` (l'appli pendant un spectacle), `sons.md` (règles des sons et des musiques : onglets, tuiles, fichiers, niveaux), `fp30x-midi.md` (ce que le piano accepte), `todo.md` (idées prévues et dette technique), `bugs.md`, `checklist.md` (vérifications à la main sur la tablette). Notes de version dans `CHANGELOG.md`.
 
 ---
 
@@ -645,7 +665,7 @@ Le numéro de version affiché dans la popup « À propos » est le champ `versi
 - **Piano** : Roland FP-30X
 - **Connexion USB** : câble USB-B → USB-A
 - **Connexion Bluetooth** : BLE MIDI (profil standard)
-- **Tablette** : Android ~11 pouces, Chrome
+- **Tablette** : Android 6, ~11 pouces, Chrome 106
 
 ---
 
