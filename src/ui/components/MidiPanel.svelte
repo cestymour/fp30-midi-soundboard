@@ -195,6 +195,14 @@
     overflow: hidden;
   }
 
+  /* Écran trop petit pour les boutons (classe posée par equalizeMidiButtons) :
+     la grille défile, les colonnes prennent la hauteur de leur contenu */
+  .midi-grid:global(.scrollable) {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    align-items: flex-start;
+  }
+
   .btn-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

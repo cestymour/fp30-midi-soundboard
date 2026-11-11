@@ -73,8 +73,13 @@ export function watchOrientation(): void {
 // HAUTEUR DES BOUTONS
 // ═══════════════════════════════════════════════════════
 
+/** Hauteur minimale d'un bouton : en dessous, la grille défile au lieu de rétrécir les boutons */
+const MIN_BTN_H = 40;
+
 /**
  * Calcule et applique une hauteur uniforme aux boutons d'un panneau en colonnes.
+ * Si une colonne ne tient pas avec des boutons de MIN_BTN_H (petit écran), la grille
+ * reçoit la classe `scrollable` et défile verticalement ; sinon elle n'a jamais de scroll.
  */
 interface EqualizeConfig {
   panelSelector:    string;
@@ -108,6 +113,7 @@ function equalizeColumnButtons(cfg: EqualizeConfig): void {
     }
 
     const availableGridH = (gridH - (visualRowCount - 1) * gapPx) / visualRowCount;
+    let overflowing = false;
 
     grid.querySelectorAll<HTMLElement>(cfg.colSelector).forEach(col => {
       let totalRows = 0;
@@ -128,8 +134,11 @@ function equalizeColumnButtons(cfg: EqualizeConfig): void {
       const gapsInGrid = (totalRows - 1) * gapInner;
       const btnH       = Math.floor((available - gapsInGrid) / totalRows);
 
-      col.style.setProperty('--btn-h', Math.max(40, btnH) + 'px');
+      if (btnH < MIN_BTN_H) overflowing = true;
+      col.style.setProperty('--btn-h', Math.max(MIN_BTN_H, btnH) + 'px');
     });
+
+    grid.classList.toggle('scrollable', overflowing);
   });
 }
 

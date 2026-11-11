@@ -167,6 +167,14 @@
     overflow: hidden;
   }
 
+  /* Écran trop petit pour les boutons (classe posée par equalizeAudioButtons) :
+     la grille défile, les colonnes prennent la hauteur de leur contenu */
+  .audio-grid-cols:global(.scrollable) {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    align-items: flex-start;
+  }
+
   .audio-cat-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

@@ -12,11 +12,13 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
   - **Application** : version et « ⟳ Mettre à jour l'application ».
   - Chaque état a une pastille : verte quand c'est prêt, orange quand c'est à vérifier avant un spectacle, grise quand l'appareil ne le permet pas.
   - Elle se ferme par la croix ✕ en haut à droite, comme la popup de la musique de transition, ou par un appui à côté. Le bouton « Fermer » du bas disparaît.
+- **Petits écrans (téléphone) : la grille défile.** Quand les tuiles ne tiennent pas en hauteur, la grille se fait défiler au doigt au lieu de couper la dernière rangée (onglets d'instruments, Musiques, Films). La barre d'onglets et la barre de contrôles (volume, arrêt d'urgence…) restent en place. Sur la tablette, où tout tient, rien ne change : pas de défilement.
 
 ### À vérifier sur la tablette
 
 - Ouvrir ⚙ dans l'application installée : toutes les pastilles doivent être vertes avant un spectacle.
 - « Plein écran » dans un onglet Chrome, puis « Quitter le plein écran ».
+- Dans les deux orientations, aucun onglet ne doit défiler. Sur un téléphone en portrait, l'onglet Instruments défile, et un glissement qui part d'une tuile ne la déclenche pas.
 
 ## 1.14.0 — 2026-11-11
 
