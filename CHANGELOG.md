@@ -16,7 +16,7 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 
 - Le temps affiché dans la popup compte depuis le début de la musique (0:09 pour All Night) : à la reprise, il affiche donc 0:41 pour All Night.
 - En portrait, les onglets sont un peu plus serrés pour que tout tienne avec le nouveau bouton.
-- Trois nouveaux fichiers dans `public/sounds/transitions/` : « Télécharger tous les sons » les ajoute au hors ligne.
+- Trois nouveaux fichiers dans `public/sounds/transitions/` : « Télécharger tous les sons » les ajoute au hors ligne. Comme les musiques des onglets, ils sont nivelés à −18 LUFS (crête ≤ −1,5 dBTP) et encodés en MP3 80 kb/s stéréo sans pochette : 7,8 Mo au total au lieu de 14,3 Mo. Les originaux étaient très forts (environ −11 LUFS, crêtes au-dessus de 0 dBFS) : ils sont donc baissés d'environ 7 dB, et le volume de la transition reste réglable dans la popup.
 
 ### À vérifier sur la tablette
 
