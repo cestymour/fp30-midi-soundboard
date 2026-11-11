@@ -180,7 +180,7 @@
     box-shadow: 0 0 12px var(--tab-accent);
   }
 
-  .tab-icon  { font-size: 15px; line-height: 1; }
+  .tab-icon  { font-size: 24px; line-height: 1; }
   .tab-label { font-size: 12px; }
 
   /* ── Desktop large ── */

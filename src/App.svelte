@@ -29,7 +29,7 @@
 <header id="header">
   <TransitionButton />
   <TabNav />
-  <button id="settings-btn" title="Paramètres" onclick={() => settingsPopup.open()} oncontextmenu={e => e.preventDefault()}>⚙</button>
+  <button id="settings-btn" title="Paramètres" onclick={() => settingsPopup.open()} oncontextmenu={e => e.preventDefault()}>⚙️</button>
 </header>
 
 <main id="panels" bind:this={panels}>

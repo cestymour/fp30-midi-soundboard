@@ -7,7 +7,7 @@ export const AUDIO_TABS: AudioTab[] = [
   {
     id: 'animaux',
     label: 'Animaux',
-    icon: '🐾',
+    icon: '🐮',
     kind: 'sounds',
     gridType: 'animals',
     categories: [
