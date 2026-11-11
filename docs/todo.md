@@ -67,3 +67,7 @@ Morceaux écartés de l'onglet Musiques parce qu'ils se jouent au clavier plutô
   - **Enfants** : plusieurs instruments au choix, chacun avec son preset.
 
   À concevoir : le format de configuration d'un thème (instrument : `pc` / `msb` / `lsb`, preset d'effets, texte d'aide, gamme) et la présentation des indications de jeu.
+
+## Dépôt et outillage
+
+- [ ] **Fins de ligne : tout en LF.** Git est en `core.autocrlf=true` (réglage par défaut de Git pour Windows) : le dépôt est en LF, le disque en CRLF, et un fichier écrit en LF (par un outil ou un script) provoque l'avertissement « LF will be replaced by CRLF ». Sans danger (l'index reste en LF), mais bruyant. Proposition : ajouter un `.gitattributes` (`* text=auto eol=lf`) et un `.editorconfig` (`end_of_line = lf`), pour des fichiers en LF partout, sur le disque comme dans le dépôt, puis reconvertir les fichiers du disque (`git add --renormalize .`, après vérification que le diff ne montre que des fins de ligne). À faire dans un commit à part.
