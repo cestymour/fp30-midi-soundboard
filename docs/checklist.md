@@ -14,7 +14,7 @@
 - [ ] Sélection d'instruments : le bon son sur le piano (Program Change + Bank Select MSB/LSB)
 - [ ] Volume MIDI, bouton d'arrêt d'urgence (coupe tout de suite, réverbération comprise, même pédale enfoncée)
 - [ ] Popups FX : repères du neutre bien visibles de part et d'autre de chaque curseur ; après Reset, chaque poignée est posée pile sur ses repères, y compris en bout de course (Chorus, High-pass, Reverb, Delay, Low-pass)
-- [ ] Barre des panneaux sur téléphone en paysage : « FX » et « RAZ » lisibles, rien de coupé (valeur du volume comprise)
+- [ ] Barre des panneaux (onglets piano, musiques et sons), en paysage, en portrait et sur un téléphone en paysage : Effets, Reset, volume et stop bien placés, rien ne déborde ni n'est coupé
 - [ ] Popup FX MIDI : sliders, presets (Studio : son sec, brillant, notes courtes), reset, surbrillance du preset après fermeture/réouverture et après changement d'onglet ; les curseurs glissent sans à-coups pendant l'animation d'un preset, réverbération comprise ; nom sous chaque curseur lisible, sans valeur chiffrée
 - [ ] Reset séparés : avec un preset piano et un preset audio actifs, le Reset d'un onglet MIDI ne remet à zéro que les effets piano (le Reset des onglets de sons reste allumé), et inversement
 - [ ] Lecture des musiques (onglets musiques) et des sons (onglets sons), y compris ceux avec `start` / `end`
@@ -33,7 +33,7 @@
 - [ ] Popup « À propos » et numéro de version ; « Stockage : protégé ✓ » dans l'application installée ; Wake Lock « actif ✓ » (et plus « actif » si la demande a échoué)
 - [ ] « Plein écran » (popup À propos) dans un onglet Chrome : barres masquées ; le bouton devient « Quitter le plein écran » et en sort ; une sortie par le geste ou la touche Retour remet le bouton à « Plein écran »
 - [ ] Sur un **téléphone en paysage** : popups des effets (chaque carte a son reset, son curseur et son nom entier) et popup À propos (défile, « Fermer » accessible)
-- [ ] « ⬇ Télécharger tous les sons » : le compteur arrive au total (aujourd'hui « 68 / 68 sons, 36 / 36 images »), puis le bouton disparaît
+- [ ] « ⬇ Télécharger tous les sons » : le compteur arrive au total (sons et images), puis le bouton disparaît
 - [ ] Wake Lock : l'écran ne se met pas en veille
 - [ ] **Hors ligne** (mode avion) : l'app se lance, avec ses polices ; après « Télécharger tous les sons », une musique et un son jamais joués se lancent ; « Mettre à jour l'application » affiche « Hors ligne : mise à jour impossible » et ne recharge rien
 - [ ] Mise à jour : après un déploiement, la tablette récupère la nouvelle version ; si elle affiche encore l'ancien numéro, « ⟳ Mettre à jour l'application » passe au nouveau sans retélécharger les sons (le compteur hors ligne ne redescend pas)
@@ -45,9 +45,9 @@ Web MIDI, Web Bluetooth et les Service Workers exigent un contexte sécurisé (`
 Le plus simple : la tablette branchée en USB au PC (débogage USB activé).
 
 1. Sur le PC : `npm run dev` (port 5173) ou `npm run build && npm run preview` (port 4173, version construite, avec le Service Worker).
-2. `adb reverse tcp:4173 tcp:4173` (ou `5173`) : la tablette ouvre `http://localhost:4173`, un contexte sécurisé, sans réglage de Chrome. Fonctionne aussi sous WSL, avec l'`adb` de Windows.
+2. `adb reverse tcp:4173 tcp:4173` (ou `5173`) : la tablette ouvre `http://localhost:4173`, un contexte sécurisé, sans réglage de Chrome.
 3. Pour inspecter la page : `chrome://inspect` dans Chrome ou Edge sur le PC.
 
-Sans câble : `npm run dev -- --host` (ou `npm run preview -- --host`), puis sur la tablette ouvrir `chrome://flags/#unsafely-treat-insecure-origin-as-secure`, y ajouter `http://<ip-du-pc>:5173` (et `http://<ip-du-pc>:4173` pour `preview`), puis relancer Chrome. Sous WSL, si la tablette n'arrive pas à joindre le serveur, vérifier la redirection de port Windows → WSL (ou le mode réseau `mirrored` de WSL) et le pare-feu Windows.
+Sans câble : `npm run dev -- --host` (ou `npm run preview -- --host`), puis sur la tablette ouvrir `chrome://flags/#unsafely-treat-insecure-origin-as-secure`, y ajouter `http://<ip-du-pc>:5173` (et `http://<ip-du-pc>:4173` pour `preview`), puis relancer Chrome. Si la tablette n'arrive pas à joindre le serveur, vérifier le pare-feu Windows (port 5173 ou 4173).
 
-Sur le PC, avec le piano : le navigateur Windows joint directement `http://localhost:4173` servi par WSL ; le piano s'y connecte en USB ou en Bluetooth (la première connexion Bluetooth peut échouer sous Windows, réessayer). Ne pas recharger la page pendant un test en Bluetooth : la connexion serait perdue.
+Sur le PC, avec le piano : Chrome ou Edge ouvre `http://localhost:5173` (ou `4173`) ; le piano s'y connecte en USB ou en Bluetooth (la première connexion Bluetooth peut échouer sous Windows, réessayer). Ne pas recharger la page pendant un test en Bluetooth : la connexion serait perdue.

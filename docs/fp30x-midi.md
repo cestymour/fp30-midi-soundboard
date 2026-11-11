@@ -5,7 +5,7 @@ Relevé des essais faits le 2026-11-05 (Edge sous Windows, piano en Bluetooth, m
 ## Deux parties sonores distinctes
 
 - **Canal 4 : le son du clavier.** Un Bank Select (CC0, CC32) suivi d'un Program Change envoyé sur le canal 4 change le son que joue le clavier lui-même, et le voyant de catégorie du piano suit. Vérifié avec des sons GM2 (`msb:121` : trompette, chien, orgue d'église, harpe), des sons Roland (Jazz Scat, Pipe Organ, Harpiness) et la batterie (`msb:120`). Un son choisi ensuite sur le piano reprend la main, et un nouveau patch la reprend à son tour.
-- **Canal 1 (et les autres) : une partie GM2 séparée**, qui ne joue que ce qu'elle reçoit en MIDI. C'est elle que l'application règle jusqu'en 1.7.x, d'où le son du clavier en double, le Local Off fait à la main et le renvoi des notes (loopback) : voir le bug n° 8 de `docs/bugs.md`.
+- **Canal 1 (et les autres) : une partie GM2 séparée**, qui ne joue que ce qu'elle reçoit en MIDI. Un patch envoyé sur ce canal ne change pas le son des touches : le clavier joue son propre son, et il faudrait couper le son du clavier (Local Off, à la main sur le piano) puis lui renvoyer les notes jouées (loopback). C'est pour cela que l'application envoie tout sur le canal 4.
 
 ## Contrôles vérifiés sur le canal 4
 
