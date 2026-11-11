@@ -88,9 +88,12 @@
     outline-offset: -2px;
   }
 
-  #transition-btn:hover,
-  #transition-btn.is-open {
+  #transition-btn:hover {
     background: color-mix(in srgb, var(--transition-accent) 18%, transparent);
+  }
+  /* Popup ouverte : fond noir, comme le bouton des paramètres sous sa popup */
+  #transition-btn.is-open {
+    background: #000;
   }
   #transition-btn:active {
     background: color-mix(in srgb, var(--transition-accent) 28%, transparent);

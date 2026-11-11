@@ -252,7 +252,7 @@
 
   #settings-card {
     background: var(--bg-surface);
-    border: 1px solid var(--border-glow);
+    border: 1px solid var(--current-accent);
     border-radius: calc(var(--radius) * 2);
     padding: 20px 24px;
     display: flex;
