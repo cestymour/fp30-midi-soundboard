@@ -1,0 +1,5 @@
+# Fichiers texte en LF partout, dans le dépôt comme sur le disque (même sous Windows)
+* text=auto eol=lf
+
+# Documents Roland d'origine (raccourcis Windows .url, notes .txt) : gardés tels quels
+docs/DOC_FP30X/** -text
