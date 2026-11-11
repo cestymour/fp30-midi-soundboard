@@ -9,7 +9,7 @@
    sans le réseau. Les fichiers déjà en cache ne sont pas retéléchargés.
 ================================================================ */
 
-import { getAudioTabs, getSoundImage } from './config/tabs.ts';
+import { getAudioTabs, getSoundImage, getTransitionMusics } from './config/tabs.ts';
 import { AUDIO_CACHE, IMAGES_CACHE } from './cache-names.ts';
 
 export interface OfflineFiles {
@@ -18,7 +18,7 @@ export interface OfflineFiles {
   images: string[];
 }
 
-/** Sons et images de tous les onglets audio, en adresses complètes (résolues comme `<audio src>`) */
+/** Sons et images de tous les onglets audio et musiques de transition, en adresses complètes (résolues comme `<audio src>`) */
 export function listOfflineFiles(base: string = document.baseURI): OfflineFiles {
   const sounds = new Set<string>();
   const images = new Set<string>();
@@ -31,6 +31,7 @@ export function listOfflineFiles(base: string = document.baseURI): OfflineFiles 
       }
     }
   }
+  for (const music of getTransitionMusics()) sounds.add(new URL(music.file, base).href);
   return { sounds: [...sounds], images: [...images] };
 }
 

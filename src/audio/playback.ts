@@ -2,7 +2,9 @@
    playback.ts — Lecture des musiques (onglets musiques : Ambiances,
    Musiques, Films) : play, stop, pause, seek, fondus et boucle de
    progression. Une seule musique à la fois, qui passe par les effets
-   audio. Les sons des onglets sons sont dans sounds.ts.
+   audio. La musique de transition (transition.ts) est elle aussi une
+   musique : elle passe par ici, mais sur sa propre sortie, sans effets
+   et avec son propre volume. Les sons des onglets sons sont dans sounds.ts.
    Aucun accès au DOM : l'interface suit la lecture via `playbackEvents`.
 ================================================================ */
 
@@ -10,7 +12,7 @@ import type { AudioItem } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import { createEmitter } from '../events.ts';
 import { AudioEngineAPI } from './audio-engine.ts';
-import type { MediaElementTrack } from './audio-engine.ts';
+import type { MediaElementTrack, TrackRoute } from './audio-engine.ts';
 import { getPlayableDuration, getPlaybackRange, getSeekTime } from './timing.ts';
 
 export type PlaybackEvent =
@@ -32,6 +34,14 @@ export const playbackEvents = createEmitter<PlaybackEvent>();
 /** Un son est chargé (en lecture ou en pause) */
 export function hasCurrentSound(): boolean {
   return !!(STATE.currentAudio && STATE.currentSoundItem);
+}
+
+/**
+ * Volume visé par les fondus d'entrée d'une piste : celui des musiques, ou 1 pour la
+ * musique de transition, dont le volume est réglé sur sa propre sortie
+ */
+function targetVolume(audio: MediaElementTrack): number {
+  return audio.route === 'transition' ? 1 : STATE.musicVolume;
 }
 
 // ================================================================
@@ -166,7 +176,14 @@ export function stopSound(fade = false): void {
 
 let _playRequestId = 0;
 
-export async function playSound(item: AudioItem): Promise<void> {
+export interface PlayOptions {
+  /** Position de départ en secondes, à la place du `start` du son (reprise de la musique de transition) */
+  startAt?: number;
+  /** Sortie de la piste (par défaut : à travers les effets) */
+  route?: TrackRoute;
+}
+
+export async function playSound(item: AudioItem, options: PlayOptions = {}): Promise<void> {
   const src = item.file;
   if (!src) return;
 
@@ -181,10 +198,11 @@ export async function playSound(item: AudioItem): Promise<void> {
 
   const { startOffset, endOffset } = getPlaybackRange(item);
 
-  const audio = AudioEngineAPI.createTrack(src);
+  const audio = AudioEngineAPI.createTrack(src, options.route);
   audio.setPlaybackRange(startOffset, endOffset);
+  if (options.startAt !== undefined) audio.currentTime = options.startAt;
   // Sans fondu d'entrée (`noFade`), le son part directement au volume choisi
-  audio.volume = item.noFade ? STATE.musicVolume : 0;
+  audio.volume = item.noFade ? targetVolume(audio) : 0;
 
   STATE.currentAudio = audio;
   STATE.currentSoundItem = item;
@@ -210,7 +228,7 @@ export async function playSound(item: AudioItem): Promise<void> {
       return;
     }
 
-    if (!item.noFade) fadeAudio(audio, 0, STATE.musicVolume, 300, null);
+    if (!item.noFade) fadeAudio(audio, 0, targetVolume(audio), 300, null);
     startProgressLoop(audio, item, startOffset, endOffset);
   } catch (err) {
     console.warn('Fichier introuvable ou illisible :', src, err);
@@ -238,7 +256,7 @@ export function togglePlayPause(): void {
     audio.play().then(() => {
       if (STATE.currentAudio !== audio) return;
       STATE.isPaused = false;
-      fadeAudio(audio, 0, STATE.musicVolume, 150, null);
+      fadeAudio(audio, 0, targetVolume(audio), 150, null);
       const { startOffset, endOffset } = getPlaybackRange(item);
       startProgressLoop(audio, item, startOffset, endOffset);
       playbackEvents.emit({ type: 'resume' });
@@ -272,6 +290,9 @@ export function setMusicVolume(volume: number): void {
   STATE.musicVolume = volume;
   // Fondu d'entrée en cours : il s'arrête là, sinon il écraserait le volume choisi (bug n° 11).
   // Un fondu de sortie (pause, STOP) continue jusqu'au silence.
-  if (_fadingIn && _fadingAudio === STATE.currentAudio) cancelFade();
-  if (STATE.currentAudio) STATE.currentAudio.volume = STATE.musicVolume;
+  // La musique de transition a son propre volume (transition.ts) : elle n'est pas touchée.
+  const audio = STATE.currentAudio;
+  if (!audio || audio.route === 'transition') return;
+  if (_fadingIn && _fadingAudio === audio) cancelFade();
+  audio.volume = STATE.musicVolume;
 }

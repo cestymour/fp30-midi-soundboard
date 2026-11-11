@@ -1,5 +1,5 @@
 <!--
-  App.svelte — Racine de l'interface : onglets, panneaux, popups
+  App.svelte — Racine de l'interface : onglets, bouton de la musique de transition, panneaux, popups
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -10,6 +10,8 @@
   import AudioPanel from './ui/components/AudioPanel.svelte';
   import AboutPopup from './ui/components/AboutPopup.svelte';
   import FxOverlay from './ui/FxOverlay.svelte';
+  import TransitionButton from './ui/components/TransitionButton.svelte';
+  import TransitionPopup from './ui/components/TransitionPopup.svelte';
 
   const tabs = getAllTabs();
 
@@ -25,6 +27,7 @@
 </script>
 
 <header id="header">
+  <TransitionButton />
   <TabNav />
   <button id="settings-btn" title="Paramètres" onclick={() => aboutPopup.open()} oncontextmenu={e => e.preventDefault()}>⚙</button>
 </header>
@@ -39,6 +42,7 @@
   {/each}
 </main>
 
+<TransitionPopup />
 <AboutPopup bind:this={aboutPopup} />
 <FxOverlay controller={midiFxOverlay} />
 <FxOverlay controller={audioFxOverlay} />

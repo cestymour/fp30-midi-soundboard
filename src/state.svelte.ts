@@ -46,6 +46,20 @@ class AppState {
   /** Volume des sons (0-1), commun aux onglets sons */
   soundVolume           = $state(1);
 
+  // ── Musique de transition (bouton de l'en-tête, audio/transition.ts) ──
+  /** Id de la musique choisie pour le spectacle (TRANSITION_MUSICS) */
+  transitionMusicId     = $state<string | null>(null);
+  /** Dernier lancement (Date.now()), null : le prochain part du début */
+  transitionLastLaunch  = $state<number | null>(null);
+  /** Moment marquant joué en dernier (0 : début du spectacle, puis 1, 2…) */
+  transitionLastMoment  = $state(0);
+  /** Volume de la musique de transition (0-1), à part de celui des musiques */
+  transitionVolume      = $state(1);
+  /** Réglage : remettre le volume de la transition à 100 % à chaque ouverture de la popup */
+  transitionResetVolume = $state(false);
+  /** Préréglage « Clarté Studio » appliqué à la musique de transition */
+  transitionClarity     = $state(false);
+
   // ── Divers ──
   wakeLock              = $state.raw<WakeLockSentinel | null>(null);
 }

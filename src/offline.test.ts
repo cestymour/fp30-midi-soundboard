@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AUDIO_CACHE, IMAGES_CACHE } from './cache-names.ts';
-import { getAudioTabs } from './config/tabs.ts';
+import { getAudioTabs, getTransitionMusics } from './config/tabs.ts';
 import { downloadAllForOffline, getOfflineStatus, listOfflineFiles } from './offline.ts';
 
 const BASE = 'https://cestymour.github.io/fp30-midi-soundboard/';
@@ -32,9 +32,12 @@ afterEach(() => {
 });
 
 describe('listOfflineFiles', () => {
-  it('liste chaque son de la configuration une fois, en adresse complète encodée comme <audio src>', () => {
+  it('liste chaque son de la configuration une fois (onglets et musiques de transition), en adresse complète encodée comme <audio src>', () => {
     const { sounds, images } = listOfflineFiles(BASE);
-    const files = getAudioTabs().flatMap(t => t.categories.flatMap(c => c.items.map(i => i.file)));
+    const files = [
+      ...getAudioTabs().flatMap(t => t.categories.flatMap(c => c.items.map(i => i.file))),
+      ...getTransitionMusics().map(music => music.file),
+    ];
 
     expect(sounds.length).toBe(new Set(files).size);
     expect(sounds.every(url => url.startsWith(BASE + 'sounds/'))).toBe(true);

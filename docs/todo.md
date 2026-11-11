@@ -4,32 +4,13 @@ Idées et évolutions demandées par l'utilisateur, pas encore planifiées. Les 
 
 ## Priorité : à faire avant tout le reste (dans cet ordre)
 
-Demandé le 2026-11-10. Le point 1 passe avant tout ; les points 1 à 3 se font avant les autres sections de cette liste. Sons et musiques (deux fonctionnements différents) est fait : voir `CHANGELOG.md`.
+Demandé le 2026-11-10. Le point 1 passe avant tout (le bouton est fait, il reste à compléter ses musiques) ; les points 1 à 3 se font avant les autres sections de cette liste. Sons et musiques (deux fonctionnements différents) est fait : voir `CHANGELOG.md`.
 
-### 1. Bouton « musique de transition »
-
-Entre deux impros, il faut lancer tout de suite une musique rythmée pour remonter l'énergie du public. La même musique sert tout le spectacle, choisie avant le début parmi une dizaine.
-
-Déroulé : avant le spectacle, on choisit la musique (liste déroulante ?). Au début, on la lance une trentaine de secondes, puis on l'arrête pour que le MC présente et lance la première impro. À la fin de l'impro, on la relance en un clic, idéalement là où on l'avait arrêtée ; on l'arrête quelques secondes plus tard, le MC introduit l'impro suivante, et ainsi de suite.
-
-- [ ] Bouton toujours visible (dans l'en-tête, quel que soit l'onglet) ; pendant la lecture, une popup par-dessus les onglets montre la progression.
-- [ ] Choix de la musique avant le spectacle, mémorisé (`localStorage`).
-- [ ] Reprise là où on s'était arrêté (position mémorisée).
-- [ ] Trouver la dizaine de musiques (fichiers à fournir).
-
-Faisabilité : rien de bloquant. Retenu (2026-11-10) : c'est une musique comme les autres (elle coupe la musique des onglets musiques, et inversement : une seule musique à la fois, voir `src/audio/playback.ts`), avec des fondus courts à la reprise et à l'arrêt, et la position mémorisée survit à un rechargement de l'appli en plein spectacle.
-
-À définir pendant la réalisation :
-- Fin du morceau : boucler au début, s'arrêter, ou enchaîner sur une autre musique de la liste ?
-- La liste des morceaux à charger.
-- Effets audio appliqués ou non ; volume des musiques ou à part.
-- Où se fait le choix : popup À propos / réglages, ou dans la popup du bouton.
-
-### 2. Réorganiser l'onglet Musiques
+### 1. Réorganiser l'onglet Musiques
 
 - [ ] Renommage, disposition de la grille, etc. Voir aussi « Musiques : finir la maquette » plus bas.
 
-### 3. Ajouter quelques sons
+### 2. Ajouter quelques sons
 
 - [ ] Épée qu'on dégaine, bruits d'épée divers (« Épées » existe déjà : `epee_contre_epee.mp3`). Attention : Bruits est plein (32 tuiles sur 32), il faut retirer des tuiles ou agrandir la grille.
 
@@ -86,3 +67,7 @@ Morceaux écartés de l'onglet Musiques parce qu'ils se jouent au clavier plutô
   - **Enfants** : plusieurs instruments au choix, chacun avec son preset.
 
   À concevoir : le format de configuration d'un thème (instrument : `pc` / `msb` / `lsb`, preset d'effets, texte d'aide, gamme) et la présentation des indications de jeu.
+
+## Dépôt et outillage
+
+- [ ] **Fins de ligne : tout en LF.** Git est en `core.autocrlf=true` (réglage par défaut de Git pour Windows) : le dépôt est en LF, le disque en CRLF, et un fichier écrit en LF (par un outil ou un script) provoque l'avertissement « LF will be replaced by CRLF ». Sans danger (l'index reste en LF), mais bruyant. Proposition : ajouter un `.gitattributes` (`* text=auto eol=lf`) et un `.editorconfig` (`end_of_line = lf`), pour des fichiers en LF partout, sur le disque comme dans le dépôt, puis reconvertir les fichiers du disque (`git add --renormalize .`, après vérification que le diff ne montre que des fins de ligne). À faire dans un commit à part.

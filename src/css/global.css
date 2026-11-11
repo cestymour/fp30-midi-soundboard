@@ -20,6 +20,8 @@
 
   /* ── Accent courant ── */
   --current-accent: #7c9cff;
+  /* ── Musique de transition (bouton de l'en-tête et sa popup) ── */
+  --transition-accent: #ff8a3d;
 
   /* ── Layout ── */
   --header-h:   48px;
