@@ -189,7 +189,7 @@ export const AUDIO_TABS: AudioTab[] = [
   {
     id: 'musique',
     label: 'Musiques',
-    icon: '🎵',
+    icon: '🎼',
     kind: 'music',
     cols: 4,
     catCols: 2,
