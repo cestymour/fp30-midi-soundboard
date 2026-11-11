@@ -9,7 +9,7 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 - **Musique de transition**, pour relancer l'énergie du public entre deux impros. Le bouton 🎉, dans le coin en haut à gauche (en face du bouton Paramètres), est visible depuis tous les onglets. Il **ouvre une popup** ; un clic raté sur l'en-tête pendant une impro ne lance donc rien. Popup ouverte, le bouton 🎉 devient un **bouton play** : un double clic sur l'en-tête ouvre la popup et lance la musique. Pendant la lecture, il devient un **carré stop**, avec la progression en fond. Ce carré, comme le gros bouton « Arrêter » de la popup, arrête la musique (court fondu) ; la popup reste ouverte (✕ ou un toucher à côté la ferme). Elle garde toujours la même taille.
 - **Plusieurs moments marquants par musique**, pour ne pas rejouer cinq fois de suite la même transition. Le moment **0** ouvre le spectacle ; les moments **1, 2, 3…** servent après chaque impro, à tour de rôle : 0, 1, 2, 3, 1, 2, 3, 1… La popup les montre sur une ligne de boutons, avec leur position dans la musique. Le **moment prévu** est en couleur et plus large, pour être touché sans viser : c'est lui que lance le bouton de l'en-tête. Les autres restent cliquables ; après un moment joué hors de l'ordre, le prévu devient son suivant. On revient au 0 en changeant de musique, ou au-delà de 6 heures sans lancement (le spectacle suivant) ; un rechargement de l'appli en plein spectacle ne change rien.
 - **Lancer la musique de transition coupe tout**, comme l'arrêt d'urgence : la musique des onglets, les sons en cours et le piano.
-- **Une seule musique pour tout le spectacle**, choisie avant le début dans la popup, et gardée d'une fois sur l'autre. Trois musiques pour commencer, avec pour l'instant un seul moment après le 0 : All Night (0 à 0:09, 1 à 0:50) et The Mojo Radio Gang (0 à 0:30, 1 à 0:53) de Parov Stelar, Rasputin de Boney M. (0 à 0:00, 1 à 0:36).
+- **Une seule musique pour tout le spectacle**, choisie avant le début dans la popup, et gardée d'une fois sur l'autre. Neuf musiques : All Night (0 à 0:09, 1 à 0:50), The Mojo Radio Gang (0 à 0:30, 1 à 0:53), Booty Swing et Catgroove de Parov Stelar, Rasputin de Boney M. (0 à 0:00, 1 à 0:36), Beatophone de Caravan Palace, This Girl de Kungs vs Cookin' on 3 Burners, The Rockafeller Skank de Fatboy Slim, Superstition de Stevie Wonder (remix C2C). Les six dernières ont des moments provisoires (0 à 0:05 ; 1, 2 et 3 à 0:10, 0:15 et 0:20), à remplacer par les vrais.
 - **Sans effets, avec son propre volume** (curseur dans la popup, gardé lui aussi). Une musique lancée depuis un onglet coupe la musique de transition ; l'arrêt d'urgence aussi.
 
 ### À savoir
@@ -18,7 +18,7 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 - Le temps affiché dans la popup compte depuis le moment 0 (0:09 pour All Night) : au moment 1, il affiche donc 0:41 pour All Night.
 - Un clic sur ▶ ou ■ dans l'en-tête qui suit de moins de 0,6 s le précédent est ignoré : un double clic ne lance pas la musique pour l'arrêter aussitôt.
 - En portrait, les onglets sont un peu plus serrés pour que tout tienne avec le nouveau bouton.
-- Trois nouveaux fichiers dans `public/sounds/transitions/` : « Télécharger tous les sons » les ajoute au hors ligne. Comme les musiques des onglets, ils sont nivelés à −18 LUFS (crête ≤ −1,5 dBTP) et encodés en MP3 80 kb/s stéréo sans pochette : 7,8 Mo au total au lieu de 14,3 Mo. Les originaux étaient très forts (environ −11 LUFS, crêtes au-dessus de 0 dBFS) : ils sont donc baissés d'environ 7 dB, et le volume de la transition reste réglable dans la popup.
+- Neuf nouveaux fichiers dans `public/sounds/transitions/` : « Télécharger tous les sons » les ajoute au hors ligne. Comme les musiques des onglets, ils sont nivelés à −18 LUFS (crête ≤ −1,5 dBTP) et encodés en MP3 80 kb/s stéréo sans pochette ni image : 20,7 Mo au total au lieu de 50 Mo. Les originaux étaient très forts (de −7 à −11 LUFS, crêtes souvent au-dessus de 0 dBFS) : ils sont donc baissés de 7 à 11 dB, et le volume de la transition reste réglable dans la popup.
 
 ### À vérifier sur la tablette
 
@@ -27,7 +27,7 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 - L'ordre des moments : 0, puis 1, 2… à tour de rôle ; le bouton en couleur est bien celui que lance le double clic.
 - Le volume de la transition ne change pas celui des musiques, et les effets audio ne s'y appliquent pas.
 - Recharger l'appli après un lancement : la musique choisie et le moment prévu sont gardés.
-- Hors ligne, après « Télécharger tous les sons » : les trois musiques de transition se lancent.
+- Hors ligne, après « Télécharger tous les sons » : les neuf musiques de transition se lancent.
 
 ## 1.12.0 — 2026-11-10
 
