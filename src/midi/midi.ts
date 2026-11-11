@@ -43,11 +43,11 @@ export function buildInstrumentPatchMessages(item: Pick<MidiItem, 'pc' | 'msb' |
 }
 
 export function sendInstrumentPatch(item: MidiItem): void {
-  buildInstrumentPatchMessages(item, STATE.MIDI_CHANNEL).forEach(sendMidi);
+  buildInstrumentPatchMessages(item, STATE.midiChannel).forEach(sendMidi);
 }
 
 export function sendVolume(val: number): void {
-  sendMidi([0xB0 | STATE.MIDI_CHANNEL, 0x07, val]);
+  sendMidi([0xB0 | STATE.midiChannel, 0x07, val]);
 }
 
 /** Volume MIDI (CC7, 0-127) : mémorisé puis envoyé au piano */
@@ -95,7 +95,7 @@ export function sendAmbience(value: number): void {
  * notes tenues par la pédale. Puis All Notes Off et Reset All Controllers sur les autres canaux.
  */
 export function sendEmergencyStopMidi(): void {
-  const main = STATE.MIDI_CHANNEL;
+  const main = STATE.midiChannel;
   sendMidi([0xB0 | main, 120, 0]); // All Sound Off
   sendMidi([0xB0 | main, 123, 0]); // All Notes Off
   sendMidi([0xB0 | main, 121, 0]); // Reset All Controllers

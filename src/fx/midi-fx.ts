@@ -37,7 +37,7 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
     step: 1,
     neutral: 0,
     read: settings => settings.chorus,
-    apply: value => sendMidi([0xB0 | STATE.MIDI_CHANNEL, 93, Math.round(value)]),
+    apply: value => sendMidi([0xB0 | STATE.midiChannel, 93, Math.round(value)]),
     formatValue: value => Math.round(value),
   },
   {
@@ -49,7 +49,7 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
     step: 1,
     neutral: 64,
     read: settings => settings.cutoff,
-    apply: value => sendMidi([0xB0 | STATE.MIDI_CHANNEL, 74, Math.round(value)]),
+    apply: value => sendMidi([0xB0 | STATE.midiChannel, 74, Math.round(value)]),
     formatValue: value => Math.round(value),
   },
   {
@@ -61,7 +61,7 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
     step: 1,
     neutral: 64,
     read: settings => settings.resonance,
-    apply: value => sendMidi([0xB0 | STATE.MIDI_CHANNEL, 71, Math.round(value)]),
+    apply: value => sendMidi([0xB0 | STATE.midiChannel, 71, Math.round(value)]),
     formatValue: value => Math.round(value),
   },
   {
@@ -73,7 +73,7 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
     step: 1,
     neutral: 64,
     read: settings => settings.attack,
-    apply: value => sendMidi([0xB0 | STATE.MIDI_CHANNEL, 73, Math.round(value)]),
+    apply: value => sendMidi([0xB0 | STATE.midiChannel, 73, Math.round(value)]),
     formatValue: value => Math.round(value),
   },
   {
@@ -85,7 +85,7 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
     step: 1,
     neutral: 64,
     read: settings => settings.release,
-    apply: value => sendMidi([0xB0 | STATE.MIDI_CHANNEL, 72, Math.round(value)]),
+    apply: value => sendMidi([0xB0 | STATE.midiChannel, 72, Math.round(value)]),
     formatValue: value => Math.round(value),
   },
   {
@@ -97,7 +97,7 @@ export const MIDI_FX_CONTROLS: MidiFxControl[] = [
     step: 1,
     neutral: 64,
     read: settings => settings.decay,
-    apply: value => sendMidi([0xB0 | STATE.MIDI_CHANNEL, 75, Math.round(value)]),
+    apply: value => sendMidi([0xB0 | STATE.midiChannel, 75, Math.round(value)]),
     formatValue: value => Math.round(value),
   },
 ];

@@ -10,7 +10,7 @@
   let { extraClass }: { extraClass?: string } = $props();
 
   /** Identifiant propre à chaque bouton pour les motifs SVG */
-  const uid = Math.random().toString(36).substring(2, 11);
+  const uid = $props.id();
 
   /** Arrêt d'urgence total — coupe le piano, la musique et les sons */
   function emergencyStopAll(): void {

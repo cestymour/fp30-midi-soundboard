@@ -15,7 +15,7 @@ afterEach(() => {
   STATE.midiOutput = null;
   STATE.midiAccess = null;
   STATE.bt = null;
-  STATE.MIDI_CHANNEL = 3;
+  STATE.midiChannel = 3;
   vi.restoreAllMocks();
 });
 
@@ -44,7 +44,7 @@ describe('sélection d\'instrument', () => {
   });
 
   it('canal 4 par défaut : celui du son du clavier du FP-30X', () => {
-    expect(STATE.MIDI_CHANNEL).toBe(3);
+    expect(STATE.midiChannel).toBe(3);
   });
 
   it('envoie le patch sur la sortie USB', () => {

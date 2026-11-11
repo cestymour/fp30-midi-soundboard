@@ -19,7 +19,7 @@ class AppState {
    * Un patch envoyé ici change ce que jouent les touches : pas de Local Off ni de
    * renvoi des notes au piano (voir docs/fp30x-midi.md).
    */
-  MIDI_CHANNEL          = $state(3);
+  midiChannel           = $state(3);
   /** Instance BluetoothMIDI, initialisée dans midi/connection.ts */
   bt                    = $state.raw<BluetoothMIDI | null>(null);
   /** Copie réactive de STATE.bt.status / error, pour le badge */
