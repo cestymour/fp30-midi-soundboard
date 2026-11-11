@@ -6,7 +6,16 @@ Les diagnostics complets des bugs fermés restent dans l'historique git : `git s
 
 ## Ouverts
 
-Aucun.
+### 27. Cache des sons : les anciennes versions ne sont jamais effacées, ni mises à jour
+
+- **Statut** : ouvert (constaté le 2026-11-11, à la lecture du code ; non vérifié sur la tablette)
+- **Où** : `src/sw.ts` (route `/sounds/`, `CacheFirst` dans `impro-audio`, sans expiration) et `src/offline.ts` (`downloadMissing()` ajoute ce qui manque, n'enlève rien)
+- **Scénarios** :
+  1. Un fichier est renommé ou retiré de la config : son ancienne version reste dans `impro-audio` pour toujours. C'est arrivé en 1.12.0 (films et bruits renommés, environ 100 Mo) et le 2026-11-11 (Films et Animaux nivelés, renommés en `_v2`, environ 80 Mo).
+  2. Un fichier est remplacé sous le même nom : la tablette garde l'ancienne version et ne charge jamais la nouvelle (voir le n° 14). La règle des nouveaux noms (`docs/sons.md`) l'évite ; pas encore arrivé en production (Bruits et Ambiances ont été nivelés avant leur première publication, en 1.10.0).
+- **Conséquences** : stockage de la tablette qui grossit à chaque changement de sons (jusqu'à environ 180 Mo inutiles, si elle avait tout téléchargé avant chaque changement). Rien ne casse : chaque son joue.
+- **Vérification possible** : sur la tablette, `chrome://inspect` → Application → Cache Storage → `impro-audio` : compter les entrées (68 sons + 36 affiches en usage, sans les transitions).
+- **Correctif proposé** (à décider) : « Télécharger tous les sons » efface aussi de `impro-audio` (et `impro-images`) les entrées qui ne sont plus dans la config, sans retélécharger ce qui est à jour. Le compteur de la popup À propos peut afficher la place libérée.
 
 ## Décisions (comportements voulus)
 
