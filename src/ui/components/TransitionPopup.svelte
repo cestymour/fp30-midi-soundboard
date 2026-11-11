@@ -28,14 +28,29 @@
   const nextMoment = $derived(transitionPopup.isOpen ? getNextMoment() : 0);
   const volumePct = $derived(Math.round(STATE.transitionVolume * 100));
 
-  /** Repères des moments 1, 2… sur la barre de progression (connus une fois le fichier chargé) */
+  /** Durées des fichiers connues à l'arrêt (métadonnées lues une fois par musique, depuis le cache hors ligne) */
+  let knownDurations = $state<Record<string, number>>({});
+  $effect(() => {
+    const target = music;
+    if (!transitionPopup.isOpen || knownDurations[target.id] !== undefined) return;
+    const probe = new Audio();
+    probe.preload = 'metadata';
+    probe.onloadedmetadata = () => {
+      if (isFinite(probe.duration)) knownDurations[target.id] = probe.duration;
+    };
+    probe.src = target.file;
+    return () => { probe.onloadedmetadata = null; probe.removeAttribute('src'); probe.load(); };
+  });
+
+  /** Repères des moments 0, 1, 2… sur la barre de progression, en lecture comme à l'arrêt */
   const markers = $derived.by((): string[] => {
     void transport.seekPct;
-    const duration = STATE.currentAudio?.duration ?? NaN;
-    if (!isCurrent || !isFinite(duration)) return [];
-    const { startOffset, totalDuration } = getPlaybackWindow(music, duration);
+    const playing = isCurrent ? STATE.currentAudio?.duration : undefined;
+    const duration = playing !== undefined && isFinite(playing) ? playing : knownDurations[music.id] ?? NaN;
+    if (!isFinite(duration)) return [];
+    const { startOffset, totalDuration } = getPlaybackWindow({ ...music, start: 0 }, duration);
     if (totalDuration <= 0) return [];
-    return music.restarts.map(time => Math.max(0, Math.min(100, (time - startOffset) / totalDuration * 100)) + '%');
+    return [music.start ?? 0, ...music.restarts].map(time => Math.max(0, Math.min(100, (time - startOffset) / totalDuration * 100)) + '%');
   });
 </script>
 
@@ -276,7 +291,7 @@
     background: var(--transition-accent);
   }
 
-  /* Repères des moments marquants 1, 2… */
+  /* Repères des moments marquants 0, 1, 2… */
   .transition-bar-marker {
     position: absolute;
     top: 0; bottom: 0;

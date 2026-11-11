@@ -8,6 +8,7 @@
 import type { AudioItem } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import { hasCurrentSound, playbackEvents } from '../audio/playback.ts';
+import { isTransitionCurrent } from '../audio/transition.ts';
 import { getSoundProgress, soundEvents } from '../audio/sounds.ts';
 import { formatTime, getPlaybackProgress } from '../audio/timing.ts';
 import { audioFxOverlay } from './fx-overlays.svelte.ts';
@@ -61,7 +62,7 @@ function updateSeekUI(): void {
   const item  = STATE.currentSoundItem;
   if (!audio || !item) return;
 
-  const { elapsed, totalDuration, pct } = getPlaybackProgress(item, audio.currentTime, audio.duration);
+  const { elapsed, totalDuration, pct } = getPlaybackProgress(isTransitionCurrent() ? { ...item, start: 0 } : item, audio.currentTime, audio.duration);
 
   getSoundButtonState(item).progress = pct.toFixed(2) + '%';
   transport.seekPct  = pct + '%';
