@@ -1,21 +1,51 @@
 <!--
   TabNav.svelte — Onglets (MIDI puis audio)
+  Les onglets tiennent toujours sur la largeur, sans défilement (un clic suffit pour
+  changer d'onglet) : libellés complets, puis marges réduites (« compact »), puis
+  emoji seuls (« icons »). Le seuil dépend de la largeur réelle des libellés et de
+  la police : il est mesuré en JS, sur la barre affichée.
 -->
 <script lang="ts">
+  import { flushSync, onMount } from 'svelte';
   import { activateTab, getAllTabs, getTabAccent, getTabKind, layout } from '../layout.svelte.ts';
 
+  type TabNavMode = 'full' | 'compact' | 'icons';
+
   const tabs = getAllTabs();
+
+  let nav: HTMLElement;
+  let mode = $state<TabNavMode>('full');
+
+  /** Mode le plus lisible dont les onglets tiennent sans déborder de la barre */
+  function fitTabs(): void {
+    for (const candidate of ['full', 'compact', 'icons'] as const) {
+      flushSync(() => { mode = candidate; });
+      if (nav.scrollWidth <= nav.clientWidth) return;
+    }
+  }
+
+  onMount(() => {
+    // La barre a une largeur imposée par l'en-tête (flex: 1, défilement) : changer
+    // de mode ne change pas sa taille, l'observateur ne se relance pas lui-même.
+    const observer = new ResizeObserver(fitTabs);
+    observer.observe(nav);
+    // Les libellés s'élargissent quand la police Rajdhani arrive
+    void document.fonts?.ready.then(fitTabs);
+    return () => observer.disconnect();
+  });
 </script>
 
-<nav id="tab-nav">
+<nav id="tab-nav" bind:this={nav} class:compact={mode === 'compact'} class:icons={mode === 'icons'}>
   {#each tabs as tab, idx (tab.id)}
+    {@const accent = getTabAccent(tab)}
     <button
       class="tab-btn"
       class:active={layout.activeTab === idx}
       data-tab={idx}
       data-type={tab.type}
       data-kind={getTabKind(tab)}
-      style:--tab-accent={getTabAccent(tab)}
+      style:--tab-accent={accent}
+      title={tab.label}
       onclick={() => activateTab(idx)}
     >
       <span class="tab-icon">{tab.icon}</span>
@@ -154,9 +184,10 @@
     .tab-btn { min-width: 70px; padding: 0 6px; gap: 4px; }
   }
 
-  /* ── Mobile ── */
-  @media (max-width: 600px) {
-    .tab-label { display: none; }
-    .tab-btn { min-width: 40px; }
-  }
+  /* ── Libellés trop larges : marges réduites (mode posé par le script) ── */
+  #tab-nav.compact .tab-btn { min-width: 0; padding: 0 6px; gap: 4px; }
+
+  /* ── Toujours trop larges : emoji seuls, onglets de même largeur ── */
+  #tab-nav.icons .tab-btn { flex: 1 1 0; min-width: 40px; padding: 0 4px; }
+  #tab-nav.icons .tab-label { display: none; }
 </style>
