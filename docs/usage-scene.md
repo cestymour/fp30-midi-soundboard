@@ -1,6 +1,6 @@
 # Usage sur scène : principes
 
-Comment le musicien (ou DJ) utilise l'application pendant un spectacle d'improvisation. Ces principes guident le choix des sons et des musiques, et la façon de les présenter dans les onglets.
+Comment le musicien (ou DJ) utilise l'application pendant un spectacle d'improvisation. Ces principes guident le choix des sons et des musiques, et la façon de les présenter dans les onglets. Les règles pratiques qui en découlent (quel onglet, quelle tuile, quels fichiers) sont dans `docs/sons.md`.
 
 ## Deux façons d'accompagner une scène
 

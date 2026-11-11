@@ -1,14 +1,17 @@
 # À faire
 
-Idées et évolutions demandées par l'utilisateur, pas encore planifiées. Les bugs ont leur propre journal (`docs/bugs.md`). Une idée réalisée sort de cette liste et passe dans `CHANGELOG.md`.
+Idées et évolutions demandées par l'utilisateur, pas encore planifiées. Les bugs ont leur propre journal (`docs/bugs.md`). Une idée réalisée sort de cette liste et passe dans `CHANGELOG.md`. Pour tout ce qui touche aux sons, voir aussi `docs/sons.md` et `docs/usage-scene.md`.
 
-## Priorité : à faire avant tout le reste (dans cet ordre)
-
-Demandé le 2026-11-10. Le point 1 passe avant tout (le bouton est fait, il reste à compléter ses musiques) ; les points 1 à 3 se font avant les autres sections de cette liste. Sons et musiques (deux fonctionnements différents) est fait : voir `CHANGELOG.md`.
+## Priorité (dans cet ordre, avant le reste de la liste)
 
 ### 1. Réorganiser l'onglet Musiques
 
-- [ ] Renommage, disposition de la grille, etc. Voir aussi « Musiques : finir la maquette » plus bas.
+L'organisation en 11 familles est arrêtée (2026-11-08) ; c'est encore une maquette. Reste à :
+
+- [ ] revoir le visuel et les libellés (premier jet, pas définitif) ;
+- [ ] trouver la bonne place de Dr. Dre (scène de banlieue ; aujourd'hui dans Démarches : le caïd qui roule des mécaniques) ;
+- [ ] trancher pour Soul Bossa Nova : surtout connu comme thème d'Austin Powers, donc une exception à la règle « hors film » ;
+- [ ] Mario et Tetris font peut-être doublon : en retirer un si la place manque.
 
 ### 2. Ajouter quelques sons
 
@@ -16,13 +19,14 @@ Demandé le 2026-11-10. Le point 1 passe avant tout (le bouton est fait, il rest
 
 ## Presets
 
-- [ ] **Studio et Pluck se ressemblent beaucoup** (effets piano) : voir à l'oreille s'il faut garder les deux, ou un seul. Depuis la 1.9.0, Studio est un son sec et proche (Reverb 0, Cutoff 78, Attack 52, Release 38, Decay 56). Pluck : Reverb 2, Cutoff 85, Resonance 75, Attack 30, Release 35, Decay 40. Voir `src/config/midi-fx.config.ts`.
+- [ ] **Studio et Pluck se ressemblent beaucoup** (effets piano) : voir à l'oreille s'il faut garder les deux, ou un seul. Studio est un son sec et proche (Reverb 0, Cutoff 78, Attack 52, Release 38, Decay 56). Pluck : Reverb 2, Cutoff 85, Resonance 75, Attack 30, Release 35, Decay 40. Voir `src/config/midi-fx.config.ts`.
+- [ ] **Réverbération des presets piano** : les valeurs d'Ambiance (0 à 10) ont été converties depuis les anciennes valeurs CC91 (0 à 127), sans être réglées à l'oreille.
 
-## Nouveaux onglets de sons (mp3)
+## Nouveaux onglets de sons et fichiers
 
-Chaque onglet est une entrée de `AUDIO_TABS` (`src/config/audio.config.ts`), avec ses fichiers dans `public/sounds/<onglet>/`. Les ids suivent les règles du README (slug stable, unique). Penser au poids des fichiers : tout part dans le cache hors ligne (« Télécharger tous les sons »).
+Chaque onglet est une entrée de `AUDIO_TABS` (`src/config/audio.config.ts`), avec ses fichiers dans `public/sounds/<onglet>/`. Règles de nommage, de traitement et de poids : `docs/sons.md`.
 
-- [ ] **Compléter l'onglet Bruits** (32 boutons sur 32 places depuis la 1.10.0 : pour en ajouter, il faut en retirer ; la perceuse est déjà en commentaire dans la config). Idées de bruitages pas encore reprises (sans doublon avec les sons MIDI : le piano a déjà rire, cri, pas, applaudissements, téléphones, porte qui grince ou claque, voiture, sirène, train, avion, laser, coup de feu, coup de poing, explosion, pluie, tonnerre, vent, chien, galop…) :
+- [ ] **Bruits** (32 tuiles sur 32 : pour en ajouter, il faut en retirer ; la perceuse est en commentaire dans la config). Idées pas encore reprises :
   - Maison : toc-toc à la porte, clés / serrure, chasse d'eau, robinet, réveil, tic-tac d'horloge / coucou, aspirateur, sèche-cheveux.
   - Bureau : imprimante / photocopieuse, caisse enregistreuse, ascenseur « ding ».
   - Action : verre brisé, gifle, fouet, chute / glissade, marteau.
@@ -30,15 +34,10 @@ Chaque onglet est une entrée de `AUDIO_TABS` (`src/config/audio.config.ts`), av
   - Gags : prout, rot, boing / ressort, course de dessin animé, rire de sitcom, « ta-dam » de fanfare, cri de Wilhelm.
   - Corps : éternuement, toux, ronflement, bâillement, huées du public, sifflement de drague, baiser.
   - Fête : bouchon de champagne, canette qu'on ouvre, gorgée.
-- [ ] **Compléter l'onglet Animaux** (30 sons sur 32 places depuis que Grillon et Cigale sont passés dans Ambiances) : sons connus qui manquent dans l'onglet : oie, perroquet, phoque / otarie, souris / rat, hippopotame, poussin, pie / geai. Un cheval au galop existe déjà en fichier (`animaux/cheval_galop.ogg`, ligne commentée) mais le MIDI a un « Galop cheval ».
-- [ ] **Musiques : finir la maquette** (état actuel dans `docs/onglet-musique.md`). L'organisation en 11 familles est arrêtée (2026-11-08). Reste à :
-  - trouver la bonne place de Dr. Dre (scène de banlieue), et trancher pour Soul Bossa Nova (thème d'Austin Powers, donc musique de film) ;
-  - déplacer Noël (en commentaire dans Musiques) dans l'onglet Ambiances ;
-  - revoir le visuel et les libellés (premier jet, pas définitif) ;
-  - Mario et Tetris font peut-être doublon : en retirer un si la place manque.
+- [ ] **Animaux** (32 sons sur 32 places : même contrainte). Sons connus qui manquent : oie, perroquet, phoque / otarie, souris / rat, hippopotame, poussin, pie / geai. Un cheval au galop existe en fichier (`animaux/cheval_galop.ogg`, ligne commentée), mais le MIDI a déjà un « Galop cheval ».
 - [ ] **Onglet Voyage (régions du monde).** Des clichés de pays, courts (quelques secondes), entendus ou non par les personnages, pour une scène qui se passe dans un pays. Ils tiennent surtout au timbre, que le piano ne rend pas : cornemuse (Écosse), sitar (Inde), mariachis (Mexique), accordéon musette (Paris), bouzouki / sirtaki (Grèce), koto (Japon), didgeridoo (Australie), steel drum (Caraïbes), balalaïka (Russie), flûte de Pan (Andes), oud (Orient), yodel (Alpes)… Les styles qui se jouent bien au piano (tango, ragtime, valse, boogie) restent au piano. Même modèle que l'onglet Musiques : familles par continent, une couleur par famille.
-- [ ] **Poids des sons** : tout part dans le cache hors ligne. Bruits, Ambiances et Musiques sont faits (128 kb/s stéréo ou 64 kb/s mono, 80 kb/s pour les musiques). Reste à voir : les films (environ 94 Mo) et les animaux.
-- [ ] **Niveler le volume des autres onglets** (commit à part de celui des nouveaux onglets). Bruits (−18 LUFS), Ambiances (−24 LUFS) et Musiques (−18 LUFS) sont nivelés depuis le 2026-11-07. À faire de la même façon pour **Films** et **Animaux** : mesurer (`ffmpeg`, filtre `ebur128`), puis gain simple avec limiteur seulement sur les crêtes qui saturent (6 dB au plus). Les fichiers aux crêtes trop denses restent sous la cible (voir les sons plafonnés ci-dessous). Script : gain → mesure → on garde seulement si le niveau se rapproche de la cible.
+- [ ] **Poids des sons** : Films (environ 94 Mo) et Animaux ne sont pas encore réencodés.
+- [ ] **Niveler le volume de Films et Animaux** (commit à part), comme Bruits, Ambiances et Musiques (méthode dans `docs/sons.md`).
 - [ ] **Sons restés sous la cible** après le nivellement du 2026-11-07, crêtes trop nombreuses pour les monter sans les écraser. À juger à l'écoute, ou à monter avec un compresseur si on accepte de changer leur caractère : Ambiances : Feu de cheminée (−28,8 au lieu de −24), Feux d'artifice (−25,8), Grotte (−25,2), Pluie et tonnerre (−25,0). Bruits : Prend feu (−28,9 au lieu de −18), Machine à écrire (−27,9), Tic-tac bombe (−24,9), Clavier d'ordinateur (−20,0), Roulement de tambour (−20,0).
 
 ## À apprendre au piano
@@ -68,6 +67,18 @@ Morceaux écartés de l'onglet Musiques parce qu'ils se jouent au clavier plutô
 
   À concevoir : le format de configuration d'un thème (instrument : `pc` / `msb` / `lsb`, preset d'effets, texte d'aide, gamme) et la présentation des indications de jeu.
 
-## Dépôt et outillage
+## Dette technique
 
+Repris de la dernière revue de code (version 1.8.0, 2026-11-05) : ce qui n'a pas été traité. Rien de bloquant.
+
+- [ ] **Code mort** :
+  - moteur audio (`src/audio/audio-engine.ts`) : distorsion et compresseur, qu'aucun contrôle ne règle, traitent le signal en permanence ; réverbération (convolution de 4,8 s) et delay tournent même quand leur mix est à 0 (du CPU qui pourrait manquer sur la tablette) ; méthodes d'`AudioEngineAPI` appelées par personne (`init`, `load`, `resetSettings`, `restoreEffectSettings`, `getDefaultSettings`, `setEQ`, `setCompressor`, `setDistortionAmount`) ; `canUseMediaElementSource` (faux seulement en `file:`) et le repli `webkitAudioContext` ;
+  - passe-bas au-dessus de 20 kHz ramené au neutre (`afterSync` dans `src/ui/fx-overlays.svelte.ts`, `read` du contrôle `lowPass` dans `src/fx/audio-fx.ts`) : ne peut pas arriver, `setLowPassFrequency()` borne déjà à 20 kHz ;
+  - règles CSS sans balisage : `.paused` (`SoundButton.svelte`) et `.fx-track` (`FxOverlay.svelte`) ;
+  - petits points : `applyAudioFxValue` ne fait qu'appeler `control.apply` ; `formatValue` ne sert plus qu'à `aria-valuetext` ; `MIDI_CHANNEL` est le seul champ en majuscules d'`AppState` ; `EmergencyStopButton.svelte` fabrique un identifiant avec `Math.random()` au lieu de `$props.id()` ;
+  - le parseur BLE (`src/midi/ble-midi-parser.ts`) ne sert plus qu'au journal `MIDI IN (BT)` de la console : à garder pour le diagnostic, ou à retirer.
+- [ ] **Volume des musiques appliqué deux fois ?** Le volume est écrit sur le gain master **et** sur `audio.volume` de la piste (`MediaElementTrack`, `setMasterVolume`). Si Chrome applique les deux, le gain effectif est v² (à 50 % sur le curseur, −12 dB au lieu de −6 dB). À vérifier en comparant un son à 50 % avec et sans `audio.volume = 1` forcé ; n'en garder qu'un change le rendu, donc à décider.
+- [ ] **Test de l'arrêt d'urgence** : ordre et contenu des messages MIDI (`sendEmergencyStopMidi()`).
+- [ ] **Dépendances** : versions majeures disponibles (Vite 8, TypeScript 7, `vite-plugin-svelte` 7), et failles modérées signalées par `npm audit` dans l'outillage de build (rien qui parte dans l'application publiée). À prévoir entre deux saisons de spectacles, avec la non-régression.
 - [ ] **Fins de ligne : tout en LF.** Git est en `core.autocrlf=true` (réglage par défaut de Git pour Windows) : le dépôt est en LF, le disque en CRLF, et un fichier écrit en LF (par un outil ou un script) provoque l'avertissement « LF will be replaced by CRLF ». Sans danger (l'index reste en LF), mais bruyant. Proposition : ajouter un `.gitattributes` (`* text=auto eol=lf`) et un `.editorconfig` (`end_of_line = lf`), pour des fichiers en LF partout, sur le disque comme dans le dépôt, puis reconvertir les fichiers du disque (`git add --renormalize .`, après vérification que le diff ne montre que des fins de ligne). À faire dans un commit à part.
+- [ ] **Vérifications sur la tablette jamais notées comme faites** (corrections de la 1.8.0 et de la 1.9.0, vérifiées seulement sur le PC) : en Bluetooth, plus de note tenue avec un orgue ; le piano retrouvé sous son nom après un rechargement (`getDevices`) ; pas de grésillement avec un son fort, volume à 100 %, réverbération et basses à fond ; une longue série de sons, chacun démarre ; dans un onglet Chrome, la dernière rangée de boutons visible. Ces points sont dans `docs/checklist.md` : à cocher ici une fois vus.
