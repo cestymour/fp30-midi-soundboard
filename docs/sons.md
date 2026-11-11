@@ -27,9 +27,9 @@ Les styles qui se jouent bien au piano (tango, ragtime, valse, boogie, les class
 
 - **Emplacement** : `public/sounds/<onglet>/` (`animaux`, `bruits`, `ambiances`, `musiques`, `films`, `transitions`), affiches dans `public/images/films/`.
 - **Nom** : minuscules, mots séparés par `_`, sans espace, accent ni parenthèse (`il_etait_une_fois_dans_l_ouest_l_homme_a_l_harmonica.mp3`). Musiques de transition : `auteur_titre.mp3`. Affiche d'un film : même nom que l'`id` de la tuile.
-- **Ne jamais remplacer un fichier sous le même nom** : la tablette garde l'ancien dans son cache hors ligne, sans jamais le mettre à jour, et le nouveau `start` s'appliquerait à l'ancien son. Un fichier modifié prend un nouveau nom.
+- **Ne jamais remplacer un fichier sous le même nom** : la tablette garde l'ancien dans son cache hors ligne, sans jamais le mettre à jour, et le nouveau `start` s'appliquerait à l'ancien son. Un fichier modifié prend un nouveau nom : suffixe `_v2`, puis `_v3`… (`star_wars_main_theme_v2.mp3`), et la config suit. Les anciennes versions restent dans le cache de la tablette (voir le bug n° 27 de `docs/bugs.md`).
 - **Une tuile en commentaire est mise de côté, pas supprimée** : la ligne et son mp3 restent. Une ligne dont le mp3 n'existe plus est supprimée ; son `id` reste réservé (historique git) et n'est jamais réutilisé.
-- **Poids** : tout part dans le cache hors ligne de la tablette (« Télécharger tous les sons »). Environ 220 Mo aujourd'hui : Films 94 Mo, Musiques 61 Mo, Transitions 27 Mo, Ambiances 25 Mo, Animaux 5,5 Mo, Bruits 4,4 Mo, affiches 2,5 Mo.
+- **Poids** : tout part dans le cache hors ligne de la tablette (« Télécharger tous les sons »). Environ 195 Mo aujourd'hui : Films 73 Mo, Musiques 61 Mo, Transitions 27 Mo, Ambiances 25 Mo, Bruits 4,4 Mo, Animaux 3,2 Mo, affiches 2,5 Mo.
 
 ## Traitement audio
 
@@ -43,9 +43,17 @@ Aucune copie des originaux n'est gardée hors de git : on retraite toujours à p
 | Onglet | Niveau | Méthode | Encodage |
 |---|---|---|---|
 | Musiques, Transitions | −18 LUFS, crête ≤ −1,5 dBTP | `loudnorm` en deux passes | MP3 80 kb/s, 44,1 kHz stéréo, sans pochette |
-| Bruits | −18 LUFS | gain simple, limiteur seulement sur les crêtes qui saturent (6 dB au plus) | MP3 128 kb/s stéréo ou 64 kb/s mono |
+| Films | −18 LUFS sur le passage joué | gain simple et limiteur (voir ci-dessous) | MP3 80 kb/s, 44,1 kHz stéréo, sans pochette |
+| Bruits, Animaux | −18 LUFS | gain simple, limiteur seulement sur les crêtes qui saturent (6 dB au plus) | MP3 128 kb/s stéréo ou 64 kb/s mono, sans dépasser le débit d'origine |
 | Ambiances | −24 LUFS | idem | idem |
-| Films, Animaux | pas encore nivelés | voir `docs/todo.md` | |
+
+Méthode de Films et Animaux (2026-11-11), à reprendre pour un nouveau fichier :
+
+- **Mesurer le passage joué**, pas le fichier entier : de `start` à `end`, ou les 30 premières secondes après `start` pour une musique. C'est ce qu'on entend sur scène.
+- **Laisser tel quel un écart faible** : moins de 1 dB, ou moins de 2 dB s'il faudrait monter le son (monter coûte du limiteur).
+- **Son baissé** : gain seul ; limiteur seulement si l'encodage ferait dépasser 0 dBTP.
+- **Son monté** : crête ≤ −1,5 dBTP après encodage, avec au plus 6 dB de limiteur (suréchantillonné ×4). Au-delà, le gain est réduit et le son reste sous la cible.
+- Vérifier après coup que la durée n'a pas changé (sinon `start` et `end` tombent ailleurs).
 
 Un fichier aux crêtes trop denses reste sous la cible plutôt que d'être écrasé : on ne garde le gain que s'il rapproche le niveau de la cible (liste des sons restés sous la cible dans `docs/todo.md`).
 
