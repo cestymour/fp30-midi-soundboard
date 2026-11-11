@@ -35,7 +35,7 @@ Compter environ 25 minutes (37 états sur 7 tailles d'écran).
 ## Variables
 
 - `REGRESSION_REF` : version de référence (tag ou commit).
-- `CHROMIUM_PATH` : un autre navigateur que le Chrome installé, par exemple le Chromium 106 de la tablette de scène (voir `CLAUDE.md`). Non essayé avec cet outil : une version aussi ancienne peut ne pas comprendre le protocole de la version de Playwright installée.
+- `CHROMIUM_PATH` : un autre navigateur que le Chrome installé, par exemple le Chromium 106 de la tablette de scène (voir `CLAUDE.md`). Vérifié avec le Chromium 106.0.5249.0 (lien de téléchargement dans `CLAUDE.md`) : Playwright le pilote sans problème. À faire après toute mise à jour de Vite ou tout changement de CSS.
 - `REGRESSION_CHANNEL` : un autre navigateur installé, par exemple `msedge` (défaut : `chrome`).
 - `REGRESSION_WORK`, `STYLES_WORK` : dossiers de travail.
 

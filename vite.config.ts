@@ -9,6 +9,15 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 export default defineConfig({
   // Chemins relatifs : le site est servi sous /fp30-midi-soundboard/ sur GitHub Pages
   base: './',
+  build: {
+    // Tablette de scène en Chrome 106 : sans cette cible, Vite 8 vise des navigateurs plus récents
+    // (Chrome 107 et plus). On garde l'ancienne cible par défaut de Vite (« modules », jusqu'à
+    // Vite 6), plus large, pour le JS et le CSS. Le Service Worker (vite-plugin-pwa) la reprend.
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+    // Minification CSS par esbuild, comme avec Vite 6 : Lightning CSS (défaut de Vite 8) réécrit
+    // media queries, dégradés et raccourcis, et Chrome 106 n'en donne pas exactement le même rendu
+    cssMinify: 'esbuild',
+  },
   define: {
     // Version affichée dans la popup « À propos »
     __APP_VERSION__: JSON.stringify(pkg.version),
