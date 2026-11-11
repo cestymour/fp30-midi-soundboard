@@ -251,7 +251,7 @@ export const AUDIO_TABS: AudioTab[] = [
       {
         id: 'pop-rock', label: 'Tubes pop, rock, rap', icon: '🎤', color: '#ff5fa8',
         items: [
-          { id: 'hat-on',           name: 'Strip-tease',        subtitle: 'Joe Cocker',                   icon: '🎩', file: 'sounds/musiques/you_can_leave_your_hat_on.mp3',          start: 1, catClass: 'musique-tuile', title: 'You Can Leave Your Hat On (Joe Cocker)' },
+          { id: 'hat-on',           name: 'Strip-tease',        subtitle: 'Joe Cocker',                   icon: '👯‍♀️', file: 'sounds/musiques/you_can_leave_your_hat_on.mp3',          start: 1, catClass: 'musique-tuile', title: 'You Can Leave Your Hat On (Joe Cocker)' },
           { id: 'careless-whisper', name: 'Careless Whisper',   subtitle: 'saxo de séduction',            icon: '😏', file: 'sounds/musiques/careless_whisper.mp3',                             catClass: 'musique-tuile', title: 'Careless Whisper (George Michael)' },
           { id: 'pretty-woman',     name: 'Pretty Woman',       subtitle: 'Roy Orbison, essayage/défilé', icon: '😍', file: 'sounds/musiques/oh_pretty_woman.mp3',                             catClass: 'musique-tuile', title: 'Oh, Pretty Woman (Roy Orbison)' },
           { id: 'all-by-myself',    name: 'All by Myself',      subtitle: 'Céline Dion, seul et triste',  icon: '😭', file: 'sounds/musiques/all_by_myself.mp3',                      start: 26, catClass: 'musique-tuile', title: 'All by Myself (Céline Dion)' },
