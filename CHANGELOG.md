@@ -2,6 +2,28 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.16.0 — 2026-11-12
+
+### Nouveautés
+
+- **Les onglets ne défilent plus.** Quand les libellés ne tiennent plus en largeur (petit écran, téléphone), la barre resserre d'abord les marges, puis n'affiche plus que les emoji. Tous les onglets restent visibles : un seul appui suffit pour changer d'onglet.
+- **L'onglet actif se voit bien mieux** : il est teinté de la couleur de son type (violet pour le piano, vert pour les sons, jaune pour les musiques), son nom est écrit dans cette couleur, et la barre lumineuse dessous est plus épaisse.
+- **Boutons des coins redessinés.** La musique de transition et les paramètres sont maintenant des ronds de couleur, orange avec ♫ à gauche, bleu avec un engrenage à droite, pour ne plus les confondre avec les onglets. Tout le carré du coin reste sensible au toucher, pas seulement le rond. Popup ouverte, ♫ devient ▶, puis ■ pendant la lecture, tous deux orange.
+- **Popup de la musique de transition :**
+  - le **carré stop du coin** arrête la musique **et ferme la popup** ; le bouton « Arrêter » de la popup, lui, la laisse ouverte ;
+  - tout le fond est **inactif** pendant que la popup est ouverte, barre d'onglets comprise, sauf le bouton du coin (▶ / ■). Un appui n'importe où à côté la ferme, sans changer d'onglet ;
+  - sur un **téléphone en paysage**, elle tient sans défilement ;
+  - son titre est en grand, comme celui des paramètres.
+- La popup Paramètres a un cadre bleu, comme le cadre orange de la popup de transition.
+- Emoji des onglets un peu plus grands. 🐮 pour Animaux (les traces de pas s'affichaient en noir, invisibles sur le fond sombre), 🎼 pour Musiques.
+
+### À vérifier sur la tablette
+
+- La barre d'onglets en paysage et en portrait : aucun défilement, onglet actif bien visible, libellés présents si la place le permet.
+- L'engrenage et ♫ s'affichent bien dans leur rond, en une seule couleur (pas en emoji ni en carré vide).
+- Un appui au bord du carré d'un coin, hors du rond, ouvre bien sa popup.
+- Musique de transition : ♫, puis ▶ (la musique part), puis ■ : la musique s'arrête en fondu et la popup se ferme. Popup ouverte, un appui sur un onglet ferme la popup sans changer d'onglet.
+
 ## 1.15.0 — 2026-11-11
 
 ### Nouveautés
