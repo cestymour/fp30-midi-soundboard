@@ -19,5 +19,5 @@ export const TRANSITION_MUSICS: TransitionMusic[] = [
   { id: 'booty-swing',       name: 'Booty Swing (Parov Stelar)',                file: 'sounds/transitions/booty_swing_parov_stelar.mp3',         start: 5,  restarts: [10, 15, 20] },
   { id: 'catgroove',         name: 'Catgroove (Parov Stelar)',                  file: 'sounds/transitions/catgroove_parov_stelar.mp3',           start: 5,  restarts: [10, 15, 20] },
   { id: 'rockafeller-skank', name: 'The Rockafeller Skank (Fatboy Slim)',       file: 'sounds/transitions/rockafeller_skank_fatboy_slim.mp3',    start: 5,  restarts: [10, 15, 20] },
-  { id: 'superstition-c2c',  name: 'Superstition (Stevie Wonder, remix C2C)',   file: 'sounds/transitions/superstition_c2c_remix.mp3',           start: 5,  restarts: [10, 15, 20] },
+  { id: 'down-the-road',      name: 'Down the Road (C2C)',                        file: 'sounds/transitions/down_the_road_c2c.mp3',                start: 5,  restarts: [10, 15, 20] },
 ];
