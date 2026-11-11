@@ -68,10 +68,10 @@ describe('musiques de transition', () => {
     expect(TRANSITION_MUSICS.map(music => music.id).filter(id => !ID_FORMAT.test(id))).toEqual([]);
   });
 
-  it('début et point de reprise sont des positions valides', () => {
+  it('début et moments marquants sont des positions valides (au moins un moment après le 0)', () => {
     const invalid = TRANSITION_MUSICS
-      .filter(music => !(music.restart >= 0) || !((music.start ?? 0) >= 0)
-        || (music.end !== undefined && music.restart >= music.end))
+      .filter(music => music.restarts.length === 0 || !((music.start ?? 0) >= 0)
+        || music.restarts.some(time => !(time >= 0) || (music.end !== undefined && time >= music.end)))
       .map(music => music.id);
     expect(invalid).toEqual([]);
   });

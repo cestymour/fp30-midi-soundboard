@@ -8,14 +8,17 @@
    coupe tout ce qui jouait, comme l'arrêt d'urgence : musique, sons et
    piano. Une musique des onglets la coupe, elle aussi.
 
-   Premier lancement : depuis le début (`start`). Lancements suivants :
-   depuis le point de reprise de la musique (`restart`), tant que le
-   dernier lancement date de moins de RESTART_WINDOW_MS (un rechargement
-   en plein spectacle ne fait pas repartir du début ; le spectacle
-   suivant, si). Changer de musique fait repartir du début.
+   Moments marquants : le 0 (`start`) ouvre le spectacle, les suivants
+   (`restarts`, numérotés à partir de 1) servent après chaque impro, à
+   tour de rôle : 0, 1, 2, 3, 1, 2, 3, 1… pour ne pas rejouer toujours
+   le même passage. Le moment prévu est le suivant de celui joué en
+   dernier, même joué hors de l'ordre. On revient au 0 quand on change
+   de musique, ou quand le dernier lancement date de plus de
+   RESTART_WINDOW_MS (le spectacle suivant ; un rechargement en plein
+   spectacle, lui, ne change rien).
 
-   Choix, dernier lancement et volume sont gardés dans localStorage.
-   Aucun accès au DOM.
+   Choix, dernier lancement, dernier moment joué et volume sont gardés
+   dans localStorage. Aucun accès au DOM.
 ================================================================ */
 
 import type { AudioItem, TransitionMusic } from '../types.ts';
@@ -28,12 +31,13 @@ import { sendEmergencyStopMidi } from '../midi/midi.ts';
 
 const STORAGE_KEY = 'fp30-soundboard.transition';
 
-/** Au-delà de ce délai depuis le dernier lancement, le suivant repart du début (nouveau spectacle) */
+/** Au-delà de ce délai depuis le dernier lancement, on repart du moment 0 (nouveau spectacle) */
 export const RESTART_WINDOW_MS = 6 * 60 * 60 * 1000;
 
 interface StoredTransition {
   musicId: string | null;
   lastLaunch: number | null;
+  lastMoment: number;
   volume: number;
 }
 
@@ -41,6 +45,7 @@ function save(): void {
   const stored: StoredTransition = {
     musicId: STATE.transitionMusicId,
     lastLaunch: STATE.transitionLastLaunch,
+    lastMoment: STATE.transitionLastMoment,
     volume: STATE.transitionVolume,
   };
   try {
@@ -50,7 +55,7 @@ function save(): void {
   }
 }
 
-/** Relit le choix, le dernier lancement et le volume enregistrés (au démarrage) */
+/** Relit le choix, le dernier lancement, le dernier moment joué et le volume (au démarrage) */
 export function initTransition(): void {
   let stored: Partial<StoredTransition> = {};
   try {
@@ -60,6 +65,7 @@ export function initTransition(): void {
   }
   STATE.transitionMusicId    = typeof stored.musicId === 'string' ? stored.musicId : null;
   STATE.transitionLastLaunch = typeof stored.lastLaunch === 'number' ? stored.lastLaunch : null;
+  STATE.transitionLastMoment = typeof stored.lastMoment === 'number' ? stored.lastMoment : 0;
   STATE.transitionVolume     = typeof stored.volume === 'number' ? Math.max(0, Math.min(1, stored.volume)) : 1;
   AudioEngineAPI.setTransitionVolume(STATE.transitionVolume);
 }
@@ -80,35 +86,43 @@ export function isTransitionCurrent(): boolean {
   return isTransitionMusic(STATE.currentSoundItem);
 }
 
-/** Le prochain lancement part du point de reprise (sinon : du début) */
-export function willRestart(now: number = Date.now()): boolean {
-  const last = STATE.transitionLastLaunch;
-  return last !== null && now - last >= 0 && now - last < RESTART_WINDOW_MS;
+/** Nombre de moments marquants de la musique (le 0 compris) */
+export function getMomentCount(music: TransitionMusic = getSelectedTransitionMusic()): number {
+  return 1 + music.restarts.length;
 }
 
-/** Position de départ du prochain lancement, en secondes */
-export function getNextStartTime(now: number = Date.now()): number {
-  const music = getSelectedTransitionMusic();
-  return willRestart(now) ? music.restart : (music.start ?? 0);
+/** Position du moment marquant `moment` (0 : début du spectacle), en secondes */
+export function getMomentTime(music: TransitionMusic, moment: number): number {
+  return moment === 0 ? (music.start ?? 0) : music.restarts[moment - 1];
 }
 
 /**
- * Lance la musique choisie : du début la première fois, puis depuis son point de reprise.
- * `from` force le point de départ (bouton de secours de la popup : relancer à la reprise
- * après un « Repartir du début » cliqué par erreur).
+ * Moment prévu pour le prochain lancement : 0 au début du spectacle (aucun lancement depuis
+ * RESTART_WINDOW_MS), sinon le suivant de celui joué en dernier, dans l'ordre 1, 2, 3, 1…
+ */
+export function getNextMoment(now: number = Date.now()): number {
+  const music = getSelectedTransitionMusic();
+  const last = STATE.transitionLastLaunch;
+  const count = music.restarts.length;
+  if (last === null || now - last < 0 || now - last >= RESTART_WINDOW_MS || count === 0) return 0;
+  const played = STATE.transitionLastMoment;
+  return played >= 1 && played < count ? played + 1 : 1;
+}
+
+/**
+ * Lance la musique choisie depuis le moment marquant `moment` (par défaut : le moment prévu).
  * Coupe d'abord tout ce qui jouait, comme l'arrêt d'urgence : sons et piano ; la musique
  * en cours, elle, est coupée net par playSound.
  */
-export function launchTransition(now: number = Date.now(), from?: 'start' | 'restart'): Promise<void> {
+export function launchTransition(now: number = Date.now(), moment: number = getNextMoment(now)): Promise<void> {
   const music = getSelectedTransitionMusic();
-  const startAt = from === 'restart' ? music.restart
-    : from === 'start' ? (music.start ?? 0)
-    : getNextStartTime(now);
+  const chosen = Math.max(0, Math.min(music.restarts.length, Math.round(moment)));
   STATE.transitionLastLaunch = now;
+  STATE.transitionLastMoment = chosen;
   save();
   stopAllSounds();
   sendEmergencyStopMidi();
-  return playSound(music, { route: 'transition', startAt });
+  return playSound(music, { route: 'transition', startAt: getMomentTime(music, chosen) });
 }
 
 /** Arrête la musique de transition (court fondu) ; ne fait rien si elle ne joue pas */
@@ -117,21 +131,16 @@ export function stopTransition(): void {
 }
 
 /**
- * Choisit la musique du spectacle. Le prochain lancement repart du début ;
- * si une musique de transition joue, la nouvelle la remplace tout de suite.
+ * Choisit la musique du spectacle : on revient au moment 0. Si une musique de transition
+ * joue, la nouvelle la remplace tout de suite, depuis son moment 0.
  */
 export function selectTransitionMusic(id: string): void {
   if (!getTransitionMusics().some(music => music.id === id)) return;
   STATE.transitionMusicId = id;
   STATE.transitionLastLaunch = null;
+  STATE.transitionLastMoment = 0;
   save();
-  if (isTransitionCurrent()) void launchTransition();
-}
-
-/** Le prochain lancement repartira du début (avant un nouveau spectacle, après un essai) */
-export function resetTransitionStart(): void {
-  STATE.transitionLastLaunch = null;
-  save();
+  if (isTransitionCurrent()) void launchTransition(Date.now(), 0);
 }
 
 /** Volume de la musique de transition (0-1) */

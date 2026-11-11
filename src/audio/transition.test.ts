@@ -19,13 +19,13 @@ vi.mock('../config/tabs.ts', () => ({
 import type { TransitionMusic } from '../types.ts';
 import { STATE } from '../state.svelte.ts';
 import {
-  RESTART_WINDOW_MS, getSelectedTransitionMusic, initTransition, launchTransition,
-  resetTransitionStart, selectTransitionMusic, stopTransition, willRestart,
+  RESTART_WINDOW_MS, getNextMoment, getSelectedTransitionMusic, initTransition, launchTransition,
+  selectTransitionMusic, stopTransition,
 } from './transition.ts';
 
 const MUSICS: TransitionMusic[] = [
-  { id: 'a', name: 'A', file: 'sounds/a.mp3', start: 2, restart: 40 },
-  { id: 'b', name: 'B', file: 'sounds/b.mp3', restart: 25 },
+  { id: 'a', name: 'A', file: 'sounds/a.mp3', start: 2, restarts: [40, 70, 100] },
+  { id: 'b', name: 'B', file: 'sounds/b.mp3', restarts: [25] },
 ];
 
 /** localStorage en mémoire */
@@ -40,58 +40,81 @@ function stubStorage(initial: Record<string, string> = {}): Map<string, string> 
 
 const T0 = 1_000_000_000_000;
 
+/** Position de départ du dernier lancement */
+function lastStartAt(): number {
+  const calls = playSound.mock.calls as unknown as [TransitionMusic, { startAt: number }][];
+  return calls[calls.length - 1][1].startAt;
+}
+
 beforeEach(() => {
   vi.unstubAllGlobals();
   playSound.mockClear();
   stopSound.mockClear();
+  setTransitionVolume.mockClear();
   stopAllSounds.mockClear();
   sendEmergencyStopMidi.mockClear();
-  setTransitionVolume.mockClear();
   STATE.currentSoundItem = null;
   stubStorage();
   initTransition();
 });
 
-describe('point de départ', () => {
-  it('le premier lancement part du début (`start`), les suivants du point de reprise', async () => {
-    await launchTransition(T0);
-    expect(playSound).toHaveBeenLastCalledWith(MUSICS[0], { route: 'transition', startAt: 2 });
-
-    await launchTransition(T0 + 60_000);
+describe('moments marquants', () => {
+  it('ordre : 0 au début du spectacle, puis 1, 2, 3, 1, 2, 3…', async () => {
+    const starts: number[] = [];
+    for (let i = 0; i < 8; i++) {
+      await launchTransition(T0 + i * 60_000);
+      starts.push(lastStartAt());
+    }
+    expect(starts).toEqual([2, 40, 70, 100, 40, 70, 100, 40]);
     expect(playSound).toHaveBeenLastCalledWith(MUSICS[0], { route: 'transition', startAt: 40 });
   });
 
-  it('sans `start`, le premier lancement part de 0', async () => {
+  it('un seul moment après le 0 : 0, 1, 1, 1…', async () => {
     selectTransitionMusic('b');
-    await launchTransition(T0);
-    expect(playSound).toHaveBeenLastCalledWith(MUSICS[1], { route: 'transition', startAt: 0 });
+    const starts: number[] = [];
+    for (let i = 0; i < 4; i++) {
+      await launchTransition(T0 + i * 60_000);
+      starts.push(lastStartAt());
+    }
+    expect(starts).toEqual([0, 25, 25, 25]);
   });
 
-  it('longtemps après le dernier lancement (spectacle suivant), on repart du début', async () => {
-    await launchTransition(T0);
-    expect(willRestart(T0 + RESTART_WINDOW_MS - 1)).toBe(true);
-    expect(willRestart(T0 + RESTART_WINDOW_MS)).toBe(false);
+  it("un moment joué hors de l'ordre : le prévu devient son suivant", async () => {
+    await launchTransition(T0);           // 0
+    await launchTransition(T0 + 1000, 3); // 3 au lieu de 1
+    expect(lastStartAt()).toBe(100);
+    expect(getNextMoment(T0 + 2000)).toBe(1);
+    await launchTransition(T0 + 3000, 1);
+    expect(getNextMoment(T0 + 4000)).toBe(2);
   });
 
-  it('le départ peut être forcé : reprise même au premier lancement (secours)', async () => {
-    await launchTransition(T0, 'restart');
-    expect(playSound).toHaveBeenLastCalledWith(MUSICS[0], { route: 'transition', startAt: 40 });
-    expect(willRestart(T0 + 1000)).toBe(true);
+  it('rejouer le 0 en plein spectacle : le prévu redevient le 1', async () => {
+    await launchTransition(T0);
+    await launchTransition(T0 + 1000);    // 1
+    await launchTransition(T0 + 2000, 0);
+    expect(lastStartAt()).toBe(2);
+    expect(getNextMoment(T0 + 3000)).toBe(1);
   });
 
-  it('« repartir du début » et changer de musique remettent le départ au début', async () => {
+  it('longtemps après le dernier lancement (spectacle suivant), on revient au 0', async () => {
     await launchTransition(T0);
-    resetTransitionStart();
-    expect(willRestart(T0 + 1000)).toBe(false);
+    await launchTransition(T0 + 1000);
+    expect(getNextMoment(T0 + 1000 + RESTART_WINDOW_MS - 1)).toBe(2);
+    expect(getNextMoment(T0 + 1000 + RESTART_WINDOW_MS)).toBe(0);
+  });
 
+  it('changer de musique ramène au 0', async () => {
     await launchTransition(T0);
+    await launchTransition(T0 + 1000);
     selectTransitionMusic('b');
-    expect(willRestart(T0 + 1000)).toBe(false);
+    expect(getNextMoment(T0 + 2000)).toBe(0);
+    selectTransitionMusic('a');
+    expect(getNextMoment(T0 + 2000)).toBe(0);
   });
 });
 
 describe('lancement et arrêt', () => {
-  it('le lancement coupe tout, comme l\'arrêt d\'urgence : sons et piano (la musique est coupée par playSound)', async () => {
+  it("le lancement coupe tout, comme l'arrêt d'urgence : sons et piano (la musique est coupée par playSound)", async () => {
     await launchTransition(T0);
     expect(stopAllSounds).toHaveBeenCalledTimes(1);
     expect(sendEmergencyStopMidi).toHaveBeenCalledTimes(1);
@@ -110,7 +133,7 @@ describe('lancement et arrêt', () => {
     expect(stopSound).not.toHaveBeenCalled();
   });
 
-  it('changer de musique pendant la lecture lance la nouvelle, depuis son début', () => {
+  it('changer de musique pendant la lecture lance la nouvelle, depuis son moment 0', () => {
     STATE.currentSoundItem = MUSICS[0];
     selectTransitionMusic('b');
     expect(playSound).toHaveBeenLastCalledWith(MUSICS[1], { route: 'transition', startAt: 0 });
@@ -118,18 +141,19 @@ describe('lancement et arrêt', () => {
 });
 
 describe('mémorisation', () => {
-  it('garde le choix, le dernier lancement et le volume après un rechargement', async () => {
+  it('garde le choix, le dernier lancement, le dernier moment et le volume après un rechargement', async () => {
     const store = stubStorage();
-    selectTransitionMusic('b');
     await launchTransition(T0);
+    await launchTransition(T0 + 1000); // 1
 
     STATE.transitionMusicId = null;
     STATE.transitionLastLaunch = null;
+    STATE.transitionLastMoment = 0;
     stubStorage(Object.fromEntries(store));
     initTransition();
 
-    expect(getSelectedTransitionMusic()).toBe(MUSICS[1]);
-    expect(willRestart(T0 + 1000)).toBe(true);
+    expect(getSelectedTransitionMusic()).toBe(MUSICS[0]);
+    expect(getNextMoment(T0 + 2000)).toBe(2);
   });
 
   it('une musique retirée de la liste : la première est choisie', () => {

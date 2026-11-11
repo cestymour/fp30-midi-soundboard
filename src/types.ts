@@ -119,11 +119,12 @@ export interface AudioTab extends TabBase<AudioItem> {
 
 /**
  * Une musique de transition (entre deux impros) : une seule sert tout le spectacle.
- * Le premier lancement part de `start` (ou du début du fichier), les suivants de `restart`.
+ * Moments marquants : le 0 (`start`, ou le début du fichier) ouvre le spectacle ; ensuite,
+ * après chaque impro, les moments 1, 2, 3… (`restarts`) à tour de rôle : 0, 1, 2, 3, 1, 2…
  */
 export interface TransitionMusic extends AudioItem {
-  /** Point de reprise, en secondes : où repartent les lancements après le premier */
-  restart: number;
+  /** Moments marquants 1, 2, 3…, en secondes (au moins un, 4 au plus en pratique) */
+  restarts: number[];
 }
 
 // ═══════════════════════════════════════════════════════

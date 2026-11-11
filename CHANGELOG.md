@@ -6,24 +6,27 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 
 ### Nouveautés
 
-- **Musique de transition**, pour relancer l'énergie du public entre deux impros. Le bouton 🎉, dans le coin en haut à gauche (en face du bouton Paramètres), est visible depuis tous les onglets. Il **ouvre une popup**, et c'est le gros bouton de la popup qui lance la musique : un clic raté sur l'en-tête pendant une impro ne lance rien. Popup ouverte, le bouton 🎉 devient un **bouton play** : un double clic sur l'en-tête lance donc la musique. Pendant la lecture, il devient un **carré stop**, avec la progression en fond. Ce carré, comme le bouton « Arrêter » de la popup, arrête la musique (court fondu) ; la popup reste ouverte (✕ ou un toucher à côté la ferme). Elle garde toujours la même taille, quel que soit l'état des boutons.
+- **Musique de transition**, pour relancer l'énergie du public entre deux impros. Le bouton 🎉, dans le coin en haut à gauche (en face du bouton Paramètres), est visible depuis tous les onglets. Il **ouvre une popup** ; un clic raté sur l'en-tête pendant une impro ne lance donc rien. Popup ouverte, le bouton 🎉 devient un **bouton play** : un double clic sur l'en-tête ouvre la popup et lance la musique. Pendant la lecture, il devient un **carré stop**, avec la progression en fond. Ce carré, comme le gros bouton « Arrêter » de la popup, arrête la musique (court fondu) ; la popup reste ouverte (✕ ou un toucher à côté la ferme). Elle garde toujours la même taille.
+- **Plusieurs moments marquants par musique**, pour ne pas rejouer cinq fois de suite la même transition. Le moment **0** ouvre le spectacle ; les moments **1, 2, 3…** servent après chaque impro, à tour de rôle : 0, 1, 2, 3, 1, 2, 3, 1… La popup les montre sur une ligne de boutons, avec leur position dans la musique. Le **moment prévu** est en couleur et plus large, pour être touché sans viser : c'est lui que lance le bouton de l'en-tête. Les autres restent cliquables ; après un moment joué hors de l'ordre, le prévu devient son suivant. On revient au 0 en changeant de musique, ou au-delà de 6 heures sans lancement (le spectacle suivant) ; un rechargement de l'appli en plein spectacle ne change rien.
 - **Lancer la musique de transition coupe tout**, comme l'arrêt d'urgence : la musique des onglets, les sons en cours et le piano.
-- **Une seule musique pour tout le spectacle**, choisie avant le début dans la popup. Le choix est gardé d'une fois sur l'autre. Trois musiques pour commencer : All Night et The Mojo Radio Gang (Parov Stelar), Rasputin (Boney M.).
-- **Premier lancement depuis le début, ensuite depuis le point de reprise** propre à chaque musique, toujours le même. All Night : début à 0:09, reprise à 0:50. The Mojo Radio Gang : début à 0:30, reprise à 0:53. Rasputin : début à 0:00, reprise à 0:36. Un trait marque le point de reprise sur la barre de progression de la popup. Un rechargement de l'appli en plein spectacle n'y change rien ; au-delà de 6 heures sans lancement (spectacle suivant), elle repart du début. « ↺ Repartir du début » le force, par exemple après un essai avant le spectacle ; changer de musique aussi. Cliqué par erreur, il se rattrape : quand le prochain lancement part du début, un petit bouton de secours « Relancer à la reprise » lance quand même la musique depuis son point de reprise.
+- **Une seule musique pour tout le spectacle**, choisie avant le début dans la popup, et gardée d'une fois sur l'autre. Trois musiques pour commencer, avec pour l'instant un seul moment après le 0 : All Night (0 à 0:09, 1 à 0:50) et The Mojo Radio Gang (0 à 0:30, 1 à 0:53) de Parov Stelar, Rasputin de Boney M. (0 à 0:00, 1 à 0:36).
 - **Sans effets, avec son propre volume** (curseur dans la popup, gardé lui aussi). Une musique lancée depuis un onglet coupe la musique de transition ; l'arrêt d'urgence aussi.
 
 ### À savoir
 
-- Le temps affiché dans la popup compte depuis le début de la musique (0:09 pour All Night) : à la reprise, il affiche donc 0:41 pour All Night.
+- Les moments se règlent dans `src/config/transition.config.ts` : `start` pour le 0, `restarts` pour les suivants (par exemple `restarts: [50, 80, 110]` donne les moments 1, 2 et 3).
+- Le temps affiché dans la popup compte depuis le moment 0 (0:09 pour All Night) : au moment 1, il affiche donc 0:41 pour All Night.
+- Un clic sur ▶ ou ■ dans l'en-tête qui suit de moins de 0,6 s le précédent est ignoré : un double clic ne lance pas la musique pour l'arrêter aussitôt.
 - En portrait, les onglets sont un peu plus serrés pour que tout tienne avec le nouveau bouton.
 - Trois nouveaux fichiers dans `public/sounds/transitions/` : « Télécharger tous les sons » les ajoute au hors ligne. Comme les musiques des onglets, ils sont nivelés à −18 LUFS (crête ≤ −1,5 dBTP) et encodés en MP3 80 kb/s stéréo sans pochette : 7,8 Mo au total au lieu de 14,3 Mo. Les originaux étaient très forts (environ −11 LUFS, crêtes au-dessus de 0 dBFS) : ils sont donc baissés d'environ 7 dB, et le volume de la transition reste réglable dans la popup.
 
 ### À vérifier sur la tablette
 
 - Le bouton 🎉 en paysage et en portrait : tous les onglets restent visibles.
-- Un clic sur 🎉 ouvre la popup sans rien lancer ; un double clic la lance ; le gros bouton la lance et coupe ce qui jouait (musique, sons, notes tenues au piano) ; le carré stop de l'en-tête et « Arrêter » l'arrêtent sans fermer la popup, qui ne change pas de taille ; le lancement suivant part du point de reprise ; après « Repartir du début », « Relancer à la reprise » part bien du point de reprise.
+- Un clic sur 🎉 ouvre la popup sans rien lancer ; un double clic la lance ; un bouton de moment la lance et coupe ce qui jouait (musique, sons, notes tenues au piano) ; le carré stop de l'en-tête et « Arrêter » l'arrêtent sans fermer la popup, qui ne change pas de taille.
+- L'ordre des moments : 0, puis 1, 2… à tour de rôle ; le bouton en couleur est bien celui que lance le double clic.
 - Le volume de la transition ne change pas celui des musiques, et les effets audio ne s'y appliquent pas.
-- Recharger l'appli après un lancement : la musique choisie et la reprise sont gardées.
+- Recharger l'appli après un lancement : la musique choisie et le moment prévu sont gardés.
 - Hors ligne, après « Télécharger tous les sons » : les trois musiques de transition se lancent.
 
 ## 1.12.0 — 2026-11-10

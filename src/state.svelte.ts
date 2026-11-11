@@ -51,6 +51,8 @@ class AppState {
   transitionMusicId     = $state<string | null>(null);
   /** Dernier lancement (Date.now()), null : le prochain part du début */
   transitionLastLaunch  = $state<number | null>(null);
+  /** Moment marquant joué en dernier (0 : début du spectacle, puis 1, 2…) */
+  transitionLastMoment  = $state(0);
   /** Volume de la musique de transition (0-1), à part de celui des musiques */
   transitionVolume      = $state(1);
 

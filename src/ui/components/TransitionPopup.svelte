@@ -1,38 +1,41 @@
 <!--
   TransitionPopup.svelte — Popup de la musique de transition, par-dessus les onglets
   (l'en-tête reste visible, donc le bouton pour l'arrêter aussi) : choix de la musique du
-  spectacle, gros bouton de lancement (qui coupe tout ce qui jouait, comme l'arrêt
-  d'urgence), progression, point de départ du prochain lancement, volume.
+  spectacle, progression (avec un repère par moment marquant), une ligne de boutons, un par
+  moment marquant (0 : début du spectacle, puis 1, 2, 3…), volume. Le moment prévu est en
+  couleur et plus large ; c'est aussi lui que lance le bouton de l'en-tête. Lancer coupe tout
+  ce qui jouait, comme l'arrêt d'urgence. En lecture, la ligne devient un gros « Arrêter ».
+  La popup garde toujours la même taille.
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
   import { getTransitionMusics } from '../../config/tabs.ts';
   import { getPlaybackWindow, formatTime } from '../../audio/timing.ts';
   import {
-    getSelectedTransitionMusic, isTransitionCurrent, resetTransitionStart,
-    launchTransition, selectTransitionMusic, setTransitionVolume, stopTransition, willRestart,
+    getMomentTime, getNextMoment, getSelectedTransitionMusic, isTransitionCurrent,
+    launchTransition, selectTransitionMusic, setTransitionVolume, stopTransition,
   } from '../../audio/transition.ts';
   import { transport } from '../transport.svelte.ts';
   import { closeTransitionPopup, transitionPopup } from '../transition.svelte.ts';
-
   import VolumeControl from './VolumeControl.svelte';
 
   const musics    = getTransitionMusics();
   const music     = $derived(getSelectedTransitionMusic());
   const isCurrent = $derived(isTransitionCurrent());
-  // Recalculé à chaque ouverture et à chaque lancement (le délai de reprise dépend de l'heure)
-  const restart   = $derived(transitionPopup.isOpen && willRestart());
-  const nextStart = $derived(restart ? music.restart : (music.start ?? 0));
+  /** Moments marquants de la musique : 0, 1, 2… */
+  const moments   = $derived(Array.from({ length: 1 + music.restarts.length }, (_, moment) => moment));
+  // Recalculé à chaque ouverture et à chaque lancement (le retour au 0 dépend de l'heure)
+  const nextMoment = $derived(transitionPopup.isOpen ? getNextMoment() : 0);
   const volumePct = $derived(Math.round(STATE.transitionVolume * 100));
 
-  /** Position du point de reprise sur la barre de progression (connue une fois le fichier chargé) */
-  const restartPct = $derived.by((): string | undefined => {
+  /** Repères des moments 1, 2… sur la barre de progression (connus une fois le fichier chargé) */
+  const markers = $derived.by((): string[] => {
     void transport.seekPct;
     const duration = STATE.currentAudio?.duration ?? NaN;
-    if (!isCurrent || !isFinite(duration)) return undefined;
+    if (!isCurrent || !isFinite(duration)) return [];
     const { startOffset, totalDuration } = getPlaybackWindow(music, duration);
-    if (totalDuration <= 0) return undefined;
-    return Math.max(0, Math.min(100, (music.restart - startOffset) / totalDuration * 100)) + '%';
+    if (totalDuration <= 0) return [];
+    return music.restarts.map(time => Math.max(0, Math.min(100, (time - startOffset) / totalDuration * 100)) + '%');
   });
 </script>
 
@@ -57,36 +60,41 @@
       <div class="transition-progress" class:is-current={isCurrent}>
         <div class="transition-bar">
           <div class="transition-bar-fill" style:width={isCurrent ? transport.seekPct : '0%'}></div>
-          {#if restartPct}<div class="transition-bar-restart" style:left={restartPct} title="Point de reprise"></div>{/if}
+          {#each markers as left, index (index)}<div class="transition-bar-marker" style:left={left}></div>{/each}
         </div>
         <span class="transition-time">{isCurrent ? transport.timeText : 'À l\'arrêt'}</span>
       </div>
 
-      <button class="transition-main" class:is-current={isCurrent} onclick={() => { if (isCurrent) stopTransition(); else void launchTransition(); }}>
+      <!-- Hauteur fixe : en lecture, le gros « Arrêter » prend exactement la place de la ligne -->
+      <div class="transition-moments">
         {#if isCurrent}
-          <span class="icon-stop" aria-hidden="true"></span> Arrêter
-        {:else if restart}
-          <span class="icon-play" aria-hidden="true"></span> Relancer à la reprise ({formatTime(nextStart)})
+          <button class="transition-main is-current" onclick={stopTransition}>
+            <span class="icon-stop" aria-hidden="true"></span> Arrêter
+          </button>
         {:else}
-          <span class="icon-play" aria-hidden="true"></span> Lancer depuis le début
+          {#each moments as moment (moment)}
+            <button
+              class="transition-moment"
+              class:is-next={moment === nextMoment}
+              title={moment === 0 ? `Début du spectacle (${formatTime(getMomentTime(music, 0))})` : `Moment ${moment} (${formatTime(getMomentTime(music, moment))})`}
+              onclick={() => void launchTransition(Date.now(), moment)}
+            >
+              <span class="transition-moment-number">
+                {#if moment === nextMoment}<span class="icon-play" aria-hidden="true"></span>{/if}{moment}
+              </span>
+              <span class="transition-moment-time">{formatTime(getMomentTime(music, moment))}</span>
+            </button>
+          {/each}
         {/if}
-      </button>
+      </div>
 
-      <!-- Toujours présent, sur une hauteur fixe : la popup garde la même taille quel que soit
-           l'état (en lecture, le petit bouton est masqué sans libérer sa place) -->
       <div class="transition-next">
-        <span class="transition-next-text">
-          {#if restart}
-            Prochain lancement : reprise à {formatTime(music.restart)}
-          {:else}
-            Prochain lancement : depuis le début{music.start ? ` (${formatTime(music.start)})` : ''}
-          {/if}
-        </span>
-        {#if restart}
-          <button class="transition-secondary" class:is-hidden={isCurrent} disabled={isCurrent} onclick={resetTransitionStart}>↺ Repartir du début</button>
+        {#if isCurrent}
+          En lecture : moment {STATE.transitionLastMoment}{STATE.transitionLastMoment === 0 ? ' (début du spectacle)' : ''}
+        {:else if nextMoment === 0}
+          Prévu : 0, début du spectacle ; ensuite {music.restarts.map((_, index) => index + 1).join(', ')} à tour de rôle
         {:else}
-          <!-- Secours : « Repartir du début » cliqué par erreur, on peut quand même reprendre à la reprise -->
-          <button class="transition-secondary" class:is-hidden={isCurrent} disabled={isCurrent} onclick={() => void launchTransition(Date.now(), 'restart')}>▶ Relancer à la reprise ({formatTime(music.restart)})</button>
+          Prévu : moment {nextMoment} ({formatTime(getMomentTime(music, nextMoment))})
         {/if}
       </div>
 
@@ -204,8 +212,8 @@
     background: var(--transition-accent);
   }
 
-  /* Repère du point de reprise */
-  .transition-bar-restart {
+  /* Repères des moments marquants 1, 2… */
+  .transition-bar-marker {
     position: absolute;
     top: 0; bottom: 0;
     width: 2px;
@@ -225,69 +233,91 @@
     color: var(--transition-accent);
   }
 
+  /* Ligne des moments marquants, ou gros « Arrêter » à la même place */
+  .transition-moments {
+    display: flex;
+    gap: 8px;
+    height: 64px;
+  }
+
   .transition-main {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    /* Hauteur fixe et une seule ligne : le libellé change sans changer la taille de la popup */
-    height: 56px;
     white-space: nowrap;
     overflow: hidden;
     border: 1px solid var(--transition-accent);
     border-radius: var(--radius);
-    background: color-mix(in srgb, var(--transition-accent) 15%, var(--bg-card));
-    color: var(--transition-accent);
+    background: var(--transition-accent);
+    color: var(--bg-base);
     font-family: var(--font-display);
     font-size: 18px;
     font-weight: 700;
     letter-spacing: 0.06em;
     cursor: pointer;
   }
-  .transition-main:active {
-    transform: scale(0.98);
-  }
-  .transition-main.is-current {
-    background: var(--transition-accent);
-    color: var(--bg-base);
-  }
 
-  .transition-next {
+  .transition-moment {
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--text-secondary);
-  }
-
-  .transition-next-text {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .transition-secondary {
-    height: 34px;
-    padding: 0 12px;
-    white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
     border: 1px solid var(--border-glow);
     border-radius: var(--radius);
-    background: transparent;
+    background: var(--bg-card);
     color: var(--text-secondary);
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-family: var(--font-display);
     cursor: pointer;
   }
 
-  .transition-secondary.is-hidden {
-    visibility: hidden;
+  /* Le moment prévu : en couleur, et plus large pour être touché sans viser */
+  .transition-moment.is-next {
+    flex-grow: 3;
+    border-color: var(--transition-accent);
+    background: color-mix(in srgb, var(--transition-accent) 22%, var(--bg-card));
+    color: var(--transition-accent);
+  }
+
+  .transition-main:active,
+  .transition-moment:active {
+    transform: scale(0.97);
+  }
+
+  .transition-moment-number {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .transition-moment-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .transition-moment.is-next .transition-moment-time {
+    color: var(--text-secondary);
+  }
+
+  /* Une seule ligne : la légende change sans changer la taille de la popup */
+  .transition-next {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    color: var(--text-secondary);
   }
 
   .transition-close:focus-visible,
   .transition-main:focus-visible,
-  .transition-secondary:focus-visible,
+  .transition-moment:focus-visible,
   select:focus-visible {
     outline: 2px solid var(--transition-accent);
     outline-offset: -2px;
