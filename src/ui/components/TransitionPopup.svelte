@@ -14,6 +14,12 @@
   } from '../../audio/transition.ts';
   import { transport } from '../transport.svelte.ts';
   import { closeTransitionPopup, transitionPopup } from '../transition.svelte.ts';
+
+  /** Arrête la musique et ferme la popup */
+  function stop(): void {
+    stopTransition();
+    closeTransitionPopup();
+  }
   import VolumeControl from './VolumeControl.svelte';
 
   const musics    = getTransitionMusics();
@@ -61,7 +67,7 @@
         <span class="transition-time">{isCurrent ? transport.timeText : 'À l\'arrêt'}</span>
       </div>
 
-      <button class="transition-main" class:is-current={isCurrent} onclick={() => { if (isCurrent) stopTransition(); else void launchTransition(); }}>
+      <button class="transition-main" class:is-current={isCurrent} onclick={() => { if (isCurrent) stop(); else void launchTransition(); }}>
         {#if isCurrent}
           <span class="icon-stop" aria-hidden="true"></span> Arrêter
         {:else if restart}
@@ -71,14 +77,18 @@
         {/if}
       </button>
 
-      <div class="transition-next">
-        {#if restart}
-          <span>Prochain lancement : reprise à {formatTime(music.restart)}</span>
-          <button class="transition-reset" onclick={resetTransitionStart}>↺ Repartir du début</button>
-        {:else}
-          <span>Prochain lancement : depuis le début{music.start ? ` (${formatTime(music.start)})` : ''}, puis reprise à {formatTime(music.restart)}</span>
-        {/if}
-      </div>
+      {#if !isCurrent}
+        <div class="transition-next">
+          {#if restart}
+            <span>Prochain lancement : reprise à {formatTime(music.restart)}</span>
+            <button class="transition-secondary" onclick={resetTransitionStart}>↺ Repartir du début</button>
+          {:else}
+            <span>Prochain lancement : depuis le début{music.start ? ` (${formatTime(music.start)})` : ''}, puis reprise à {formatTime(music.restart)}</span>
+            <!-- Secours : « Repartir du début » cliqué par erreur, on peut quand même reprendre à la reprise -->
+            <button class="transition-secondary" onclick={() => void launchTransition(Date.now(), 'restart')}>▶ Relancer à la reprise ({formatTime(music.restart)})</button>
+          {/if}
+        </div>
+      {/if}
 
       <VolumeControl
         sliderClass="transition-vol" max={100} value={volumePct} volPct={volumePct + '%'}
@@ -248,7 +258,7 @@
     color: var(--text-secondary);
   }
 
-  .transition-reset {
+  .transition-secondary {
     padding: 8px 12px;
     border: 1px solid var(--border-glow);
     border-radius: var(--radius);
@@ -261,7 +271,7 @@
 
   .transition-close:focus-visible,
   .transition-main:focus-visible,
-  .transition-reset:focus-visible,
+  .transition-secondary:focus-visible,
   select:focus-visible {
     outline: 2px solid var(--transition-accent);
     outline-offset: -2px;

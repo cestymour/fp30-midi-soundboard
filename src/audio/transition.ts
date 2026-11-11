@@ -94,12 +94,16 @@ export function getNextStartTime(now: number = Date.now()): number {
 
 /**
  * Lance la musique choisie : du début la première fois, puis depuis son point de reprise.
+ * `from` force le point de départ (bouton de secours de la popup : relancer à la reprise
+ * après un « Repartir du début » cliqué par erreur).
  * Coupe d'abord tout ce qui jouait, comme l'arrêt d'urgence : sons et piano ; la musique
  * en cours, elle, est coupée net par playSound.
  */
-export function launchTransition(now: number = Date.now()): Promise<void> {
+export function launchTransition(now: number = Date.now(), from?: 'start' | 'restart'): Promise<void> {
   const music = getSelectedTransitionMusic();
-  const startAt = getNextStartTime(now);
+  const startAt = from === 'restart' ? music.restart
+    : from === 'start' ? (music.start ?? 0)
+    : getNextStartTime(now);
   STATE.transitionLastLaunch = now;
   save();
   stopAllSounds();

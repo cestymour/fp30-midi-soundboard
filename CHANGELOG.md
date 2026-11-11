@@ -6,25 +6,25 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 
 ### Nouveautés
 
-- **Musique de transition**, pour relancer l'énergie du public entre deux impros. Le bouton 🎉, dans le coin en haut à gauche (en face du bouton Paramètres), est visible depuis tous les onglets. Il **ouvre une popup**, et c'est le gros bouton de la popup qui lance la musique : un clic raté sur l'en-tête pendant une impro ne lance rien. Pendant la lecture, le bouton 🎉 devient un **carré stop**, avec la progression en fond : un clic arrête la musique (court fondu) et ferme la popup.
+- **Musique de transition**, pour relancer l'énergie du public entre deux impros. Le bouton 🎉, dans le coin en haut à gauche (en face du bouton Paramètres), est visible depuis tous les onglets. Il **ouvre une popup**, et c'est le gros bouton de la popup qui lance la musique : un clic raté sur l'en-tête pendant une impro ne lance rien. Popup ouverte, le bouton 🎉 devient un **bouton play** : un double clic sur l'en-tête lance donc la musique. Pendant la lecture, il devient un **carré stop**, avec la progression en fond. Ce carré, comme le bouton « Arrêter » de la popup, arrête la musique (court fondu) et ferme la popup.
 - **Lancer la musique de transition coupe tout**, comme l'arrêt d'urgence : la musique des onglets, les sons en cours et le piano.
-- **Une seule musique pour tout le spectacle**, choisie avant le début dans la popup. Le choix est gardé d'une fois sur l'autre. Deux musiques pour commencer : All Night et The Mojo Radio Gang (Parov Stelar).
-- **Premier lancement depuis le début, ensuite depuis le point de reprise** propre à chaque musique, toujours le même. All Night : début à 0:09, reprise à 0:50. The Mojo Radio Gang : début à 0:30, reprise à 0:53. Un trait marque le point de reprise sur la barre de progression de la popup. Un rechargement de l'appli en plein spectacle n'y change rien ; au-delà de 6 heures sans lancement (spectacle suivant), elle repart du début. « ↺ Repartir du début » le force, par exemple après un essai avant le spectacle ; changer de musique aussi.
+- **Une seule musique pour tout le spectacle**, choisie avant le début dans la popup. Le choix est gardé d'une fois sur l'autre. Trois musiques pour commencer : All Night et The Mojo Radio Gang (Parov Stelar), Rasputin (Boney M.).
+- **Premier lancement depuis le début, ensuite depuis le point de reprise** propre à chaque musique, toujours le même. All Night : début à 0:09, reprise à 0:50. The Mojo Radio Gang : début à 0:30, reprise à 0:53. Rasputin : début à 0:00, reprise à 0:36. Un trait marque le point de reprise sur la barre de progression de la popup. Un rechargement de l'appli en plein spectacle n'y change rien ; au-delà de 6 heures sans lancement (spectacle suivant), elle repart du début. « ↺ Repartir du début » le force, par exemple après un essai avant le spectacle ; changer de musique aussi. Cliqué par erreur, il se rattrape : quand le prochain lancement part du début, un petit bouton de secours « Relancer à la reprise » lance quand même la musique depuis son point de reprise.
 - **Sans effets, avec son propre volume** (curseur dans la popup, gardé lui aussi). Une musique lancée depuis un onglet coupe la musique de transition ; l'arrêt d'urgence aussi.
 
 ### À savoir
 
 - Le temps affiché dans la popup compte depuis le début de la musique (0:09 pour All Night) : à la reprise, il affiche donc 0:41 pour All Night.
 - En portrait, les onglets sont un peu plus serrés pour que tout tienne avec le nouveau bouton.
-- Deux nouveaux fichiers dans `public/sounds/transitions/` : « Télécharger tous les sons » les ajoute au hors ligne.
+- Trois nouveaux fichiers dans `public/sounds/transitions/` : « Télécharger tous les sons » les ajoute au hors ligne.
 
 ### À vérifier sur la tablette
 
 - Le bouton 🎉 en paysage et en portrait : tous les onglets restent visibles.
-- Un clic sur 🎉 ouvre la popup sans rien lancer ; le gros bouton lance la musique et coupe ce qui jouait (musique, sons, notes tenues au piano) ; 🎉 devenu carré stop l'arrête et ferme la popup ; le lancement suivant part du point de reprise.
+- Un clic sur 🎉 ouvre la popup sans rien lancer ; un double clic la lance ; le gros bouton la lance et coupe ce qui jouait (musique, sons, notes tenues au piano) ; le carré stop de l'en-tête et « Arrêter » l'arrêtent et ferment la popup ; le lancement suivant part du point de reprise ; après « Repartir du début », « Relancer à la reprise » part bien du point de reprise.
 - Le volume de la transition ne change pas celui des musiques, et les effets audio ne s'y appliquent pas.
 - Recharger l'appli après un lancement : la musique choisie et la reprise sont gardées.
-- Hors ligne, après « Télécharger tous les sons » : les deux musiques de transition se lancent.
+- Hors ligne, après « Télécharger tous les sons » : les trois musiques de transition se lancent.
 
 ## 1.12.0 — 2026-11-10
 

@@ -73,6 +73,12 @@ describe('point de départ', () => {
     expect(willRestart(T0 + RESTART_WINDOW_MS)).toBe(false);
   });
 
+  it('le départ peut être forcé : reprise même au premier lancement (secours)', async () => {
+    await launchTransition(T0, 'restart');
+    expect(playSound).toHaveBeenLastCalledWith(MUSICS[0], { route: 'transition', startAt: 40 });
+    expect(willRestart(T0 + 1000)).toBe(true);
+  });
+
   it('« repartir du début » et changer de musique remettent le départ au début', async () => {
     await launchTransition(T0);
     resetTransitionStart();

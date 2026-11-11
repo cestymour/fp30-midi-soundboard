@@ -1,13 +1,14 @@
 <!--
   TransitionButton.svelte — Bouton de la musique de transition, dans le coin haut gauche de
   l'en-tête (pendant du bouton Paramètres), visible sur tous les onglets.
-  Musique à l'arrêt : il ouvre la popup, d'où on la lance (jamais de lancement en un clic
-  depuis l'en-tête : un clic raté pendant une impro ne doit rien lancer).
-  Musique en cours : il devient un bouton stop, avec la progression en fond.
+  Popup fermée : il l'ouvre (jamais de lancement en un clic depuis l'en-tête : un clic raté
+  pendant une impro ne doit rien lancer). Popup ouverte : il devient un bouton play, donc un
+  double clic lance la musique. Musique en cours : bouton stop, avec la progression en fond ;
+  il arrête la musique et ferme la popup.
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
-  import { isTransitionCurrent, stopTransition } from '../../audio/transition.ts';
+  import { isTransitionCurrent, launchTransition, stopTransition } from '../../audio/transition.ts';
   import { transport } from '../transport.svelte.ts';
   import { closeTransitionPopup, openTransitionPopup, transitionPopup } from '../transition.svelte.ts';
 
@@ -15,10 +16,19 @@
   const isPlaying = $derived(isCurrent && !STATE.isPaused);
 
   function handleClick(): void {
-    if (isCurrent) stopTransition();
-    else if (transitionPopup.isOpen) closeTransitionPopup();
-    else openTransitionPopup();
+    if (isCurrent) {
+      stopTransition();
+      closeTransitionPopup();
+    } else if (transitionPopup.isOpen) {
+      void launchTransition();
+    } else {
+      openTransitionPopup();
+    }
   }
+
+  const label = $derived(isCurrent ? 'Arrêter la musique de transition'
+    : transitionPopup.isOpen ? 'Lancer la musique de transition'
+    : 'Musique de transition');
 </script>
 
 <button
@@ -26,8 +36,8 @@
   class:is-current={isCurrent}
   class:is-playing={isPlaying}
   class:is-open={transitionPopup.isOpen}
-  title={isCurrent ? 'Arrêter la musique de transition' : 'Musique de transition'}
-  aria-label={isCurrent ? 'Arrêter la musique de transition' : 'Musique de transition'}
+  title={label}
+  aria-label={label}
   style:--transition-progress={isCurrent ? transport.seekPct ?? '0%' : '0%'}
   onclick={handleClick}
   oncontextmenu={e => e.preventDefault()}
@@ -35,6 +45,8 @@
   <span class="transition-fill" aria-hidden="true"></span>
   {#if isCurrent}
     <span class="icon-stop" aria-hidden="true"></span>
+  {:else if transitionPopup.isOpen}
+    <span class="icon-play" aria-hidden="true"></span>
   {:else}
     <span class="transition-icon" aria-hidden="true">🎉</span>
   {/if}
@@ -102,12 +114,21 @@
     50%      { box-shadow: inset 0 -2px 0 var(--transition-accent); }
   }
 
-  /* Carré stop en CSS pur (évite les emojis Android) */
+  /* Carré stop et triangle play en CSS pur (évite les emojis Android) */
   .icon-stop {
     position: relative;
     width: 18px;
     height: 18px;
     background: currentColor;
     border-radius: 2px;
+  }
+  .icon-play {
+    position: relative;
+    width: 0;
+    height: 0;
+    margin-left: 4px;
+    border-style: solid;
+    border-width: 10px 0 10px 17px;
+    border-color: transparent transparent transparent currentColor;
   }
 </style>
