@@ -7,7 +7,7 @@
 import { MIDI_FX_PRESETS } from '../config/midi-fx.config.ts';
 import { AUDIO_FX_PRESETS } from '../config/audio-fx.config.ts';
 import { MIDI_FX_CONTROLS, MIDI_FX_STATE, applyMidiFxValue } from '../fx/midi-fx.ts';
-import { AUDIO_FX_CONTROLS, applyAudioFxValue } from '../fx/audio-fx.ts';
+import { AUDIO_FX_CONTROLS } from '../fx/audio-fx.ts';
 import { AudioEngineAPI } from '../audio/audio-engine.ts';
 import { FxOverlayController } from './fx-overlay.svelte.ts';
 
@@ -54,13 +54,7 @@ export const audioFxOverlay = new FxOverlayController({
   panelSelector: '.panel.panel-audio.active',
   gridSelector:  '.audio-grid',
   readSettings:  () => AudioEngineAPI.getCurrentSettings(),
-  applyValue:    applyAudioFxValue,
-  afterSync: (settings, overlay) => {
-    // Passe-bas au-delà de 20 kHz ramené au neutre de l'interface (ne peut pas arriver : code mort, voir docs/todo.md)
-    if (settings.lowPassFrequency > 20000) {
-      overlay.setControlValue('lowPass', 20000, true);
-    }
-  },
+  applyValue:    (control, value) => control.apply(value),
   refreshToolbar: () => refreshFxToolbarButtons(),
 });
 

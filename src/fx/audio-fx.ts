@@ -54,8 +54,7 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
     max: 20000,
     step: 100,
     neutral: 20000,
-    // La popup s'arrête à 20 kHz, son neutre
-    read: settings => Math.min(20000, settings.lowPassFrequency),
+    read: settings => settings.lowPassFrequency,
     apply: value => AudioEngineAPI.setLowPassFrequency(value),
     formatValue: value => value >= 1000 ? `${(value / 1000).toFixed(1)} kHz` : `${Math.round(value)} Hz`,
   },
@@ -118,8 +117,3 @@ export const AUDIO_FX_CONTROLS: AudioFxControl[] = [
     formatValue: value => `${(value / 100).toFixed(2)}x`,
   },
 ];
-
-/** Applique une valeur au moteur audio */
-export function applyAudioFxValue(control: AudioFxControl, value: number): void {
-  control.apply(value);
-}

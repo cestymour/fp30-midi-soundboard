@@ -37,8 +37,6 @@ export interface FxOverlayConfig<Key extends string, Settings> {
   readSettings:  () => Settings;
   /** Applique une valeur (curseur déplacé ou animation) */
   applyValue:    (control: FxControl<Key, Settings>, value: number) => void;
-  /** Ajustement propre à une popup après synchronisation */
-  afterSync?:    (settings: Settings, overlay: FxOverlayController<Key, Settings>) => void;
   /** Rafraîchit les boutons Effets / Reset des barres de panneau */
   refreshToolbar: () => void;
 }
@@ -164,8 +162,6 @@ export class FxOverlayController<Key extends string, Settings> {
       this.updateNeutralRailMarks(control.key);
     });
 
-    this.config.afterSync?.(settings, this);
-
     this.refreshPresetHighlightFromControls();
     this.config.refreshToolbar();
   }
@@ -236,17 +232,6 @@ export class FxOverlayController<Key extends string, Settings> {
     this.updateNeutralRailMarks(control.key);
     this.refreshPresetHighlightFromControls();
     this.config.refreshToolbar();
-  }
-
-  setControlValue(controlKey: Key, value: number, apply = true): void {
-    const control = this.findControl(controlKey);
-    if (!control || !this.isBuilt) return;
-
-    this.values[controlKey] = value;
-    this.updateNeutralRailMarks(controlKey);
-    if (apply) {
-      this.config.applyValue(control, value);
-    }
   }
 
   isAnyControlModified(): boolean {
