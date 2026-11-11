@@ -193,9 +193,9 @@
 
   .transition-title {
     font-family: var(--font-display);
-    font-size: 16px;
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--transition-accent);
   }
@@ -493,5 +493,10 @@
     #transition-overlay { padding: 8px; }
     #transition-card { gap: 8px; padding: 12px 16px; }
     .transition-close { width: 32px; height: 32px; }
+  }
+
+  /* ── Petit téléphone en portrait : le titre tient encore sur une ligne ── */
+  @media (max-width: 380px) {
+    .transition-title { font-size: 18px; }
   }
 </style>
