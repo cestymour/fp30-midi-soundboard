@@ -29,7 +29,15 @@
 <header id="header">
   <TransitionButton />
   <TabNav />
-  <button id="settings-btn" title="Paramètres" onclick={() => settingsPopup.open()} oncontextmenu={e => e.preventDefault()}>⚙️</button>
+  <button id="settings-btn" title="Paramètres" onclick={() => settingsPopup.open()} oncontextmenu={e => e.preventDefault()}>
+    <span class="corner-pill">
+      <!-- Engrenage dessiné : le caractère ⚙ est petit et peu lisible dans les polices du système -->
+      <svg class="settings-gear" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9.69 4.55 10.02 1.69 13.98 1.69 14.31 4.55 15.64 5.10 17.89 3.31 20.69 6.11 18.90 8.36 19.45 9.69 22.31 10.02 22.31 13.98 19.45 14.31 18.90 15.64 20.69 17.89 17.89 20.69 15.64 18.90 14.31 19.45 13.98 22.31 10.02 22.31 9.69 19.45 8.36 18.90 6.11 20.69 3.31 17.89 5.10 15.64 4.55 14.31 1.69 13.98 1.69 10.02 4.55 9.69 5.10 8.36 3.31 6.11 6.11 3.31 8.36 5.10Z" />
+        <circle cx="12" cy="12" r="3.3" />
+      </svg>
+    </span>
+  </button>
 </header>
 
 <main id="panels" bind:this={panels}>
@@ -62,26 +70,32 @@
   }
 
   #settings-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
     width: var(--header-h);
     min-width: var(--header-h);
     height: 100%;
-    /* Bordure à la couleur de sa popup sur les côtés intérieurs, coin intérieur arrondi :
-       un bouton de coin, pas un onglet */
+    padding: 0;
     border: none;
-    border-left: 1px solid var(--current-accent);
-    border-bottom: 1px solid var(--current-accent);
-    border-bottom-left-radius: calc(var(--radius) * 2);
     background: transparent;
-    color: var(--text-muted);
-    font-size: 24px;
+    color: var(--current-accent);
     cursor: pointer;
     flex-shrink: 0;
-    transition: color 0.15s, background 0.15s;
     user-select: none;
     -webkit-user-select: none;
+  }
+  /* Pastille à la couleur de la popup des paramètres */
+  #settings-btn .corner-pill {
+    border-color: color-mix(in srgb, var(--current-accent) 55%, transparent);
+    background: color-mix(in srgb, var(--current-accent) 15%, transparent);
+  }
+
+  .settings-gear {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
   }
 
   /* ── Focus accessible (clavier uniquement) ── */
@@ -90,14 +104,12 @@
     outline-offset: -2px;
   }
 
-  #settings-btn:hover {
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.03);
+  #settings-btn:hover .corner-pill {
+    background: color-mix(in srgb, var(--current-accent) 25%, transparent);
   }
 
-  #settings-btn:active {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.06);
+  #settings-btn:active .corner-pill {
+    background: color-mix(in srgb, var(--current-accent) 35%, transparent);
   }
 
   /* ═══════════════════════════════════════════════════════

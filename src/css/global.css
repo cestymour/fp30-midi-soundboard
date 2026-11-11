@@ -61,6 +61,33 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════════════
+    PASTILLE — boutons de coin de l'en-tête (transition, paramètres)
+    Le bouton garde tout le carré de l'en-tête comme zone de clic ; la
+    pastille, un rond détaché des bords, avec un caractère d'une seule
+    couleur (pas un emoji), le distingue des onglets.
+    Couleurs posées par chaque bouton.
+════════════════════════════════════════════════════════ */
+
+.corner-pill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--header-h) - 6px);
+  height: calc(var(--header-h) - 6px);
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  pointer-events: none;
+  transition: background 0.15s;
+}
+
+/* ═══════════════════════════════════════════════════════
     CURSEUR — volume des panneaux et popups d'effets
 ════════════════════════════════════════════════════════ */
 

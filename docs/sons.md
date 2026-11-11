@@ -11,7 +11,7 @@ Comment choisir, ranger, présenter et traiter les sons et les musiques de l'app
 | Ambiances | musiques | Fonds sonores longs (ville, gare, mer, forêt…). Un son long qui sonne comme une ambiance (grillons, cigales) va ici : il y gagne fondus et effets. |
 | Musiques | musiques | Musiques **cultes hors film**, connues, qui habillent une scène en cours. Pas de doublon avec Films. |
 | Films | musiques | Thèmes de film, avec leur affiche. Le musicien pense « la musique de tel film » : il les retrouve par l'image. |
-| Transition (bouton 🎉) | à part | Musiques rythmées pour relancer le public entre deux impros (`src/config/transition.config.ts`). |
+| Transition (bouton ♫) | à part | Musiques rythmées pour relancer le public entre deux impros (`src/config/transition.config.ts`). |
 
 Les styles qui se jouent bien au piano (tango, ragtime, valse, boogie, les classiques du répertoire) restent au piano : voir « À apprendre au piano » dans `docs/todo.md`.
 

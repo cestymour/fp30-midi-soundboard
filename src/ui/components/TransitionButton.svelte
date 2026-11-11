@@ -6,6 +6,7 @@
   lance le moment marquant prévu ; un double clic ouvre donc la popup et lance la musique.
   Musique en cours : bouton stop, avec la progression en fond ; il arrête la musique et
   laisse la popup ouverte.
+  Tout le carré est cliquable ; la pastille dessinée dedans le distingue des onglets.
 -->
 <script lang="ts">
   import { STATE } from '../../state.svelte.ts';
@@ -52,39 +53,37 @@
   onclick={handleClick}
   oncontextmenu={e => e.preventDefault()}
 >
-  <span class="transition-fill" aria-hidden="true"></span>
-  {#if isCurrent}
-    <span class="icon-stop" aria-hidden="true"></span>
-  {:else if transitionPopup.isOpen}
-    <span class="icon-play" aria-hidden="true"></span>
-  {:else}
-    <span class="transition-icon" aria-hidden="true">🎉</span>
-  {/if}
+  <span class="corner-pill">
+    <span class="transition-fill" aria-hidden="true"></span>
+    {#if isCurrent}
+      <span class="icon-stop" aria-hidden="true"></span>
+    {:else if transitionPopup.isOpen}
+      <span class="icon-play" aria-hidden="true"></span>
+    {:else}
+      <span class="transition-icon" aria-hidden="true">♫︎</span>
+    {/if}
+  </span>
 </button>
 
 <style>
   #transition-btn {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: var(--header-h);
     min-width: var(--header-h);
     height: 100%;
     flex-shrink: 0;
-    overflow: hidden;
-    /* Bordure à la couleur de sa popup sur les côtés intérieurs, coin intérieur arrondi :
-       un bouton de coin, pas un onglet */
+    padding: 0;
     border: none;
-    border-right: 1px solid var(--transition-accent);
-    border-bottom: 1px solid var(--transition-accent);
-    border-bottom-right-radius: calc(var(--radius) * 2);
-    background: color-mix(in srgb, var(--transition-accent) 8%, transparent);
+    background: transparent;
     color: var(--transition-accent);
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
-    transition: color 0.15s, background 0.15s;
+  }
+  /* Pastille à la couleur de la popup de transition */
+  #transition-btn .corner-pill {
+    border-color: color-mix(in srgb, var(--transition-accent) 55%, transparent);
+    background: color-mix(in srgb, var(--transition-accent) 15%, transparent);
   }
 
   #transition-btn:focus-visible {
@@ -92,24 +91,18 @@
     outline-offset: -2px;
   }
 
-  #transition-btn:hover {
-    background: color-mix(in srgb, var(--transition-accent) 18%, transparent);
+  #transition-btn:hover .corner-pill {
+    background: color-mix(in srgb, var(--transition-accent) 25%, transparent);
   }
-  /* Popup ouverte : fond noir, comme le bouton des paramètres sous sa popup */
-  #transition-btn.is-open {
-    background: #000;
-  }
-  #transition-btn:active {
-    background: color-mix(in srgb, var(--transition-accent) 28%, transparent);
+  #transition-btn:active .corner-pill {
+    background: color-mix(in srgb, var(--transition-accent) 35%, transparent);
   }
 
   .transition-icon {
     position: relative;
-    font-size: 24px;
-    line-height: 1;
   }
 
-  /* Progression de la musique : remplissage du bouton, de bas en haut */
+  /* Progression de la musique : remplissage de la pastille, de bas en haut */
   .transition-fill {
     position: absolute;
     left: 0; right: 0; bottom: 0;
@@ -118,24 +111,23 @@
     pointer-events: none;
   }
 
-  #transition-btn.is-current {
-    color: var(--text-primary);
-    box-shadow: inset 0 -2px 0 var(--transition-accent);
+  #transition-btn.is-current .corner-pill {
+    border-color: var(--transition-accent);
   }
-  #transition-btn.is-playing {
+  #transition-btn.is-playing .corner-pill {
     animation: transition-glow 1s ease-in-out infinite;
   }
 
   @keyframes transition-glow {
-    0%, 100% { box-shadow: inset 0 -2px 0 var(--transition-accent), inset 0 0 14px color-mix(in srgb, var(--transition-accent) 60%, transparent); }
-    50%      { box-shadow: inset 0 -2px 0 var(--transition-accent); }
+    0%, 100% { box-shadow: inset 0 0 14px color-mix(in srgb, var(--transition-accent) 60%, transparent); }
+    50%      { box-shadow: none; }
   }
 
   /* Carré stop et triangle play en CSS pur (évite les emojis Android) */
   .icon-stop {
     position: relative;
-    width: 18px;
-    height: 18px;
+    width: 12px;
+    height: 12px;
     background: currentColor;
     border-radius: 2px;
   }
@@ -143,9 +135,9 @@
     position: relative;
     width: 0;
     height: 0;
-    margin-left: 4px;
+    margin-left: 3px;
     border-style: solid;
-    border-width: 10px 0 10px 17px;
+    border-width: 9px 0 9px 15px;
     border-color: transparent transparent transparent currentColor;
   }
 </style>
