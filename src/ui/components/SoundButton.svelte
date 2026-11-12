@@ -327,7 +327,7 @@
     GRILLE ANIMAUX — Couleurs par catégorie (classes CSS)
   ════════════════════════════════════════════════════════ */
 
-  .animaux-domestique { --cat-accent: #ff00ff; }
+  .animaux-domestique { --cat-accent: #ff2a2a; }
   .animaux-ferme      { --cat-accent: #44aa00; }
   .animaux-foret      { --cat-accent: #7700ff; }
   .animaux-oiseau     { --cat-accent: #0066ff; }
