@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { MIDI_TABS } from './midi.config.ts';
 import { AUDIO_TABS } from './audio.config.ts';
 import { TRANSITION_MUSICS } from './transition.config.ts';
+import { TILE_ICONS } from '../icons/index.ts';
 
 /** Renvoie les id présents plusieurs fois dans la liste */
 function findDuplicateIds(entries: { id: string }[]): string[] {
@@ -82,5 +83,20 @@ describe('musiques de transition', () => {
       .map(path => path.replace('../../public/', '')));
     const missing = TRANSITION_MUSICS.filter(music => !files.has(music.file)).map(music => music.file);
     expect(missing).toEqual([]);
+  });
+});
+
+describe('dessins des tuiles', () => {
+  it('chaque `svg` de la configuration a son fichier dans src/icons/', () => {
+    const items: { id: string; svg?: string }[] = [...MIDI_TABS, ...AUDIO_TABS]
+      .flatMap(tab => tab.categories.flatMap<{ id: string; svg?: string }>(category => category.items));
+    const missing = items.filter(item => item.svg !== undefined && !(item.svg in TILE_ICONS)).map(item => item.id);
+    expect(missing).toEqual([]);
+  });
+
+  it('chaque dessin est un SVG de 64 × 64', () => {
+    for (const [name, svg] of Object.entries(TILE_ICONS)) {
+      expect(svg, name).toMatch(/^<svg [^>]*viewBox="0 0 64 64"/);
+    }
   });
 });

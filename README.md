@@ -179,6 +179,7 @@ export const MIDI_TABS: MidiTab[] = [
             id: 'piano',
             name: 'Piano',  // Button label
             icon: '🎹',     // Button emoji
+            // svg: 'piano-queue', // Optional: drawing src/icons/piano-queue.svg, shown instead of the emoji
             pc: 1,          // Program Change (1-128, musical notation)
             msb: 0,         // Bank Select MSB (CC0)
             lsb: 68,        // Bank Select LSB (CC32)
@@ -220,6 +221,7 @@ export const AUDIO_TABS: AudioTab[] = [
             icon: '🌲',                          // Button emoji (or image path)
             file: 'sounds/foret-oiseau.wav',    // Path to audio file (under public/)
             // Optional fields:
+            // svg: 'foret',                    // Drawing src/icons/foret.svg, shown instead of the emoji
             // img: 'images/films/cover.jpg',   // Cover image (overrides icon)
             // start: 12.5,                     // Start time in seconds
             // end: 45.0,                       // End time in seconds
@@ -515,6 +517,7 @@ export const MIDI_TABS: MidiTab[] = [
             id: 'piano',
             name: 'Piano',  // Nom affiché sur le bouton
             icon: '🎹',     // Emoji du bouton
+            // svg: 'piano-queue', // Optionnel : dessin src/icons/piano-queue.svg, affiché à la place de l'emoji
             pc: 1,          // Program Change (1-128, notation musicale)
             msb: 0,         // Bank Select MSB (CC0)
             lsb: 68,        // Bank Select LSB (CC32)
@@ -556,6 +559,7 @@ export const AUDIO_TABS: AudioTab[] = [
             icon: '🌲',                          // Emoji (ou chemin vers image)
             file: 'sounds/foret-oiseau.wav',    // Chemin vers le fichier audio (dans public/)
             // Champs optionnels :
+            // svg: 'foret',                    // Dessin src/icons/foret.svg, affiché à la place de l'emoji
             // img: 'images/films/cover.jpg',   // Image de couverture (remplace icon)
             // start: 12.5,                     // Temps de départ en secondes
             // end: 45.0,                       // Temps de fin en secondes

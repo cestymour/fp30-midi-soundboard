@@ -13,6 +13,7 @@
   import { getSoundButtonState } from '../transport.svelte.ts';
   import { getSoundImage } from '../../config/tabs.ts';
   import { assetUrl } from '../../asset-url.ts';
+  import TileIcon from './TileIcon.svelte';
 
   let { item, kind }: { item: AudioItem; kind: AudioTabKind } = $props();
 
@@ -65,7 +66,7 @@
   style:--progress-transition={buttonState.transition}
   title={item.title ?? item.name}
   onclick={handleClick}
->{#if imageSrc}<span class="btn-icon"><img src={imageSrc} alt={item.name} />{#if isOneShot && isPlaying}{@render repeatIcon()}{/if}</span>{:else if item.icon || !item.subtitle}<span class="btn-icon">{item.icon ?? '▶'}{#if isOneShot && isPlaying}{@render repeatIcon()}{/if}</span>{/if}<span class="btn-label">{item.name}</span>{#if item.subtitle}<span class="btn-sub">{item.subtitle}</span>{/if}</button>
+>{#if imageSrc}<span class="btn-icon"><img src={imageSrc} alt={item.name} />{#if isOneShot && isPlaying}{@render repeatIcon()}{/if}</span>{:else if item.icon || !item.subtitle}<span class="btn-icon"><TileIcon svg={item.svg} emoji={item.icon ?? '▶'} />{#if isOneShot && isPlaying}{@render repeatIcon()}{/if}</span>{/if}<span class="btn-label">{item.name}</span>{#if item.subtitle}<span class="btn-sub">{item.subtitle}</span>{/if}</button>
 
 <!-- Double flèche « repeat » (pictogramme Material « repeat ») : un clic relance le son par-dessus -->
 {#snippet repeatIcon()}<svg class="repeat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" /></svg>{/snippet}

@@ -40,6 +40,8 @@ export interface MidiItem {
   id: ConfigId;
   name: string;
   icon: string;
+  /** Dessin de src/icons/ (nom du fichier sans `.svg`), affiché à la place de l'emoji `icon` */
+  svg?: string;
   /** Program Change, 1-128 (notation musicale) : envoyé en `pc - 1` */
   pc: number;
   /** Bank Select MSB (CC0) */
@@ -66,6 +68,8 @@ export interface AudioItem {
   name: string;
   /** Emoji ou chemin vers une image */
   icon?: string;
+  /** Dessin de src/icons/ (nom du fichier sans `.svg`), affiché à la place de l'emoji `icon` */
+  svg?: string;
   /** Chemin du fichier audio, relatif à la page (fichiers dans public/) */
   file: string;
   /** Image de couverture (remplace `icon`) */
