@@ -135,38 +135,53 @@ export const AUDIO_TABS: AudioTab[] = [
       {
         id: 'toutes-les-ambiances', label: 'Toutes les ambiances', icon: '🔊', color: '#88ccff',
         items: [
-          // ── Ville et lieux publics ──
-          { id: 'ville',              name: 'Ville',              icon: '🏙️', file: 'sounds/ambiances/ville_voiture.mp3' },
-          { id: 'travaux',            name: 'Travaux',            icon: '🚧', file: 'sounds/ambiances/travaux_urbains.ogg' },
-          { id: 'manifestation',      name: 'Manifestation',      icon: '✊', file: 'sounds/ambiances/manifestation.mp3' },
-          { id: 'gare',               name: 'Gare',               icon: '🚉', file: 'sounds/ambiances/hall_gare.mp3' },
-          { id: 'cafe',               name: 'Café',               icon: '☕', file: 'sounds/ambiances/discussion_foule.ogg', start: 12.6 },
-          { id: 'restaurant',         name: 'Restaurant',         icon: '🍽️', file: 'sounds/ambiances/discussions_restaurant.ogg' },
-          { id: 'discussions-dehors', name: 'Discussions dehors', icon: '🗣️', file: 'sounds/ambiances/discussions_exterieures.mp3' },
-          { id: 'discussions-dedans', name: 'Discussions dedans', icon: '🏠', file: 'sounds/ambiances/discussions_interieur.mp3' },
-          { id: 'arcade',             name: 'Salle d\'arcade',    icon: '🕹️', file: 'sounds/ambiances/salle_jeux_arcade.ogg' },
-          { id: 'recreation',         name: 'Récréation',         icon: '🏫', file: 'sounds/ambiances/recreation_maternelle.mp3' },
-          { id: 'maternite',          name: 'Maternité',          icon: '👶', file: 'sounds/ambiances/maternite_pleurs_bebe.mp3' },
-          { id: 'feux-d-artifices',   name: 'Feux d\'artifices',  icon: '🎆', file: 'sounds/ambiances/feux_artifices.mp3' },
-          { id: 'noel',               name: 'Noël',               icon: '🎅', file: 'sounds/ambiances/noel.mp3', start: 1.5, title: 'Jingle Bells' },
+          // Disposition en blocs (paysage, 8 colonnes ; en portrait la grille est transposée) :
+          //   N N T T T F F F    N : nature, T : ville et transports, F : foules et fêtes
+          //   N N N T T F F F    M : mer, E : éléments, S : nuit, peur et guerre (sombre),
+          //   M M E E S S V V    V : voix. Une couleur par thème (catClass ambiances-*,
+          //   M M E E S S V V    couleurs dans SoundButton.svelte).
+          // ── Ligne 1 ──
+          { id: 'jungle',            name: 'Jungle',            icon: '🌴', file: 'sounds/ambiances/jungle_tropicale.mp3',        catClass: 'ambiances-nature',   title: 'Jungle tropicale' },
+          { id: 'cigale-tszzzz',     name: 'Cigales',           icon: '🦗', file: 'sounds/ambiances/cigales_chant.mp3',           catClass: 'ambiances-nature',   title: 'Cigale Chant' },
+          { id: 'gare',              name: 'Gare',              icon: '🚉', file: 'sounds/ambiances/hall_gare.mp3',               catClass: 'ambiances-ville' },
+          { id: 'train',             name: 'Train',             icon: '🚆', file: 'sounds/ambiances/interieur_train.mp3',         catClass: 'ambiances-ville',    title: 'À l\'intérieur d\'un train' },
+          { id: 'metro',             name: 'Métro',             icon: '🚇', file: 'sounds/ambiances/interieur_metro.mp3',         catClass: 'ambiances-ville',    title: 'À l\'intérieur d\'un métro' },
+          { id: 'fete-foraine',      name: 'Fête foraine',      icon: '🎠', file: 'sounds/ambiances/fete_foraine_carrousel.mp3',  catClass: 'ambiances-fete',     title: 'Carrousel de fête foraine' },
+          { id: 'feux-d-artifices',  name: 'Feux d\'artifices', icon: '🎆', file: 'sounds/ambiances/feux_artifices.mp3',          catClass: 'ambiances-fete' },
+          { id: 'noel',              name: 'Noël',              icon: '🎅', file: 'sounds/ambiances/noel.mp3',                    catClass: 'ambiances-fete',     start: 1.5, title: 'Jingle Bells' },
 
-          // ── Mer et nature ──
-          { id: 'plage',              name: 'Plage',              icon: '🏖️', file: 'sounds/ambiances/plage_vacanciers.mp3' },
-          { id: 'mer',                name: 'Mer',                icon: '🌊', file: 'sounds/ambiances/mer_vagues.mp3' },
-          { id: 'vague-mouettes',     name: 'Vagues et mouettes', icon: '⚓', file: 'sounds/ambiances/vague_mouette.ogg' },
-          { id: 'foret',              name: 'Forêt oiseaux',      icon: '🌲', file: 'sounds/ambiances/foret_oiseau.mp3' },
-          { id: 'mare',               name: 'Mare',               icon: '🐸', file: 'sounds/ambiances/mare_grenouilles.mp3' },
-          { id: 'troupeau',           name: 'Troupeau',           icon: '🐄', file: 'sounds/ambiances/troupeau_cloche.mp3' },
-          { id: 'cigale-tszzzz',      name: 'Cigales',            icon: '🦗', file: 'sounds/ambiances/cigales_chant.mp3', title: 'Cigale Chant' },
-          { id: 'vent',               name: 'Vent',               icon: '💨', file: 'sounds/ambiances/vent.mp3' },
-          { id: 'orage',              name: 'Orage',              icon: '⛈️', file: 'sounds/ambiances/pluie_tonnerre.mp3' },
-          { id: 'feu',                name: 'Feu de cheminée',    icon: '🔥', file: 'sounds/ambiances/feu_cheminee.ogg' },
-          { id: 'grotte',             name: 'Grotte',             icon: '💧', file: 'sounds/ambiances/grotte_goutte.mp3' },
-          { id: 'nuit-campagne',      name: 'Nuit à la campagne', icon: '🌙', file: 'sounds/ambiances/nuit_campagne.mp3' },
+          // ── Ligne 2 ──
+          { id: 'foret',             name: 'Forêt oiseaux',     icon: '🌲', file: 'sounds/ambiances/foret_oiseau.mp3',            catClass: 'ambiances-nature' },
+          { id: 'mare',              name: 'Mare',              icon: '🐸', file: 'sounds/ambiances/mare_grenouilles.mp3',        catClass: 'ambiances-nature' },
+          { id: 'troupeau',          name: 'Troupeau',          icon: '🐄', file: 'sounds/ambiances/troupeau_cloche.mp3',         catClass: 'ambiances-nature' },
+          { id: 'travaux',           name: 'Travaux',           icon: '🚧', file: 'sounds/ambiances/travaux_urbains.ogg',         catClass: 'ambiances-ville' },
+          { id: 'ville',             name: 'Ville',             icon: '🏙️', file: 'sounds/ambiances/ville_voiture.mp3',          catClass: 'ambiances-ville' },
+          { id: 'manifestation',     name: 'Manifestation',     icon: '✊', file: 'sounds/ambiances/manifestation.mp3',           catClass: 'ambiances-fete' },
+          { id: 'stade',             name: 'Stade',             icon: '🏟️', file: 'sounds/ambiances/stade_foule_football.mp3',   catClass: 'ambiances-fete',     title: 'Foule de stade de football' },
+          { id: 'concert',           name: 'Concert',           icon: '🎤', file: 'sounds/ambiances/concert_foule_applaudissements.mp3', catClass: 'ambiances-fete', title: 'Foule de concert : applaudissements et cris' },
+       // { id: 'arcade',            name: 'Salle d\'arcade',   icon: '🕹️', file: 'sounds/ambiances/salle_jeux_arcade.ogg',      catClass: 'ambiances-fete' },
 
-          // ── Peur ──
-          { id: 'nuit-angoissante',   name: 'Nuit angoissante',   icon: '🌑', file: 'sounds/ambiances/ambiance_nuit_peur.mp3' },
-          { id: 'zombies',            name: 'Zombies',            icon: '🧟', file: 'sounds/ambiances/ambiance_bruit_zombie.mp3' },
+          // ── Ligne 3 ──
+          { id: 'plage',             name: 'Plage',             icon: '🏖️', file: 'sounds/ambiances/plage_vacanciers.mp3',       catClass: 'ambiances-mer' },
+          { id: 'mer',               name: 'Mer',               icon: '🌊', file: 'sounds/ambiances/mer_vagues.mp3',              catClass: 'ambiances-mer' },
+          { id: 'orage',             name: 'Orage',             icon: '⛈️', file: 'sounds/ambiances/pluie_tonnerre.mp3',         catClass: 'ambiances-elements' },
+          { id: 'vent',              name: 'Vent',              icon: '💨', file: 'sounds/ambiances/vent.mp3',                    catClass: 'ambiances-elements' },
+          { id: 'nuit-campagne',     name: 'Nuit à la campagne', icon: '🌙', file: 'sounds/ambiances/nuit_campagne.mp3',          catClass: 'ambiances-nuit' },
+          { id: 'nuit-angoissante',  name: 'Nuit angoissante',  icon: '🌑', file: 'sounds/ambiances/ambiance_nuit_peur.mp3',      catClass: 'ambiances-nuit' },
+          { id: 'discussions-dehors', name: 'Discussions dehors', icon: '🗣️', file: 'sounds/ambiances/discussions_exterieures.mp3', catClass: 'ambiances-voix' },
+          { id: 'discussions-dedans', name: 'Discussions dedans', icon: '🏠', file: 'sounds/ambiances/discussions_interieur.mp3', catClass: 'ambiances-voix' },
+
+          // ── Ligne 4 ──
+          { id: 'vague-mouettes',    name: 'Vagues et mouettes', icon: '⚓', file: 'sounds/ambiances/vague_mouette.ogg',          catClass: 'ambiances-mer' },
+          { id: 'plongee',           name: 'Sous l\'eau',       icon: '🤿', file: 'sounds/ambiances/plongee_sous_marine.mp3',     catClass: 'ambiances-mer',      title: 'Plongée sous-marine' },
+          { id: 'grotte',            name: 'Grotte',            icon: '💧', file: 'sounds/ambiances/grotte_goutte.mp3',           catClass: 'ambiances-elements' },
+          { id: 'feu',               name: 'Feu de cheminée',   icon: '🔥', file: 'sounds/ambiances/feu_cheminee.ogg',            catClass: 'ambiances-elements' },
+          { id: 'bataille',          name: 'Champ de bataille', icon: '💥', file: 'sounds/ambiances/champ_de_bataille.mp3',       catClass: 'ambiances-nuit',     title: 'Champ de bataille : tirs et explosions' },
+          { id: 'zombies',           name: 'Zombies',           icon: '🧟', file: 'sounds/ambiances/ambiance_bruit_zombie.mp3',   catClass: 'ambiances-nuit' },
+          { id: 'recreation',        name: 'Récréation',        icon: '🏫', file: 'sounds/ambiances/recreation_maternelle.mp3',   catClass: 'ambiances-voix' },
+          { id: 'maternite',         name: 'Maternité',         icon: '👶', file: 'sounds/ambiances/maternite_pleurs_bebe.mp3',   catClass: 'ambiances-voix' },
+       // { id: 'cafe',              name: 'Café',              icon: '☕', file: 'sounds/ambiances/discussion_foule.ogg',        catClass: 'ambiances-voix',     start: 12.6 },
+       // { id: 'restaurant',        name: 'Restaurant',        icon: '🍽️', file: 'sounds/ambiances/discussions_restaurant.ogg', catClass: 'ambiances-voix' },
         ]
       }
     ]

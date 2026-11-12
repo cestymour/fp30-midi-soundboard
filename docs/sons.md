@@ -29,7 +29,7 @@ Les styles qui se jouent bien au piano (tango, ragtime, valse, boogie, les class
 - **Nom** : minuscules, mots séparés par `_`, sans espace, accent ni parenthèse (`il_etait_une_fois_dans_l_ouest_l_homme_a_l_harmonica.mp3`). Musiques de transition : `auteur_titre.mp3`. Affiche d'un film : même nom que l'`id` de la tuile.
 - **Remplacer un fichier sous le même nom est possible** : à la build, chaque son et chaque image reçoit une empreinte de son contenu, ajoutée à son adresse (`?v=…`, `src/asset-url.ts`). Un fichier modifié change d'adresse : la tablette le télécharge (« Télécharger tous les sons »), puis efface l'ancienne version de son cache. Les suffixes `_v2` des fichiers existants restent tels quels ; inutile d'en ajouter.
 - **Une tuile en commentaire est mise de côté, pas supprimée** : la ligne et son mp3 restent. Une ligne dont le mp3 n'existe plus est supprimée ; son `id` reste réservé (historique git) et n'est jamais réutilisé.
-- **Poids** : tout part dans le cache hors ligne de la tablette (« Télécharger tous les sons »). Environ 195 Mo aujourd'hui : Films 73 Mo, Musiques 61 Mo, Transitions 27 Mo, Ambiances 25 Mo, Bruits 4,4 Mo, Animaux 3,2 Mo, affiches 2,5 Mo.
+- **Poids** : tout part dans le cache hors ligne de la tablette (« Télécharger tous les sons »). Environ 205 Mo aujourd'hui : Films 73 Mo, Musiques 61 Mo, Ambiances 35 Mo, Transitions 27 Mo, Bruits 4,4 Mo, Animaux 3,2 Mo, affiches 2,5 Mo.
 
 ## Traitement audio
 
@@ -68,6 +68,12 @@ Tous les autres fichiers sont entiers.
 - **Peer Gynt (Morning Mood)** : coupé à 3:58, la fin est retirée.
 - **Dans l'antre du roi de la montagne (Grieg)** : début remonté (le crescendo le rendait presque inaudible à la tuile) : gain de +12 dB jusqu'à 1:25, puis rampe jusqu'à 0 dB à 1:40 ; la fin est intacte. Le passage de la tuile est vers −24 LUFS.
 - **Musique d'ascenseur** : version de 57 s.
+- **Jungle (Ambiances)** : de 6:00 à 7:30 d'un enregistrement de 9:49.
+- **Métro (Ambiances)** : passage presque silencieux retiré, de 0:04 à 0:13 (coupe nette) ; 1:51 au lieu de 2:00.
+
+## Écartés de l'onglet Ambiances
+
+- **En commentaire** (mis de côté, fichier gardé) : Café et Restaurant (doublons de Discussions dedans, qui sonne le mieux des trois), Salle d'arcade (rarement utile).
 
 ## Écartés de l'onglet Musiques
 

@@ -335,6 +335,15 @@
   .animaux-savane     { --cat-accent: #cccc00; }
   .animaux-aquatique  { --cat-accent: #00ffee; }
 
+  /* Onglet Ambiances : même grille, une couleur par thème */
+  .ambiances-ville    { --cat-accent: #0066ff; }
+  .ambiances-voix     { --cat-accent: #ff2a2a; }
+  .ambiances-fete     { --cat-accent: #ff8000; }
+  .ambiances-mer      { --cat-accent: #00ffee; }
+  .ambiances-nature   { --cat-accent: #44aa00; }
+  .ambiances-elements { --cat-accent: #cccc00; }
+  .ambiances-nuit     { --cat-accent: #7700ff; }
+
   :global(.animals-grid) .sound-btn {
     border-color: color-mix(in srgb, var(--cat-accent, var(--border)) 35%, var(--border));
     background: color-mix(in srgb, var(--cat-accent, transparent) 8%, var(--bg-card));
