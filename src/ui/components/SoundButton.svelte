@@ -314,6 +314,11 @@
     container-type: size;
   }
 
+  /* ESSAI : couleur des silhouettes simples (TileIcon), éclaircie pour le fond sombre */
+  :global(.audio-grid.animals-grid) .sound-btn {
+    --tile-icon-color: color-mix(in srgb, var(--cat-accent) 50%, #ffffff);
+  }
+
   :global(.audio-grid.animals-grid) .sound-btn .btn-icon {
     font-size: 45cqh;
     line-height: 1;
