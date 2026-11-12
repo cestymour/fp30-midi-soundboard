@@ -344,6 +344,14 @@
   .ambiances-elements { --cat-accent: #cccc00; }
   .ambiances-nuit     { --cat-accent: #7700ff; }
 
+  /* Onglet Bruits : même grille, une couleur par thème */
+  .bruits-rue         { --cat-accent: #0066ff; }
+  .bruits-spectacle   { --cat-accent: #cccc00; }
+  .bruits-bureau      { --cat-accent: #00ffee; }
+  .bruits-telephone   { --cat-accent: #7700ff; }
+  .bruits-maison      { --cat-accent: #44aa00; }
+  .bruits-danger      { --cat-accent: #ff2a2a; }
+
   :global(.animals-grid) .sound-btn {
     border-color: color-mix(in srgb, var(--cat-accent, var(--border)) 35%, var(--border));
     background: color-mix(in srgb, var(--cat-accent, transparent) 8%, var(--bg-card));
