@@ -17,6 +17,17 @@ L'organisation en 11 familles est arrêtée (2026-11-08) ; c'est encore une maqu
 
 - [ ] Épée qu'on dégaine, bruits d'épée divers (« Épées » existe déjà : `epee_contre_epee.mp3`). Attention : Bruits est plein (32 tuiles sur 32), il faut retirer des tuiles ou agrandir la grille.
 
+## Revue UX/UI
+
+- [ ] **Pistes de la revue UX/UI du 2026-11-12** (version 1.16.0, faite sur des captures en paysage 1280×800 et en portrait 800×1280, pas sur la tablette). La base tient : zones fixes, couleur par type d'onglet, grosses tuiles, arrêt d'urgence partout ; Films (affiches) et Animaux (familles de couleur) suivent le mieux le principe « repère visuel d'abord » de `docs/usage-scene.md`. À reprendre, du plus important au moins important :
+  - **Ambiances** : 27 tuiles grises identiques, sans catégorie ni couleur ; il faut tout lire pour trouver une tuile. Les grouper en familles colorées (ville et lieux, nature, mer, nuit et angoisse, fête…).
+  - **Instruments** : 48 tuiles grises, seul le petit titre de catégorie est en couleur, alors que c'est l'onglet central. Teinter les tuiles par catégorie, comme dans Musiques.
+  - **Petits textes peu lisibles** pour un musicien qui lit lentement : sous-titres des tuiles de Musiques (petits, peu contrastés), titres de catégorie (capitales mono d'environ 9 px), légendes de Films (petites ; en paysage, l'affiche laisse une bande vide au-dessus et au-dessous). En portrait, dans Musiques, la taille du texte change d'un bloc à l'autre : les tuiles du haut (Épique, Cirque…) sont plus basses et leur texte nettement plus petit que celles du bas (Tubes, Élégance).
+  - **Musiques en paysage** : hauteurs de tuiles différentes d'une colonne à l'autre, tuiles seules sur leur ligne (O Fortuna, Roi de la montagne) ; l'ensemble paraît désordonné et la position d'une tuile se retient moins bien.
+  - **« Non connecté »** (onglets piano) : petit badge gris, alors qu'un piano déconnecté est l'état le plus grave sur scène. Le rendre très visible (rouge ou orange).
+  - **Curseur de volume tout près de STOP** : à 100 %, le pouce est à environ 50 px du bouton. Vérifier au doigt sur la tablette qu'un geste trop large en montant le volume ne déclenche pas l'arrêt.
+  - **Petites incohérences** : « Ambiance tendu » au lieu de « tendue » (Films, Saw) ; « Course Poursuite » deux fois (Kill Bill et Taxi) ; volume affiché « 100 » sur l'onglet piano et « 100% » ailleurs ; légende de la popup de transition coupée par « … ».
+
 ## Presets
 
 - [ ] **Studio et Pluck se ressemblent beaucoup** (effets piano) : voir à l'oreille s'il faut garder les deux, ou un seul. Studio est un son sec et proche (Reverb 0, Cutoff 78, Attack 52, Release 38, Decay 56). Pluck : Reverb 2, Cutoff 85, Resonance 75, Attack 30, Release 35, Decay 40. Voir `src/config/midi-fx.config.ts`.
