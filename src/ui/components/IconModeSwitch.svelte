@@ -1,6 +1,6 @@
 <!--
-  IconModeSwitch.svelte — ESSAI TEMPORAIRE : trois boutons en bas de l'écran pour passer
-  d'un affichage des icônes de tuile à l'autre (emoji, dessin détaillé, dessin simple).
+  IconModeSwitch.svelte — ESSAI TEMPORAIRE : quatre boutons en bas de l'écran pour passer
+  d'un affichage des icônes de tuile à l'autre (emoji, dessin détaillé, silhouette simple, V4).
   À retirer une fois le style choisi.
 -->
 <script lang="ts">
@@ -10,6 +10,7 @@
     { mode: 'emoji',  label: '1 · Emoji' },
     { mode: 'detail', label: '2 · Détaillé' },
     { mode: 'simple', label: '3 · Simple' },
+    { mode: 'v4',     label: '4 · V4' },
   ];
 </script>
 
