@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { MIDI_TABS } from './midi.config.ts';
 import { AUDIO_TABS } from './audio.config.ts';
 import { TRANSITION_MUSICS } from './transition.config.ts';
-import { TILE_ICONS } from '../icons/index.ts';
+import { TILE_ICONS, TILE_ICONS_SIMPLE } from '../icons/index.ts';
 
 /** Renvoie les id présents plusieurs fois dans la liste */
 function findDuplicateIds(entries: { id: string }[]): string[] {
@@ -92,10 +92,13 @@ describe('dessins des tuiles', () => {
       .flatMap(tab => tab.categories.flatMap<{ id: string; svg?: string }>(category => category.items));
     const missing = items.filter(item => item.svg !== undefined && !(item.svg in TILE_ICONS)).map(item => item.id);
     expect(missing).toEqual([]);
+    // Essai : chaque dessin existe aussi en silhouette simple (src/icons/simple/)
+    const missingSimple = items.filter(item => item.svg !== undefined && !(item.svg in TILE_ICONS_SIMPLE)).map(item => item.id);
+    expect(missingSimple).toEqual([]);
   });
 
   it('chaque dessin est un SVG de 64 × 64', () => {
-    for (const [name, svg] of Object.entries(TILE_ICONS)) {
+    for (const [name, svg] of [...Object.entries(TILE_ICONS), ...Object.entries(TILE_ICONS_SIMPLE)]) {
       expect(svg, name).toMatch(/^<svg [^>]*viewBox="0 0 64 64"/);
     }
   });
