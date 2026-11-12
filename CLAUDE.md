@@ -72,6 +72,7 @@ Entry point: `index.html` only holds `<div id="app">`. It loads `src/main.ts`, w
 - `src/types.ts`: shared types: config schema (`MidiTab`, `MidiItem`, `AudioTab`, `AudioItem`, `Category`), FX controls and presets (`FxControl`, `FxPreset`, `MidiFxKey`, `AudioFxKey`).
 - `src/state.svelte.ts`: the shared `STATE` object, a class with `$state` fields (`AppState`). Objects compared by identity or owned by browser APIs (MIDI ports, BLE, tracks, the current `AudioItem`) use `$state.raw`, so they are never proxied.
 - `src/config/tabs.ts`: `getMidiTabs()` / `getAudioTabs()`. Components never read `MIDI_TABS` / `AUDIO_TABS` directly: these functions are the single place to apply user preferences later (hidden tiles, order).
+- `src/icons/`: SVG drawings of the tiles (`<name>.svg`, `TILE_ICONS` in `index.ts`, inlined in the JS bundle so they work offline). A tile with `svg: '<name>'` shows the drawing instead of its emoji (`TileIcon.svelte`); `config.test.ts` checks every name has its file. Style rules: `docs/sons.md`.
 - `src/config/*.config.ts`: pure data exports (`MIDI_TABS`, `AUDIO_TABS`, `MIDI_FX_PRESETS`, `AUDIO_FX_PRESETS`). `config.test.ts` checks that every `id` is unique among its siblings.
 - `src/events.ts`: `createEmitter()`, the small typed event emitter the engines use to notify the UI.
 

@@ -17,7 +17,8 @@ Les styles qui se jouent bien au piano (tango, ragtime, valse, boogie, les class
 
 ## Présenter une tuile
 
-- **Repère visuel d'abord** : position, couleur, famille, emoji ou affiche. Le texte vient ensuite, avec peu de mots en gros.
+- **Repère visuel d'abord** : position, couleur, famille, emoji, dessin ou affiche. Le texte vient ensuite, avec peu de mots en gros.
+- **Le dessin part du son entendu**, pas de l'emoji disponible : une mouette pour le cri de mouette, un piano droit de saloon pour le honky-tonk. Quand aucun emoji ne convient, ou que plusieurs tuiles partagent le même, la tuile reçoit son propre dessin SVG (`svg: '<nom>'`, fichier `src/icons/<nom>.svg` : viewBox 0 0 64 64, aplats de couleur sans contour, sujet de profil tourné vers la gauche). Sans dessin, la tuile garde son emoji.
 - **Musiques** : en gros (`name`), ce qui identifie le mieux la musique pour le commun des gens (titre, artiste ou usage : « Entrée du cirque », « Strip-tease ») ; en petit (`subtitle`), ce qu'elle fait entendre ou la situation. Le titre complet va dans `title` (info-bulle).
 - **Familles de l'onglet Musiques** : par ambiance et par genre, une couleur par famille (les tuiles la prennent, classe `musique-tuile`). Les familles comiques et dramatiques ne se mélangent pas. 4 colonnes, 2 tuiles par ligne (`catCols: 2`) ; `colSizes` fixe le nombre de familles par colonne, à mettre à jour si on ajoute ou retire une famille.
 - **Moment marquant** : réglé avec `start` (et `end` si besoin). Ce sont les premières secondes qui comptent.

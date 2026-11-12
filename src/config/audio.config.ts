@@ -24,7 +24,7 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'poule-cot-cot',     name: 'Poule : Cot-cot',     icon: '🐔',   file: 'sounds/animaux/poule_gloussement_v2.mp3',                               catClass: 'animaux-ferme',      title: 'Poule Gloussement' },
           { id: 'coq-cocorico',      name: 'Coq : Cocorico',      icon: '🐓',   file: 'sounds/animaux/coq_cocorico_v2.mp3',                start: 0.17,        catClass: 'animaux-ferme',      title: 'Coq Cocorico' },
           { id: 'oiseau-cui-cui',    name: 'Oiseau : Cui-cui',    icon: '🐦',   file: 'sounds/animaux/chant_des_oiseaux_v2.mp3',                               catClass: 'animaux-oiseau',     title: 'Chant des oiseaux Gazouillement' },
-          { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️',   file: 'sounds/animaux/pigeon_roucoulement_v2.mp3',                  end: 7.65, catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
+          { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️', svg: 'pigeon',   file: 'sounds/animaux/pigeon_roucoulement_v2.mp3',                  end: 7.65, catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
           { id: 'lion-tigre-roarrr', name: 'Lion/tigre : Roarrr', icon: '🦁',   file: 'sounds/animaux/lion_tigre_rugissement_v2.mp3',                          catClass: 'animaux-savane',     title: 'Lion/tigre Rugissement' },
           { id: 'hyene-hi-hi',       name: 'Hyène : Hi-hi',       icon: '🐆',   file: 'sounds/animaux/hyene_rire_v2.mp3',                                      catClass: 'animaux-savane',     title: 'Hyène Rire' },
 
@@ -33,18 +33,18 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'ane-i-an',          name: 'Âne : I-An',          icon: '🫏',   file: 'sounds/animaux/ane_braiement_v2.mp3',                                   catClass: 'animaux-ferme',      title: 'Âne Braiement' },
           { id: 'dindon-glouglou',   name: 'Dindon : Glouglou',   icon: '🦃',   file: 'sounds/animaux/dindon_glouglou_v2.mp3',                                 catClass: 'animaux-ferme',      title: 'Dindon Glouglou' },
           { id: 'canard-coin-coin',  name: 'Canard : Coin-coin',  icon: '🦆',   file: 'sounds/animaux/canard_cancanement_v2.mp3',                              catClass: 'animaux-ferme',      title: 'Canard Cancanement' },
-          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛',   file: 'sounds/animaux/corbeau_croassement_v2.mp3',                   end: 2.9, catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
+          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛', svg: 'corbeau',   file: 'sounds/animaux/corbeau_croassement_v2.mp3',                   end: 2.9, catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
           { id: 'aigle-cri-percant', name: 'Aigle : Cri perçant', icon: '🦅',   file: 'sounds/animaux/aigle_faucon_cri_percant_v2.mp3',                        catClass: 'animaux-oiseau',     title: 'Aigle / Faucon Cri perçant' },
           { id: 'elephant',          name: 'Éléphant',            icon: '🐘',   file: 'sounds/animaux/elephant_barrissement_v2.mp3',       start: 0.5, end: 6, catClass: 'animaux-savane',     title: 'Éléphant Barrissement' },
           { id: 'singe-ouh-ouh',     name: 'Singe : Ouh-ouh',     icon: '🐒',   file: 'sounds/animaux/singe_cris_v2.mp3',                  start: 0.4,         catClass: 'animaux-savane',     title: 'Singe Cris' },
 
           // ── Ligne 3 ──
           { id: 'chat-miaou',        name: 'Chat : Miaou',        icon: '🐱',   file: 'sounds/animaux/chat_miaulement_v2.mp3', start: 0.1,                     catClass: 'animaux-domestique', title: 'Chat Miaulement' },
-          { id: 'chat-ronron',       name: 'Chat : Ronron',       icon: '🐈',   file: 'sounds/animaux/chat_ronronnement_v2.mp3',                               catClass: 'animaux-domestique', title: 'Chat Ronronnement' },
+          { id: 'chat-ronron',       name: 'Chat : Ronron',       icon: '🐈', svg: 'chat-ronron',   file: 'sounds/animaux/chat_ronronnement_v2.mp3',                               catClass: 'animaux-domestique', title: 'Chat Ronronnement' },
           { id: 'mouton-beee',       name: 'Mouton : Bêêê',       icon: '🐑',   file: 'sounds/animaux/mouton_chevre_belement_v2.mp3',                          catClass: 'animaux-ferme',      title: 'Mouton/Chèvre Bêlement' },
           { id: 'cochon-groin',      name: 'Cochon : Groin',      icon: '🐷',   file: 'sounds/animaux/cochon_grognement_v2.mp3',                    end: 8.65, catClass: 'animaux-ferme',      title: 'Cochon Grognement / Couinement' },
           { id: 'chouette-hou-hou',  name: 'Chouette : Hou-hou',  icon: '🦉',   file: 'sounds/animaux/chouette_hibou_hululements_v2.mp3', start: 0.1, end: 2.6, catClass: 'animaux-oiseau',     title: 'Chouette / Hibou Hululements' },
-          { id: 'mouettes',          name: 'Mouette : Kriaa',     icon: '🦤',   file: 'sounds/animaux/mouettes_v2.mp3',                                        catClass: 'animaux-oiseau',     title: 'Mouette Piaulement' },
+          { id: 'mouettes',          name: 'Mouette : Kriaa',     icon: '🦤', svg: 'mouette',   file: 'sounds/animaux/mouettes_v2.mp3',                                        catClass: 'animaux-oiseau',     title: 'Mouette Piaulement' },
           { id: 'serpent-sssss',     name: 'Serpent : Sssss',     icon: '🐍',   file: 'sounds/animaux/serpent_sifflement_v2.mp3',      start: 0.17,            catClass: 'animaux-savane',     title: 'Serpent Sifflement' },
           { id: 'grenouille-coaa',   name: 'Grenouille : Coââ',   icon: '🐸',   file: 'sounds/animaux/grenouille_coassement_v2.mp3',                           catClass: 'animaux-aquatique',  title: 'Grenouille Coassement' },
 

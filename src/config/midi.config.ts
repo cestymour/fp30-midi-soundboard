@@ -16,11 +16,11 @@ export const MIDI_TABS: MidiTab[] = [
         id: 'romantique-amour', label: 'Romantique / Amour', icon: '🌹', color: '#ff8fab',
         items: [
           // { id: 'piano-gp1', name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:68,  title: 'Roland => Concert Piano(GP1)' },
-          { id: 'piano', name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:0,   title: 'GM2 => Acoustic Grand Piano' },
+          { id: 'piano', name: 'Piano',            icon: '🎹', svg: 'piano-queue', pc:1,   msb:0,   lsb:0,   title: 'GM2 => Acoustic Grand Piano' },
           { id: 'harpe', name: 'Harpe',            icon: '🪉', pc:47,  msb:121, lsb:0,   title: 'GM2 => Harp' },
           // { id: 'violons', name: 'Violons',          icon: '🎻', pc:49,  msb:16,  lsb:64,  title: 'Roland => Chamber Str' },
           { id: 'violon-solo', name: 'Violon solo',      icon: '🎻', pc:41,  msb:121, lsb:0,   title: 'GM2 => Violin' },
-          { id: 'accordeon', name: 'Accordéon',        icon: '🪗', pc:22,  msb:121, lsb:0,   title: 'GM2 => Accordion 1' },
+          { id: 'accordeon', name: 'Accordéon',        icon: '🪗', svg: 'accordeon', pc:22,  msb:121, lsb:0,   title: 'GM2 => Accordion 1' },
         ]
       },
 
@@ -29,7 +29,7 @@ export const MIDI_TABS: MidiTab[] = [
         items: [
           { id: 'boite-a-musique', name: 'Boîte à musique',  icon: '🎠', pc:11,  msb:121, lsb:0,   title: 'GM2 => Music Box' },
           { id: 'celesta', name: 'Célesta',          icon: '✨', pc:9,   msb:121, lsb:0,   title: 'GM2 => Celesta' },
-          { id: 'rhodes', name: 'Rhodes',           icon: '🎹', pc:5,   msb:16,  lsb:67,  title: 'Roland => E. Piano 1' },
+          { id: 'rhodes', name: 'Rhodes',           icon: '🎹', svg: 'rhodes', pc:5,   msb:16,  lsb:67,  title: 'Roland => E. Piano 1' },
           { id: 'voix-jazz', name: 'Voix jazz',        icon: '🗣️', pc:55,  msb:0,   lsb:65,  title: 'Roland => Jazz Scat' },
         ]
       },
@@ -58,7 +58,7 @@ export const MIDI_TABS: MidiTab[] = [
       {
         id: 'western-saloon', label: 'Western / Saloon', icon: '🤠', color: '#ffaa55',
         items: [
-          { id: 'piano-saloon', name: 'Piano Saloon',     icon: '🤠', pc:4,   msb:121, lsb:0,   title: 'GM2 => Honky-tonk' },
+          { id: 'piano-saloon', name: 'Piano Saloon',     icon: '🤠', svg: 'piano-saloon', pc:4,   msb:121, lsb:0,   title: 'GM2 => Honky-tonk' },
           { id: 'harmonica', name: 'Harmonica',        icon: '🎵', pc:23,  msb:121, lsb:0,   title: 'GM2 => Harmonica' },
           { id: 'banjo', name: 'Banjo',            icon: '🪕', pc:106, msb:121, lsb:0,   title: 'GM2 => Banjo' },
           { id: 'guitare-jazz', name: 'Guitare jazz',     icon: '🎸', pc:27,  msb:121, lsb:0,   title: 'GM2 => Jazz Guitar' },

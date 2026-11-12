@@ -17,6 +17,7 @@
   import FxToolbar from './FxToolbar.svelte';
   import EmergencyStopButton from './EmergencyStopButton.svelte';
   import VolumeControl from './VolumeControl.svelte';
+  import TileIcon from './TileIcon.svelte';
 
   let { tab, index }: { tab: MidiTab; index: number } = $props();
 
@@ -105,7 +106,7 @@
                   title={item.title ?? item.name}
                   onclick={() => selectInstrument(item)}
                 >
-                  <span class="btn-icon">{item.icon}</span>
+                  <span class="btn-icon"><TileIcon svg={item.svg} emoji={item.icon} /></span>
                   <span class="btn-label">{item.name}</span>
                 </button>
               {/each}
