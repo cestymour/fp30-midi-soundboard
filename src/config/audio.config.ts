@@ -17,6 +17,11 @@ export const AUDIO_TABS: AudioTab[] = [
         icon: '🔊',
         color: '#88ccff',
         items: [
+          // Disposition en blocs (paysage, 8 colonnes ; en portrait la grille est transposée) :
+          //   F F F F O O S S    F : ferme, O : oiseaux, S : savane et jungle,
+          //   F F F F O O S S    D : chats et chiens, B : forêt (loup, ours),
+          //   D D F F O O S A    I : insectes, A : animaux aquatiques. Une couleur par thème
+          //   D D B B I I A A    (catClass animaux-*, couleurs dans SoundButton.svelte).
           // ── Ligne 1 ──
           { id: 'cheval-hiii',       name: 'Cheval : Hiii',       icon: '🐴',   file: 'sounds/animaux/cheval_hennissement_v2.mp3',                   end: 1.9, catClass: 'animaux-ferme',      title: 'Cheval Hennissement' },
           { id: 'cheval-souffle',    name: 'Cheval : Souffle',    icon: '🐎',   file: 'sounds/animaux/cheval_souffle_v2.mp3',                                  catClass: 'animaux-ferme',      title: 'Cheval Souffle' },
@@ -53,8 +58,8 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'chien-grrr',        name: 'Chien : Grrr',        icon: '🐕',   file: 'sounds/animaux/chien_grognement_v2.mp3',                                catClass: 'animaux-domestique', title: 'Chien Grognement' },
           { id: 'loup-aouuuuh',      name: 'Loup : Aouuuuh',      icon: '🐺',   file: 'sounds/animaux/loup_hurlement_v2.mp3',          start: 0.11, end: 5.1,  catClass: 'animaux-foret',      title: 'Loup Hurlement' },
           { id: 'ours-grrr',         name: 'Ours : Grrr',         icon: '🐻',   file: 'sounds/animaux/ours_grognement_v2.mp3',                                 catClass: 'animaux-foret',      title: 'Ours Grognement' },
-          { id: 'abeille-bzzzz',     name: 'Abeille : Bzzzz',     icon: '🐝',   file: 'sounds/animaux/moustique_bourdonnement_v2.mp3',                         catClass: 'animaux-insecte',    title: 'Abeille / Mouche / Moustique Bourdonnement' },
           { id: 'grillon-zzzzz',     name: 'Grillons',            icon: '🦗',   file: 'sounds/animaux/grillon_gresillement_v2.mp3',                            catClass: 'animaux-insecte',    title: 'Grillon Grésillement' },
+          { id: 'abeille-bzzzz',     name: 'Abeille : Bzzzz',     icon: '🐝',   file: 'sounds/animaux/moustique_bourdonnement_v2.mp3',                         catClass: 'animaux-insecte',    title: 'Abeille / Mouche / Moustique Bourdonnement' },
           { id: 'dauphin-i-i-i-i',   name: 'Dauphin : I i i i',   icon: '🐬',   file: 'sounds/animaux/dauphin_sifflements_v2.mp3',                             catClass: 'animaux-aquatique',  title: 'Dauphin Clics et sifflements' },
           { id: 'baleine-chant',     name: 'Baleine : Chant',     icon: '🐋',   file: 'sounds/animaux/baleine_chant_v2.mp3',           start: 0.21,  end: 3.2, catClass: 'animaux-aquatique',  title: 'Baleine Chant' },
         ]
