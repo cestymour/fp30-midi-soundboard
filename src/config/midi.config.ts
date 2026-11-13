@@ -9,7 +9,7 @@ export const MIDI_TABS: MidiTab[] = [
     id: 'instruments',
     label: 'Instruments',
     icon: '🎹',
-    svg: 'onglet-instruments',
+    // svg: 'onglet-instruments',
     cols: 6,
     categories: [
 
@@ -147,7 +147,7 @@ export const MIDI_TABS: MidiTab[] = [
     id: 'sons-midi',
     label: 'Sons MIDI',
     icon: '🔊',
-    svg: 'onglet-sons-midi',
+    // svg: 'onglet-sons-midi',
     cols: 5,
     categories: [
 

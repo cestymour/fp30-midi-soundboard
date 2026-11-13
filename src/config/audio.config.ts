@@ -75,7 +75,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'effets',
     label: 'Bruits',
     icon: '⚡',
-    svg: 'onglet-bruits',
+    // svg: 'onglet-bruits',
     kind: 'sounds',
     gridType: 'animals',
     categories: [
@@ -168,7 +168,7 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'travaux',           name: 'Travaux',           icon: '🚧', file: 'sounds/ambiances/travaux_urbains.ogg',         catClass: 'ambiances-ville' },
           { id: 'ville',             name: 'Ville',             icon: '🏙️', file: 'sounds/ambiances/ville_voiture.mp3',          catClass: 'ambiances-ville' },
           { id: 'manifestation',     name: 'Manifestation',     icon: '✊', file: 'sounds/ambiances/manifestation.mp3',           catClass: 'ambiances-fete' },
-          { id: 'stade',             name: 'Stade',             icon: '🏟️', file: 'sounds/ambiances/stade_foule_football.mp3',   catClass: 'ambiances-fete',     title: 'Foule de stade de football' },
+          { id: 'stade',             name: 'Stade',             icon: '🏟️', svg: 'stade', file: 'sounds/ambiances/stade_foule_football.mp3',   catClass: 'ambiances-fete',     title: 'Foule de stade de football' },
           { id: 'concert',           name: 'Concert',           icon: '🎤', file: 'sounds/ambiances/concert_foule_applaudissements.mp3', catClass: 'ambiances-fete', title: 'Foule de concert : applaudissements et cris' },
        // { id: 'arcade',            name: 'Salle d\'arcade',   icon: '🕹️', file: 'sounds/ambiances/salle_jeux_arcade.ogg',      catClass: 'ambiances-fete' },
 
@@ -179,18 +179,18 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'vent',              name: 'Vent',              icon: '💨', file: 'sounds/ambiances/vent.mp3',                    catClass: 'ambiances-elements' },
           { id: 'nuit-campagne',     name: 'Nuit à la campagne', icon: '🌙', file: 'sounds/ambiances/nuit_campagne.mp3',          catClass: 'ambiances-nuit' },
           { id: 'nuit-angoissante',  name: 'Nuit angoissante',  icon: '🌑', file: 'sounds/ambiances/ambiance_nuit_peur.mp3',      catClass: 'ambiances-nuit' },
-          { id: 'discussions-dehors', name: 'Discussions dehors', icon: '🗣️', file: 'sounds/ambiances/discussions_exterieures.mp3', catClass: 'ambiances-voix' },
-          { id: 'discussions-dedans', name: 'Discussions dedans', icon: '🏠', file: 'sounds/ambiances/discussions_interieur.mp3', catClass: 'ambiances-voix' },
+          { id: 'discussions-dehors', name: 'Discussions dehors', icon: '🗣️', svg: 'discussions-dehors', file: 'sounds/ambiances/discussions_exterieures.mp3', catClass: 'ambiances-voix' },
+          { id: 'discussions-dedans', name: 'Discussions dedans', icon: '🏠', svg: 'discussions-dedans', file: 'sounds/ambiances/discussions_interieur.mp3', catClass: 'ambiances-voix' },
 
           // ── Ligne 4 ──
           { id: 'vague-mouettes',    name: 'Vagues et mouettes', icon: '⚓', svg: 'vagues-mouettes', file: 'sounds/ambiances/vague_mouette.ogg',          catClass: 'ambiances-mer' },
           { id: 'plongee',           name: 'Sous l\'eau',       icon: '🤿', file: 'sounds/ambiances/plongee_sous_marine.mp3',     catClass: 'ambiances-mer',      title: 'Plongée sous-marine' },
           { id: 'grotte',            name: 'Grotte',            icon: '💧', svg: 'grotte', file: 'sounds/ambiances/grotte_goutte.mp3',           catClass: 'ambiances-elements' },
-          { id: 'feu',               name: 'Feu de cheminée',   icon: '🔥', file: 'sounds/ambiances/feu_cheminee.ogg',            catClass: 'ambiances-elements' },
-          { id: 'bataille',          name: 'Champ de bataille', icon: '💥', file: 'sounds/ambiances/champ_de_bataille.mp3',       catClass: 'ambiances-nuit',     title: 'Champ de bataille : tirs et explosions' },
+          { id: 'feu',               name: 'Feu de cheminée',   icon: '🔥', svg: 'feu-cheminee', file: 'sounds/ambiances/feu_cheminee.ogg',            catClass: 'ambiances-elements' },
+          { id: 'bataille',          name: 'Champ de bataille', icon: '💥', svg: 'champ-bataille', file: 'sounds/ambiances/champ_de_bataille.mp3',       catClass: 'ambiances-nuit',     title: 'Champ de bataille : tirs et explosions' },
           { id: 'zombies',           name: 'Zombies',           icon: '🧟', file: 'sounds/ambiances/ambiance_bruit_zombie.mp3',   catClass: 'ambiances-nuit' },
           { id: 'recreation',        name: 'Récréation',        icon: '🏫', file: 'sounds/ambiances/recreation_maternelle.mp3',   catClass: 'ambiances-voix' },
-          { id: 'maternite',         name: 'Maternité',         icon: '👶', file: 'sounds/ambiances/maternite_pleurs_bebe.mp3',   catClass: 'ambiances-voix' },
+          { id: 'maternite',         name: 'Maternité',         icon: '👶', svg: 'maternite', file: 'sounds/ambiances/maternite_pleurs_bebe.mp3',   catClass: 'ambiances-voix' },
        // { id: 'cafe',              name: 'Café',              icon: '☕', file: 'sounds/ambiances/discussion_foule.ogg',        catClass: 'ambiances-voix',     start: 12.6 },
        // { id: 'restaurant',        name: 'Restaurant',        icon: '🍽️', file: 'sounds/ambiances/discussions_restaurant.ogg', catClass: 'ambiances-voix' },
         ]
@@ -328,7 +328,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'films',
     label: 'Films',
     icon: '🎬',
-    svg: 'onglet-films',
+    // svg: 'onglet-films',
     kind: 'music',
     cols: 4,
     categories: [
