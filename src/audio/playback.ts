@@ -13,7 +13,7 @@ import { STATE } from '../state.svelte.ts';
 import { createEmitter } from '../events.ts';
 import { AudioEngineAPI } from './audio-engine.ts';
 import type { MediaElementTrack, TrackRoute } from './audio-engine.ts';
-import { getPlayableDuration, getPlaybackRange, getSeekTime } from './timing.ts';
+import { getPlaybackRange, getSeekTime } from './timing.ts';
 import { assetUrl } from '../asset-url.ts';
 
 export type PlaybackEvent =
@@ -23,8 +23,8 @@ export type PlaybackEvent =
   | { type: 'stop'; item: AudioItem | null }
   | { type: 'pause' }
   | { type: 'resume' }
-  /** Boucle de progression lancée ; durée jouable null si encore inconnue */
-  | { type: 'progress-start'; item: AudioItem; playableDuration: number | null }
+  /** Boucle de progression lancée */
+  | { type: 'progress-start'; item: AudioItem }
   /** À chaque frame pendant la lecture, et après un seek */
   | { type: 'progress' }
   /** Fichier introuvable ou illisible */
@@ -109,15 +109,11 @@ function fadeAudio(
 // ================================================================
 
 function startProgressLoop(
-  audio: MediaElementTrack, item: AudioItem, startOffset: number, endOffset: number | null,
+  audio: MediaElementTrack, item: AudioItem, endOffset: number | null,
 ): void {
   if (STATE.progressRAF) cancelAnimationFrame(STATE.progressRAF);
 
-  playbackEvents.emit({
-    type: 'progress-start',
-    item,
-    playableDuration: getPlayableDuration(startOffset, endOffset, audio.duration),
-  });
+  playbackEvents.emit({ type: 'progress-start', item });
 
   function tick(): void {
     if (!STATE.currentAudio || !STATE.currentSoundItem) return;
@@ -230,7 +226,7 @@ export async function playSound(item: AudioItem, options: PlayOptions = {}): Pro
     }
 
     if (!item.noFade) fadeAudio(audio, 0, targetVolume(audio), 300, null);
-    startProgressLoop(audio, item, startOffset, endOffset);
+    startProgressLoop(audio, item, endOffset);
   } catch (err) {
     console.warn('Fichier introuvable ou illisible :', src, err);
     playbackEvents.emit({ type: 'missing', item });
@@ -258,8 +254,8 @@ export function togglePlayPause(): void {
       if (STATE.currentAudio !== audio) return;
       STATE.isPaused = false;
       fadeAudio(audio, 0, targetVolume(audio), 150, null);
-      const { startOffset, endOffset } = getPlaybackRange(item);
-      startProgressLoop(audio, item, startOffset, endOffset);
+      const { endOffset } = getPlaybackRange(item);
+      startProgressLoop(audio, item, endOffset);
       playbackEvents.emit({ type: 'resume' });
     }).catch((err: unknown) => {
       // Le son reste en pause : un nouvel appui sur ▶ réessaie

@@ -40,16 +40,47 @@ export function getSeekTime(item: Pick<AudioItem, 'start' | 'end'>, duration: nu
   return Math.max(startOffset, Math.min(newTime, effectiveEnd));
 }
 
-/** Durée jouable au lancement (null si la fin n'est pas encore connue) */
-export function getPlayableDuration(startOffset: number, endOffset: number | null, duration: number): number | null {
-  const effectiveEnd = endOffset !== null ? endOffset : (duration && isFinite(duration) ? duration : null);
-  return effectiveEnd !== null ? effectiveEnd - startOffset : null;
-}
-
 /** Formate des secondes en M:SS */
 export function formatTime(sec: number): string {
   if (!isFinite(sec) || sec < 0) return '–:––';
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
   return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+/** Écart au-delà duquel l'horloge lissée se recale d'un coup (seek, reprise, saut) */
+const SMOOTH_RESYNC_S = 0.25;
+/** Part de l'écart rattrapée à chaque lecture (une par image) */
+const SMOOTH_GAIN = 0.1;
+
+/**
+ * Horloge de lecture lissée, pour l'affichage de la progression (bug n° 29).
+ * L'horloge audio (`AudioContext.currentTime`, `<audio>.currentTime`) avance par paquets,
+ * au rythme des tampons audio : lue à chaque image, elle avance deux fois plus ou pas du tout.
+ * Celle-ci avance au rythme régulier de `now` (`performance.now()`, en ms) et rattrape
+ * doucement l'horloge audio ; elle ne recule que pour un écart de plus de 0,25 s (seek).
+ */
+export class SmoothClock {
+  #time: number | null = null;
+  #at = 0;
+
+  /** Temps lissé (s), à partir du temps audio (s), de `now` (ms) et de la vitesse de lecture */
+  read(audioTime: number, now: number, rate = 1): number {
+    if (this.#time === null || !isFinite(audioTime)) return this.#set(audioTime, now);
+    const predicted = this.#time + ((now - this.#at) / 1000) * rate;
+    const error = audioTime - predicted;
+    if (Math.abs(error) > SMOOTH_RESYNC_S) return this.#set(audioTime, now);
+    return this.#set(Math.max(this.#time, predicted + error * SMOOTH_GAIN), now);
+  }
+
+  /** Oublie l'état : la prochaine lecture repart du temps audio (nouveau son, pause) */
+  reset(): void {
+    this.#time = null;
+  }
+
+  #set(time: number, now: number): number {
+    this.#time = time;
+    this.#at = now;
+    return time;
+  }
 }

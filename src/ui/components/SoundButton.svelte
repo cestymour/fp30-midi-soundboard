@@ -63,7 +63,6 @@
   data-start={String(item.start ?? 0)}
   data-end={String(item.end ?? '')}
   style:--progress={buttonState.progress}
-  style:--progress-transition={buttonState.transition}
   title={item.title ?? item.name}
   onclick={handleClick}
 >{#if imageSrc}<span class="btn-icon"><img src={imageSrc} alt={item.name} />{#if isOneShot && isPlaying}{@render repeatIcon()}{/if}</span>{:else if item.icon || !item.subtitle}<span class="btn-icon"><TileIcon svg={item.svg} emoji={item.icon ?? '▶'} />{#if isOneShot && isPlaying}{@render repeatIcon()}{/if}</span>{/if}<span class="btn-label">{item.name}</span>{#if item.subtitle}<span class="btn-sub">{item.subtitle}</span>{/if}</button>
@@ -247,7 +246,6 @@
     background: color-mix(in srgb, var(--panel-accent) 25%, transparent);
     z-index: 1;
     border-radius: inherit;
-    transition: transform var(--progress-transition, 0.25s) linear;
     pointer-events: none;
   }
   .sound-btn.playing::before { will-change: transform; }

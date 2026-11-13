@@ -3,7 +3,7 @@
 ================================================================ */
 
 import { describe, expect, it } from 'vitest';
-import { formatTime, getPlayableDuration, getPlaybackProgress, getSeekTime } from './timing.ts';
+import { SmoothClock, formatTime, getPlaybackProgress, getSeekTime } from './timing.ts';
 
 describe('formatTime', () => {
   it('formate en M:SS', () => {
@@ -51,10 +51,52 @@ describe('seek', () => {
   });
 });
 
-describe('durée jouable', () => {
-  it('end prioritaire, sinon durée du fichier, sinon inconnue', () => {
-    expect(getPlayableDuration(5, 9, 100)).toBe(4);
-    expect(getPlayableDuration(5, null, 100)).toBe(95);
-    expect(getPlayableDuration(5, null, NaN)).toBeNull();
+
+describe('SmoothClock (bug n° 29)', () => {
+  /** Horloge audio qui avance par tampons de 20 ms, lue toutes les 16,7 ms */
+  const steppedAudio = (now: number) => Math.floor(now / 20) * 0.02;
+
+  it("avance régulièrement quand l'horloge audio avance par paquets", () => {
+    const clock = new SmoothClock();
+    const steps: number[] = [];
+    let last = clock.read(0, 0);
+    for (let i = 1; i <= 120; i++) {
+      const now = i * (1000 / 60);
+      const t = clock.read(steppedAudio(now), now);
+      if (i > 60) steps.push(t - last);
+      last = t;
+    }
+    // Pas brut : 0, 20 ou 40 ms ; pas lissé : 16,7 ms à 2 ms près
+    for (const step of steps) expect(Math.abs(step - 1 / 60)).toBeLessThan(0.002);
+    // Reste calé sur l'horloge audio
+    expect(Math.abs(last - steppedAudio(2000))).toBeLessThan(0.03);
+  });
+
+  it('suit la vitesse de lecture', () => {
+    const clock = new SmoothClock();
+    clock.read(10, 0, 2);
+    expect(clock.read(10.04, 16, 2)).toBeCloseTo(10.032 + 0.0008, 3);
+  });
+
+  it("se recale d'un coup sur un saut (seek), même en arrière", () => {
+    const clock = new SmoothClock();
+    clock.read(5, 0);
+    clock.read(5.016, 16);
+    expect(clock.read(60, 33)).toBe(60);
+    expect(clock.read(2, 50)).toBe(2);
+  });
+
+  it("ne recule pas pour un petit retard de l'horloge audio", () => {
+    const clock = new SmoothClock();
+    clock.read(1, 0);
+    const a = clock.read(1.1, 100);
+    expect(clock.read(1.05, 116)).toBeGreaterThanOrEqual(a);
+  });
+
+  it('reset : la lecture suivante rend le temps audio tel quel', () => {
+    const clock = new SmoothClock();
+    clock.read(1, 0);
+    clock.reset();
+    expect(clock.read(1.2, 10)).toBe(1.2);
   });
 });
