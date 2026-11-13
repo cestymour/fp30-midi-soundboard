@@ -88,10 +88,13 @@ describe('musiques de transition', () => {
   });
 });
 
-describe('dessins des tuiles', () => {
+describe('dessins des onglets et des tuiles', () => {
   it('chaque `svg` de la configuration a son fichier dans src/icons/', () => {
-    const items: { id: string; svg?: string }[] = [...MIDI_TABS, ...AUDIO_TABS]
-      .flatMap(tab => tab.categories.flatMap<{ id: string; svg?: string }>(category => category.items));
+    const tabs = [...MIDI_TABS, ...AUDIO_TABS];
+    const items: { id: string; svg?: string }[] = [
+      ...tabs,
+      ...tabs.flatMap(tab => tab.categories.flatMap<{ id: string; svg?: string }>(category => category.items)),
+    ];
     const missing = items.filter(item => item.svg !== undefined && !(item.svg in TILE_ICONS)).map(item => item.id);
     expect(missing).toEqual([]);
     // Un dessin qu'aucune tuile n'utilise est gardé en commentaire dans la config

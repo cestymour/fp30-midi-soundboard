@@ -29,6 +29,8 @@ interface TabBase<Item> {
   label: string;
   /** Emoji affiché dans l'onglet (la couleur vient du type d'onglet : voir TAB_ACCENTS) */
   icon: string;
+  /** Dessin de src/icons/ (nom du fichier sans `.svg`), affiché à la place de l'emoji `icon` */
+  svg?: string;
   categories: Category<Item>[];
 }
 

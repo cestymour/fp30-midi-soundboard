@@ -8,6 +8,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'animaux',
     label: 'Animaux',
     icon: '🐮',
+    svg: 'onglet-animaux',
     kind: 'sounds',
     gridType: 'animals',
     categories: [
@@ -74,6 +75,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'effets',
     label: 'Bruits',
     icon: '⚡',
+    svg: 'onglet-bruits',
     kind: 'sounds',
     gridType: 'animals',
     categories: [
@@ -137,6 +139,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'ambiances',
     label: 'Ambiances',
     icon: '🏙️',
+    svg: 'onglet-ambiances',
     kind: 'music',
     gridType: 'animals',
     categories: [
@@ -213,6 +216,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'musique',
     label: 'Musiques',
     icon: '🎼',
+    svg: 'onglet-musiques',
     kind: 'music',
     cols: 4,
     catCols: 2,
@@ -324,6 +328,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'films',
     label: 'Films',
     icon: '🎬',
+    svg: 'onglet-films',
     kind: 'music',
     cols: 4,
     categories: [

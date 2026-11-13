@@ -21,6 +21,10 @@ Avant de passer sur `main` : retirer le sélecteur (le composant, son module, la
 | Bruits | Verre d'eau 🥛 → verre qu'on remplit ; Machine à café ☕ → machine à expresso ; Machine à écrire 📝 ; Erreur Windows 🖥️ → fenêtre d'erreur ; Tronçonneuse 🪚 ; Briquet 🚬 → briquet allumé ; Ba-dum-tss 🎭 → caisse claire et cymbale ; Scie à métaux 🪛 |
 | Ambiances | Cigales 🦗 → cigale vue de dessus ; Vagues et mouettes ⚓ ; Grotte 💧 → grotte, goutte et ronds dans l'eau |
 
+## Onglets
+
+Instruments 🎹 → clavier ; Sons MIDI 🔊 → haut-parleur ; Animaux 🐮 → empreinte de patte ; Bruits ⚡ → explosion de bande dessinée ; Ambiances 🏙️ → paysage (collines, soleil, nuage) ; Musiques 🎼 → double croche ; Films 🎬 → clap. Champ `svg` de l'onglet, affiché par `TabNav.svelte` ; le sélecteur d'essai agit aussi sur les onglets.
+
 ## Dessins écartés, gardés
 
 Ces dessins restent dans `src/icons/` et en commentaire sur leur tuile (`/* svg: '<nom>', */`) : pour en remettre un, il suffit de retirer le commentaire.

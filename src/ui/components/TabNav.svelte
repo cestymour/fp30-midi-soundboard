@@ -9,6 +9,7 @@
   import { flushSync, onMount } from 'svelte';
   import { colorChannels } from '../color-channels.ts';
   import { activateTab, getAllTabs, getTabAccent, getTabKind, layout } from '../layout.svelte.ts';
+  import TileIcon from './TileIcon.svelte';
 
   type TabNavMode = 'full' | 'compact' | 'icons';
 
@@ -53,7 +54,7 @@
       title={tab.label}
       onclick={() => activateTab(idx)}
     >
-      <span class="tab-icon">{tab.icon}</span>
+      <span class="tab-icon"><TileIcon svg={tab.svg} emoji={tab.icon} /></span>
       <span class="tab-label">{tab.label}</span>
     </button>
   {/each}
