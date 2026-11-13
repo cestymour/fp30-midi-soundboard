@@ -439,21 +439,24 @@
   .sound-btn.musique-tuile.playing .btn-icon::after {
     visibility: visible;
   }
+  /* Les textes se règlent sur la tuile la plus basse du panneau (--btn-h-min, posée par
+     equalizeAudioButtons) et non sur la tuile elle-même (cqh) : même taille dans toutes les
+     colonnes, alors que la hauteur des tuiles change d'une colonne à l'autre */
   .musique-tuile .btn-label {
-    font-size: clamp(11px, min(17cqh, 11cqw), 20px);
+    font-size: clamp(12px, min(var(--btn-h-min, 80px) * 0.19, 11.5cqw), 21px);
     color: var(--text-primary);
   }
   /* Sans emoji (variante texte) : le nom prend la place */
   .musique-tuile:not(:has(.btn-icon)) .btn-label {
-    font-size: clamp(12px, min(22cqh, 13cqw), 24px);
+    font-size: clamp(13px, min(var(--btn-h-min, 80px) * 0.24, 13cqw), 24px);
   }
   .musique-tuile.playing .btn-label { color: var(--cat-accent); }
 
   .btn-sub {
-    font-size: clamp(9px, min(12cqh, 8.5cqw), 14px);
-    font-weight: 500;
+    font-size: clamp(11px, min(var(--btn-h-min, 80px) * 0.15, 9cqw), 16px);
+    font-weight: 600;
     letter-spacing: 0.02em;
     line-height: 1.1;
-    color: color-mix(in srgb, var(--cat-accent, var(--text-secondary)) 55%, var(--text-secondary));
+    color: color-mix(in srgb, var(--cat-accent, var(--text-primary)) 30%, var(--text-primary));
   }
 </style>

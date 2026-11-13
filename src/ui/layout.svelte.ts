@@ -114,6 +114,7 @@ function equalizeColumnButtons(cfg: EqualizeConfig): void {
 
     const availableGridH = (gridH - (visualRowCount - 1) * gapPx) / visualRowCount;
     let overflowing = false;
+    let minBtnH = Infinity;
 
     grid.querySelectorAll<HTMLElement>(cfg.colSelector).forEach(col => {
       let totalRows = 0;
@@ -135,10 +136,15 @@ function equalizeColumnButtons(cfg: EqualizeConfig): void {
       const btnH       = Math.floor((available - gapsInGrid) / totalRows);
 
       if (btnH < MIN_BTN_H) overflowing = true;
-      col.style.setProperty('--btn-h', Math.max(MIN_BTN_H, btnH) + 'px');
+      const h = Math.max(MIN_BTN_H, btnH);
+      minBtnH = Math.min(minBtnH, h);
+      col.style.setProperty('--btn-h', h + 'px');
     });
 
     grid.classList.toggle('scrollable', overflowing);
+    // Hauteur de la tuile la plus basse du panneau : les textes qui s'y règlent
+    // (tuiles de Musiques) ont la même taille dans toutes les colonnes
+    if (Number.isFinite(minBtnH)) (grid as HTMLElement).style.setProperty('--btn-h-min', minBtnH + 'px');
   });
 }
 
