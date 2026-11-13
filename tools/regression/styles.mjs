@@ -21,6 +21,7 @@ const dump = async (label) => {
     freeze.replaceSync(`
       .transport-seek-fill[style*="width"] { width: 37% !important; }
       .transport-seek-handle[style*="left"] { left: 37% !important; }
+      .transport-seek[style*="--seek"] { --seek: 37% !important; }
       .sound-btn[style*="--progress"]:not([style*="--progress: 0%"]) { --progress: 37% !important; }
     `);
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, freeze];

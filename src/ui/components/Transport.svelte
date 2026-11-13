@@ -78,9 +78,9 @@
     disabled={!hasSound}
     onclick={togglePlayPause}
   >{#if isPlaying}<span class="icon-pause"></span>{:else}<span class="icon-play"></span>{/if}</button>
-  <div class="transport-seek" bind:this={seekBar}>
-    <div class="transport-seek-fill" style:width={transport.seekPct}></div>
-    <div class="transport-seek-handle" class:pulsing={isPlaying} style:left={transport.seekPct}></div>
+  <div class="transport-seek" bind:this={seekBar} style:--seek={transport.seekPct}>
+    <div class="transport-seek-clip"><div class="transport-seek-fill"></div></div>
+    <div class="transport-seek-track"><div class="transport-seek-handle" class:pulsing={isPlaying}></div></div>
   </div>
   <span class="transport-time">{transport.timeText}</span>
 </div>
@@ -196,18 +196,41 @@
     overflow: visible;
   }
 
+  /* Remplissage et poignée glissent par transform sur leur propre calque, selon --seek :
+     la carte graphique les déplace sans redessiner la barre à chaque image (bug n° 29).
+     Le remplissage, pleine largeur et décalé vers la gauche, est découpé par .transport-seek-clip
+     (arrondi à gauche seulement, bord droit net) ; la poignée suit .transport-seek-track,
+     de la largeur de la barre, décalé de --seek de sa propre largeur. */
+  .transport-seek-clip,
+  .transport-seek-track {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .transport-seek-clip {
+    overflow: hidden;
+    border-radius: 6px 0 0 6px;
+  }
+  .transport-seek-track {
+    transform: translateX(var(--seek, 0%));
+    will-change: transform;
+  }
+
   .transport-seek-fill {
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
     height: 100%;
+    transform: translateX(calc(var(--seek, 0%) - 100%));
+    will-change: transform;
     background: var(--panel-accent, var(--current-accent));
-    border-radius: 6px 0 0 6px;
     pointer-events: none;
   }
 
   .transport-seek-handle {
     position: absolute;
+    left: 0;
     top: 50%;
     width: 16px;
     height: 16px;

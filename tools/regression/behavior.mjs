@@ -85,7 +85,7 @@ await page.click('.panel.active .transport-play-pause'); await page.waitForTimeo
 await snap('reprise');
 const bar = await page.$('.panel.active .transport-seek'); const bb = await bar.boundingBox();
 await page.mouse.click(bb.x + bb.width * 0.5, bb.y + bb.height / 2); await page.waitForTimeout(300);
-const fill = await page.$eval('.panel.active .transport-seek-fill', e => Math.round(parseFloat(e.style.width) / 10) * 10);
+const fill = await page.$eval('.panel.active .transport-seek-fill', e => Math.round(parseFloat(e.style.width || e.closest('.transport-seek').style.getPropertyValue('--seek')) / 10) * 10);
 await snap('seek 50 % (remplissage ≈ ' + fill + ' %)');
 await page.click('.panel.active .sound-btn >> nth=1'); await page.waitForTimeout(1500);
 await snap('changement de son');

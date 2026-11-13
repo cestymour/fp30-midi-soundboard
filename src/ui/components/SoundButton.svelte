@@ -235,18 +235,26 @@
     background: color-mix(in srgb, var(--panel-accent) 10%, var(--bg-card));
   }
 
+  /* Remplissage de progression : pleine largeur, décalé vers la gauche (la tuile découpe ce qui
+     dépasse). Il glisse par transform, sur son propre calque pendant la lecture : la carte graphique
+     le déplace sans redessiner la tuile et son emoji à chaque image (bug n° 29). */
   .sound-btn::before {
     content: '';
     position: absolute;
     top: 0; left: 0;
-    width: var(--progress, 0%);
+    width: 100%;
     height: 100%;
+    transform: translateX(calc(var(--progress, 0%) - 100%));
     background: color-mix(in srgb, var(--panel-accent) 25%, transparent);
     z-index: 1;
     border-radius: inherit;
-    transition: width var(--progress-transition, 0.25s) linear;
+    transition: transform var(--progress-transition, 0.25s) linear;
     pointer-events: none;
   }
+  .sound-btn.playing::before { will-change: transform; }
+  /* Tuile au repos : remplissage caché, sinon son bord, décalé hors de la tuile, déborde
+     d'un pixel sur la bordure des tuiles posées à une position fractionnaire */
+  .sound-btn:not(.playing)::before { visibility: hidden; }
 
   .sound-btn > * { position: relative; z-index: 2; }
 
