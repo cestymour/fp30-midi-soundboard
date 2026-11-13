@@ -14,7 +14,7 @@
 - [ ] Effets piano : la réverbération (Ambiance, 0 à 10) s'entend en USB comme en Bluetooth ; en USB, Chrome demande une fois l'autorisation SysEx (« contrôler entièrement les appareils MIDI ») : l'accepter
 - [ ] Sélection d'instruments : le bon son sur le piano (Program Change + Bank Select MSB/LSB)
 - [ ] Volume MIDI, bouton d'arrêt d'urgence (coupe tout de suite, réverbération comprise, même pédale enfoncée)
-- [ ] Popups FX : repères du neutre bien visibles de part et d'autre de chaque curseur ; après Reset, chaque poignée est posée pile sur ses repères, y compris en bout de course (Chorus, High-pass, Reverb, Delay, Low-pass)
+- [ ] Popups FX : le reset ↺ de chaque curseur au-dessus du curseur ; repères du neutre bien visibles de part et d'autre de chaque curseur ; après Reset, chaque poignée est posée pile sur ses repères, y compris en bout de course (Chorus, High-pass, Reverb, Delay, Low-pass)
 - [ ] Barre des panneaux (onglets piano, musiques et sons), en paysage, en portrait et sur un téléphone en paysage : Effets, Reset, volume et stop bien placés, rien ne déborde ni n'est coupé
 - [ ] Popup FX MIDI : sliders, presets (Studio : son sec, brillant, notes courtes), reset, surbrillance du preset après fermeture/réouverture et après changement d'onglet ; les curseurs glissent sans à-coups pendant l'animation d'un preset, réverbération comprise ; nom sous chaque curseur lisible, sans valeur chiffrée
 - [ ] Reset séparés : avec un preset piano et un preset audio actifs, le Reset d'un onglet MIDI ne remet à zéro que les effets piano (le Reset des onglets de sons reste allumé), et inversement
@@ -34,7 +34,7 @@
 - [ ] Sur la **tablette de scène (Chrome 106)** : mêmes couleurs que sur un Chrome récent (tuiles teintées par famille, cadres des panneaux, couleur de chaque type d'onglet, boutons Effets/Reset, fond opaque des popups d'effets, barre de progression d'un son, double flèche d'un son en cours)
 - [ ] Popup « Paramètres » et numéro de version ; pastilles vertes dans l'application installée : « Écran toujours allumé : oui » (« non » en orange si la demande a échoué), « Stockage : protégé » ; le bouton « Plein écran » est le plus visible de la popup
 - [ ] « Plein écran » (popup Paramètres) dans un onglet Chrome : barres masquées ; le bouton devient « Quitter le plein écran » et en sort ; une sortie par le geste ou la touche Retour remet le bouton à « Plein écran »
-- [ ] Sur un **téléphone en paysage et en portrait** : popups des effets (chaque carte a son reset au-dessus du curseur, son curseur et son nom entier) et popup Paramètres (défile ; la croix ✕ en haut à droite et un appui hors de la popup la ferment)
+- [ ] Sur un **téléphone en paysage et en portrait** : popups des effets (chaque carte a son curseur et son nom entier) et popup Paramètres (défile ; la croix ✕ en haut à droite et un appui hors de la popup la ferment)
 - [ ] « ⬇ Télécharger tous les sons » : le compteur arrive au total (sons et images), puis le bouton disparaît ; s'il restait d'anciens fichiers, le message donne la place libérée (« … Mo libérés »)
 - [ ] Son remplacé sous le même nom (après un déploiement qui en modifie un) : le compteur des sons redescend d'un fichier ; avant « Télécharger tous les sons », en mode avion, le son joue encore (ancienne version) ; après, la nouvelle version joue
 - [ ] Wake Lock : l'écran ne se met pas en veille

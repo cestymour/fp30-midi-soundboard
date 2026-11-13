@@ -353,9 +353,11 @@
 
   /* ── Contrôle individuel ────────────────────────────────────── */
 
+  /* Chaque carte empile reset, curseur et nom : à côté du nom, un nom long (Resonance)
+     poussait le reset hors d'une carte étroite */
   .fx-control {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     gap: 10px;
     min-width: 0;
     min-height: 0;
@@ -368,22 +370,15 @@
       var(--bg-card);
   }
 
+  /* Nom et reset sont des lignes de la carte ; le pied ne garde que la police */
   .fx-control__foot {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    min-height: 36px;
-    padding: 0 2px;
+    display: contents;
     color: var(--text-primary);
     font-size: 16px;
-    background: var(--bg-card);
   }
 
   .fx-control__name {
-    flex: 1;
+    grid-row: 3;
     min-width: 0;
     text-align: center;
     font-weight: 600;
@@ -394,7 +389,8 @@
   /* ── Bouton reset individuel ────────────────────────────────── */
 
   .fx-one-reset {
-    flex-shrink: 0;
+    grid-row: 1;
+    justify-self: center;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -432,6 +428,7 @@
   /* ── Slider vertical ────────────────────────────────────────── */
 
   .fx-slider-wrap {
+    grid-row: 2;
     display: flex;
     align-items: stretch;
     justify-content: center;
@@ -633,7 +630,6 @@
 
     .fx-control__foot {
       font-size: 14px;
-      min-height: 32px;
     }
 
     .fx-one-reset {
@@ -670,34 +666,6 @@
   @media (orientation: landscape) and (max-width: 520px) {
     .fx-presets {
       grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
-    }
-  }
-
-  /* ── Téléphone (paysage ou portrait) : reset au-dessus du curseur ──
-     Les cartes sont trop étroites pour le nom et le reset côte à côte : en paysage le nom
-     se coupait lettre par lettre et écrasait le curseur, en portrait un nom long (Résonance)
-     poussait le reset hors de la carte. Chaque carte empile reset, curseur et nom. */
-  @media (orientation: landscape) and (max-height: 500px), (orientation: portrait) and (max-width: 600px) {
-    .fx-control {
-      grid-template-rows: auto minmax(0, 1fr) auto;
-    }
-
-    /* Nom et reset deviennent des lignes de la carte */
-    .fx-control__foot {
-      display: contents;
-    }
-
-    .fx-one-reset {
-      grid-row: 1;
-      justify-self: center;
-    }
-
-    .fx-slider-wrap {
-      grid-row: 2;
-    }
-
-    .fx-control__name {
-      grid-row: 3;
     }
   }
 

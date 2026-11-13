@@ -19,7 +19,7 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 
 ### Corrections
 
-- **Popups des effets sur un téléphone en portrait** : le bouton ↺ de chaque curseur est maintenant au-dessus du curseur. Il était à droite du nom, et un nom long (Resonance) le poussait hors de la carte.
+- **Popups des effets** : le bouton ↺ de chaque curseur est maintenant au-dessus du curseur, sur tous les écrans. Il était à droite du nom, et sur un téléphone en portrait un nom long (Resonance) le poussait hors de la carte.
 
 ### À savoir
 
