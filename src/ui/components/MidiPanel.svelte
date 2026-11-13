@@ -292,7 +292,6 @@
   .inst-btn.active {
     background: color-mix(in srgb, var(--panel-accent) 15%, var(--bg-card));
     border-color: var(--panel-accent);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--panel-accent) 35%, transparent);
     animation: active-pulse 2s ease-in-out infinite alternate;
   }
   .inst-btn.active .btn-label {
@@ -305,12 +304,13 @@
 
   .inst-btn.active:hover {
     background: color-mix(in srgb, var(--panel-accent) 28%, var(--bg-card));
-    box-shadow: 0 0 16px color-mix(in srgb, var(--panel-accent) 50%, transparent);
   }
 
+  /* Lueur pulsée en filter: drop-shadow (même flou qu'un box-shadow, la tuile est opaque) : elle
+     tourne tant qu'un instrument est actif, la carte graphique l'anime sans redessin (bug n° 29) */
   @keyframes active-pulse {
-    from { box-shadow: 0 0 6px  color-mix(in srgb, var(--panel-accent) 25%, transparent); }
-    to   { box-shadow: 0 0 16px color-mix(in srgb, var(--panel-accent) 50%, transparent); }
+    from { filter: drop-shadow(0 0 6px  color-mix(in srgb, var(--panel-accent) 25%, transparent)); }
+    to   { filter: drop-shadow(0 0 16px color-mix(in srgb, var(--panel-accent) 50%, transparent)); }
   }
 
   /* ── Mobile ── */

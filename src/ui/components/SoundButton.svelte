@@ -204,7 +204,6 @@
 
   .sound-btn--img.playing {
     border-color: var(--panel-accent);
-    box-shadow: 0 0 20px color-mix(in srgb, var(--panel-accent) 50%, transparent);
   }
 
   .sound-btn--img.playing .btn-label {
@@ -266,9 +265,11 @@
   }
   .sound-btn.playing .btn-label { color: var(--panel-accent); }
 
+  /* Lueur pulsée en filter: drop-shadow (même flou qu'un box-shadow, la tuile est opaque) :
+     la carte graphique l'anime sans redessiner la tuile à chaque image (bug n° 29) */
   @keyframes playing-glow {
-    from { box-shadow: 0 0 8px  color-mix(in srgb, var(--panel-accent) 25%, transparent); }
-    to   { box-shadow: 0 0 22px color-mix(in srgb, var(--panel-accent) 55%, transparent); }
+    from { filter: drop-shadow(0 0 8px  color-mix(in srgb, var(--panel-accent) 25%, transparent)); }
+    to   { filter: drop-shadow(0 0 22px color-mix(in srgb, var(--panel-accent) 55%, transparent)); }
   }
 
   .sound-btn.playing .btn-icon { font-size: 0; }
@@ -383,7 +384,6 @@
   :global(.fixed-grid) .sound-btn.playing {
     border-color: var(--cat-accent, var(--panel-accent));
     background: color-mix(in srgb, var(--cat-accent, transparent) 20%, var(--bg-card));
-    box-shadow: 0 0 12px color-mix(in srgb, var(--cat-accent, var(--panel-accent)) 40%, transparent);
   }
 
   :global(.fixed-grid) .sound-btn.playing .btn-label {
@@ -391,8 +391,8 @@
   }
 
   @keyframes playing-glow-cat {
-    from { box-shadow: 0 0 6px  color-mix(in srgb, var(--cat-accent) 25%, transparent); }
-    to   { box-shadow: 0 0 18px color-mix(in srgb, var(--cat-accent) 55%, transparent); }
+    from { filter: drop-shadow(0 0 6px  color-mix(in srgb, var(--cat-accent) 25%, transparent)); }
+    to   { filter: drop-shadow(0 0 18px color-mix(in srgb, var(--cat-accent) 55%, transparent)); }
   }
 
   :global(.fixed-grid) .sound-btn.playing {
