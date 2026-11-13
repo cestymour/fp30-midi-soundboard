@@ -50,7 +50,7 @@ export const MIDI_TABS: MidiTab[] = [
         items: [
           { id: 'orgue-jazz', name: 'Orgue jazz',       icon: '🎼', svg: 'orgue-jazz', pc:19,  msb:0,   lsb:69,  title: 'Roland => Combo Jz.Org' },
           { id: 'trompette', name: 'Trompette',        icon: '🎺', pc:57,  msb:121, lsb:0,   title: 'GM2 => Trumpet' },
-          { id: 'basse', name: 'Basse',            icon: '🎸', svg: 'contrebasse', pc:34,  msb:121, lsb:0,   title: 'GM2 => FingeredBass' },
+          { id: 'basse', name: 'Basse',            icon: '🎸', /* svg: 'contrebasse', */ svg: 'basse-electrique', pc:34,  msb:121, lsb:0,   title: 'GM2 => FingeredBass' },
           { id: 'saxo', name: 'Saxo',             icon: '🎷', pc:66,  msb:121, lsb:0,   title: 'GM2 => Alto Sax' },
         ]
       },

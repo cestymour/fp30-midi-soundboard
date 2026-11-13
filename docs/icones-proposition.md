@@ -15,7 +15,7 @@ Avant de passer sur `main` : retirer le sélecteur (le composant, son module, la
 
 | Onglet | Tuiles (emoji remplacé → dessin) |
 |---|---|
-| Instruments | Harpe glissando 🪉 → harpe ; Voix jazz 🗣️ → micro rétro ; Cloches tubulaires 🔔 → tubes sur un portique ; Orgue jazz 🎼 → orgue à deux claviers ; Basse 🎸 → contrebasse ; Harmonica 🎵 ; Xylophone 🥢 ; Grosse caisse 🥁 → grosse caisse et mailloche ; Cuivres 📯 → trompette de héraut à bannière ; Guitare 🎸 → guitare classique ; Laser / Synth 🔆 → synthé et rayons ; Piano électrique 💎 → planète à anneau ; Flûte 🪈 → flûte traversière ; Flûte de Pan 🎋 ; Saxo soprano 🎷 → saxo droit ; Chœur 🎶 → trois choristes ; Rhodes 🎹 → télé rétro |
+| Instruments | Harpe glissando 🪉 → harpe ; Voix jazz 🗣️ → micro rétro ; Cloches tubulaires 🔔 → tubes sur un portique ; Orgue jazz 🎼 → orgue à deux claviers ; Basse 🎸 → basse électrique ; Harmonica 🎵 ; Xylophone 🥢 ; Grosse caisse 🥁 → grosse caisse et mailloche ; Cuivres 📯 → trompette de héraut à bannière ; Guitare 🎸 → guitare classique ; Laser / Synth 🔆 → synthé et rayons ; Piano électrique 💎 → planète à anneau ; Flûte 🪈 → flûte traversière ; Flûte de Pan 🎋 ; Saxo soprano 🎷 → saxo droit ; Chœur 🎶 → trois choristes ; Rhodes 🎹 → télé rétro |
 | Sons MIDI | Ruisseau 🏞️ → ruisseau seul ; Bloc de bois 🪵 ; Cloche de vache 🔔 → cloche à sangle ; Grincement porte 🚪 → porte entrouverte sur le noir ; Claque ! 🚪 → porte fermée qui tremble ; Pistolet laser 🔫 → pistolet de science-fiction ; Coup de feu 🔫 → revolver qui tire ; Mitraillette 🔫 → mitraillette à chargeur rond |
 | Animaux | Pigeon 🕊️ ; Hyène 🐆 ; Âne 🫏 ; Chat : Ronron 🐈 → chat en boule ; Mouette 🦤 ; Moustique 🐝 (tuile « Abeille » renommée « Moustique », le son est un moustique) |
 | Bruits | Verre d'eau 🥛 → verre qu'on remplit ; Machine à café ☕ → machine à expresso ; Machine à écrire 📝 ; Erreur Windows 🖥️ → fenêtre d'erreur ; Tronçonneuse 🪚 ; Briquet 🚬 → briquet allumé ; Ba-dum-tss 🎭 → caisse claire et cymbale ; Scie à métaux 🪛 |
@@ -29,6 +29,7 @@ Ces dessins restent dans `src/icons/` et en commentaire sur leur tuile (`/* svg:
 - Démarrage voiture : `cle-voiture` (clé trop compliquée).
 - Freinage : `pneu-freinage` (dessin trop compliqué).
 - Sonnette : `sonnette`.
+- Basse : `contrebasse` (le son est une basse électrique).
 
 ## À voir plus tard
 
