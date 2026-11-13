@@ -11,14 +11,14 @@
 
 <style>
   .cat-title {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.15em;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
     color: var(--cat-color, var(--text-muted));
     text-transform: uppercase;
     padding: 2px 4px;
-    opacity: 0.9;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
