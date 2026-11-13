@@ -335,7 +335,7 @@ export const AUDIO_TABS: AudioTab[] = [
       {
         id: 'horreur', label: 'Horreur', icon: '😱', color: '#ff6666',
         items: [
-          { id: 'saw',                name: 'Ambiance tendu',       img: 'images/films/saw.jpg',                file: 'sounds/films/saw_theme_v2.mp3',                                            start: 21.2,            title: 'Saw' },
+          { id: 'saw',                name: 'Ambiance tendue',      img: 'images/films/saw.jpg',                file: 'sounds/films/saw_theme_v2.mp3',                                            start: 21.2,            title: 'Saw' },
           { id: 'jaws',               name: 'Danger proche',        img: 'images/films/jaws.jpg',               file: 'sounds/films/les_dents_de_la_mer_theme_v2.mp3',                            start: 9.5,             title: 'Les Dents de la Mer' },
           { id: 'psycho',             name: 'Au secours Ahhh !',    img: 'images/films/psycho.jpg',             file: 'sounds/films/psycho_shower_scene_v2.mp3',                                  start: 0.1,             title: 'Psycho (Scène Douche)' },
         ]
