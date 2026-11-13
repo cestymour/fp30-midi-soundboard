@@ -18,23 +18,6 @@ Les diagnostics complets des bugs fermés restent dans l'historique git : `git s
 - **À faire pour le diagnostic** : 1) en ligne, lire les lignes Service Worker et Stockage de la section « Hors ligne » de la popup ⚙ ; 2) en ligne, regarder dans `chrome://serviceworker-internals` si le Service Worker de `cestymour.github.io/fp30-midi-soundboard/` est activé ; 3) en mode avion, ouvrir l'adresse de production dans un onglet Chrome normal plutôt que par l'icône. Si l'onglet marche et pas l'icône, réinstaller l'icône depuis la production (cause 2). Si rien ne marche, c'est la cause 1 : vérifier l'espace libre de la tablette ; 4) au besoin, inspecter la tablette depuis le PC (`chrome://inspect`, `adb` à installer).
 - **Correctif proposé** : selon la cause trouvée. Pour la cause 1, faire de l'état du Service Worker et du stockage persistant un point de `docs/checklist.md` à vérifier avant chaque spectacle.
 
-### 29. Remplissage de progression des tuiles saccadé
-
-- **Scénario** : pendant la lecture d'un son ou d'une musique, le remplissage qui avance sur la tuile progresse par à-coups au lieu de glisser. Constaté sur un écran 4K, Chrome en plein écran ; la saccade disparaît quand on rétrécit la fenêtre. Une tablette lente peut avoir le même effet sur un écran plus petit.
-- **Cause 1, le coût du dessin, qui grandit avec le nombre de pixels** : à chaque image (60 par seconde), le navigateur redessine des zones entières de l'écran.
-  - Le remplissage (`.sound-btn::before`) avance en changeant sa largeur (`width`) : la tuile entière, emoji ou dessin SVG compris, est redessinée à chaque image.
-  - La lueur pulsée de la tuile en lecture (`playing-glow`, `playing-glow-cat` dans `SoundButton.svelte`) anime un `box-shadow` : redessin de la tuile et de son halo à chaque image.
-  - La barre de transport des musiques (`Transport.svelte`) : remplissage en `width`, poignée en `left` et halo pulsé (`handle-pulse`, `box-shadow`).
-  - Même sans rien jouer : l'instrument actif des onglets MIDI pulse en continu (`active-pulse`, `box-shadow`, `MidiPanel.svelte`), donc pendant presque tout le spectacle. Idem pour le bouton de transition pendant sa musique (`transition-glow`).
-  - Mesuré (2026-11-13, Chromium sans interface, 1920×1080 à l'échelle 2, soit les pixels d'un écran 4K, musique en cours, temps de raster par image) : 1,4 à 1,6 ms en l'état ; 0,3 ms avec un remplissage déplacé par `transform` et une lueur en `filter: drop-shadow` animé (que la carte graphique anime sans redessin) ; 0 ms quand la barre de transport est aussi traitée. Les valeurs absolues sont faibles sans interface, mais le rapport compte : sur un vrai écran 4K, ou sur une tablette lente, ce redessin dépasse le temps d'une image.
-- **Cause 2, l'horloge audio** : la boucle `requestAnimationFrame` lit une horloge qui avance par paquets. Pour les sons (`getSoundProgress()`, `src/audio/sounds.ts`), c'est `AudioContext.currentTime`, qui n'avance qu'à chaque tampon audio rendu. Mesuré dans Chromium (une lecture par image de 16,7 ms) : 0, 20, 20, 12, 20, 17, 12, 20, 20, 9… ms. Le tampon est plus grand sur Android et en Bluetooth. Pour les musiques, `audio.currentTime` (`updateSeekUI()`, `src/ui/transport.svelte.ts`) a toutes les chances de faire pareil (non mesuré : le `<audio>` n'avance pas dans Chromium sans interface). La transition CSS sur `width` (`--progress-transition`, 0,05 s pour un son de moins de 3 s) ne lisse presque rien pour les sons courts.
-- **Conséquences** : effet visuel seulement, la lecture n'est pas touchée. Sur la tablette, le redessin continu consomme aussi du processeur et de la batterie pendant tout le spectacle.
-- **Correctif proposé** :
-  1. Remplissage des tuiles : largeur fixe de 100 %, déplacé par `transform: translateX(calc(var(--progress) - 100%))`, calque à part pendant la lecture (`will-change: transform` sur `.playing::before`). Le bord droit reste arrondi et le gauche est découpé par la tuile, comme aujourd'hui.
-  2. Lueurs pulsées (tuiles en lecture, instrument actif, bouton de transition, poignée) : `filter: drop-shadow()` animé au lieu de `box-shadow`, mêmes couleurs et mêmes flous. À valider à l'œil.
-  3. Barre de transport : remplissage en `transform: scaleX()` et poignée en `translateX()`.
-  4. Progression calculée sur `performance.now()` : noté au départ de chaque voix pour un son ; pour une musique, `audio.currentTime` recalé sur `performance.now()` à la lecture, à la reprise et au seek, avec la vitesse de lecture. Puis suppression de `--progress-transition`.
-
 ## Décisions (comportements voulus)
 
 - **Changer de musique coupe la précédente net**, sans fondu de sortie : la suivante doit partir tout de suite (n° 1).
@@ -74,3 +57,4 @@ Les diagnostics complets des bugs fermés restent dans l'historique git : `git s
 | 25 | Popups des effets : repères du neutre peu visibles, coupés aux extrémités | repères redessinés | 1.9.1 |
 | 26 | Chrome 106 : couleurs mélangées absentes (`color-mix()`) | `color-mix()` réécrit en `rgb()` à la build (`tools/color-mix-compat.ts`) | 1.10.1 |
 | 27 | Cache des sons : anciennes versions jamais effacées | « Télécharger tous les sons » efface les entrées obsolètes, une fois tout téléchargé | 1.15.0 |
+| 29 | Remplissage de progression des tuiles saccadé (écran 4K, tablette lente) | remplissages par `transform`, lueurs en `filter: drop-shadow`, sans redessin ; horloge lissée (`SmoothClock`) | prochaine version |

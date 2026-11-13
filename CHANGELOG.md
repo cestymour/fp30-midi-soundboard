@@ -9,11 +9,14 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 - **Textes plus lisibles de loin.** Titres de catégorie en 14 px gras au lieu de petites capitales de 9 px. Noms des tuiles plus grands et plus clairs dans tous les onglets (jusqu'à 20 px, au lieu de 14 px au plus), à la même taille dans toutes les colonnes d'un onglet ; en portrait, ceux des Instruments passent de 9 à 15 px. Un mot trop long pour sa tuile est coupé avec un trait d'union (Applaudisse-ments). Musiques : noms et sous-titres plus grands, sous-titres plus contrastés ; en portrait, le texte a la même taille dans tous les blocs (Épique et Cirque en haut comme Tubes et Élégance en bas). Films : légendes plus grandes, elles prennent la bande vide au-dessus et au-dessous de l'affiche.
 - **Piano non connecté bien visible** : le badge « ⚠ Non connecté » est plein et orange ; les erreurs Bluetooth (BT perdu, Bluetooth refusé…) sont pleines et rouges.
 - **Films** : « Ambiance tendue » (Saw) au lieu de « tendu ».
+- **Lecture plus fluide, surtout sur grand écran ou tablette lente.** Le remplissage qui avance sur la tuile d'un son ou d'une musique, et celui de la barre de lecture, glissent sans à-coups. Ils sont maintenant déplacés par la carte graphique au lieu d'être redessinés à chaque image, et suivent une horloge régulière : l'horloge audio, elle, avance par paquets. Les lueurs qui pulsent (tuile en lecture, instrument actif) sont animées de la même façon : l'instrument actif ne fait plus redessiner l'écran en continu pendant tout le spectacle. Le rendu ne change pas.
+- **Grands écrans** : les emojis des Instruments, des Sons MIDI et des Musiques grandissent avec la tuile, comme ceux des Animaux, des Bruits et des Ambiances (ils plafonnaient à 44 px).
 
 ### À vérifier sur la tablette
 
 - Tous les onglets dans les deux orientations : aucun texte coupé ni débordant, césure correcte des mots longs (Sons MIDI : Applaudissements, Téléportation), emojis toujours lisibles dans les tuiles du haut en portrait.
 - Onglets piano sans connexion : le badge orange se voit d'un coup d'œil sans gêner la liste de connexion.
+- Lecture d'une musique, puis d'un son : le remplissage de la tuile et de la barre de lecture avance sans à-coups, repart de zéro à chaque relance, saute bien au bon endroit quand on touche la barre ; pause et reprise. Lueur de la tuile en lecture et de l'instrument actif : même aspect qu'avant.
 
 ## 1.17.0 — 2026-11-13
 
