@@ -29,7 +29,7 @@
     bt:      { text: '● BT',  className: 'midi-badge bt' },
     /** Connexion ou reconnexion automatique Bluetooth en cours */
     pending: { text: '◌ BT…', className: 'midi-badge bt' },
-    none:    { text: 'Non connecté', className: 'midi-badge' },
+    none:    { text: '⚠ Non connecté', className: 'midi-badge off' },
     lost:    { text: 'BT perdu', className: 'midi-badge err' },
   };
   /** Échecs Bluetooth (un sélecteur fermé sans choisir n'en est pas un) */
@@ -163,7 +163,16 @@
   }
   .midi-badge.usb { color: #4cffaa; border-color: #4cffaa; }
   .midi-badge.bt  { color: #55aaff; border-color: #55aaff; }
-  .midi-badge.err { color: #ff4444; border-color: #ff4444; }
+  /* Piano non connecté ou connexion en échec : l'état le plus grave sur scène,
+     badge plein qui se voit de loin (orange sans connexion, rouge en échec) */
+  .midi-badge.off,
+  .midi-badge.err {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1a0a00;
+  }
+  .midi-badge.off { background: #ff9a1f; border-color: #ff9a1f; }
+  .midi-badge.err { background: #ff4444; border-color: #ff4444; color: #fff; }
 
   /* ═══════════════════════════════════════════════════════
       COLONNES ET BLOCS CATÉGORIE
@@ -303,6 +312,8 @@
   @media (max-width: 600px) {
     .midi-select { max-width: 130px; font-size: 10px; }
     .midi-badge  { min-width: 70px; font-size: 10px; }
+    .midi-badge.off,
+    .midi-badge.err { font-size: 11px; }
   }
 
   /* ── Portrait — tous écrans ── */
