@@ -1,7 +1,9 @@
 // Compare deux relevés de styles calculés (styles.mjs) : liste les propriétés qui diffèrent
-// Usage : node compare-styles.mjs <avant.json> <après.json>
-import { readFileSync } from 'node:fs';
-const [a, b] = process.argv.slice(2).map(f => JSON.parse(readFileSync(f, 'utf8')));
+// Usage : node compare-styles.mjs <avant.ndjson> <après.ndjson> (un état par ligne, puis { errors })
+import { createReadStream } from 'node:fs';
+import { createInterface } from 'node:readline';
+const [fileA, fileB] = process.argv.slice(2);
+const lines = f => createInterface({ input: createReadStream(f), crlfDelay: Infinity })[Symbol.asyncIterator]();
 // Identifiants aléatoires du bouton d'arrêt d'urgence (dégradés SVG) : non significatifs
 // Préfixe ajouté par Svelte aux @keyframes déclarées dans un composant : non significatif
 const normalize = str => str.replace(/url\("#([a-z-]+)-[a-z0-9]+"\)/g, 'url("#$1-ID")').replace(/\bsvelte-[a-z0-9]+-/g, '');
@@ -11,15 +13,26 @@ const isTimingOnly = (props, ma, mb, pseudo) => pseudo === '::before'
   && props.every(p => (p === 'width' || p === 'inline-size') && /%$/.test(ma.get(p)) && /%$/.test(mb.get(p)));
 const PSEUDO = ['', '', '', '::before', '::after'];
 let total = 0;
-if (a.states.length !== b.states.length) console.log('  ÉCART  nombre d\'états', a.states.length, b.states.length);
-a.states.forEach((sa, si) => {
-  const sb = b.states[si];
-  if (!sb) return;
+let count = 0;
+const itA = lines(fileA), itB = lines(fileB);
+let errorsA = null, errorsB = null;
+const compareState = (sa, sb) => {
   let diffs = 0;
-  if (sa.elems.length !== sb.elems.length) console.log(`  ÉCART  ${sa.label} : ${sa.elems.length} éléments → ${sb.elems.length}`);
-  sa.elems.forEach((ea, ei) => {
-    const eb = sb.elems[ei];
-    if (!eb || ea[0] !== eb[0] || ea[1] !== eb[1]) { diffs++; return; }
+  // Éléments appariés par chemin et balise : un élément ajouté ou retiré ne décale pas les suivants
+  const key = e => e[0] + ' ' + e[1];
+  const byKey = new Map(sb.elems.map(e => [key(e), e]));
+  const keysA = new Set(sa.elems.map(key));
+  const onlyA = sa.elems.filter(e => !byKey.has(key(e))).map(key);
+  const onlyB = sb.elems.filter(e => !keysA.has(key(e))).map(key);
+  if (onlyA.length || onlyB.length) {
+    console.log(`  ÉCART  ${sa.label} : ${sa.elems.length} éléments → ${sb.elems.length}`);
+    if (onlyA.length) console.log(`           seulement avant : ${onlyA.slice(0, 8).join(', ')}${onlyA.length > 8 ? '…' : ''}`);
+    if (onlyB.length) console.log(`           seulement après : ${onlyB.slice(0, 8).join(', ')}${onlyB.length > 8 ? '…' : ''}`);
+    diffs += onlyA.length + onlyB.length;
+  }
+  sa.elems.forEach(ea => {
+    const eb = byKey.get(key(ea));
+    if (!eb) return;
     for (const k of [2, 3, 4]) {
       if (ea[k] === -1 && eb[k] === -1) continue;
       const strA = ea[k] === -1 ? '' : sa.dict[ea[k]];
@@ -36,5 +49,18 @@ a.states.forEach((sa, si) => {
   });
   if (diffs > 15) console.log(`  … ${diffs} écarts au total dans « ${sa.label} »`);
   total += diffs;
-});
-console.log(`${a.states.length} états, ${total} écart(s) ; erreurs : avant = ${JSON.stringify(a.errors)} ; après = ${JSON.stringify(b.errors)}`);
+};
+// Lecture des deux relevés ligne à ligne, état par état
+for (;;) {
+  const [ra, rb] = await Promise.all([itA.next(), itB.next()]);
+  if (ra.done && rb.done) break;
+  const sa = ra.done ? null : JSON.parse(ra.value);
+  const sb = rb.done ? null : JSON.parse(rb.value);
+  if (sa && 'errors' in sa) errorsA = sa;
+  if (sb && 'errors' in sb) errorsB = sb;
+  const stateA = sa && !('errors' in sa) ? sa : null;
+  const stateB = sb && !('errors' in sb) ? sb : null;
+  if (stateA && stateB) { count++; compareState(stateA, stateB); }
+  else if (stateA || stateB) console.log('  ÉCART  état présent d\'un seul côté :', (stateA ?? stateB).label);
+}
+console.log(`${count} états, ${total} écart(s) ; erreurs : avant = ${JSON.stringify(errorsA?.errors)} ; après = ${JSON.stringify(errorsB?.errors)}`);

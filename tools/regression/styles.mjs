@@ -1,7 +1,9 @@
 // Relevé des styles calculés de chaque élément (et de ses ::before / ::after) dans une série d'états
 // de l'interface. Sert à vérifier qu'un changement purement CSS (découpage en styles de composants)
 // ne modifie aucun style : comparer deux relevés avec compare-styles.mjs.
-// Usage : node styles.mjs <url> <largeur> <hauteur> > relevé.json
+// Usage : node styles.mjs <url> <largeur> <hauteur> > relevé.ndjson
+// Sortie : un état par ligne (JSON), puis une dernière ligne { errors }. Le relevé complet ne tient
+// pas dans une seule chaîne JavaScript (plus de 512 Mo avec les dessins SVG des tuiles).
 import { launchBrowser } from './browser.mjs';
 const [,, url, vw, vh] = process.argv;
 const browser = await launchBrowser();
@@ -13,7 +15,7 @@ page.on('pageerror', e => errors.push('pageerror: ' + e.message));
 await page.goto(url, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
 
-const states = [];
+let stateCount = 0;
 const dump = async (label) => {
   const s = await page.evaluate(() => {
     // Positions de lecture (styles en ligne mis à jour en continu) fixées le temps du relevé
@@ -49,7 +51,8 @@ const dump = async (label) => {
     anims.forEach(a => { if (!(a instanceof CSSTransition)) a.play(); });
     return { elems, dict: [...dict.keys()] };
   });
-  states.push({ label, ...s });
+  process.stdout.write(JSON.stringify({ label, ...s }) + '\n');
+  stateCount++;
 };
 const tab = async i => { await page.click(`.tab-btn[data-tab="${i}"]`); await page.waitForTimeout(250); };
 const tabCount = await page.$$eval('.tab-btn', bs => bs.length);
@@ -110,5 +113,5 @@ await dump('son introuvable');
 await page.click('#settings-btn'); await page.waitForTimeout(300);
 await dump('à propos');
 
-console.log(JSON.stringify({ states, errors }));
+console.log(JSON.stringify({ errors, stateCount }));
 await browser.close();
