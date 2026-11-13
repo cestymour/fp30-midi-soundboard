@@ -178,10 +178,13 @@
     border-radius: 0;
   }
 
+  /* Légende assez grande pour se lire de loin : elle prend la bande que l'affiche
+     (object-fit: contain) laisserait vide au-dessus et au-dessous */
   .sound-btn--img .btn-label {
     flex-shrink: 0;
-    padding: 6px 8px;
-    font-size: clamp(9px, 1vw, 11px);
+    padding: 5px 4px;
+    font-size: clamp(10px, 12.5cqw, 17px);
+    letter-spacing: 0.02em;
     line-height: 1.2;
     background: var(--bg-card);
     border-top: 1px solid var(--border);
