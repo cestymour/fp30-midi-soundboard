@@ -101,7 +101,7 @@ export const MIDI_TABS: MidiTab[] = [
         items: [
           { id: 'flute', name: 'Flûte',            icon: '🪈', svg: 'flute', pc:74,  msb:121, lsb:0,   title: 'GM2 => Flute' },
           { id: 'flute-de-pan', name: 'Flûte de Pan',     icon: '🎋', svg: 'flute-de-pan', pc:76,  msb:121, lsb:0,   title: 'GM2 => Pan Flute' },
-          { id: 'kalimba', name: 'Kalimba',          icon: '🧝', pc:109, msb:121, lsb:0,   title: 'GM2 => Kalimba' },
+          { id: 'kalimba', name: 'Kalimba',          icon: '🧝', svg: 'kalimba', pc:109, msb:121, lsb:0,   title: 'GM2 => Kalimba' },
           { id: 'saxo-soprano', name: 'Saxo soprano',     icon: '🎷', svg: 'saxo-soprano', pc:65,  msb:121, lsb:0,   title: 'GM2 => Soprano Sax' },
         ]
       },
