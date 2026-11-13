@@ -182,16 +182,19 @@
   }
 
   .tab-icon  { font-size: 20px; line-height: 1; }
-  .tab-label { font-size: 12px; }
+  /* Libellés à la taille des noms des tuiles (jusqu'à 20 px), aussi grands que la barre
+     le permet sans passer aux emoji seuls */
+  .tab-label { font-size: 15px; }
 
   /* ── Desktop large ── */
   @media (min-width: 1024px) {
-    .tab-label { font-size: 13px; }
+    .tab-label { font-size: 18px; }
   }
 
   /* ── Tablette portrait ── */
   @media (max-width: 1024px) and (orientation: portrait) {
-    .tab-label { font-size: 11px; }
+    /* 14 px ne tient plus sur 800 px de large : emoji seuls */
+    .tab-label { font-size: 13px; }
     /* Marges réduites : place pour le bouton de la musique de transition */
     .tab-btn { min-width: 70px; padding: 0 6px; gap: 4px; }
   }
