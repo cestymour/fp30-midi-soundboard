@@ -19,6 +19,11 @@ L'organisation en 11 familles est arrêtée (2026-11-08) ; c'est encore une maqu
 
 ## Revue UX/UI
 
+- [ ] **Dessins SVG, à voir plus tard** (règles dans `docs/sons.md`) :
+  - **Épées** ⚔️ : sur la tablette, l'emoji s'affiche plus petit que les autres et trop simple. Il sert aussi aux titres de catégorie « Royaume / Médiéval » et « Bagarre ».
+  - **Titres de catégorie** : ils n'acceptent pas encore de dessin (seulement les onglets et les tuiles).
+  - **Harpe** (Instruments, à côté du piano) : remise en emoji, alors que 🪉 s'affiche en carré vide sur la tablette (le dessin `harpe` est en commentaire sur la tuile).
+  - Dessins écartés, en commentaire dans la config, à reprendre si on change d'avis : onglets Instruments, Sons MIDI, Bruits, Ambiances et Films, Démarrage voiture, Freinage, Sonnette, contrebasse (Basse).
 - [ ] **Pistes de la revue UX/UI du 2026-11-12** (version 1.16.0, faite sur des captures en paysage 1280×800 et en portrait 800×1280, pas sur la tablette). La base tient : zones fixes, couleur par type d'onglet, grosses tuiles, arrêt d'urgence partout ; Films (affiches) et Animaux (familles de couleur) suivent le mieux le principe « repère visuel d'abord » de `docs/usage-scene.md`. À reprendre, du plus important au moins important :
   - **Instruments** : 48 tuiles grises, seul le petit titre de catégorie est en couleur, alors que c'est l'onglet central. Teinter les tuiles par catégorie, comme dans Musiques.
   - **Petits textes peu lisibles** pour un musicien qui lit lentement : sous-titres des tuiles de Musiques (petits, peu contrastés), titres de catégorie (capitales mono d'environ 9 px), légendes de Films (petites ; en paysage, l'affiche laisse une bande vide au-dessus et au-dessous). En portrait, dans Musiques, la taille du texte change d'un bloc à l'autre : les tuiles du haut (Épique, Cirque…) sont plus basses et leur texte nettement plus petit que celles du bas (Tubes, Élégance).

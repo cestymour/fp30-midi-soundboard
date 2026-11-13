@@ -12,7 +12,6 @@
   import FxOverlay from './ui/FxOverlay.svelte';
   import TransitionButton from './ui/components/TransitionButton.svelte';
   import TransitionPopup from './ui/components/TransitionPopup.svelte';
-  import IconModeSwitch from './ui/components/IconModeSwitch.svelte';
   import { transitionPopup } from './ui/transition.svelte.ts';
 
   const tabs = getAllTabs();
@@ -56,8 +55,6 @@
 <SettingsPopup bind:this={settingsPopup} />
 <FxOverlay controller={midiFxOverlay} />
 <FxOverlay controller={audioFxOverlay} />
-<!-- ESSAI TEMPORAIRE : choix de l'affichage des icônes de tuile -->
-<IconModeSwitch />
 
 <style>
   /* ═══════════════════════════════════════════════════════

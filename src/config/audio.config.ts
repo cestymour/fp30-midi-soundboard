@@ -139,7 +139,7 @@ export const AUDIO_TABS: AudioTab[] = [
     id: 'ambiances',
     label: 'Ambiances',
     icon: '🏙️',
-    svg: 'onglet-ambiances',
+    // svg: 'onglet-ambiances',
     kind: 'music',
     gridType: 'animals',
     categories: [

@@ -1,16 +1,14 @@
 <!--
-  TileIcon.svelte — Icône d'une tuile : le dessin SVG `svg` s'il est donné, sinon l'emoji.
-  Le dessin fait 1em de côté : il suit la taille de police de `.btn-icon`, comme l'emoji
+  TileIcon.svelte — Icône d'une tuile ou d'un onglet : le dessin SVG `svg` s'il est donné, sinon l'emoji.
+  Le dessin fait 1em de côté : il suit la taille de police de son conteneur, comme l'emoji
   (et disparaît avec lui quand un état de lecture met cette taille à 0).
-  ESSAI : en mode « emoji » (iconMode), l'emoji s'affiche toujours.
 -->
 <script lang="ts">
   import { TILE_ICONS } from '../../icons/index.ts';
-  import { iconMode } from '../icon-mode.svelte.ts';
 
   let { svg, emoji }: { svg?: string; emoji: string } = $props();
 
-  const drawing = $derived(svg && iconMode.value === 'svg' ? TILE_ICONS[svg] : undefined);
+  const drawing = $derived(svg ? TILE_ICONS[svg] : undefined);
 </script>
 
 <!-- Dessins du dépôt (src/icons/), jamais une saisie de l'utilisateur -->

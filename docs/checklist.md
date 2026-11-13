@@ -28,6 +28,7 @@
 - [ ] Volume des musiques baissé juste après avoir lancé une musique (pendant le fondu d'entrée) : elle reste au volume choisi
 - [ ] Une longue série de sons (une cinquantaine) : chacun démarre
 - [ ] Onglet animaux (`gridType: 'animals'`) et onglets avec `cols`
+- [ ] Dessins SVG des onglets et des tuiles (`svg` dans la config) : affichés à la taille des emojis voisins, visibles sur le fond sombre, jamais en carré vide ; en lecture, ils laissent la place au carré stop ou à la double flèche
 - [ ] Mode **paysage** et mode **portrait** : mise en page, hauteurs de boutons égalisées, réorganisation des grilles MIDI en portrait
 - [ ] Dans un **onglet Chrome** (pas l'application installée) : la dernière rangée de boutons est entièrement visible, en paysage et en portrait
 - [ ] Sur la **tablette de scène (Chrome 106)** : mêmes couleurs que sur un Chrome récent (tuiles teintées par famille, cadres des panneaux, couleur de chaque type d'onglet, boutons Effets/Reset, fond opaque des popups d'effets, barre de progression d'un son, double flèche d'un son en cours)

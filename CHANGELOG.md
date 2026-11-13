@@ -2,6 +2,31 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.17.0 — 2026-11-13
+
+### Nouveautés
+
+- **Des dessins à la place de certains emojis.** Les emojis justes restent ; une tuile reçoit un dessin quand son emoji avait été pris faute de mieux (un dodo pour la mouette, une scie de menuisier pour la tronçonneuse), quand des tuiles différentes partageaient le même (trois pistolets à eau), ou quand l'emoji s'affichait en carré vide sur la tablette (flûte, âne, harpe glissando). Les dessins ont le niveau de détail d'un emoji, en vraies couleurs, et sont intégrés à l'application (disponibles hors ligne).
+  - **Instruments** : Rhodes (télé rétro), Voix jazz (micro rétro), Cloches tubulaires, Orgue jazz, Basse (basse électrique), Harmonica, Xylophone, Grosse caisse, Cuivres (trompette de héraut), Guitare (guitare classique), Laser / Synth, Piano électrique (planète à anneau), Flûte, Flûte de Pan, Saxo soprano (saxo droit), Harpe glissando, Chœur.
+  - **Sons MIDI** : Ruisseau, Pas (traces de chaussures), Bloc de bois, Cloche de vache, Grincement porte (porte entrouverte), Claque ! (porte qui tremble), Pistolet laser, Coup de feu (revolver), Mitraillette.
+  - **Animaux** : Pigeon, Hyène, Âne, Chat : Ronron (chat en boule), Mouette, Moustique.
+  - **Bruits** : Verre d'eau, Machine à café, Machine à écrire, Erreur Windows, Tronçonneuse, Briquet, Ba-dum-tss, Scie à métaux.
+  - **Ambiances** : Cigales, Vagues et mouettes, Grotte, Feu de cheminée (cheminée de salon), Champ de bataille, Stade (stade de foot), Discussions dehors et dedans (bulles de dialogue), Maternité (bébé qui pleure), Manifestation.
+  - **Onglets** : une patte pour Animaux, une double croche pour Musiques.
+- **Animaux** : la tuile « Abeille » devient **« Moustique »** (le son est un moustique). Chats et chiens en rouge, pour les distinguer de la forêt ; Grillons passe avant Moustique.
+- **Ambiances : 8 nouvelles ambiances** : Métro, Train, Stade, Concert, Fête foraine, Sous l'eau, Jungle, Champ de bataille. Café, Restaurant et Salle d'arcade sont retirés de la grille (fichiers gardés).
+- **Bruits et Ambiances : tuiles en blocs de couleur par thème**, rangées pour que les voisines se ressemblent (Bruits : maison, bureau et informatique, téléphone, rue et cérémonies, spectacle et jeux, danger et outils ; Ambiances : nature, ville et transports, foules et fêtes, mer, éléments, nuit et peur, voix).
+
+### À savoir
+
+- Sur la tablette, l'emoji de la **Harpe** (à côté du piano) reste un carré vide : elle garde son emoji pour l'instant. Les **Épées** (⚔️) aussi sont à revoir.
+
+### À vérifier sur la tablette
+
+- Chaque dessin s'affiche (pas de carré vide), à la taille des emojis voisins, bien visible sur le fond sombre, en paysage et en portrait.
+- Pendant la lecture, le dessin d'une tuile de musique laisse la place au carré stop, et celui d'une tuile de son à la double flèche, comme un emoji.
+- Hors ligne (mode avion), les dessins s'affichent toujours.
+
 ## 1.16.0 — 2026-11-12
 
 ### Nouveautés
