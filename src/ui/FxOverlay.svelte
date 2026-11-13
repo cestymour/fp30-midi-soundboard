@@ -673,10 +673,36 @@
     }
   }
 
+  /* ── Téléphone (paysage ou portrait) : reset au-dessus du curseur ──
+     Les cartes sont trop étroites pour le nom et le reset côte à côte : en paysage le nom
+     se coupait lettre par lettre et écrasait le curseur, en portrait un nom long (Résonance)
+     poussait le reset hors de la carte. Chaque carte empile reset, curseur et nom. */
+  @media (orientation: landscape) and (max-height: 500px), (orientation: portrait) and (max-width: 600px) {
+    .fx-control {
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    /* Nom et reset deviennent des lignes de la carte */
+    .fx-control__foot {
+      display: contents;
+    }
+
+    .fx-one-reset {
+      grid-row: 1;
+      justify-self: center;
+    }
+
+    .fx-slider-wrap {
+      grid-row: 2;
+    }
+
+    .fx-control__name {
+      grid-row: 3;
+    }
+  }
+
   /* ── Téléphone en paysage (peu de hauteur) ──────────────────────
-     Les cartes sont trop étroites pour le nom et le reset côte à côte : le nom se coupait
-     lettre par lettre et écrasait le curseur. Ici, chaque carte empile reset, curseur et
-     nom (sur une ligne), et les presets sont des tuiles basses, icône à côté du texte. */
+     Nom sur une ligne, et presets en tuiles basses, icône à côté du texte. */
   @media (orientation: landscape) and (max-height: 500px) {
     .fx-popup {
       padding: 8px;
@@ -711,26 +737,14 @@
     }
 
     .fx-control {
-      grid-template-rows: auto minmax(0, 1fr) auto;
       gap: 4px;
       padding: 6px 4px;
     }
 
-    /* Nom et reset deviennent des lignes de la carte */
-    .fx-control__foot {
-      display: contents;
-    }
-
     .fx-one-reset {
-      grid-row: 1;
-      justify-self: center;
       width: 30px;
       height: 30px;
       font-size: 15px;
-    }
-
-    .fx-slider-wrap {
-      grid-row: 2;
     }
 
     .fx-slider-rail {
@@ -739,7 +753,6 @@
     }
 
     .fx-control__name {
-      grid-row: 3;
       font-size: 14px;
       white-space: nowrap;
       overflow: hidden;

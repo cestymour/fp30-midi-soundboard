@@ -34,7 +34,7 @@
 - [ ] Sur la **tablette de scène (Chrome 106)** : mêmes couleurs que sur un Chrome récent (tuiles teintées par famille, cadres des panneaux, couleur de chaque type d'onglet, boutons Effets/Reset, fond opaque des popups d'effets, barre de progression d'un son, double flèche d'un son en cours)
 - [ ] Popup « Paramètres » et numéro de version ; pastilles vertes dans l'application installée : « Écran toujours allumé : oui » (« non » en orange si la demande a échoué), « Stockage : protégé » ; le bouton « Plein écran » est le plus visible de la popup
 - [ ] « Plein écran » (popup Paramètres) dans un onglet Chrome : barres masquées ; le bouton devient « Quitter le plein écran » et en sort ; une sortie par le geste ou la touche Retour remet le bouton à « Plein écran »
-- [ ] Sur un **téléphone en paysage** : popups des effets (chaque carte a son reset, son curseur et son nom entier) et popup Paramètres (défile ; la croix ✕ en haut à droite et un appui hors de la popup la ferment)
+- [ ] Sur un **téléphone en paysage et en portrait** : popups des effets (chaque carte a son reset au-dessus du curseur, son curseur et son nom entier) et popup Paramètres (défile ; la croix ✕ en haut à droite et un appui hors de la popup la ferment)
 - [ ] « ⬇ Télécharger tous les sons » : le compteur arrive au total (sons et images), puis le bouton disparaît ; s'il restait d'anciens fichiers, le message donne la place libérée (« … Mo libérés »)
 - [ ] Son remplacé sous le même nom (après un déploiement qui en modifie un) : le compteur des sons redescend d'un fichier ; avant « Télécharger tous les sons », en mode avion, le son joue encore (ancienne version) ; après, la nouvelle version joue
 - [ ] Wake Lock : l'écran ne se met pas en veille

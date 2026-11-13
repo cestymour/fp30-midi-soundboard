@@ -17,6 +17,10 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 - **Ambiances : 8 nouvelles ambiances** : Métro, Train, Stade, Concert, Fête foraine, Sous l'eau, Jungle, Champ de bataille. Café, Restaurant et Salle d'arcade sont retirés de la grille (fichiers gardés).
 - **Bruits et Ambiances : tuiles en blocs de couleur par thème**, rangées pour que les voisines se ressemblent (Bruits : maison, bureau et informatique, téléphone, rue et cérémonies, spectacle et jeux, danger et outils ; Ambiances : nature, ville et transports, foules et fêtes, mer, éléments, nuit et peur, voix).
 
+### Corrections
+
+- **Popups des effets sur un téléphone en portrait** : le bouton ↺ de chaque curseur est maintenant au-dessus du curseur. Il était à droite du nom, et un nom long (Resonance) le poussait hors de la carte.
+
 ### À savoir
 
 - Sur la tablette, l'emoji de la **Harpe** (à côté du piano) reste un carré vide : elle garde son emoji pour l'instant. Les **Épées** (⚔️) aussi sont à revoir.
