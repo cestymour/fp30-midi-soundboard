@@ -328,7 +328,7 @@
     GRILLE FIXE — Couleurs par catégorie (classes CSS catClass)
   ════════════════════════════════════════════════════════ */
 
-  .animaux-domestique { --cat-accent: #ff2a2a; }
+  .animaux-domestique { --cat-accent: #ff5cb0; }
   .animaux-ferme      { --cat-accent: #44aa00; }
   .animaux-foret      { --cat-accent: #7700ff; }
   .animaux-oiseau     { --cat-accent: #0066ff; }
@@ -338,7 +338,7 @@
 
   /* Onglet Ambiances : même grille, une couleur par thème */
   .ambiances-ville    { --cat-accent: #0066ff; }
-  .ambiances-voix     { --cat-accent: #ff2a2a; }
+  .ambiances-voix     { --cat-accent: #ff5cb0; }
   .ambiances-fete     { --cat-accent: #ff8000; }
   .ambiances-mer      { --cat-accent: #00ffee; }
   .ambiances-nature   { --cat-accent: #44aa00; }
@@ -351,7 +351,7 @@
   .bruits-bureau      { --cat-accent: #00ffee; }
   .bruits-telephone   { --cat-accent: #7700ff; }
   .bruits-maison      { --cat-accent: #44aa00; }
-  .bruits-danger      { --cat-accent: #ff2a2a; }
+  .bruits-danger      { --cat-accent: #ff5cb0; }
 
   :global(.fixed-grid) .sound-btn {
     border-color: color-mix(in srgb, var(--cat-accent, var(--border)) 35%, var(--border));
