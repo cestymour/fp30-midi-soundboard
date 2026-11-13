@@ -90,7 +90,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--gap-inner);
-    padding: 10px 8px;
+    padding: 6px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
     background: var(--bg-card);
@@ -126,13 +126,18 @@
     z-index: 2;
     flex-shrink: 1;
   }
+  /* Nom réglé sur la tuile la plus basse du panneau (--btn-h-min, posée par l'égalisation des
+     hauteurs) : même taille dans toutes les colonnes. Plafonné par la largeur de la tuile (cqw),
+     pour qu'un mot long (Applaudissements) tienne sur sa ligne */
   .btn-label {
-    font-size: clamp(7px, 18cqh, 14px);
+    font-size: clamp(11px, min((var(--btn-h-min, 80px) - 14px) * 0.26, 17cqw), 20px);
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     text-align: center;
     line-height: 1.1;
     word-break: break-word;
+    /* Mot plus large que la tuile : coupé avec un trait d'union (lang="fr") */
+    hyphens: auto;
     position: relative;
     z-index: 2;
     flex-shrink: 0;
@@ -322,8 +327,9 @@
     line-height: 1;
   }
 
+  /* Grille fixe : toutes les tuiles ont la même taille, le nom se règle sur la tuile */
   :global(.audio-grid.fixed-grid) .sound-btn .btn-label {
-    font-size: clamp(7px, 18cqh, 14px);
+    font-size: clamp(11px, min(24cqh, 17cqw), 20px);
     line-height: 1.1;
   }
 
@@ -456,7 +462,7 @@
   .musique-tuile.playing .btn-label { color: var(--cat-accent); }
 
   .btn-sub {
-    font-size: clamp(11px, min(var(--btn-h-min, 80px) * 0.15, 9cqw), 16px);
+    font-size: clamp(10px, min(var(--btn-h-min, 80px) * 0.15, 9cqw), 16px);
     font-weight: 600;
     letter-spacing: 0.02em;
     line-height: 1.1;

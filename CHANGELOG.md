@@ -6,13 +6,13 @@ La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne so
 
 ### Corrections
 
-- **Textes plus lisibles de loin.** Titres de catégorie en 14 px gras au lieu de petites capitales de 9 px. Musiques : noms et sous-titres plus grands, sous-titres plus contrastés ; en portrait, le texte a la même taille dans tous les blocs (Épique et Cirque en haut comme Tubes et Élégance en bas). Films : légendes plus grandes, elles prennent la bande vide au-dessus et au-dessous de l'affiche.
+- **Textes plus lisibles de loin.** Titres de catégorie en 14 px gras au lieu de petites capitales de 9 px. Noms des tuiles plus grands et plus clairs dans tous les onglets (jusqu'à 20 px, au lieu de 14 px au plus), à la même taille dans toutes les colonnes d'un onglet ; en portrait, ceux des Instruments passent de 9 à 15 px. Un mot trop long pour sa tuile est coupé avec un trait d'union (Applaudisse-ments). Musiques : noms et sous-titres plus grands, sous-titres plus contrastés ; en portrait, le texte a la même taille dans tous les blocs (Épique et Cirque en haut comme Tubes et Élégance en bas). Films : légendes plus grandes, elles prennent la bande vide au-dessus et au-dessous de l'affiche.
 - **Piano non connecté bien visible** : le badge « ⚠ Non connecté » est plein et orange ; les erreurs Bluetooth (BT perdu, Bluetooth refusé…) sont pleines et rouges.
 - **Films** : « Ambiance tendue » (Saw) au lieu de « tendu ».
 
 ### À vérifier sur la tablette
 
-- Musiques et Films dans les deux orientations : aucun texte coupé ni débordant, emojis toujours lisibles dans les tuiles du haut en portrait.
+- Tous les onglets dans les deux orientations : aucun texte coupé ni débordant, césure correcte des mots longs (Sons MIDI : Applaudissements, Téléportation), emojis toujours lisibles dans les tuiles du haut en portrait.
 - Onglets piano sans connexion : le badge orange se voit d'un coup d'œil sans gêner la liste de connexion.
 
 ## 1.17.0 — 2026-11-13
