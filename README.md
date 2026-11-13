@@ -207,7 +207,7 @@ export const AUDIO_TABS: AudioTab[] = [
     // cols: 3,              // Multi-column layout (Films tab)
     // catCols: 2,           // With cols: tiles per row in a category (default 3); tiles take the category color
     // colSizes: [3, 3, 2, 3], // With cols: categories in each column, in order (default: ceil(categories / cols) per column)
-    // gridType: 'animals',  // Special grid layout (Animals tab)
+    // gridType: 'fixed',    // Fixed 4×8 grid (Animaux, Bruits, Ambiances tabs)
     categories: [
       {
         id: 'nature-eau',
@@ -256,11 +256,11 @@ Preset buttons for the MIDI and audio FX overlays. Each file exports an array �
 }
 ```
 
-**Animal grid** (fixed 4×8 landscape / 8×4 portrait):
+**Fixed grid** (4×8 landscape / 8×4 portrait, fills the panel):
 ```js
 {
   label: 'Animaux',
-  gridType: 'animals',  // Enables the special animal grid
+  gridType: 'fixed',  // Enables the fixed grid
   // ...
 }
 ```
@@ -545,7 +545,7 @@ export const AUDIO_TABS: AudioTab[] = [
     // cols: 3,              // Affichage multi-colonnes (onglet Films)
     // catCols: 2,           // Avec cols : tuiles par ligne dans une catégorie (défaut 3) ; les tuiles prennent la couleur de la catégorie
     // colSizes: [3, 3, 2, 3], // Avec cols : nombre de catégories dans chaque colonne, dans l'ordre (défaut : ceil(catégories / cols) par colonne)
-    // gridType: 'animals',  // Grille spéciale (onglet Animaux)
+    // gridType: 'fixed',    // Grille fixe 4×8 (onglets Animaux, Bruits, Ambiances)
     categories: [
       {
         id: 'nature-eau',
@@ -594,11 +594,11 @@ Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un
 }
 ```
 
-**Grille animaux** (4×8 fixe en paysage / 8×4 en portrait) :
+**Grille fixe** (4×8 en paysage / 8×4 en portrait, remplit le panneau) :
 ```js
 {
   label: 'Animaux',
-  gridType: 'animals',  // Active la grille spéciale animaux
+  gridType: 'fixed',  // Active la grille fixe
   // ...
 }
 ```

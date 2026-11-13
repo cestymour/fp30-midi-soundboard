@@ -10,7 +10,7 @@ export const AUDIO_TABS: AudioTab[] = [
     icon: '🐮',
     svg: 'onglet-animaux',
     kind: 'sounds',
-    gridType: 'animals',
+    gridType: 'fixed',
     categories: [
       {
         id: 'tous-les-animaux',
@@ -77,7 +77,7 @@ export const AUDIO_TABS: AudioTab[] = [
     icon: '⚡',
     // svg: 'onglet-bruits',
     kind: 'sounds',
-    gridType: 'animals',
+    gridType: 'fixed',
     categories: [
       {
         id: 'tous-les-bruits', label: 'Tous les bruits', icon: '🔊', color: '#dd66ff',
@@ -141,7 +141,7 @@ export const AUDIO_TABS: AudioTab[] = [
     icon: '🏙️',
     // svg: 'onglet-ambiances',
     kind: 'music',
-    gridType: 'animals',
+    gridType: 'fixed',
     categories: [
       {
         id: 'toutes-les-ambiances', label: 'Toutes les ambiances', icon: '🔊', color: '#88ccff',

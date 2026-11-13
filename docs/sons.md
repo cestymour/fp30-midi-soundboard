@@ -6,7 +6,7 @@ Comment choisir, ranger, présenter et traiter les sons et les musiques de l'app
 
 | Onglet | Type | Ce qu'il reçoit |
 |---|---|---|
-| Animaux | sons | Cris d'animaux, courts. Grille fixe de 32 cases (`gridType: 'animals'`). |
+| Animaux | sons | Cris d'animaux, courts. Grille fixe de 32 cases (`gridType: 'fixed'`). |
 | Bruits | sons | Bruitages courts, entendus par les personnages. 32 cases. Pas de doublon avec les sons MIDI du piano (rire, cri, pas, applaudissements, téléphones, portes, voiture, sirène, train, avion, laser, coup de feu, coup de poing, explosion, pluie, tonnerre, vent, chien, galop…). |
 | Ambiances | musiques | Fonds sonores longs (ville, gare, mer, forêt…). Un son long qui sonne comme une ambiance (grillons, cigales) va ici : il y gagne fondus et effets. |
 | Musiques | musiques | Musiques **cultes hors film**, connues, qui habillent une scène en cours. Pas de doublon avec Films. |

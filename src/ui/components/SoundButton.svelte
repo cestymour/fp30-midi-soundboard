@@ -73,7 +73,7 @@
 
 <style>
   /* Toutes les règles qui visent .sound-btn sont ici, dans l'ordre où la cascade les applique,
-     y compris celles qui dépendent de la grille (:global(.audio-col), :global(.animals-grid)). */
+     y compris celles qui dépendent de la grille (:global(.audio-col), :global(.fixed-grid)). */
 
   /* ── Focus accessible (clavier uniquement) ── */
   .sound-btn:focus-visible {
@@ -305,27 +305,27 @@
   }
 
   /* ═══════════════════════════════════════════════════════
-    GRILLE ANIMAUX
+    GRILLE FIXE (Animaux, Bruits, Ambiances)
   ════════════════════════════════════════════════════════ */
-  :global(.audio-grid.animals-grid) .sound-btn {
+  :global(.audio-grid.fixed-grid) .sound-btn {
     height: 100%;
     min-height: 0;
     padding: 4px 2px;
     container-type: size;
   }
 
-  :global(.audio-grid.animals-grid) .sound-btn .btn-icon {
+  :global(.audio-grid.fixed-grid) .sound-btn .btn-icon {
     font-size: 45cqh;
     line-height: 1;
   }
 
-  :global(.audio-grid.animals-grid) .sound-btn .btn-label {
+  :global(.audio-grid.fixed-grid) .sound-btn .btn-label {
     font-size: clamp(7px, 18cqh, 14px);
     line-height: 1.1;
   }
 
   /* ═══════════════════════════════════════════════════════
-    GRILLE ANIMAUX — Couleurs par catégorie (classes CSS)
+    GRILLE FIXE — Couleurs par catégorie (classes CSS catClass)
   ════════════════════════════════════════════════════════ */
 
   .animaux-domestique { --cat-accent: #ff2a2a; }
@@ -353,23 +353,23 @@
   .bruits-maison      { --cat-accent: #44aa00; }
   .bruits-danger      { --cat-accent: #ff2a2a; }
 
-  :global(.animals-grid) .sound-btn {
+  :global(.fixed-grid) .sound-btn {
     border-color: color-mix(in srgb, var(--cat-accent, var(--border)) 35%, var(--border));
     background: color-mix(in srgb, var(--cat-accent, transparent) 8%, var(--bg-card));
   }
 
-  :global(.animals-grid) .sound-btn:hover {
+  :global(.fixed-grid) .sound-btn:hover {
     border-color: color-mix(in srgb, var(--cat-accent, var(--border-glow)) 65%, var(--border-glow));
     background: color-mix(in srgb, var(--cat-accent, transparent) 15%, var(--bg-card-hover));
   }
 
-  :global(.animals-grid) .sound-btn.playing {
+  :global(.fixed-grid) .sound-btn.playing {
     border-color: var(--cat-accent, var(--panel-accent));
     background: color-mix(in srgb, var(--cat-accent, transparent) 20%, var(--bg-card));
     box-shadow: 0 0 12px color-mix(in srgb, var(--cat-accent, var(--panel-accent)) 40%, transparent);
   }
 
-  :global(.animals-grid) .sound-btn.playing .btn-label {
+  :global(.fixed-grid) .sound-btn.playing .btn-label {
     color: var(--cat-accent, var(--panel-accent));
   }
 
@@ -378,23 +378,23 @@
     to   { box-shadow: 0 0 18px color-mix(in srgb, var(--cat-accent) 55%, transparent); }
   }
 
-  :global(.animals-grid) .sound-btn.playing {
+  :global(.fixed-grid) .sound-btn.playing {
     animation: playing-glow-cat 0.9s ease-in-out infinite alternate;
   }
 
-  :global(.animals-grid) .sound-btn::before {
+  :global(.fixed-grid) .sound-btn::before {
     background: color-mix(in srgb, var(--cat-accent, var(--panel-accent)) 30%, transparent);
   }
 
-  :global(.animals-grid) .sound-btn::after {
+  :global(.fixed-grid) .sound-btn::after {
     background: color-mix(in srgb, var(--cat-accent, transparent) 8%, var(--bg-card));
   }
 
-  :global(.animals-grid) .sound-btn:hover::after {
+  :global(.fixed-grid) .sound-btn:hover::after {
     background: color-mix(in srgb, var(--cat-accent, transparent) 15%, var(--bg-card-hover));
   }
 
-  :global(.animals-grid) .sound-btn.playing::after {
+  :global(.fixed-grid) .sound-btn.playing::after {
     background: color-mix(in srgb, var(--cat-accent, transparent) 20%, var(--bg-card));
   }
 

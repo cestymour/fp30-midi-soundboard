@@ -74,8 +74,8 @@
     <EmergencyStopButton extraClass="audio-stop-btn" />
   {/snippet}
 
-  {#if tab.gridType === 'animals'}
-    <div class="audio-grid animals-grid">
+  {#if tab.gridType === 'fixed'}
+    <div class="audio-grid fixed-grid">
       {#each tab.categories as cat (cat.id)}
         {#each cat.items as item (item.id)}
           <SoundButton {item} kind={tab.kind} />
@@ -123,7 +123,7 @@
 </Panel>
 
 <style>
-  /* Les styles des boutons eux-mêmes (y compris dans la grille Animaux)
+  /* Les styles des boutons eux-mêmes (y compris dans la grille fixe)
      sont dans SoundButton.svelte */
 
   /* ═══════════════════════════════════════════════════════
@@ -182,9 +182,9 @@
   }
 
   /* ═══════════════════════════════════════════════════════
-    GRILLE ANIMAUX — 4×8 paysage, 8×4 portrait (transposé)
+    GRILLE FIXE (Animaux, Bruits, Ambiances) — 4×8 paysage, 8×4 portrait (transposé)
   ════════════════════════════════════════════════════════ */
-  :global(.panel) .audio-grid.animals-grid {
+  :global(.panel) .audio-grid.fixed-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(4, 1fr);
@@ -209,7 +209,7 @@
 
   /* ── Portrait — tous écrans ── */
   @media (orientation: portrait) {
-    :global(.panel) .audio-grid.animals-grid {
+    :global(.panel) .audio-grid.fixed-grid {
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(8, 1fr);
       grid-auto-flow: column;
