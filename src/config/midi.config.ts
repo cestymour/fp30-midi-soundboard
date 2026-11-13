@@ -175,7 +175,7 @@ export const MIDI_TABS: MidiTab[] = [
           { id: 'rire', name: 'Rire',             icon: '😂', pc:127, msb:121, lsb:1,   title: 'GM2 => Laughing' },
           { id: 'cri', name: 'Cri',              icon: '😱', pc:127, msb:121, lsb:2,   title: 'GM2 => Screaming' },
           { id: 'cur', name: 'Cœur',             icon: '💓', pc:127, msb:121, lsb:4,   title: 'GM2 => Heart Beat' },
-          { id: 'pas', name: 'Pas',              icon: '👣', pc:127, msb:121, lsb:5,   title: 'GM2 => Footsteps' },
+          { id: 'pas', name: 'Pas',              icon: '👣', svg: 'pas', pc:127, msb:121, lsb:5,   title: 'GM2 => Footsteps' },
           { id: 'claque-doigt', name: 'Claque doigt',     icon: '🫰', pc:116, msb:121, lsb:1,   title: 'GM2 => Castanets' },
           { id: 'applaudissements', name: 'Applaudissements', icon: '👏', pc:127, msb:121, lsb:0,   title: 'GM2 => Applause' },
         ]

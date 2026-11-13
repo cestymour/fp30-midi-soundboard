@@ -11,12 +11,12 @@ Un sélecteur temporaire en bas de l'écran (`IconModeSwitch.svelte`, `src/ui/ic
 
 Avant de passer sur `main` : retirer le sélecteur (le composant, son module, la ligne dans `App.svelte` et le mode dans `TileIcon.svelte`), puis supprimer ce fichier.
 
-## Tuiles dessinées (42 tuiles)
+## Tuiles dessinées (43 tuiles)
 
 | Onglet | Tuiles (emoji remplacé → dessin) |
 |---|---|
 | Instruments | Harpe glissando 🪉 → harpe ; Voix jazz 🗣️ → micro rétro ; Cloches tubulaires 🔔 → tubes sur un portique ; Orgue jazz 🎼 → orgue à deux claviers ; Basse 🎸 → basse électrique ; Harmonica 🎵 ; Xylophone 🥢 ; Grosse caisse 🥁 → grosse caisse et mailloche ; Cuivres 📯 → trompette de héraut à bannière ; Guitare 🎸 → guitare classique ; Laser / Synth 🔆 → synthé et rayons ; Piano électrique 💎 → planète à anneau ; Flûte 🪈 → flûte traversière ; Flûte de Pan 🎋 ; Saxo soprano 🎷 → saxo droit ; Chœur 🎶 → trois choristes ; Rhodes 🎹 → télé rétro |
-| Sons MIDI | Ruisseau 🏞️ → ruisseau en zigzag, qui s'élargit en descendant ; Bloc de bois 🪵 ; Cloche de vache 🔔 → cloche à sangle ; Grincement porte 🚪 → porte entrouverte sur le noir ; Claque ! 🚪 → porte fermée qui tremble ; Pistolet laser 🔫 → pistolet de science-fiction ; Coup de feu 🔫 → revolver qui tire ; Mitraillette 🔫 → mitraillette à chargeur rond |
+| Sons MIDI | Ruisseau 🏞️ → ruisseau en zigzag, qui s'élargit en descendant ; Pas 👣 → traces de chaussures (beige clair, visibles sur fond sombre) ; Bloc de bois 🪵 ; Cloche de vache 🔔 → cloche à sangle ; Grincement porte 🚪 → porte entrouverte sur le noir ; Claque ! 🚪 → porte fermée qui tremble ; Pistolet laser 🔫 → pistolet de science-fiction ; Coup de feu 🔫 → revolver qui tire ; Mitraillette 🔫 → mitraillette à chargeur rond |
 | Animaux | Pigeon 🕊️ ; Hyène 🐆 ; Âne 🫏 ; Chat : Ronron 🐈 → chat en boule ; Mouette 🦤 ; Moustique 🐝 (tuile « Abeille » renommée « Moustique », le son est un moustique) |
 | Bruits | Verre d'eau 🥛 → verre qu'on remplit ; Machine à café ☕ → machine à expresso ; Machine à écrire 📝 ; Erreur Windows 🖥️ → fenêtre d'erreur ; Tronçonneuse 🪚 ; Briquet 🚬 → briquet allumé ; Ba-dum-tss 🎭 → caisse claire et cymbale ; Scie à métaux 🪛 |
 | Ambiances | Cigales 🦗 → cigale vue de dessus ; Vagues et mouettes ⚓ ; Grotte 💧 → grotte, goutte et ronds dans l'eau |
