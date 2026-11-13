@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">
+  <rect x="18" y="2" width="28" height="22" fill="#fbfaf5"/>
+  <path d="M22 7 H41 M22 11 H43 M22 15 H37" stroke="#9aa0ad" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M10 25 H54 L60 52 Q60 57 55 57 H9 Q4 57 4 52 Z" fill="#3d6b6a"/>
+  <path d="M4 50 H60 V52 Q60 57 55 57 H9 Q4 57 4 52 Z" fill="#2c5050"/>
+  <rect x="8" y="19" width="48" height="7" rx="3.5" fill="#2b2d36"/>
+  <circle cx="6" cy="22.5" r="4" fill="#4a4f5c"/>
+  <circle cx="58" cy="22.5" r="4" fill="#4a4f5c"/>
+  <g fill="#f4efe4"><circle cx="14" cy="33" r="2.3"/><circle cx="19.7" cy="33" r="2.3"/><circle cx="25.4" cy="33" r="2.3"/><circle cx="31.1" cy="33" r="2.3"/><circle cx="36.8" cy="33" r="2.3"/><circle cx="42.5" cy="33" r="2.3"/><circle cx="48.2" cy="33" r="2.3"/>
+  <circle cx="12" cy="39.5" r="2.3"/><circle cx="17.7" cy="39.5" r="2.3"/><circle cx="23.4" cy="39.5" r="2.3"/><circle cx="29.1" cy="39.5" r="2.3"/><circle cx="34.8" cy="39.5" r="2.3"/><circle cx="40.5" cy="39.5" r="2.3"/><circle cx="46.2" cy="39.5" r="2.3"/><circle cx="51.9" cy="39.5" r="2.3"/></g>
+  <rect x="20" y="44.5" width="24" height="3" rx="1.5" fill="#f4efe4"/>
+</svg>

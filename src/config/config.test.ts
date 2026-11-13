@@ -6,7 +6,9 @@ import { describe, expect, it } from 'vitest';
 import { MIDI_TABS } from './midi.config.ts';
 import { AUDIO_TABS } from './audio.config.ts';
 import { TRANSITION_MUSICS } from './transition.config.ts';
-import { TILE_ICONS, TILE_ICONS_SIMPLE, TILE_ICONS_V4 } from '../icons/index.ts';
+import { TILE_ICONS } from '../icons/index.ts';
+import midiConfigSource from './midi.config.ts?raw';
+import audioConfigSource from './audio.config.ts?raw';
 
 /** Renvoie les id présents plusieurs fois dans la liste */
 function findDuplicateIds(entries: { id: string }[]): string[] {
@@ -92,15 +94,15 @@ describe('dessins des tuiles', () => {
       .flatMap(tab => tab.categories.flatMap<{ id: string; svg?: string }>(category => category.items));
     const missing = items.filter(item => item.svg !== undefined && !(item.svg in TILE_ICONS)).map(item => item.id);
     expect(missing).toEqual([]);
-    // Essai : chaque dessin existe aussi en silhouette simple (src/icons/simple/)
-    const missingSimple = items.filter(item => item.svg !== undefined && !(item.svg in TILE_ICONS_SIMPLE)).map(item => item.id);
-    expect(missingSimple).toEqual([]);
-    const missingV4 = items.filter(item => item.svg !== undefined && !(item.svg in TILE_ICONS_V4)).map(item => item.id);
-    expect(missingV4).toEqual([]);
+    // Un dessin qu'aucune tuile n'utilise est gardé en commentaire dans la config
+    // (`/* svg: '<nom>', */`, pour pouvoir le remettre) ; sinon il est à supprimer
+    const sources = midiConfigSource + audioConfigSource;
+    const named = (name: string) => sources.includes(`svg: '${name}'`);
+    expect(Object.keys(TILE_ICONS).filter(name => !named(name))).toEqual([]);
   });
 
   it('chaque dessin est un SVG de 64 × 64', () => {
-    for (const [name, svg] of [...Object.entries(TILE_ICONS), ...Object.entries(TILE_ICONS_SIMPLE), ...Object.entries(TILE_ICONS_V4)]) {
+    for (const [name, svg] of Object.entries(TILE_ICONS)) {
       expect(svg, name).toMatch(/^<svg [^>]*viewBox="0 0 64 64"/);
     }
   });

@@ -31,14 +31,14 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'oiseau-cui-cui',    name: 'Oiseau : Cui-cui',    icon: '🐦',   file: 'sounds/animaux/chant_des_oiseaux_v2.mp3',                               catClass: 'animaux-oiseau',     title: 'Chant des oiseaux Gazouillement' },
           { id: 'pigeon-rou-rou',    name: 'Pigeon : Rou-rou',    icon: '🕊️', svg: 'pigeon',   file: 'sounds/animaux/pigeon_roucoulement_v2.mp3',                  end: 7.65, catClass: 'animaux-oiseau',     title: 'Pigeon Roucoulement' },
           { id: 'lion-tigre-roarrr', name: 'Lion/tigre : Roarrr', icon: '🦁',   file: 'sounds/animaux/lion_tigre_rugissement_v2.mp3',                          catClass: 'animaux-savane',     title: 'Lion/tigre Rugissement' },
-          { id: 'hyene-hi-hi',       name: 'Hyène : Hi-hi',       icon: '🐆',   file: 'sounds/animaux/hyene_rire_v2.mp3',                                      catClass: 'animaux-savane',     title: 'Hyène Rire' },
+          { id: 'hyene-hi-hi',       name: 'Hyène : Hi-hi',       icon: '🐆', svg: 'hyene',   file: 'sounds/animaux/hyene_rire_v2.mp3',                                      catClass: 'animaux-savane',     title: 'Hyène Rire' },
 
           // ── Ligne 2 ──
           { id: 'vache-meuh',        name: 'Vache : Meuh',        icon: '🐮',   file: 'sounds/animaux/vache_meuglement_v2.mp3',            start: 0.5,         catClass: 'animaux-ferme',      title: 'Vache Meuglement' },
-          { id: 'ane-i-an',          name: 'Âne : I-An',          icon: '🫏',   file: 'sounds/animaux/ane_braiement_v2.mp3',                                   catClass: 'animaux-ferme',      title: 'Âne Braiement' },
+          { id: 'ane-i-an',          name: 'Âne : I-An',          icon: '🫏', svg: 'ane',   file: 'sounds/animaux/ane_braiement_v2.mp3',                                   catClass: 'animaux-ferme',      title: 'Âne Braiement' },
           { id: 'dindon-glouglou',   name: 'Dindon : Glouglou',   icon: '🦃',   file: 'sounds/animaux/dindon_glouglou_v2.mp3',                                 catClass: 'animaux-ferme',      title: 'Dindon Glouglou' },
           { id: 'canard-coin-coin',  name: 'Canard : Coin-coin',  icon: '🦆',   file: 'sounds/animaux/canard_cancanement_v2.mp3',                              catClass: 'animaux-ferme',      title: 'Canard Cancanement' },
-          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛', svg: 'corbeau',   file: 'sounds/animaux/corbeau_croassement_v2.mp3',                   end: 2.9, catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
+          { id: 'corbeau-croa-croa', name: 'Corbeau : Croa-croa', icon: '🐦‍⬛',   file: 'sounds/animaux/corbeau_croassement_v2.mp3',                   end: 2.9, catClass: 'animaux-oiseau',     title: 'Corbeau Croassement' },
           { id: 'aigle-cri-percant', name: 'Aigle : Cri perçant', icon: '🦅',   file: 'sounds/animaux/aigle_faucon_cri_percant_v2.mp3',                        catClass: 'animaux-oiseau',     title: 'Aigle / Faucon Cri perçant' },
           { id: 'elephant',          name: 'Éléphant',            icon: '🐘',   file: 'sounds/animaux/elephant_barrissement_v2.mp3',       start: 0.5, end: 6, catClass: 'animaux-savane',     title: 'Éléphant Barrissement' },
           { id: 'singe-ouh-ouh',     name: 'Singe : Ouh-ouh',     icon: '🐒',   file: 'sounds/animaux/singe_cris_v2.mp3',                  start: 0.4,         catClass: 'animaux-savane',     title: 'Singe Cris' },
@@ -59,7 +59,7 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'loup-aouuuuh',      name: 'Loup : Aouuuuh',      icon: '🐺',   file: 'sounds/animaux/loup_hurlement_v2.mp3',          start: 0.11, end: 5.1,  catClass: 'animaux-foret',      title: 'Loup Hurlement' },
           { id: 'ours-grrr',         name: 'Ours : Grrr',         icon: '🐻',   file: 'sounds/animaux/ours_grognement_v2.mp3',                                 catClass: 'animaux-foret',      title: 'Ours Grognement' },
           { id: 'grillon-zzzzz',     name: 'Grillons',            icon: '🦗',   file: 'sounds/animaux/grillon_gresillement_v2.mp3',                            catClass: 'animaux-insecte',    title: 'Grillon Grésillement' },
-          { id: 'abeille-bzzzz',     name: 'Abeille : Bzzzz',     icon: '🐝',   file: 'sounds/animaux/moustique_bourdonnement_v2.mp3',                         catClass: 'animaux-insecte',    title: 'Abeille / Mouche / Moustique Bourdonnement' },
+          { id: 'abeille-bzzzz',     name: 'Moustique : Bzzzz',   icon: '🐝', svg: 'moustique', file: 'sounds/animaux/moustique_bourdonnement_v2.mp3',                         catClass: 'animaux-insecte',    title: 'Moustique / Mouche / Abeille Bourdonnement' },
           { id: 'dauphin-i-i-i-i',   name: 'Dauphin : I i i i',   icon: '🐬',   file: 'sounds/animaux/dauphin_sifflements_v2.mp3',                             catClass: 'animaux-aquatique',  title: 'Dauphin Clics et sifflements' },
           { id: 'baleine-chant',     name: 'Baleine : Chant',     icon: '🐋',   file: 'sounds/animaux/baleine_chant_v2.mp3',           start: 0.21,  end: 3.2, catClass: 'animaux-aquatique',  title: 'Baleine Chant' },
         ]
@@ -87,9 +87,9 @@ export const AUDIO_TABS: AudioTab[] = [
           //   R R S S D D D D    couleurs dans SoundButton.svelte).
           // ── Ligne 1 ──
           { id: 'bebe-rit',                name: 'Bébé rit',             icon: '👶', file: 'sounds/bruits/bebe_rit.mp3', catClass: 'bruits-maison' },
-          { id: 'verre-d-eau',             name: 'Verre d\'eau',         icon: '🥛', file: 'sounds/bruits/remplissage_verre_d_eau.mp3', catClass: 'bruits-maison' },
-          { id: 'machine-a-cafe',          name: 'Machine à café',       icon: '☕', file: 'sounds/bruits/bruit_machine_cafe.mp3', catClass: 'bruits-maison' },
-          { id: 'machine-a-ecrire',        name: 'Machine à écrire',     icon: '📝', file: 'sounds/bruits/machine_a_ecrire.ogg',         start: 0.15, catClass: 'bruits-bureau' },
+          { id: 'verre-d-eau',             name: 'Verre d\'eau',         icon: '🥛', svg: 'verre-d-eau', file: 'sounds/bruits/remplissage_verre_d_eau.mp3', catClass: 'bruits-maison' },
+          { id: 'machine-a-cafe',          name: 'Machine à café',       icon: '☕', svg: 'machine-a-cafe', file: 'sounds/bruits/bruit_machine_cafe.mp3', catClass: 'bruits-maison' },
+          { id: 'machine-a-ecrire',        name: 'Machine à écrire',     icon: '📝', svg: 'machine-a-ecrire', file: 'sounds/bruits/machine_a_ecrire.ogg',         start: 0.15, catClass: 'bruits-bureau' },
           { id: 'modem-56k',               name: 'Modem 56k',            icon: '📠', file: 'sounds/bruits/connexion_modem_56k.mp3', catClass: 'bruits-bureau' },
           { id: 'tonalite-appel',          name: 'Tonalité d\'appel',    icon: '📞', file: 'sounds/bruits/tonalite_appel.mp3',           start: 5.1,  end: 12.75, catClass: 'bruits-telephone' },
           { id: 'tonalite-raccroche',      name: 'Raccroché',            icon: '☎️', file: 'sounds/bruits/tonalite_raccroche.mp3', catClass: 'bruits-telephone' },
@@ -97,9 +97,9 @@ export const AUDIO_TABS: AudioTab[] = [
 
           // ── Ligne 2 ──
           { id: 'bebe-pleure',             name: 'Bébé pleure',          icon: '😭', file: 'sounds/bruits/bebe_pleure.mp3', catClass: 'bruits-maison' },
-          { id: 'sonnette-porte',          name: 'Sonnette',             icon: '🛎️', file: 'sounds/bruits/sonnette_porte.mp3',                        end: 2.7, catClass: 'bruits-maison' },
+          { id: 'sonnette-porte',          name: 'Sonnette',             icon: '🛎️', /* svg: 'sonnette', */ file: 'sounds/bruits/sonnette_porte.mp3',                        end: 2.7, catClass: 'bruits-maison' },
           { id: 'bip-morse',               name: 'Bip morse',            icon: '📡', file: 'sounds/bruits/bip_code_morse.mp3', catClass: 'bruits-bureau' },
-          { id: 'erreur-windows',          name: 'Erreur Windows',       icon: '🖥️', file: 'sounds/bruits/erreur_windows_xp.mp3',        start: 0.2, catClass: 'bruits-bureau' },
+          { id: 'erreur-windows',          name: 'Erreur Windows',       icon: '🖥️', svg: 'erreur-windows', file: 'sounds/bruits/erreur_windows_xp.mp3',        start: 0.2, catClass: 'bruits-bureau' },
           { id: 'clavier',                 name: 'Clavier',              icon: '⌨️', file: 'sounds/bruits/bruit_clavier_ordinateur.mp3', catClass: 'bruits-bureau' },
           { id: 'notification',            name: 'Notification',         icon: '🔔', file: 'sounds/bruits/bruit_notification.mp3',       start: 0.8, catClass: 'bruits-telephone' },
           { id: 'appareil-photo',          name: 'Appareil photo',       icon: '📷', file: 'sounds/bruits/bruit_appareil_photo.mp3',     start: 0.15, end: 0.7, catClass: 'bruits-telephone' },
@@ -110,18 +110,18 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'sonnette-velo',           name: 'Sonnette vélo',        icon: '🚲', file: 'sounds/bruits/sonnette_velo.mp3',            start: 1.1,  end: 4.8, catClass: 'bruits-rue' },
           { id: 'buzzer-bonne-reponse',    name: 'Bonne réponse',        icon: '✅', file: 'sounds/bruits/buzzer_bonne_reponse.mp3', catClass: 'bruits-spectacle' },
           { id: 'buzzer-mauvaise-reponse', name: 'Mauvaise réponse',     icon: '❌', file: 'sounds/bruits/buzzer_mauvaise_reponse.mp3',  start: 0.6, catClass: 'bruits-spectacle' },
-          { id: 'tronconneuse',            name: 'Tronçonneuse',         icon: '🪚', file: 'sounds/bruits/bruit_tronconneuse.ogg', catClass: 'bruits-danger' },
+          { id: 'tronconneuse',            name: 'Tronçonneuse',         icon: '🪚', svg: 'tronconneuse', file: 'sounds/bruits/bruit_tronconneuse.ogg', catClass: 'bruits-danger' },
+          { id: 'briquet',                 name: 'Briquet',              icon: '🚬', svg: 'briquet', file: 'sounds/bruits/bruit_briquet_cigarette.mp3', catClass: 'bruits-danger' },
           { id: 'prend-feu',               name: 'Prend feu',            icon: '🔥', file: 'sounds/bruits/bruit_prend_feu.ogg', catClass: 'bruits-danger' },
-          { id: 'briquet',                 name: 'Briquet',              icon: '🚬', file: 'sounds/bruits/bruit_briquet_cigarette.mp3', catClass: 'bruits-danger' },
           { id: 'tic-tac-bombe',           name: 'Tic-tac bombe',        icon: '💣', file: 'sounds/bruits/tic_tac_bombe.ogg', catClass: 'bruits-danger' },
 
           // ── Ligne 4 ──
           { id: 'annonce-sncf',            name: 'Annonce SNCF',         icon: '📢', file: 'sounds/bruits/annonce_sncf.mp3',                          end: 2.3, catClass: 'bruits-rue' },
           { id: 'foule-amen',              name: 'Foule : Amen',         icon: '🙏', file: 'sounds/bruits/bruit_foule_amen.mp3', catClass: 'bruits-rue' },
           { id: 'roulement-tambour',       name: 'Roulement de tambour', icon: '🥁', file: 'sounds/bruits/roulement_de_tambour.mp3', catClass: 'bruits-spectacle' },
-          { id: 'batterie-blague',         name: 'Ba-dum-tss',           icon: '🎭', file: 'sounds/bruits/batterie_blague.mp3',                       end: 2.45, catClass: 'bruits-spectacle' },
+          { id: 'batterie-blague',         name: 'Ba-dum-tss',           icon: '🎭', svg: 'ba-dum-tss', file: 'sounds/bruits/batterie_blague.mp3',                       end: 2.45, catClass: 'bruits-spectacle' },
           { id: 'scie-egoine',             name: 'Scie égoïne',          icon: '🪚', file: 'sounds/bruits/scie_egoine.mp3', catClass: 'bruits-danger' },
-          { id: 'scie-a-metaux',           name: 'Scie à métaux',        icon: '🪛', file: 'sounds/bruits/scie_a_metaux.mp3', catClass: 'bruits-danger' },
+          { id: 'scie-a-metaux',           name: 'Scie à métaux',        icon: '🪛', svg: 'scie-a-metaux', file: 'sounds/bruits/scie_a_metaux.mp3', catClass: 'bruits-danger' },
        // { id: 'perceuse',                name: 'Perceuse',             icon: '🔧', file: 'sounds/bruits/bruit_perceuse.mp3', catClass: 'bruits-danger' },
           { id: 'epees',                   name: 'Épées',                icon: '⚔️', file: 'sounds/bruits/epee_contre_epee.mp3',                      end: 3.95, catClass: 'bruits-danger' },
           { id: 'couteau',                 name: 'Meurtre au couteau',   icon: '🔪', file: 'sounds/bruits/meurtre_au_couteau.mp3',                    end: 1.15, catClass: 'bruits-danger' },
@@ -150,7 +150,7 @@ export const AUDIO_TABS: AudioTab[] = [
           //   M M E E S S V V    couleurs dans SoundButton.svelte).
           // ── Ligne 1 ──
           { id: 'jungle',            name: 'Jungle',            icon: '🌴', file: 'sounds/ambiances/jungle_tropicale.mp3',        catClass: 'ambiances-nature',   title: 'Jungle tropicale' },
-          { id: 'cigale-tszzzz',     name: 'Cigales',           icon: '🦗', file: 'sounds/ambiances/cigales_chant.mp3',           catClass: 'ambiances-nature',   title: 'Cigale Chant' },
+          { id: 'cigale-tszzzz',     name: 'Cigales',           icon: '🦗', svg: 'cigale', file: 'sounds/ambiances/cigales_chant.mp3',           catClass: 'ambiances-nature',   title: 'Cigale Chant' },
           { id: 'gare',              name: 'Gare',              icon: '🚉', file: 'sounds/ambiances/hall_gare.mp3',               catClass: 'ambiances-ville' },
           { id: 'train',             name: 'Train',             icon: '🚆', file: 'sounds/ambiances/interieur_train.mp3',         catClass: 'ambiances-ville',    title: 'À l\'intérieur d\'un train' },
           { id: 'metro',             name: 'Métro',             icon: '🚇', file: 'sounds/ambiances/interieur_metro.mp3',         catClass: 'ambiances-ville',    title: 'À l\'intérieur d\'un métro' },
@@ -180,9 +180,9 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'discussions-dedans', name: 'Discussions dedans', icon: '🏠', file: 'sounds/ambiances/discussions_interieur.mp3', catClass: 'ambiances-voix' },
 
           // ── Ligne 4 ──
-          { id: 'vague-mouettes',    name: 'Vagues et mouettes', icon: '⚓', file: 'sounds/ambiances/vague_mouette.ogg',          catClass: 'ambiances-mer' },
+          { id: 'vague-mouettes',    name: 'Vagues et mouettes', icon: '⚓', svg: 'vagues-mouettes', file: 'sounds/ambiances/vague_mouette.ogg',          catClass: 'ambiances-mer' },
           { id: 'plongee',           name: 'Sous l\'eau',       icon: '🤿', file: 'sounds/ambiances/plongee_sous_marine.mp3',     catClass: 'ambiances-mer',      title: 'Plongée sous-marine' },
-          { id: 'grotte',            name: 'Grotte',            icon: '💧', file: 'sounds/ambiances/grotte_goutte.mp3',           catClass: 'ambiances-elements' },
+          { id: 'grotte',            name: 'Grotte',            icon: '💧', svg: 'grotte', file: 'sounds/ambiances/grotte_goutte.mp3',           catClass: 'ambiances-elements' },
           { id: 'feu',               name: 'Feu de cheminée',   icon: '🔥', file: 'sounds/ambiances/feu_cheminee.ogg',            catClass: 'ambiances-elements' },
           { id: 'bataille',          name: 'Champ de bataille', icon: '💥', file: 'sounds/ambiances/champ_de_bataille.mp3',       catClass: 'ambiances-nuit',     title: 'Champ de bataille : tirs et explosions' },
           { id: 'zombies',           name: 'Zombies',           icon: '🧟', file: 'sounds/ambiances/ambiance_bruit_zombie.mp3',   catClass: 'ambiances-nuit' },

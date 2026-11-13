@@ -102,7 +102,6 @@
               {#each cat.items as item (item.id)}
                 <button
                   class="inst-btn"
-                  style:--tile-icon-color={cat.color}
                   class:active={instruments.active === item}
                   title={item.title ?? item.name}
                   onclick={() => selectInstrument(item)}

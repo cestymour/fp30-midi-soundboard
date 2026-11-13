@@ -1,122 +1,36 @@
-# Icônes SVG des tuiles : proposition de travail
+# Dessins SVG des tuiles : essai en cours
 
-> **Statut : proposition de Claude, pas validée par l'utilisateur.** Le choix des images, tuile par tuile, sera largement revu avant d'être dessiné. Ce fichier garde la trace de l'essai pour reprendre le travail plus tard.
+> **Statut : essai, sur la branche `essai-icones-svg`.** Les dessins sont à valider sur la tablette avant de passer sur `main`. Les règles de choix et de style sont dans `docs/sons.md` (« Dessins SVG »).
 
 ## Où en est l'essai
 
-Branche `essai-icones-svg`. Huit tuiles ont un dessin (`svg: '<nom>'` dans la config) : Piano, Accordéon, Rhodes, Piano Saloon (Instruments), Pigeon, Mouette, Corbeau, Chat : Ronron (Animaux). Les autres tuiles gardent leur emoji. Un sélecteur temporaire en bas de l'écran (`IconModeSwitch.svelte`, `src/ui/icon-mode.svelte.ts`) passe d'un affichage à l'autre :
+Un sélecteur temporaire en bas de l'écran (`IconModeSwitch.svelte`, `src/ui/icon-mode.svelte.ts`) passe d'un affichage à l'autre :
 
-1. **Emoji** : l'état actuel.
-2. **Détaillé** (`src/icons/*.svg`) : l'objet dessiné en couleurs, avec beaucoup de détails. Rejeté pour les instruments : trop d'informations, lent à lire, illisible en petit sur un téléphone. Bon niveau pour les oiseaux.
-3. **Simple** (`src/icons/simple/`) : silhouette pleine d'une seule couleur, celle de la catégorie. Rejeté : pas assez d'informations, on doute de ce qu'on voit (la mouette ressemble à une vague), et la couleur réelle aide à reconnaître (un éléphant, on le cherche gris).
-4. **V4** (`src/icons/v4/`) : retenue comme direction. Voir les règles ci-dessous.
+1. **Emoji** : l'état de la version en production, tous les emojis.
+2. **Emoji + SVG** (choix par défaut) : les tuiles qui ont un dessin l'affichent, les autres gardent leur emoji.
 
-Avant de généraliser : retirer le sélecteur et les styles écartés, ne garder qu'un dossier de dessins.
+Avant de passer sur `main` : retirer le sélecteur (le composant, son module, la ligne dans `App.svelte` et le mode dans `TileIcon.svelte`), puis supprimer ce fichier.
 
-## Règles retenues (après l'essai V4)
+## Tuiles dessinées (42 tuiles)
 
-- **Niveau de détail d'un emoji** : quelques formes, quelques tons, pas de fioriture. Les dessins se mélangent alors aux emojis restants sans détonner : on peut passer aux SVG petit à petit.
-- **Vraies couleurs** : l'objet garde ses couleurs naturelles. Une couleur par catégorie, si on la veut, va sur le fond de la tuile, pas sur l'image.
-- **Animaux et bruits : partir du son entendu**, pas de l'emoji disponible (une mouette pour le cri de mouette, pas un dodo ; un pigeon, pas une colombe).
-- **Instruments : l'image évoque la situation, le libellé dit l'instrument.** Image et libellé donnent deux informations. Exemple : sur une scène de roi et de reine, l'œil cherche la royauté (couronne), et le libellé dit « Clavecin ». L'information de situation compte souvent plus que l'instrument, mais il faut les deux.
-- Une image différente par tuile dans une même catégorie : le titre de catégorie donne déjà l'ambiance, l'image distingue la nuance.
+| Onglet | Tuiles (emoji remplacé → dessin) |
+|---|---|
+| Instruments | Harpe glissando 🪉 → harpe ; Voix jazz 🗣️ → micro rétro ; Cloches tubulaires 🔔 → tubes sur un portique ; Orgue jazz 🎼 → orgue à deux claviers ; Basse 🎸 → contrebasse ; Harmonica 🎵 ; Xylophone 🥢 ; Grosse caisse 🥁 → grosse caisse et mailloche ; Cuivres 📯 → trompette de héraut à bannière ; Guitare 🎸 → guitare classique ; Laser / Synth 🔆 → synthé et rayons ; Piano électrique 💎 → planète à anneau ; Flûte 🪈 → flûte traversière ; Flûte de Pan 🎋 ; Saxo soprano 🎷 → saxo droit ; Chœur 🎶 → trois choristes ; Rhodes 🎹 → télé rétro |
+| Sons MIDI | Ruisseau 🏞️ → ruisseau seul ; Bloc de bois 🪵 ; Cloche de vache 🔔 → cloche à sangle ; Grincement porte 🚪 → porte entrouverte sur le noir ; Claque ! 🚪 → porte fermée qui tremble ; Pistolet laser 🔫 → pistolet de science-fiction ; Coup de feu 🔫 → revolver qui tire ; Mitraillette 🔫 → mitraillette à chargeur rond |
+| Animaux | Pigeon 🕊️ ; Hyène 🐆 ; Âne 🫏 ; Chat : Ronron 🐈 → chat en boule ; Mouette 🦤 ; Moustique 🐝 (tuile « Abeille » renommée « Moustique », le son est un moustique) |
+| Bruits | Verre d'eau 🥛 → verre qu'on remplit ; Machine à café ☕ → machine à expresso ; Machine à écrire 📝 ; Erreur Windows 🖥️ → fenêtre d'erreur ; Tronçonneuse 🪚 ; Briquet 🚬 → briquet allumé ; Ba-dum-tss 🎭 → caisse claire et cymbale ; Scie à métaux 🪛 |
+| Ambiances | Cigales 🦗 → cigale vue de dessus ; Vagues et mouettes ⚓ ; Grotte 💧 → grotte, goutte et ronds dans l'eau |
 
-## Proposition, tuile par tuile (onglet Instruments)
+## Dessins écartés, gardés
 
-✓ = l'idée de l'emoji actuel est gardée, seulement redessinée. ⚠ = à préciser par l'utilisateur (dans quelle scène il joue ce son).
+Ces dessins restent dans `src/icons/` et en commentaire sur leur tuile (`/* svg: '<nom>', */`) : pour en remettre un, il suffit de retirer le commentaire.
 
-**Romantique / Amour** 🌹
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Piano | 🎹 | un cœur | la romance en général |
-| Harpe | 🪉 | des ailes d'ange | le rêve, l'amour idéal, le paradis |
-| Violon solo | 🎻 | une bougie | le dîner aux chandelles |
-| Accordéon | 🪗 | la tour Eiffel | Paris, la guinguette, l'amour à la française |
+- Harpe (onglet Instruments, à côté du piano) : `harpe`, gardé sur Harpe glissando.
+- Démarrage voiture : `cle-voiture` (clé trop compliquée).
+- Freinage : `pneu-freinage` (dessin trop compliqué).
+- Sonnette : `sonnette`.
 
-**Comédie / Cartoon** 🎪
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Boîte à musique | 🎠 | ✓ un cheval de manège | l'enfance, la berceuse |
-| Célesta | ✨ | une baguette magique étoilée | la magie de dessin animé |
-| Rhodes | 🎹 | une télé rétro ⚠ | la sitcom des années 70 |
-| Voix jazz | 🗣️ | un micro rétro ⚠ | le scat, le crooner |
+## À voir plus tard
 
-**Sacré / Mariage** ⛪
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Orgue d'église | ⛪ | ✓ une église (clocher et croix) | la messe, l'enterrement |
-| Gospel | ✝️ | deux mains levées | la ferveur, la louange |
-| Cloches tubulaires | 🔔 | deux alliances | le mariage |
-| Clochettes Noël | 🎄 | ✓ un sapin | Noël |
-
-**Jazz / Années 50-60** 🎷
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Orgue jazz | 🎼 | un verre à cocktail | le club, le lounge |
-| Trompette | 🎺 | un chapeau mou (fedora) ⚠ | le film noir, le détective |
-| Basse | 🎸 | des traces de pas | la filature, la marche sur la pointe des pieds |
-| Saxo | 🎷 | des lèvres | la séduction |
-
-**Western / Saloon** 🤠
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Piano Saloon | 🤠 | les portes battantes du saloon | le saloon |
-| Harmonica | 🎵 | un feu de camp | le cowboy solitaire le soir |
-| Banjo | 🪕 | une botte de foin | la campagne, la ferme, les péquenauds |
-| Guitare jazz | 🎸 | un cactus ⚠ | le désert, la balade |
-
-**Percussions** 🥁
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Xylophone | 🥢 | un squelette (ou un os) ⚠ | le gag de dessin animé |
-| Tom mélodique | 🪘 | une feuille de jungle | la tribu, l'aventure |
-| Percu (kit) | 🥁 | une cymbale avec un éclat | le « ba-dum-tss » de la blague |
-| Grosse caisse | 🥁 | un éclair | le coup de théâtre, le tonnerre |
-
-**Royaume / Médiéval** ⚔️
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Clavecin | 👑 | ✓ une couronne | la cour, le roi, la reine |
-| Cuivres | 📯 | un parchemin déroulé | la proclamation, « Oyez ! », l'entrée du roi |
-| Guitare | 🎸 | un chapeau à plume | le troubadour, la sérénade |
-| Flûte médiévale | 🌿 | une chope | la taverne, la fête au village |
-
-**Futuriste / SF** 🚀
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Laser / Synth | 🔆 | une soucoupe volante | les extraterrestres |
-| Fantasia | 🚀 | ✓ une fusée | le voyage spatial |
-| Piano électrique | 💎 | une planète à anneau | la rêverie dans l'espace |
-| Pluie de cristal | ❄️ | ✓ un flocon ou un cristal | la glace, la magie froide |
-
-**Fantastique / Féérique** 🧚
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Flûte | 🪈 | un champignon | la forêt enchantée, les contes |
-| Flûte de Pan | 🎋 | des montagnes ⚠ | les grands espaces, les Andes |
-| Kalimba | 🧝 | des lucioles | la nuit magique |
-| Saxo soprano | 🎷 | un arc-en-ciel ⚠ | le rêve, le merveilleux |
-
-**Mystère / Suspense** 🌙
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Pad boréal | 🌌 | des étoiles | la nuit, l'immensité |
-| Pad légendaire | 🌙 | ✓ un croissant de lune | la légende, la nuit |
-| Cordes Tron | 🔮 | ✓ une boule de cristal | la voyante, l'énigme |
-| Voix céleste | 👁️ | ✓ un œil | on est observé, le mystère |
-
-**Musique du monde** 🌍
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Shamisen | 🎌 | un torii (portique japonais) | le Japon |
-| Steelpan | 🌴 | ✓ un palmier | les Caraïbes |
-| Sitar | 🕌 | un dôme de palais indien | l'Inde |
-| Harpe glissando | 🪉 | un nuage ⚠ | le rêve, le flashback (plus qu'une musique du monde) |
-
-**Horreur / Angoisse** 👻
-| Instrument | Emoji actuel | Image | Ce qu'elle évoque |
-|---|---|---|---|
-| Nappe sombre | 🌀 | une toile d'araignée | la tension qui monte, la maison hantée |
-| Gobelins | 👹 | un chaudron | la sorcière, le monstre |
-| Halo | 😱 | un fantôme (drap) | l'apparition |
-| Chœur | 🎶 | un crâne | la messe noire, la mort |
+- **Épées** ⚔️ : sur la tablette, l'emoji s'affiche plus petit que les autres et trop simple. Il sert aussi aux titres de catégorie « Royaume / Médiéval » et « Bagarre ».
+- **Titres de catégorie** : ils n'acceptent pas encore de dessin (seulement les tuiles).

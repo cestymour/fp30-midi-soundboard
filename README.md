@@ -179,7 +179,7 @@ export const MIDI_TABS: MidiTab[] = [
             id: 'piano',
             name: 'Piano',  // Button label
             icon: '🎹',     // Button emoji
-            // svg: 'piano-queue', // Optional: drawing src/icons/piano-queue.svg, shown instead of the emoji
+            // svg: 'rhodes',  // Optional: drawing src/icons/rhodes.svg, shown instead of the emoji
             pc: 1,          // Program Change (1-128, musical notation)
             msb: 0,         // Bank Select MSB (CC0)
             lsb: 68,        // Bank Select LSB (CC32)
@@ -517,7 +517,7 @@ export const MIDI_TABS: MidiTab[] = [
             id: 'piano',
             name: 'Piano',  // Nom affiché sur le bouton
             icon: '🎹',     // Emoji du bouton
-            // svg: 'piano-queue', // Optionnel : dessin src/icons/piano-queue.svg, affiché à la place de l'emoji
+            // svg: 'rhodes',  // Optionnel : dessin src/icons/rhodes.svg, affiché à la place de l'emoji
             pc: 1,          // Program Change (1-128, notation musicale)
             msb: 0,         // Bank Select MSB (CC0)
             lsb: 68,        // Bank Select LSB (CC32)

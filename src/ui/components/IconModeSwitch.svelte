@@ -1,16 +1,13 @@
 <!--
-  IconModeSwitch.svelte — ESSAI TEMPORAIRE : quatre boutons en bas de l'écran pour passer
-  d'un affichage des icônes de tuile à l'autre (emoji, dessin détaillé, silhouette simple, V4).
-  À retirer une fois le style choisi.
+  IconModeSwitch.svelte — ESSAI TEMPORAIRE : deux boutons en bas de l'écran pour passer
+  des emojis seuls aux emojis avec les dessins SVG. À retirer une fois les dessins validés.
 -->
 <script lang="ts">
   import { iconMode, setIconMode, type IconMode } from '../icon-mode.svelte.ts';
 
   const MODES: { mode: IconMode; label: string }[] = [
-    { mode: 'emoji',  label: '1 · Emoji' },
-    { mode: 'detail', label: '2 · Détaillé' },
-    { mode: 'simple', label: '3 · Simple' },
-    { mode: 'v4',     label: '4 · V4' },
+    { mode: 'emoji', label: '1 · Emoji' },
+    { mode: 'svg',   label: '2 · Emoji + SVG' },
   ];
 </script>
 
