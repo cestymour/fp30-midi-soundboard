@@ -81,7 +81,7 @@
 
       <div class="transition-progress" class:is-current={isCurrent}>
         <div class="transition-bar">
-          <div class="transition-bar-fill" style:width={isCurrent ? transport.seekPct : '0%'}></div>
+          <div class="transition-bar-fill" class:is-current={isCurrent} style:--fill={isCurrent ? transport.seekPct : '0%'}></div>
           {#each markers as left, index (index)}<div class="transition-bar-marker" style:left={left}></div>{/each}
         </div>
         <span class="transition-time">{isCurrent ? transport.timeText : 'À l\'arrêt'}</span>
@@ -345,11 +345,19 @@
     overflow: hidden;
   }
 
+  /* Remplissage pleine largeur, décalé vers la gauche (la barre découpe ce qui dépasse) : il glisse
+     par transform sur son propre calque, sans redessiner la barre à chaque image (bug n° 29).
+     Caché quand la musique choisie ne joue pas : son bord, hors de la barre, déborderait d'un pixel. */
   .transition-bar-fill {
     position: absolute;
     left: 0; top: 0; bottom: 0;
+    width: 100%;
+    transform: translateX(calc(var(--fill, 0%) - 100%));
+    will-change: transform;
     background: var(--transition-accent);
+    visibility: hidden;
   }
+  .transition-bar-fill.is-current { visibility: visible; }
 
   /* Repères des moments marquants 0, 1, 2… */
   .transition-bar-marker {

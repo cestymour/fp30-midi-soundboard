@@ -112,13 +112,21 @@
     position: relative;
   }
 
-  /* Progression de la musique : remplissage de la pastille, de bas en haut */
+  /* Progression de la musique : remplissage de la pastille, de bas en haut. Pleine hauteur, décalé
+     vers le bas (la pastille découpe ce qui dépasse) : il glisse par transform sur son propre calque,
+     sans redessiner l'en-tête à chaque image (bug n° 29). Caché quand la musique ne joue pas. */
   .transition-fill {
     position: absolute;
     left: 0; right: 0; bottom: 0;
-    height: var(--transition-progress, 0%);
+    height: 100%;
+    transform: translateY(calc(100% - var(--transition-progress, 0%)));
     background: color-mix(in srgb, var(--transition-accent) 35%, transparent);
     pointer-events: none;
+    visibility: hidden;
+  }
+  #transition-btn.is-current .transition-fill {
+    visibility: visible;
+    will-change: transform;
   }
 
   #transition-btn.is-current .corner-pill {
