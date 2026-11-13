@@ -82,7 +82,7 @@ export const MIDI_TABS: MidiTab[] = [
           { id: 'clavecin', name: 'Clavecin',         icon: '👑', pc:7,   msb:0,   lsb:67,  title: 'Roland => Harpsichord' },
           { id: 'cuivres', name: 'Cuivres',          icon: '📯', svg: 'trompette-heraut', pc:62,  msb:121, lsb:0,   title: 'GM2 => Brass 1' },
           { id: 'guitare', name: 'Guitare',          icon: '🎸', svg: 'guitare-classique', pc:25,  msb:121, lsb:0,   title: 'GM2 => Nylon-str.Gt' },
-          { id: 'flute-medievale', name: 'Flûte médiévale',  icon: '🌿', pc:20,  msb:16,  lsb:66,  title: "Roland => Nason flt 8'" },
+          { id: 'flute-medievale', name: 'Flûte médiévale',  icon: '🪈', pc:20,  msb:16,  lsb:66,  title: "Roland => Nason flt 8'" },
         ]
       },
 
