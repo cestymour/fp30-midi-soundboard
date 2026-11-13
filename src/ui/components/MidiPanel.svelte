@@ -255,7 +255,7 @@
   .inst-btn:active { transform: scale(0.93); }
 
   .btn-icon {
-    font-size: clamp(16px, 45cqh, 44px);
+    font-size: max(16px, 45cqh);
     line-height: 1;
     position: relative;
     z-index: 2;

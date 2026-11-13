@@ -120,7 +120,7 @@
   .sound-btn:active { transform: scale(0.93); }
 
   .btn-icon {
-    font-size: clamp(16px, 45cqh, 44px);
+    font-size: max(16px, 45cqh);
     line-height: 1;
     position: relative;
     z-index: 2;
@@ -428,12 +428,12 @@
   }
 
   .musique-tuile .btn-icon {
-    font-size: clamp(14px, 30cqh, 40px);
+    font-size: max(14px, 30cqh);
   }
   /* En lecture, l'emoji garde sa place (masqué) : le carré stop s'affiche à sa place,
      sans faire remonter le nom et le sous-titre sous le carré */
   .sound-btn.musique-tuile.playing .btn-icon {
-    font-size: clamp(14px, 30cqh, 40px);
+    font-size: max(14px, 30cqh);
     visibility: hidden;
   }
   .sound-btn.musique-tuile.playing .btn-icon::after {
