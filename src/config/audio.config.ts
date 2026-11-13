@@ -167,7 +167,7 @@ export const AUDIO_TABS: AudioTab[] = [
           { id: 'troupeau',          name: 'Troupeau',          icon: '🐄', file: 'sounds/ambiances/troupeau_cloche.mp3',         catClass: 'ambiances-nature' },
           { id: 'travaux',           name: 'Travaux',           icon: '🚧', file: 'sounds/ambiances/travaux_urbains.ogg',         catClass: 'ambiances-ville' },
           { id: 'ville',             name: 'Ville',             icon: '🏙️', file: 'sounds/ambiances/ville_voiture.mp3',          catClass: 'ambiances-ville' },
-          { id: 'manifestation',     name: 'Manifestation',     icon: '✊', file: 'sounds/ambiances/manifestation.mp3',           catClass: 'ambiances-fete' },
+          { id: 'manifestation',     name: 'Manifestation',     icon: '✊',  svg: 'manifestation', file: 'sounds/ambiances/manifestation.mp3',           catClass: 'ambiances-fete' },
           { id: 'stade',             name: 'Stade',             icon: '🏟️', svg: 'stade', file: 'sounds/ambiances/stade_foule_football.mp3',   catClass: 'ambiances-fete',     title: 'Foule de stade de football' },
           { id: 'concert',           name: 'Concert',           icon: '🎤', file: 'sounds/ambiances/concert_foule_applaudissements.mp3', catClass: 'ambiances-fete', title: 'Foule de concert : applaudissements et cris' },
        // { id: 'arcade',            name: 'Salle d\'arcade',   icon: '🕹️', file: 'sounds/ambiances/salle_jeux_arcade.ogg',      catClass: 'ambiances-fete' },
