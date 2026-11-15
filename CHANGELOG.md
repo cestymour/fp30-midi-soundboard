@@ -2,6 +2,27 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.18.1 — 2026-11-15
+
+### Corrections
+
+- **Sons et musiques plus forts.** Les musiques, les transitions, les films, les bruits et les animaux sont montés au niveau du Rockafeller Skank original (−9,6 LUFS) : ils manquaient de puissance sur scène, même avec l'enceinte à fond. Aucun son ne sonne plus bas que son original : un original déjà plus fort garde son niveau (Taxi, le lion…).
+  - **Ambiances** : un peu plus bas que le reste (−16 LUFS), pour rester un fond sonore.
+  - **Mario et Tetris** : au niveau de leur original, trop forts à −9,6.
+  - **Sons très faibles à l'origine** (machine à écrire, tic-tac, appareil photo, clavier, ronronnement…) : montés de 25 dB au plus. Plus, ils étaient écrasés et leur souffle remontait trop.
+  - **Films** : refaits depuis de meilleures sources.
+- **Application plus légère** : tous les sons à 80 kb/s au plus (certains `.ogg` montaient jusqu'à 150 kb/s). Environ 190 Mo de sons au lieu de 200.
+
+### À savoir
+
+- Les crêtes de certains fichiers dépassent un peu 0 dB, comme les disques du commerce. Le limiteur de sortie de l'application les absorbe ; dans un autre lecteur, elles peuvent grésiller légèrement.
+
+### À vérifier sur la tablette
+
+- « Télécharger tous les sons » dans les réglages : tous les fichiers ont changé, la tablette doit les retélécharger (environ 190 Mo) avant le spectacle, puis libérer la place des anciens.
+- Sur l'enceinte, volume habituel : écouter une musique, une ambiance, un bruit et un animal. Aucun ne grésille ; les ambiances restent en dessous des musiques.
+- Les sons les plus montés (Feu de cheminée, Grotte, Pluie et tonnerre, Machine à écrire, Tic-tac bombe) : souffle de fond acceptable.
+
 ## 1.18.0 — 2026-11-13
 
 ### Nouveautés
