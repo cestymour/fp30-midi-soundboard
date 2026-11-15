@@ -34,33 +34,46 @@ Les styles qui se jouent bien au piano (tango, ragtime, valse, boogie, les class
 - **Nom** : minuscules, mots séparés par `_`, sans espace, accent ni parenthèse (`il_etait_une_fois_dans_l_ouest_l_homme_a_l_harmonica.mp3`). Musiques de transition : `auteur_titre.mp3`. Affiche d'un film : même nom que l'`id` de la tuile.
 - **Remplacer un fichier sous le même nom est possible** : à la build, chaque son et chaque image reçoit une empreinte de son contenu, ajoutée à son adresse (`?v=…`, `src/asset-url.ts`). Un fichier modifié change d'adresse : la tablette le télécharge (« Télécharger tous les sons »), puis efface l'ancienne version de son cache. Les suffixes `_v2` des fichiers existants restent tels quels ; inutile d'en ajouter.
 - **Une tuile en commentaire est mise de côté, pas supprimée** : la ligne et son mp3 restent. Une ligne dont le mp3 n'existe plus est supprimée ; son `id` reste réservé (historique git) et n'est jamais réutilisé.
-- **Poids** : tout part dans le cache hors ligne de la tablette (« Télécharger tous les sons »). Environ 205 Mo aujourd'hui : Films 73 Mo, Musiques 61 Mo, Ambiances 35 Mo, Transitions 27 Mo, Bruits 4,4 Mo, Animaux 3,2 Mo, affiches 2,5 Mo.
+- **Poids** : tout part dans le cache hors ligne de la tablette (« Télécharger tous les sons »). Environ 190 Mo aujourd'hui : Films 72 Mo, Musiques 60 Mo, Transitions 26 Mo, Ambiances 24 Mo, Bruits 3,3 Mo, Animaux 2,2 Mo, affiches 2,3 Mo.
 
 ## Traitement audio
 
-Aucune copie des originaux n'est gardée hors de git : on retraite toujours à partir de la version du dépôt (`git show HEAD:<fichier>`), jamais d'un fichier déjà réencodé deux fois.
+On retraite toujours à partir de l'original, jamais d'un fichier déjà nivelé et réencodé :
+
+- **Musiques, transitions, films, nouvelles ambiances** : les téléchargements d'origine, hors git, dans le dossier `DIVERS ORIGINAL` de l'utilisateur (MP3 192 kb/s le plus souvent ; pour les films, `tmp/_musiques/original` avant `tmp/_musiques/compressed`). Les fichiers du dépôt y ont été retrouvés par corrélation du signal, coupes comprises. Une autre version du même morceau (autre master, autre vitesse) n'est pas utilisée : il faudrait refaire les `start`.
+- **Bruits, Animaux, premières ambiances, Rasputin, All Night, The Mojo Radio Gang, Mission Impossible, Kill Bill (Battle Without Honor), Il était une fois dans l'Ouest** : la version d'avant le nivellement, dans l'historique git (le commit parent de `449074e`, `2486e4f` ou `831e42c`), ou `DIVERS ORIGINAL` quand elle y est en meilleure qualité.
+- **Sans original** (Dancing Queen, dont `DIVERS ORIGINAL` n'a qu'une autre version ; cigales, feu de cheminée, discussion de foule, modem 56k, tic-tac bombe) : la version du dépôt, réencodée une fois de plus.
 
 - **Les fichiers restent entiers.** Le moment marquant se règle avec `start`, et la fin reste disponible. On ne coupe que par exception.
 - **Une coupe est une coupe nette**, sans fondu : les fondus sont faits par l'application.
 - **Compresser** = réencoder seulement (débit, pochette et métadonnées retirées). Tout autre traitement (fondu, normalisation, égalisation, limiteur…) est proposé à l'utilisateur avant d'être appliqué.
 - **Mesure** : `ffmpeg`, filtre `ebur128` (LUFS intégré, crête vraie).
 
-| Onglet | Niveau | Méthode | Encodage |
-|---|---|---|---|
-| Musiques, Transitions | −18 LUFS, crête ≤ −1,5 dBTP | `loudnorm` en deux passes | MP3 80 kb/s, 44,1 kHz stéréo, sans pochette |
-| Films | −18 LUFS sur le passage joué | gain simple et limiteur (voir ci-dessous) | MP3 80 kb/s, 44,1 kHz stéréo, sans pochette |
-| Bruits, Animaux | −18 LUFS | gain simple, limiteur seulement sur les crêtes qui saturent (6 dB au plus) | MP3 128 kb/s stéréo ou 64 kb/s mono, sans dépasser le débit d'origine |
-| Ambiances | −24 LUFS | idem | idem |
+Règles de l'utilisateur (2026-11-14), qui priment sur tout le reste :
 
-Méthode de Films et Animaux (2026-11-11), à reprendre pour un nouveau fichier :
+1. **80 kb/s au plus**, pour que l'application reste légère : MP3 80 kb/s CBR, ou Ogg Vorbis plafonné à 80 kb/s (`-maxrate`) pour les `.ogg` ; jamais plus que le débit du fichier en place.
+2. **Aucun son ne sonne plus bas que son original.**
+3. **Tout au niveau du Rockafeller Skank original : −9,6 LUFS**, sauf les Ambiances (−16 LUFS, voir le tableau). Un original plus fort garde au moins son niveau.
+4. **Abîmer plutôt que baisser** : le limiteur travaille autant qu'il faut. Écouté et validé à l'oreille sur le Duo des fleurs (+17 dB) et Zarathoustra (+15 dB).
 
-- **Mesurer le passage joué**, pas le fichier entier : de `start` à `end`, ou les 30 premières secondes après `start` pour une musique. C'est ce qu'on entend sur scène.
-- **Laisser tel quel un écart faible** : moins de 1 dB, ou moins de 2 dB s'il faudrait monter le son (monter coûte du limiteur).
-- **Son baissé** : gain seul ; limiteur seulement si l'encodage ferait dépasser 0 dBTP.
-- **Son monté** : crête ≤ −1,5 dBTP après encodage, avec au plus 6 dB de limiteur (suréchantillonné ×4). Au-delà, le gain est réduit et le son reste sous la cible.
-- Vérifier après coup que la durée n'a pas changé (sinon `start` et `end` tombent ailleurs).
+| Onglet | Niveau mesuré |
+|---|---|
+| Musiques, Transitions | −9,6 LUFS (ou plus, si l'original est plus fort) sur le fichier entier ; sauf Mario et Tetris, au niveau de leur original (−16,6 et −12,1), trop forts à −9,6 |
+| Ambiances | −16 LUFS (ou plus, si l'original est plus fort) sur le fichier entier |
+| Films | −9,6 LUFS, sur le passage joué |
+| Animaux | −9,6 LUFS, sur le passage joué, ou passages forts (voir plus bas), gain plafonné à +25 dB |
+| Bruits | −9,6 LUFS, sur le fichier entier, ou passages forts, gain plafonné à +25 dB |
 
-Un fichier aux crêtes trop denses reste sous la cible plutôt que d'être écrasé : on ne garde le gain que s'il rapproche le niveau de la cible (liste des sons restés sous la cible dans `docs/todo.md`).
+Les cibles précédentes (−18, puis −14 LUFS, Ambiances 6 dB plus bas) manquaient de puissance sur scène, même avec l'enceinte à fond. À −9,6, les Ambiances étaient trop fortes à l'écoute (2026-11-14), et les sons courts montés de +30 à +48 dB (machine à écrire…) aussi.
+
+Méthode, à reprendre pour un nouveau fichier :
+
+- **Mesurer** le passage joué pour Films et Animaux : de `start` à `end`, ou les 30 premières secondes après `start` pour une musique. C'est ce qu'on entend sur scène.
+- **Gain**, puis **limiteur** `alimiter` à −1 dBFS, suréchantillonné ×4 (`aresample` à 4 × la fréquence, attaque 5 ms, relâchement 80 ms, `level=0`, `latency=1` pour ne pas décaler le son), sans limite de réduction.
+- **Encoder, mesurer, reprendre le gain** jusqu'à la cible. Le MP3 80 kb/s fait dépasser les crêtes au-dessus de 0 dBTP (jusqu'à +3 dB), comme les originaux du commerce (Rockafeller : +1,1) : ce n'est pas corrigé, car un plafond de crête plus bas plafonne le volume vers −11 LUFS. Dans l'application, tout passe en virgule flottante puis par le limiteur de sortie (`LIMITER_THRESHOLD_DB`, `src/audio/audio-engine.ts`), qui absorbe ces dépassements.
+- **Sons courts** (Bruits, Animaux) : sur un son clairsemé (briquet, appareil photo), le volume intégré *baisse* quand on monte le gain, parce que les silences remontent et entrent dans la mesure. On vérifie donc aussi les **passages forts** : le volume momentané (400 ms) dépassé 10 % du temps. Le son est bon quand l'une des deux mesures atteint la cible et dépasse l'original.
+- **Gain plafonné** : +25 dB pour Bruits et Animaux (au-delà, le limiteur écrase le son et remonte surtout le bruit de fond), +45 dB ailleurs (au-delà, on ne gagne presque plus rien). Le Lion fait exception : son original est déjà à −5 LUFS, et il lui faut +42 dB de gain pour ne pas finir sous l'original une fois limité.
+- **Vérifier** que la durée n'a pas changé et que le son n'est pas décalé (sinon `start`, `end` et les moments de transition tombent ailleurs).
 
 ## Fichiers coupés ou retouchés
 
@@ -71,7 +84,7 @@ Tous les autres fichiers sont entiers.
 - **Duo des fleurs (Lakmé)** : de 1:04 à 2:28.
 - **Bomb Run** : partie du milieu retirée (de 1:11.1 à 1:48.4), avec un fondu enchaîné de 1 s entre les deux parties ; 1:37 au lieu de 2:15.
 - **Peer Gynt (Morning Mood)** : coupé à 3:58, la fin est retirée.
-- **Dans l'antre du roi de la montagne (Grieg)** : début remonté (le crescendo le rendait presque inaudible à la tuile) : gain de +12 dB jusqu'à 1:25, puis rampe jusqu'à 0 dB à 1:40 ; la fin est intacte. Le passage de la tuile est vers −24 LUFS.
+- **Dans l'antre du roi de la montagne (Grieg)** : début remonté (le crescendo le rendait presque inaudible à la tuile) : gain de +12 dB jusqu'à 1:25, puis rampe jusqu'à 0 dB à 1:40 ; la fin est intacte. Le passage de la tuile (30 s après `start`) est vers −9 LUFS.
 - **Musique d'ascenseur** : version de 57 s.
 - **Jungle (Ambiances)** : de 6:00 à 7:30 d'un enregistrement de 9:49.
 - **Métro (Ambiances)** : passage presque silencieux retiré, de 0:04 à 0:13 (coupe nette) ; 1:51 au lieu de 2:00.
