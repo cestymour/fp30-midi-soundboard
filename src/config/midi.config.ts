@@ -16,8 +16,8 @@ export const MIDI_TABS: MidiTab[] = [
       {
         id: 'romantique-amour', label: 'Romantique / Amour', icon: '🌹', color: '#ff8fab',
         items: [
-          // { id: 'piano-gp1', name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:68,  title: 'Roland => Concert Piano(GP1)' },
-          { id: 'piano', name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:0,   title: 'GM2 => Acoustic Grand Piano' },
+          { id: 'piano-gp1', name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:68,  title: 'Roland => Concert Piano(GP1)' },
+          // { id: 'piano', name: 'Piano',            icon: '🎹', pc:1,   msb:0,   lsb:0,   title: 'GM2 => Acoustic Grand Piano' },
           { id: 'harpe', name: 'Harpe',            icon: '🪉', /* svg: 'harpe', */ pc:47,  msb:121, lsb:0,   title: 'GM2 => Harp' },
           // { id: 'violons', name: 'Violons',          icon: '🎻', pc:49,  msb:16,  lsb:64,  title: 'Roland => Chamber Str' },
           { id: 'violon-solo', name: 'Violon solo',      icon: '🎻', pc:41,  msb:121, lsb:0,   title: 'GM2 => Violin' },
