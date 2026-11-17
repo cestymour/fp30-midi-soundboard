@@ -33,6 +33,11 @@ L'organisation en 11 familles est arrêtée (2026-11-08) ; c'est encore une maqu
 ## Presets
 
 - [ ] **Studio et Pluck se ressemblent beaucoup** (effets piano) : voir à l'oreille s'il faut garder les deux, ou un seul. Studio est un son sec et proche (Reverb 0, Cutoff 78, Attack 52, Release 38, Decay 56). Pluck : Reverb 2, Cutoff 85, Resonance 75, Attack 30, Release 35, Decay 40. Voir `src/config/midi-fx.config.ts`.
+- [ ] **Effets piano qui ne marchent pas sur tous les sons Roland.** Chaque son du piano choisit les CC qu'il suit, sans règle visible ni liste chez Roland (le piano ne renvoie pas l'information) : un preset peut donc ne rien changer sur un son. Sur le Concert Piano (GP1), seuls réverbération (Ambiance, valable pour tous les sons), chorus et filtre marchent ; résonance, attaque, relâchement et decay sont sans effet. Le clavecin suit tous les curseurs. À faire, dans l'ordre :
+  - [ ] relever à l'oreille, pour chaque tuile Roland de l'onglet Instruments, les curseurs qui marchent et ceux qui ne marchent pas, et noter le tableau dans `docs/fp30x-midi.md` (Decay et Chorus s'entendent mal sur certains sons même quand ils marchent : decay sur les sons courts ou tenus, chorus sur les sons nets). Au passage, vérifier si Xylophone (« Vibraphone », banque 0/0) et Percu (« STANDARD Set », banque 120) sont vraiment des sons Roland ou des sons GM2 mal étiquetés ;
+  - [ ] puis, selon le tableau : griser dans la fenêtre Effets les curseurs sans effet sur l'instrument choisi, et/ou revoir les presets pour qu'ils reposent surtout sur les curseurs qui marchent partout ;
+  - [ ] tester le réglage **Brillance** du piano (SysEx `01 00 02 1C`, adresse relevée sur le FP-30, pas encore essayée sur le FP-30X) : s'il agit sur tous les sons, il peut remplacer le filtre sur les sons où le CC74 ne marche pas.
+  - Écarté : simuler le relâchement par la pédale de sustain (CC64) ; elle garde toutes les notes jusqu'à ce qu'on la relâche, au lieu de prolonger chaque note un moment après sa touche. Pas d'autre moyen connu pour attaque, decay et résonance.
 - [ ] **Réverbération des presets piano** : les valeurs d'Ambiance (0 à 10) ont été converties depuis les anciennes valeurs CC91 (0 à 127), sans être réglées à l'oreille.
 
 ## Nouveaux onglets de sons et fichiers

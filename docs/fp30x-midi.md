@@ -20,7 +20,7 @@ Relevé des essais faits le 2026-11-05 (Edge sous Windows, piano en Bluetooth, m
 | CC93 (chorus) | oui (Strings, GM2) |
 | CC91 (réverbération) | **aucun** : la réverbération du clavier est le réglage Ambiance (ci-dessous) |
 
-Le manuel prévient que certains sons ne réagissent pas à certains de ces CC : les essais ont été faits avec des sons qui y réagissent fort.
+Le manuel prévient que certains sons ne réagissent pas à certains de ces CC : les essais ont été faits avec des sons qui y réagissent fort. Chaque son choisit les CC qu'il suit, sans règle visible : sur le Concert Piano (GP1), le chorus (CC93), le filtre (CC74) et la réverbération (Ambiance, valable pour tous les sons) marchent, mais pas la résonance, l'attaque, le relâchement ni le decay (CC71, 73, 72, 75) ; le clavecin (Harpsichord) les suit tous (essais à l'oreille, 2026-11-17).
 
 Sur le canal 1, le CC91 agit normalement.
 
