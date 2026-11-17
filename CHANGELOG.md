@@ -2,6 +2,20 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.18.2 — 2026-11-17
+
+### Corrections
+
+- **Le vrai piano Roland sur la tuile Piano** (onglet Instruments, en haut à gauche) : elle envoie le Concert Piano (GP1) du FP-30X au lieu du piano GM2, moins beau. Le piano GM2 avait été choisi quand l'application jouait sur le canal 1, où les effets ne marchaient que sur les sons GM2 ; sur le canal 4, les sons Roland les suivent aussi.
+
+### À savoir
+
+- **Certains effets piano sont sans effet selon le son.** Chaque son Roland choisit les réglages qu'il suit, sans règle visible. Sur le piano de concert, réverbération, chorus et filtre marchent ; résonance, attaque, relâchement et decay ne changent rien. Un preset qui repose sur ces derniers change donc peu ce piano. Un relevé son par son est prévu.
+
+### À vérifier sur la tablette
+
+- La tuile Piano joue le piano de concert Roland, et le voyant de catégorie du piano s'allume sur Piano.
+
 ## 1.18.1 — 2026-11-15
 
 ### Corrections
