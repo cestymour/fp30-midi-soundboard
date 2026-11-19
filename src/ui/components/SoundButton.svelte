@@ -58,6 +58,7 @@
 
 <Tile
   class={baseClass}
+  color={item.color}
   states={{ oneshot: isOneShot, playing: isPlaying, missing: buttonState.missing }}
   data-audio={item.file}
   data-label={item.name}

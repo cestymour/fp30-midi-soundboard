@@ -37,6 +37,12 @@ interface TabBase<Item> {
   gridType?: 'fixed';
 }
 
+/**
+ * Couleur d'une tuile en grille fixe : la palette commune à tous les onglets
+ * (valeurs dans Tile.svelte). Elle dit le thème de la tuile (ferme, rue, nuit…).
+ */
+export type TileColor = 'bleu' | 'vert' | 'rose' | 'violet' | 'orange' | 'jaune' | 'cyan';
+
 // ═══════════════════════════════════════════════════════
 // MIDI
 // ═══════════════════════════════════════════════════════
@@ -55,8 +61,8 @@ export interface MidiItem {
   lsb: number;
   /** Infobulle (par défaut : `name`) */
   title?: string;
-  /** Classe CSS de couleur de thème, en grille fixe (classes dans Tile.svelte) */
-  catClass?: string;
+  /** Couleur de la tuile en grille fixe */
+  color?: TileColor;
 }
 
 export type MidiCategory = Category<MidiItem>;
@@ -92,7 +98,9 @@ export interface AudioItem {
   /** Onglets musiques : pas de fondu d'entrée, la musique démarre tout de suite au volume choisi.
    *  Inutile dans les onglets sons, qui n'ont jamais de fondu. */
   noFade?: boolean;
-  /** Classe CSS de couleur : thème en grille fixe (animaux-ferme…), musique-tuile en colonnes (classes dans Tile.svelte) */
+  /** Couleur de la tuile en grille fixe */
+  color?: TileColor;
+  /** Variante de tuile, classes CSS de Tile.svelte : musique-tuile (onglet Musiques), musique-manquant */
   catClass?: string;
 }
 

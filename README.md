@@ -230,7 +230,7 @@ export const MUSIC_TABS: AudioTab[] = [
             // subtitle: 'tender moment',       // Small line under the name
             // title: 'Custom tooltip',         // Tooltip text
             // noFade: true,                    // Music tabs only: no fade-in, starts at once at the chosen volume
-            // catClass: 'animaux-ferme',       // CSS class for category color
+            // color: 'vert',                   // Fixed grid: theme color (bleu, vert, rose, violet, orange, jaune, cyan)
           },
         ]
       }
@@ -267,7 +267,7 @@ Preset buttons for the MIDI and audio FX overlays. Each file exports an array �
 }
 ```
 
-In a fixed grid, every tile (sound, music or instrument) looks the same; `catClass` (e.g. `animaux-ferme`, classes in `Tile.svelte`) gives it its theme color.
+In a fixed grid, every tile (sound, music or instrument) looks the same; `color` (`bleu`, `vert`, `rose`, `violet`, `orange`, `jaune`, `cyan`: the palette shared by every tab, in `Tile.svelte`) gives it its theme color.
 
 ---
 
@@ -572,7 +572,7 @@ export const MUSIC_TABS: AudioTab[] = [
             // subtitle: 'tendresse',           // Ligne en petit sous le nom
             // title: 'Tooltip personnalisé',   // Texte du tooltip
             // noFade: true,                    // Onglets musiques seulement : pas de fondu d'entrée, démarre tout de suite au volume choisi
-            // catClass: 'animaux-ferme',       // Classe CSS pour couleur de catégorie
+            // color: 'vert',                   // Grille fixe : couleur de thème (bleu, vert, rose, violet, orange, jaune, cyan)
           },
         ]
       }
@@ -609,7 +609,7 @@ Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un
 }
 ```
 
-En grille fixe, toutes les tuiles (sons, musiques, instruments) ont le même aspect ; `catClass` (ex. `animaux-ferme`, classes dans `Tile.svelte`) leur donne leur couleur de thème.
+En grille fixe, toutes les tuiles (sons, musiques, instruments) ont le même aspect ; `color` (`bleu`, `vert`, `rose`, `violet`, `orange`, `jaune`, `cyan` : la palette commune à tous les onglets, dans `Tile.svelte`) leur donne leur couleur de thème.
 
 ---
 

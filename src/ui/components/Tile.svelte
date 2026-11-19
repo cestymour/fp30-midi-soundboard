@@ -4,16 +4,19 @@
   de la grille (colonnes, grille fixe). Le comportement (clic, états, progression) vient de
   SoundButton (sons et musiques, classe sound-btn) ou d'InstrumentButton (piano, classe inst-btn).
   Dans une grille fixe, une tuile piano a l'aspect d'une tuile de sons (Animaux), couleur de thème
-  (catClass) comprise, et l'instrument actif celui d'un son qui joue.
+  (`color`) comprise, et l'instrument actif celui d'un son qui joue.
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { TileColor } from '../../types.ts';
   import type { HTMLButtonAttributes } from 'svelte/elements';
   import TileIcon from './TileIcon.svelte';
 
   interface Props extends Omit<HTMLButtonAttributes, 'class' | 'children'> {
     /** Classes fixes : sound-btn ou inst-btn, puis catClass… */
     class: string;
+    /** Couleur en grille fixe : classe couleur-<nom> */
+    color?: TileColor;
     /** Classes d'état, ajoutées après les classes fixes quand elles valent true */
     states?: Record<string, boolean>;
     /** Remplissage de progression (sons et musiques) : variable CSS --progress */
@@ -30,12 +33,12 @@
   }
 
   let {
-    class: className, states = {}, progress, imageSrc, svg, emoji, name, subtitle, iconOverlay, ...rest
+    class: className, color, states = {}, progress, imageSrc, svg, emoji, name, subtitle, iconOverlay, ...rest
   }: Props = $props();
 </script>
 
 <button
-  class={[className, states]}
+  class={[className, color && `couleur-${color}`, states]}
   {...rest}
   style:--progress={progress}
 >{#if imageSrc}<span class="btn-icon"><img src={imageSrc} alt={name} />{@render iconOverlay?.()}</span>{:else if emoji !== undefined}<span class="btn-icon"><TileIcon {svg} {emoji} />{@render iconOverlay?.()}</span>{/if}<span class="btn-label">{name}</span>{#if subtitle}<span class="btn-sub">{subtitle}</span>{/if}</button>
@@ -336,33 +339,16 @@
   }
 
   /* ═══════════════════════════════════════════════════════
-    GRILLE FIXE — Couleurs par thème (classes CSS catClass, tuiles de sons et tuiles piano)
+    GRILLE FIXE — Palette des couleurs de thème (`color` des tuiles, type TileColor),
+    commune à tous les onglets
   ════════════════════════════════════════════════════════ */
-
-  .animaux-domestique { --cat-accent: #ff5cb0; }
-  .animaux-ferme      { --cat-accent: #44aa00; }
-  .animaux-foret      { --cat-accent: #7700ff; }
-  .animaux-oiseau     { --cat-accent: #0066ff; }
-  .animaux-insecte    { --cat-accent: #ff8000; }
-  .animaux-savane     { --cat-accent: #cccc00; }
-  .animaux-aquatique  { --cat-accent: #00ffee; }
-
-  /* Onglet Ambiances : même grille, une couleur par thème */
-  .ambiances-ville    { --cat-accent: #0066ff; }
-  .ambiances-voix     { --cat-accent: #ff5cb0; }
-  .ambiances-fete     { --cat-accent: #ff8000; }
-  .ambiances-mer      { --cat-accent: #00ffee; }
-  .ambiances-nature   { --cat-accent: #44aa00; }
-  .ambiances-elements { --cat-accent: #cccc00; }
-  .ambiances-nuit     { --cat-accent: #7700ff; }
-
-  /* Onglet Bruits : même grille, une couleur par thème */
-  .bruits-rue         { --cat-accent: #0066ff; }
-  .bruits-spectacle   { --cat-accent: #cccc00; }
-  .bruits-bureau      { --cat-accent: #00ffee; }
-  .bruits-telephone   { --cat-accent: #7700ff; }
-  .bruits-maison      { --cat-accent: #44aa00; }
-  .bruits-danger      { --cat-accent: #ff5cb0; }
+  .couleur-bleu   { --cat-accent: #0066ff; }
+  .couleur-vert   { --cat-accent: #44aa00; }
+  .couleur-rose   { --cat-accent: #ff5cb0; }
+  .couleur-violet { --cat-accent: #7700ff; }
+  .couleur-orange { --cat-accent: #ff8000; }
+  .couleur-jaune  { --cat-accent: #cccc00; }
+  .couleur-cyan   { --cat-accent: #00ffee; }
 
   :global(.fixed-grid) .sound-btn,
   :global(.fixed-grid) .inst-btn {

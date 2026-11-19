@@ -12,7 +12,8 @@
 </script>
 
 <Tile
-  class={'inst-btn' + (item.catClass ? ' ' + item.catClass : '')}
+  class="inst-btn"
+  color={item.color}
   states={{ active: instruments.active === item }}
   title={item.title ?? item.name}
   onclick={() => selectInstrument(item)}

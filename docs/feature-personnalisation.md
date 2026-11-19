@@ -96,7 +96,7 @@ Dans les grilles en colonnes (Musiques, Films), on choisit la **colonne et le ra
 
 ## 5. Couleurs des tuiles
 
-- **Dans une grille fixe**, la couleur d'une tuile dit son thème (ferme, oiseaux, maison, téléphone…). Au départ, c'est celle de la configuration (`catClass`) ; l'utilisateur peut la changer :
+- **Dans une grille fixe**, la couleur d'une tuile dit son thème (ferme, oiseaux, maison, téléphone…). Au départ, c'est celle de la configuration (`color`) ; l'utilisateur peut la changer :
   - pour une tuile, dans son menu ;
   - pour plusieurs tuiles, un bouton « Couleur » de l'éditeur passe en **sélection** (chaque toucher ajoute ou enlève une tuile), puis on choisit une couleur, appliquée à toutes d'un coup ;
   - « Couleur d'origine » rend la couleur de la configuration ;
