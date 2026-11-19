@@ -1,6 +1,8 @@
 /* ================================================================
    tabs.ts — Accès à la configuration des onglets
-   Les composants ne lisent jamais MIDI_TABS / AUDIO_TABS directement :
+   Un fichier de configuration par type d'onglet : midi.config.ts (piano),
+   sounds.config.ts (sons), music.config.ts (musiques).
+   Les composants ne lisent jamais MIDI_TABS / SOUND_TABS / MUSIC_TABS directement :
    c'est le seul endroit à modifier pour appliquer un jour des
    préférences utilisateur (tuiles masquées, ordre), repérées par leur id.
    Pour l'instant, la configuration est renvoyée telle quelle.
@@ -8,7 +10,8 @@
 
 import type { AudioItem, AudioTab, MidiTab, TabKind, TransitionMusic } from '../types.ts';
 import { MIDI_TABS } from './midi.config.ts';
-import { AUDIO_TABS } from './audio.config.ts';
+import { SOUND_TABS } from './sounds.config.ts';
+import { MUSIC_TABS } from './music.config.ts';
 import { TRANSITION_MUSICS } from './transition.config.ts';
 
 /**
@@ -24,6 +27,9 @@ export const TAB_ACCENTS: Record<TabKind, string> = {
 export function getMidiTabs(): MidiTab[] {
   return MIDI_TABS;
 }
+
+/** Onglets audio, dans l'ordre de la barre du haut : les sons, puis les musiques */
+const AUDIO_TABS: AudioTab[] = [...SOUND_TABS, ...MUSIC_TABS];
 
 export function getAudioTabs(): AudioTab[] {
   return AUDIO_TABS;

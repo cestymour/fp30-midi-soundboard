@@ -111,7 +111,8 @@ Each sound file is decoded on its first click (read from the offline cache), the
 │   ├── sw.ts                       # Service Worker (Workbox)
 │   ├── config/                     # Data + FX presets
 │   │   ├── midi.config.ts          # MIDI instrument data (MIDI_TABS)
-│   │   ├── audio.config.ts         # Audio sound data (AUDIO_TABS)
+│   │   ├── sounds.config.ts        # Sound tabs data (SOUND_TABS)
+│   │   ├── music.config.ts         # Music tabs data (MUSIC_TABS)
 │   │   ├── midi-fx.config.ts       # MIDI FX overlay presets (MIDI_FX_PRESETS)
 │   │   ├── audio-fx.config.ts      # Audio FX overlay presets (AUDIO_FX_PRESETS)
 │   │   ├── transition.config.ts    # Transition musics (TRANSITION_MUSICS)
@@ -192,12 +193,12 @@ export const MIDI_TABS: MidiTab[] = [
 ];
 ```
 
-#### Audio sounds — `src/config/audio.config.ts`
+#### Audio tabs — `src/config/sounds.config.ts`, `src/config/music.config.ts`
 
-Exports `AUDIO_TABS` — same structure as `MIDI_TABS`, with audio-specific fields:
+One file per kind of tab: `SOUND_TABS` (`kind: 'sounds'`) and `MUSIC_TABS` (`kind: 'music'`), shown in that order. Same structure as `MIDI_TABS`, with audio-specific fields:
 
 ```js
-export const AUDIO_TABS: AudioTab[] = [
+export const MUSIC_TABS: AudioTab[] = [
   {
     id: 'nature',
     label: 'Nature',
@@ -449,7 +450,8 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 │   ├── sw.ts                       # Service Worker (Workbox)
 │   ├── config/                     # Données + presets FX
 │   │   ├── midi.config.ts          # Données instruments MIDI (MIDI_TABS)
-│   │   ├── audio.config.ts         # Données sons audio (AUDIO_TABS)
+│   │   ├── sounds.config.ts        # Données des onglets sons (SOUND_TABS)
+│   │   ├── music.config.ts         # Données des onglets musiques (MUSIC_TABS)
 │   │   ├── midi-fx.config.ts       # Presets popup effets MIDI (MIDI_FX_PRESETS)
 │   │   ├── audio-fx.config.ts      # Presets popup effets audio (AUDIO_FX_PRESETS)
 │   │   ├── transition.config.ts    # Musiques de transition (TRANSITION_MUSICS)
@@ -530,12 +532,12 @@ export const MIDI_TABS: MidiTab[] = [
 ];
 ```
 
-#### Sons audio — `src/config/audio.config.ts`
+#### Onglets audio — `src/config/sounds.config.ts`, `src/config/music.config.ts`
 
-Exporte `AUDIO_TABS` — même structure que `MIDI_TABS`, avec des champs spécifiques audio :
+Un fichier par type d'onglet : `SOUND_TABS` (`kind: 'sounds'`) et `MUSIC_TABS` (`kind: 'music'`), affichés dans cet ordre. Même structure que `MIDI_TABS`, avec des champs spécifiques audio :
 
 ```js
-export const AUDIO_TABS: AudioTab[] = [
+export const MUSIC_TABS: AudioTab[] = [
   {
     id: 'nature',
     label: 'Nature',

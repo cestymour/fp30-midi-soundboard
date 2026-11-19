@@ -42,7 +42,7 @@ L'organisation en 11 familles est arrêtée (2026-11-08) ; c'est encore une maqu
 
 ## Nouveaux onglets de sons et fichiers
 
-Chaque onglet est une entrée de `AUDIO_TABS` (`src/config/audio.config.ts`), avec ses fichiers dans `public/sounds/<onglet>/`. Règles de nommage, de traitement et de poids : `docs/sons.md`.
+Chaque onglet est une entrée de `SOUND_TABS` (`src/config/sounds.config.ts`) ou de `MUSIC_TABS` (`src/config/music.config.ts`), avec ses fichiers dans `public/sounds/<onglet>/`. Règles de nommage, de traitement et de poids : `docs/sons.md`.
 
 - [ ] **Bruits** (32 tuiles sur 32 : pour en ajouter, il faut en retirer ; la perceuse est en commentaire dans la config). Idées pas encore reprises :
   - Maison : toc-toc à la porte, clés / serrure, chasse d'eau, robinet, réveil, tic-tac d'horloge / coucou, aspirateur, sèche-cheveux.

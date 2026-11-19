@@ -4,11 +4,13 @@
 
 import { describe, expect, it } from 'vitest';
 import { MIDI_TABS } from './midi.config.ts';
-import { AUDIO_TABS } from './audio.config.ts';
+import { SOUND_TABS } from './sounds.config.ts';
+import { MUSIC_TABS } from './music.config.ts';
 import { TRANSITION_MUSICS } from './transition.config.ts';
 import { TILE_ICONS } from '../icons/index.ts';
 import midiConfigSource from './midi.config.ts?raw';
-import audioConfigSource from './audio.config.ts?raw';
+import soundsConfigSource from './sounds.config.ts?raw';
+import musicConfigSource from './music.config.ts?raw';
 
 /** Renvoie les id présents plusieurs fois dans la liste */
 function findDuplicateIds(entries: { id: string }[]): string[] {
@@ -22,6 +24,8 @@ function findDuplicateIds(entries: { id: string }[]): string[] {
 }
 
 const ID_FORMAT = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+const AUDIO_TABS = [...SOUND_TABS, ...MUSIC_TABS];
 
 describe('identifiants de la configuration', () => {
   const allTabs = [...MIDI_TABS, ...AUDIO_TABS];
@@ -48,16 +52,19 @@ describe('identifiants de la configuration', () => {
   });
 });
 
-describe('onglets sons', () => {
-  const soundTabs = AUDIO_TABS.filter(tab => tab.kind === 'sounds');
-
+describe('onglets sons et musiques', () => {
   it('il y a des onglets sons et des onglets musiques', () => {
-    expect(soundTabs.length).toBeGreaterThan(0);
-    expect(AUDIO_TABS.some(tab => tab.kind === 'music')).toBe(true);
+    expect(SOUND_TABS.length).toBeGreaterThan(0);
+    expect(MUSIC_TABS.length).toBeGreaterThan(0);
+  });
+
+  it('chaque fichier ne contient que des onglets de son type', () => {
+    expect(SOUND_TABS.filter(tab => tab.kind !== 'sounds').map(tab => tab.id)).toEqual([]);
+    expect(MUSIC_TABS.filter(tab => tab.kind !== 'music').map(tab => tab.id)).toEqual([]);
   });
 
   it("aucun son n'a l'option noFade (les sons n'ont jamais de fondu)", () => {
-    const withNoFade = soundTabs.flatMap(tab => tab.categories.flatMap(category => category.items))
+    const withNoFade = SOUND_TABS.flatMap(tab => tab.categories.flatMap(category => category.items))
       .filter(item => item.noFade !== undefined)
       .map(item => item.id);
     expect(withNoFade).toEqual([]);
@@ -99,7 +106,7 @@ describe('dessins des onglets et des tuiles', () => {
     expect(missing).toEqual([]);
     // Un dessin qu'aucune tuile n'utilise est gardé en commentaire dans la config
     // (`/* svg: '<nom>', */`, pour pouvoir le remettre) ; sinon il est à supprimer
-    const sources = midiConfigSource + audioConfigSource;
+    const sources = midiConfigSource + soundsConfigSource + musicConfigSource;
     const named = (name: string) => sources.includes(`svg: '${name}'`);
     expect(Object.keys(TILE_ICONS).filter(name => !named(name))).toEqual([]);
   });

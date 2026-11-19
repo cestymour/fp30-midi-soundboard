@@ -9,7 +9,7 @@ L'utilisateur de la tablette veut organiser l'application à sa façon : garder 
 ## Vocabulaire
 
 - **Personnalisation** : la fonctionnalité. Le bouton qui ouvre l'éditeur s'appelle « Personnaliser ».
-- **Disposition** : une organisation enregistrée, avec un nom : les onglets, leurs catégories, la place et la couleur des tuiles. L'application en garde plusieurs ; une seule est **active**. **« Par défaut »** est la disposition définie par la configuration du code (`MIDI_TABS`, `AUDIO_TABS`).
+- **Disposition** : une organisation enregistrée, avec un nom : les onglets, leurs catégories, la place et la couleur des tuiles. L'application en garde plusieurs ; une seule est **active**. **« Par défaut »** est la disposition définie par la configuration du code (`MIDI_TABS`, `SOUND_TABS`, `MUSIC_TABS`).
 - **Type d'onglet** : **piano**, **sons** ou **musiques** (`TabKind` : `midi`, `sounds`, `music`). Une tuile a le type de son onglet.
 - **Grille** d'un onglet, de deux sortes :
   - **grille fixe** (`gridType: 'fixed'` : Animaux, Bruits, Ambiances) : 32 cases, sans catégorie ;
