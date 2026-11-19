@@ -29,7 +29,7 @@ Designed for tablet use (Android / Chrome), landscape & portrait orientation.
   - **Music tabs** (Ambiances, Musiques, Films) — one music at a time, shared by the three tabs, with fade in/out, progress bar, audio FX and their own volume
   - **Sound tabs** (Animaux, Bruits) — short sounds that play over everything else (the music and other sounds, up to 8 at once), with no fade and no FX, and their own volume
 - **Film soundboard** — movie themes organized by genre with cover images
-- **Animal soundboard** — 4×8 color-coded grid with category accents
+- **Animal soundboard** — 4×8 grid, one color per theme (farm, birds, savanna…)
 - Organized by cinematic universe (classical, western, medieval, jazz, sci-fi, horror, world music...) and sound category (nature, animals, vehicles, human, SFX...)
 - Auto-connects to the Roland FP-30X over USB on page load; over Bluetooth, reconnects on its own after a dropout, and offers the last piano again after a reload
 - Volume control directly from the interface (MIDI CC7, music volume and sound volume, independently)
@@ -185,7 +185,8 @@ export const MIDI_TABS: MidiTab[] = [
             pc: 1,          // Program Change (1-128, musical notation)
             msb: 0,         // Bank Select MSB (CC0)
             lsb: 68,        // Bank Select LSB (CC32)
-            title: 'Roland => Concert Piano(GP1)' // Tooltip
+            title: 'Roland => Concert Piano(GP1)', // Tooltip
+            // color: 'vert', // Optional, fixed grid only: theme color (bleu, vert, rose, violet, orange, jaune, cyan)
           },
         ]
       }
@@ -209,7 +210,7 @@ export const MUSIC_TABS: AudioTab[] = [
     // cols: 3,              // Multi-column layout (Films tab)
     // catCols: 2,           // With cols: tiles per row in a category (default 3); tiles take the category color
     // colSizes: [3, 3, 2, 3], // With cols: categories in each column, in order (default: ceil(categories / cols) per column)
-    // gridType: 'fixed',    // Fixed 4×8 grid (Animaux, Bruits, Ambiances tabs)
+    // gridType: 'fixed',    // Fixed 4×8 grid (Animaux, Bruits, Ambiances tabs; see below)
     categories: [
       {
         id: 'nature-eau',
@@ -231,6 +232,7 @@ export const MUSIC_TABS: AudioTab[] = [
             // title: 'Custom tooltip',         // Tooltip text
             // noFade: true,                    // Music tabs only: no fade-in, starts at once at the chosen volume
             // color: 'vert',                   // Fixed grid: theme color (bleu, vert, rose, violet, orange, jaune, cyan)
+            // catClass: 'musique-tuile',       // Tile variant: musique-tuile (Musiques tab), musique-manquant (mp3 not there yet)
           },
         ]
       }
@@ -371,7 +373,7 @@ Conçue pour une utilisation sur tablette Android (Chrome), en orientation paysa
   - **Onglets musiques** (Ambiances, Musiques, Films) — une seule musique à la fois, commune aux trois onglets, avec fondus, barre de progression, effets audio et son propre volume
   - **Onglets sons** (Animaux, Bruits) — des sons courts qui se superposent à tout le reste (la musique et les autres sons, jusqu'à 8 à la fois), sans fondu ni effets, avec leur propre volume
 - **Soundboard films** — thèmes de films organisés par genre avec images de couverture
-- **Soundboard animaux** — grille 4×8 avec couleurs par catégorie d'animal
+- **Soundboard animaux** — grille 4×8, une couleur par thème (ferme, oiseaux, savane…)
 - Organisé par univers cinématographique (classique, western, médiéval, jazz, SF, horreur, musique du monde...) et catégorie sonore (nature, animaux, véhicules, humain, effets spéciaux...)
 - Connexion automatique au Roland FP-30X en USB au chargement de la page ; en Bluetooth, reconnexion seule après une coupure, et dernier piano reproposé après un rechargement
 - Contrôle du volume directement depuis l'interface (MIDI CC7, volume des musiques et volume des sons, indépendants)
@@ -527,7 +529,8 @@ export const MIDI_TABS: MidiTab[] = [
             pc: 1,          // Program Change (1-128, notation musicale)
             msb: 0,         // Bank Select MSB (CC0)
             lsb: 68,        // Bank Select LSB (CC32)
-            title: 'Roland => Concert Piano(GP1)' // Tooltip
+            title: 'Roland => Concert Piano(GP1)', // Infobulle
+            // color: 'vert', // Optionnel, grille fixe seulement : couleur de thème (bleu, vert, rose, violet, orange, jaune, cyan)
           },
         ]
       }
@@ -551,7 +554,7 @@ export const MUSIC_TABS: AudioTab[] = [
     // cols: 3,              // Affichage multi-colonnes (onglet Films)
     // catCols: 2,           // Avec cols : tuiles par ligne dans une catégorie (défaut 3) ; les tuiles prennent la couleur de la catégorie
     // colSizes: [3, 3, 2, 3], // Avec cols : nombre de catégories dans chaque colonne, dans l'ordre (défaut : ceil(catégories / cols) par colonne)
-    // gridType: 'fixed',    // Grille fixe 4×8 (onglets Animaux, Bruits, Ambiances)
+    // gridType: 'fixed',    // Grille fixe 4×8 (onglets Animaux, Bruits, Ambiances ; voir plus bas)
     categories: [
       {
         id: 'nature-eau',
@@ -573,6 +576,7 @@ export const MUSIC_TABS: AudioTab[] = [
             // title: 'Tooltip personnalisé',   // Texte du tooltip
             // noFade: true,                    // Onglets musiques seulement : pas de fondu d'entrée, démarre tout de suite au volume choisi
             // color: 'vert',                   // Grille fixe : couleur de thème (bleu, vert, rose, violet, orange, jaune, cyan)
+            // catClass: 'musique-tuile',       // Variante de tuile : musique-tuile (onglet Musiques), musique-manquant (mp3 pas encore là)
           },
         ]
       }

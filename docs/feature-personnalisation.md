@@ -1,6 +1,6 @@
 # Personnalisation de l'interface : cahier des charges
 
-Document de travail pour la personnalisation de l'interface (voir `docs/todo.md`). État : **cahier des charges** (2026-11-19), rien n'est codé. La fonctionnalité sortira d'un bloc, dans une version majeure ; l'ordre de sortie avec le looper n'est pas décidé.
+Document de travail pour la personnalisation de l'interface (voir `docs/todo.md`). État : **cahier des charges** (2026-11-19). L'éditeur n'est pas codé ; la base technique sur laquelle il s'appuie existe (section 7, « Base existante »). La fonctionnalité sortira d'un bloc, dans une version majeure ; l'ordre de sortie avec le looper n'est pas décidé.
 
 ## Le besoin
 
@@ -11,9 +11,8 @@ L'utilisateur de la tablette veut organiser l'application à sa façon : garder 
 - **Personnalisation** : la fonctionnalité. Le bouton qui ouvre l'éditeur s'appelle « Personnaliser ».
 - **Disposition** : une organisation enregistrée, avec un nom : les onglets, leurs catégories, la place et la couleur des tuiles. L'application en garde plusieurs ; une seule est **active**. **« Par défaut »** est la disposition définie par la configuration du code (`MIDI_TABS`, `SOUND_TABS`, `MUSIC_TABS`).
 - **Type d'onglet** : **piano**, **sons** ou **musiques** (`TabKind` : `midi`, `sounds`, `music`). Une tuile a le type de son onglet.
-- **Grille** d'un onglet, de deux sortes :
-  - **grille fixe** (`gridType: 'fixed'` : Animaux, Bruits, Ambiances) : 32 cases, sans catégorie ;
-  - la grille ne dépend pas du type d'onglet : un onglet piano peut être en grille fixe (ses tuiles ont alors l'aspect de celles d'Animaux), un onglet de sons en grille à catégories ;
+- **Grille** d'un onglet, de deux sortes, quel que soit son type :
+  - **grille fixe** (`gridType: 'fixed'` : Animaux, Bruits, Ambiances) : 32 cases, sans catégorie ; un onglet piano en grille fixe a des tuiles de même aspect qu'Animaux ;
   - **grille à catégories** (Instruments, Sons MIDI, Musiques, Films) : les tuiles sont rangées par catégorie ; dans Musiques et Films, les catégories sont réparties **en colonnes** (`cols`).
 - **Réserve** : les tuiles qui ne sont dans aucun onglet de la disposition.
 - **Mode d'édition** : l'état de l'application pendant qu'on modifie une disposition.
@@ -100,7 +99,8 @@ Dans les grilles en colonnes (Musiques, Films), on choisit la **colonne et le ra
   - pour une tuile, dans son menu ;
   - pour plusieurs tuiles, un bouton « Couleur » de l'éditeur passe en **sélection** (chaque toucher ajoute ou enlève une tuile), puis on choisit une couleur, appliquée à toutes d'un coup ;
   - « Couleur d'origine » rend la couleur de la configuration ;
-  - les couleurs viennent d'une **palette** (celles des thèmes actuels, plus quelques autres) : elles restent lisibles sur le fond sombre et cohérentes avec le reste de l'application.
+  - les couleurs viennent de la **palette** commune à tous les onglets (`TileColor` : bleu, vert, rose, violet, orange, jaune, cyan ; valeurs dans `Tile.svelte`), qu'on peut agrandir de quelques couleurs : elles restent lisibles sur le fond sombre et cohérentes avec le reste de l'application ;
+  - une tuile sans couleur dans la configuration (les tuiles piano, par exemple) est neutre en grille fixe tant qu'on ne lui en donne pas.
 - **Dans une grille à catégories**, la tuile prend la couleur de sa catégorie, là où l'onglet colore les tuiles (Musiques).
 - Une tuile garde sa couleur de grille fixe quand elle passe par une catégorie ou par la réserve, et la retrouve en revenant dans une grille fixe.
 
@@ -117,6 +117,15 @@ Dans les grilles en colonnes (Musiques, Films), on choisit la **colonne et le ra
 
 ## 7. Contraintes techniques
 
+### Base existante
+
+- **Un fichier de configuration par type d'onglet** : `midi.config.ts` (piano), `sounds.config.ts` (sons), `music.config.ts` (musiques). Les règles propres à un type (`id` uniques, réserve de la section 8) portent sur son fichier.
+- **Une seule tuile** pour les trois types : `Tile.svelte` porte l'aspect (cadre, icône, nom, couleur) et tous les styles, y compris ceux de chaque grille ; `SoundButton` (sons, musiques) et `InstrumentButton` (piano) n'ajoutent que le comportement (clic, états). Le mode d'édition (menu au toucher, glissement, aperçu) se branche donc sur une seule tuile, pour tous les types.
+- **La grille fixe est commune** à tous les types (`FixedGrid.svelte`, `gridType: 'fixed'` sur n'importe quel onglet), en CSS seul.
+- **Les grilles à catégories ont un affichage par panneau** : `MidiPanel` (colonnes de catégories, 2 en portrait) et `AudioPanel` (`cols`, `catCols`, `colSizes`). Pour qu'un onglet de n'importe quel type puisse prendre l'une ou l'autre (section 4), les deux sont à rapprocher en un composant de grille à catégories, comme la grille fixe.
+- **La couleur des tuiles** est une donnée de la tuile (`color`, type `TileColor`), valable pour tous les types : la disposition n'a qu'à la remplacer.
+- **Un seul point d'entrée** pour les onglets : `getMidiTabs()` / `getAudioTabs()` (`src/config/tabs.ts`).
+
 ### Format et application
 
 - Une disposition **ne recopie pas les tuiles** : elle les désigne par leur `id`, et la configuration reste la seule source des fichiers, patchs, libellés et images. Elle désigne de même les onglets et catégories de la configuration par leur `id`, et décrit en entier ceux créés par l'utilisateur, qui reçoivent un `id` généré et unique (les `id` d'onglets restent uniques entre piano et audio).
@@ -126,7 +135,7 @@ Dans les grilles en colonnes (Musiques, Films), on choisit la **colonne et le ra
 
 ### Identifiants des tuiles
 
-Un `id` de tuile n'est aujourd'hui garanti unique que dans sa catégorie. Vérifié le 2026-11-19 : aucun ne se répète d'un onglet à l'autre (88 tuiles piano, 166 tuiles sons et musiques). La règle devient : **`id` de tuile unique pour tout son type**, vérifiée par `config.test.ts` et notée dans `CLAUDE.md` et le README.
+`config.test.ts` garantit un `id` de tuile unique dans sa catégorie. Vérifié le 2026-11-19 : aucun ne se répète d'un onglet à l'autre (88 tuiles piano, 166 tuiles sons et musiques). La personnalisation demande un **`id` de tuile unique pour tout son type** : à vérifier par `config.test.ts`, fichier de configuration par fichier, et à noter dans `CLAUDE.md` et le README.
 
 ### Mises à jour de l'application
 
@@ -142,6 +151,7 @@ La configuration évolue d'une version à l'autre ; les dispositions suivent san
 
 - L'égalisation des hauteurs de boutons (`equalizeMidiButtons`, `equalizeAudioButtons`), la répartition des catégories en portrait (`MidiPanel.svelte`) et les colonnes de Musiques et Films fonctionnent avec un nombre quelconque de catégories et de tuiles.
 - Une grille à catégories peut recevoir plus de tuiles que l'écran n'en montre : l'éditeur le **signale** (l'onglet déborde), dans les deux orientations.
+- Une grille fixe a toujours 32 cases : au-delà de 32 tuiles, une rangée de plus s'écraserait en bas. Les règles de dépôt de la section 3 (échange, ou l'occupante va dans la réserve) n'y mettent jamais plus d'une tuile par case.
 
 ### Hors ligne
 
@@ -160,7 +170,7 @@ La configuration évolue d'une version à l'autre ; les dispositions suivent san
 
 ## 8. Tuiles en réserve dans la configuration
 
-La configuration peut déclarer des **tuiles disponibles mais pas placées dans « Par défaut »** (par exemple une liste de réserve par type) : elles arrivent dans la réserve, et l'utilisateur les place s'il en a l'usage. C'est le moyen d'avoir plus de tuiles que de cases : les tuiles aujourd'hui en commentaire faute de place (perceuse, Café, Restaurant, Salle d'arcade, galop…) et les idées de `docs/todo.md` (toc-toc, verre brisé, oie…) pourraient y aller, sans retirer d'autres tuiles. Les règles de `docs/sons.md` s'y appliquent comme aux autres sons.
+La configuration peut déclarer des **tuiles disponibles mais pas placées dans « Par défaut »** (une liste de réserve dans le fichier de configuration de chaque type, à côté de ses onglets) : elles arrivent dans la réserve, et l'utilisateur les place s'il en a l'usage. C'est le moyen d'avoir plus de tuiles que de cases : les tuiles aujourd'hui en commentaire faute de place (perceuse, Café, Restaurant, Salle d'arcade, galop…) et les idées de `docs/todo.md` (toc-toc, verre brisé, oie…) pourraient y aller, sans retirer d'autres tuiles. Les règles de `docs/sons.md` s'y appliquent comme aux autres sons.
 
 ## 9. Bonus et plus tard
 
