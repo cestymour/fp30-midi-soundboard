@@ -1,7 +1,7 @@
 <!--
   MidiPanel.svelte — Panneau d'un onglet MIDI : barre de contrôles
-  (connexion, effets, stop, volume) et grille d'instruments.
-  En portrait, la grille passe sur 2 colonnes (les autres sont masquées).
+  (connexion, effets, stop, volume) et grille d'instruments : colonnes de catégories
+  (en portrait, 2 colonnes, les autres sont masquées) ou grille fixe (`gridType: 'fixed'`).
 -->
 <script lang="ts">
   import type { MidiItem, MidiTab, Category } from '../../types.ts';
@@ -18,6 +18,7 @@
   import EmergencyStopButton from './EmergencyStopButton.svelte';
   import VolumeControl from './VolumeControl.svelte';
   import InstrumentButton from './InstrumentButton.svelte';
+  import FixedGrid from './FixedGrid.svelte';
 
   let { tab, index }: { tab: MidiTab; index: number } = $props();
 
@@ -92,22 +93,32 @@
     <EmergencyStopButton />
   {/snippet}
 
-  <div class="midi-grid">
-    {#each columns as col, colIdx (colIdx)}
-      <div class="midi-col" style:display={colIdx < visibleCols ? undefined : 'none'}>
-        {#each col as cat (cat.id)}
-          <div class="cat-block">
-            <CategoryTitle {cat} />
-            <div class="btn-grid">
-              {#each cat.items as item (item.id)}
-                <InstrumentButton {item} />
-              {/each}
-            </div>
-          </div>
+  {#if tab.gridType === 'fixed'}
+    <FixedGrid>
+      {#each tab.categories as cat (cat.id)}
+        {#each cat.items as item (item.id)}
+          <InstrumentButton {item} />
         {/each}
-      </div>
-    {/each}
-  </div>
+      {/each}
+    </FixedGrid>
+  {:else}
+    <div class="midi-grid">
+      {#each columns as col, colIdx (colIdx)}
+        <div class="midi-col" style:display={colIdx < visibleCols ? undefined : 'none'}>
+          {#each col as cat (cat.id)}
+            <div class="cat-block">
+              <CategoryTitle {cat} />
+              <div class="btn-grid">
+                {#each cat.items as item (item.id)}
+                  <InstrumentButton {item} />
+                {/each}
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/each}
+    </div>
+  {/if}
 </Panel>
 
 <style>
@@ -211,7 +222,7 @@
     gap: var(--gap-inner);
   }
 
-  /* Les styles des tuiles sont dans Tile.svelte */
+  /* Les styles des tuiles sont dans Tile.svelte, ceux de la grille fixe dans FixedGrid.svelte */
 
   /* ── Mobile ── */
   @media (max-width: 600px) {

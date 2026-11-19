@@ -13,6 +13,7 @@ L'utilisateur de la tablette veut organiser l'application à sa façon : garder 
 - **Type d'onglet** : **piano**, **sons** ou **musiques** (`TabKind` : `midi`, `sounds`, `music`). Une tuile a le type de son onglet.
 - **Grille** d'un onglet, de deux sortes :
   - **grille fixe** (`gridType: 'fixed'` : Animaux, Bruits, Ambiances) : 32 cases, sans catégorie ;
+  - la grille ne dépend pas du type d'onglet : un onglet piano peut être en grille fixe (ses tuiles ont alors l'aspect de celles d'Animaux), un onglet de sons en grille à catégories ;
   - **grille à catégories** (Instruments, Sons MIDI, Musiques, Films) : les tuiles sont rangées par catégorie ; dans Musiques et Films, les catégories sont réparties **en colonnes** (`cols`).
 - **Réserve** : les tuiles qui ne sont dans aucun onglet de la disposition.
 - **Mode d'édition** : l'état de l'application pendant qu'on modifie une disposition.
@@ -76,7 +77,7 @@ On déplace les tuiles une par une, par glisser-déposer, comme les icônes sur 
 
 ### Onglets
 
-- **Ajouter** un onglet : on choisit son **type** (il ne change plus ensuite), son **nom**, son **emoji** et sa **grille**, reprise d'un onglet existant du même type : grille à catégories comme Instruments pour le piano ; grille fixe comme Bruits, ou grille à catégories en colonnes comme Musiques, pour les sons et les musiques. Il arrive vide.
+- **Ajouter** un onglet : on choisit son **type** (il ne change plus ensuite), son **nom**, son **emoji** et sa **grille**, quel que soit le type : grille fixe comme Bruits, grille à catégories comme Instruments, ou grille à catégories en colonnes comme Musiques. Il arrive vide.
 - **Supprimer** un onglet, avec confirmation : ses tuiles vont dans la réserve.
 - **Renommer** un onglet, changer son **emoji**, **changer l'ordre** des onglets en les glissant dans la barre du haut.
 - **Au moins un onglet**, de n'importe quel type : aucun type n'est obligatoire. Sans onglet piano, le choix de la connexion au piano (dans la barre des onglets piano) n'apparaît pas, et rien ne le remplace ni ne le signale ; l'application marche sans erreur (arrêt d'urgence, musique de transition, sons, musiques).

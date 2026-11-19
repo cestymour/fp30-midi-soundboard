@@ -169,6 +169,7 @@ export const MIDI_TABS: MidiTab[] = [
     label: 'Instruments',   // Tab name
     icon: '🎹',             // Emoji displayed in the tab (the color comes from the kind of tab: TAB_ACCENTS in src/config/tabs.ts)
     cols: 7,                // Number of columns (optional, default: 5)
+    // gridType: 'fixed',    // Fixed 4×8 grid instead of the columns (see below)
     categories: [
       {
         id: 'classique',
@@ -257,14 +258,16 @@ Preset buttons for the MIDI and audio FX overlays. Each file exports an array �
 }
 ```
 
-**Fixed grid** (4×8 landscape / 8×4 portrait, fills the panel):
+**Fixed grid** (4×8 landscape / 8×4 portrait, fills the panel), for any kind of tab, piano included:
 ```js
 {
   label: 'Animaux',
-  gridType: 'fixed',  // Enables the fixed grid
+  gridType: 'fixed',  // Enables the fixed grid (category titles are not shown)
   // ...
 }
 ```
+
+In a fixed grid, every tile (sound, music or instrument) looks the same; `catClass` (e.g. `animaux-ferme`, classes in `Tile.svelte`) gives it its theme color.
 
 ---
 
@@ -508,6 +511,7 @@ export const MIDI_TABS: MidiTab[] = [
     label: 'Instruments',   // Nom de l'onglet
     icon: '🎹',             // Emoji affiché dans l'onglet (la couleur vient du type d'onglet : TAB_ACCENTS dans src/config/tabs.ts)
     cols: 7,                // Nombre de colonnes (optionnel, défaut : 5)
+    // gridType: 'fixed',    // Grille fixe 4×8 à la place des colonnes (voir plus bas)
     categories: [
       {
         id: 'classique',
@@ -596,14 +600,16 @@ Boutons de preset des popups d’effets MIDI et audio. Chaque fichier exporte un
 }
 ```
 
-**Grille fixe** (4×8 en paysage / 8×4 en portrait, remplit le panneau) :
+**Grille fixe** (4×8 en paysage / 8×4 en portrait, remplit le panneau), pour tout type d'onglet, piano compris :
 ```js
 {
   label: 'Animaux',
-  gridType: 'fixed',  // Active la grille fixe
+  gridType: 'fixed',  // Active la grille fixe (les titres de catégorie ne sont pas affichés)
   // ...
 }
 ```
+
+En grille fixe, toutes les tuiles (sons, musiques, instruments) ont le même aspect ; `catClass` (ex. `animaux-ferme`, classes dans `Tile.svelte`) leur donne leur couleur de thème.
 
 ---
 

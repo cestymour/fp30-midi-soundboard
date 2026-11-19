@@ -32,6 +32,9 @@ interface TabBase<Item> {
   /** Dessin de src/icons/ (nom du fichier sans `.svg`), affiché à la place de l'emoji `icon` */
   svg?: string;
   categories: Category<Item>[];
+  /** Grille fixe de 32 tuiles qui remplit le panneau (4×8 en paysage, 8×4 en portrait), pour tout
+   *  type d'onglet : Animaux, Bruits, Ambiances. Les titres de catégorie n'y sont pas affichés. */
+  gridType?: 'fixed';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -117,8 +120,6 @@ export interface AudioTab extends TabBase<AudioItem> {
   /** Mode colonnes : nombre de catégories dans chaque colonne, dans l'ordre (ex. [2, 3, 2, 2]).
    *  Par défaut, les catégories sont réparties à parts égales (ceil(catégories / cols) par colonne). */
   colSizes?: number[];
-  /** Grille fixe de 32 tuiles qui remplit le panneau (4×8 en paysage, 8×4 en portrait) : Animaux, Bruits, Ambiances */
-  gridType?: 'fixed';
 }
 
 // ═══════════════════════════════════════════════════════
