@@ -14,6 +14,9 @@ const snap = async (label) => {
   const s = await page.evaluate(() => {
     // Classes de portée ajoutées par Svelte (styles scopés) : ignorées
     const cn = e => e.className.replace(/ svelte-[a-z0-9]+/g, '');
+    // Tuiles : classes de couleur de thème ignorées aussi (animaux-ferme… dans les builds de référence jusqu'à la 1.18, couleur-vert… ensuite),
+    // les couleurs sont vérifiées par les captures et la comparaison des styles
+    const tileCn = e => cn(e).replace(/ (animaux|ambiances|bruits|couleur)-[a-z]+/g, '');
     const ov = id => { const o = document.getElementById(id); if (!o) return null; return {
       open: o.classList.contains('is-open'), aria: o.getAttribute('aria-hidden'),
       active: [...o.querySelectorAll('.fx-preset-btn.is-active')].map(b => b.textContent.trim()),
@@ -33,7 +36,7 @@ const snap = async (label) => {
       playPause: [...document.querySelectorAll('.transport-play-pause')].map(b => cn(b) + '|' + b.disabled + '|' + b.innerHTML.replace(/<!--[^]*?-->/g, '').replace(/ svelte-[a-z0-9]+/g, '')),
       handles: cls('.transport-seek-handle'),
       timeKnown: [...document.querySelectorAll('.transport-time')].map(t => /^\d+:\d\d \/ \d+:\d\d$/.test(t.textContent) ? 'temps' : t.textContent),
-      soundBtns: [...document.querySelectorAll('.sound-btn')].filter(b => cn(b) !== 'sound-btn' && !/^sound-btn( sound-btn--img| (animaux|ambiances|bruits|couleur)-\w+)*$/.test(cn(b))).map(b => b.title + ':' + cn(b)),
+      soundBtns: [...document.querySelectorAll('.sound-btn')].filter(b => !/^sound-btn( sound-btn--img)?$/.test(tileCn(b))).map(b => b.title + ':' + tileCn(b)),
       progressShown: [...document.querySelectorAll('.sound-btn')].filter(b => !['', '0%', '0.00%'].includes(b.style.getPropertyValue('--progress'))).map(b => b.title),
       progressTransition: [...document.querySelectorAll('.sound-btn')].filter(b => b.style.getPropertyValue('--progress-transition')).map(b => b.title + ':' + b.style.getPropertyValue('--progress-transition')),
       instActive: [...document.querySelectorAll('.inst-btn.active')].map(b => b.title),
