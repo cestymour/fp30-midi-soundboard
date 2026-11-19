@@ -142,7 +142,7 @@ Each sound file is decoded on its first click (read from the offline cache), the
 │   │   ├── color-channels.ts       # Color channels for script-set colors (Chrome 106)
 │   │   ├── midi-ui.svelte.ts       # MIDI connection selects, active instrument
 │   │   ├── layout.svelte.ts        # Active tab, orientation, button heights
-│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, SoundButton, Transport, TransitionPopup…
+│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, Tile, SoundButton, InstrumentButton, FixedGrid, Transport…
 │   └── css/
 │       └── global.css              # Variables, reset, shared slider (other styles are in the components)
 └── public/                         # Copied as-is to the site root
@@ -481,7 +481,7 @@ Chaque fichier est décodé à son premier clic (lu dans le cache hors ligne), p
 │   │   ├── color-channels.ts       # Canaux des couleurs posées par script (Chrome 106)
 │   │   ├── midi-ui.svelte.ts       # Listes de connexion MIDI, instrument actif
 │   │   ├── layout.svelte.ts        # Onglet actif, orientation, hauteur des boutons
-│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, SoundButton, Transport, TransitionPopup…
+│   │   └── components/             # TabNav, Panel, MidiPanel, AudioPanel, Tile, SoundButton, InstrumentButton, FixedGrid, Transport…
 │   └── css/
 │       └── global.css              # Variables, reset, curseur partagé (le reste est dans les composants)
 └── public/                         # Copié tel quel à la racine du site

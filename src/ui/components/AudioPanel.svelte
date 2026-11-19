@@ -12,6 +12,7 @@
   import { audioFxOverlay, fxToolbar } from '../fx-overlays.svelte.ts';
   import Transport from './Transport.svelte';
   import SoundButton from './SoundButton.svelte';
+  import FixedGrid from './FixedGrid.svelte';
   import CategoryTitle from './CategoryTitle.svelte';
   import Panel from './Panel.svelte';
   import FxToolbar from './FxToolbar.svelte';
@@ -75,13 +76,13 @@
   {/snippet}
 
   {#if tab.gridType === 'fixed'}
-    <div class="audio-grid fixed-grid">
+    <FixedGrid class="audio-grid">
       {#each tab.categories as cat (cat.id)}
         {#each cat.items as item (item.id)}
           <SoundButton {item} kind={tab.kind} />
         {/each}
       {/each}
-    </div>
+    </FixedGrid>
   {:else if tab.cols && tab.cols > 1}
     <div class="audio-grid audio-grid-cols">
       {#each columns as col, colIdx (colIdx)}
@@ -123,8 +124,8 @@
 </Panel>
 
 <style>
-  /* Les styles des boutons eux-mêmes (y compris dans la grille fixe)
-     sont dans SoundButton.svelte */
+  /* Les styles des tuiles (y compris dans la grille fixe) sont dans Tile.svelte,
+     ceux de la grille fixe dans FixedGrid.svelte */
 
   /* ═══════════════════════════════════════════════════════
       COLONNES ET BLOCS CATÉGORIE
@@ -181,22 +182,6 @@
     gap: var(--gap-inner);
   }
 
-  /* ═══════════════════════════════════════════════════════
-    GRILLE FIXE (Animaux, Bruits, Ambiances) — 4×8 paysage, 8×4 portrait (transposé)
-  ════════════════════════════════════════════════════════ */
-  :global(.panel) .audio-grid.fixed-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: var(--gap-inner);
-
-    flex: 1;
-    min-height: 0;
-    height: 100%;
-    align-content: stretch;
-    align-items: stretch;
-  }
-
   /* ── Tablette portrait ── */
   @media (max-width: 1024px) and (orientation: portrait) {
     .audio-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
@@ -209,12 +194,6 @@
 
   /* ── Portrait — tous écrans ── */
   @media (orientation: portrait) {
-    :global(.panel) .audio-grid.fixed-grid {
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(8, 1fr);
-      grid-auto-flow: column;
-    }
-
     .audio-grid:not(.audio-grid-cols) .audio-cat-grid {
       grid-template-columns: repeat(2, 1fr);
     }

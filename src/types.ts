@@ -52,6 +52,8 @@ export interface MidiItem {
   lsb: number;
   /** Infobulle (par défaut : `name`) */
   title?: string;
+  /** Classe CSS de couleur de thème, en grille fixe (classes dans Tile.svelte) */
+  catClass?: string;
 }
 
 export type MidiCategory = Category<MidiItem>;
@@ -87,7 +89,7 @@ export interface AudioItem {
   /** Onglets musiques : pas de fondu d'entrée, la musique démarre tout de suite au volume choisi.
    *  Inutile dans les onglets sons, qui n'ont jamais de fondu. */
   noFade?: boolean;
-  /** Classe CSS de couleur de catégorie (onglet animaux) */
+  /** Classe CSS de couleur : thème en grille fixe (animaux-ferme…), musique-tuile en colonnes (classes dans Tile.svelte) */
   catClass?: string;
 }
 

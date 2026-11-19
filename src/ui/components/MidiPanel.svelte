@@ -8,7 +8,7 @@
   import { STATE } from '../../state.svelte.ts';
   import { setMidiVolume } from '../../midi/midi.ts';
   import { selectMidiConnection } from '../../midi/connection.ts';
-  import { instruments, midiSelects, registerMidiSelect, selectInstrument } from '../midi-ui.svelte.ts';
+  import { midiSelects, registerMidiSelect } from '../midi-ui.svelte.ts';
   import { fxToolbar, midiFxOverlay } from '../fx-overlays.svelte.ts';
   import { layout } from '../layout.svelte.ts';
   import { TAB_ACCENTS } from '../../config/tabs.ts';
@@ -17,7 +17,7 @@
   import FxToolbar from './FxToolbar.svelte';
   import EmergencyStopButton from './EmergencyStopButton.svelte';
   import VolumeControl from './VolumeControl.svelte';
-  import TileIcon from './TileIcon.svelte';
+  import InstrumentButton from './InstrumentButton.svelte';
 
   let { tab, index }: { tab: MidiTab; index: number } = $props();
 
@@ -100,15 +100,7 @@
             <CategoryTitle {cat} />
             <div class="btn-grid">
               {#each cat.items as item (item.id)}
-                <button
-                  class="inst-btn"
-                  class:active={instruments.active === item}
-                  title={item.title ?? item.name}
-                  onclick={() => selectInstrument(item)}
-                >
-                  <span class="btn-icon"><TileIcon svg={item.svg} emoji={item.icon} /></span>
-                  <span class="btn-label">{item.name}</span>
-                </button>
+                <InstrumentButton {item} />
               {/each}
             </div>
           </div>
@@ -219,99 +211,7 @@
     gap: var(--gap-inner);
   }
 
-  /* ═══════════════════════════════════════════════════════
-      BOUTONS INSTRUMENT (même base que les boutons de sons)
-  ════════════════════════════════════════════════════════ */
-  /* ── Focus accessible (clavier uniquement) ── */
-  .inst-btn:focus-visible {
-    outline: 2px solid var(--current-accent);
-    outline-offset: -2px;
-  }
-
-  .inst-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--gap-inner);
-    padding: 6px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text-secondary);
-    font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, background 0.15s,
-                box-shadow 0.15s, transform 0.08s;
-    user-select: none;
-    text-align: center;
-    min-height: 0;
-    height: var(--btn-h, 80px);
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    container-type: size;
-  }
-
-  .inst-btn:hover {
-    border-color: var(--border-glow);
-    color: var(--text-primary);
-    background: var(--bg-card-hover);
-  }
-
-  .inst-btn:active { transform: scale(0.93); }
-
-  .btn-icon {
-    font-size: max(16px, 45cqh);
-    line-height: 1;
-    position: relative;
-    z-index: 2;
-    flex-shrink: 1;
-  }
-  /* Nom réglé sur la tuile la plus basse du panneau (--btn-h-min, posée par l'égalisation des
-     hauteurs) : même taille dans toutes les colonnes. Plafonné par la largeur de la tuile (cqw),
-     pour qu'un mot long (Applaudissements) tienne sur sa ligne */
-  .btn-label {
-    font-size: clamp(11px, min((var(--btn-h-min, 80px) - 14px) * 0.26, 17cqw), 20px);
-    font-weight: 600;
-    color: var(--text-primary);
-    text-align: center;
-    line-height: 1.1;
-    word-break: break-word;
-    /* Mot plus large que la tuile : coupé avec un trait d'union (lang="fr") */
-    hyphens: auto;
-    position: relative;
-    z-index: 2;
-    flex-shrink: 0;
-  }
-  .inst-btn:hover .btn-label { color: var(--text-primary); }
-
-  /* ── État actif ── */
-  .inst-btn.active {
-    background: color-mix(in srgb, var(--panel-accent) 15%, var(--bg-card));
-    border-color: var(--panel-accent);
-    animation: active-pulse 2s ease-in-out infinite alternate;
-  }
-  .inst-btn.active .btn-label {
-    color: var(--panel-accent);
-    font-weight: 700;
-  }
-  .inst-btn.active .btn-icon {
-    filter: drop-shadow(0 0 4px var(--panel-accent));
-  }
-
-  .inst-btn.active:hover {
-    background: color-mix(in srgb, var(--panel-accent) 28%, var(--bg-card));
-  }
-
-  /* Lueur pulsée en filter: drop-shadow (même flou qu'un box-shadow, la tuile est opaque) : elle
-     tourne tant qu'un instrument est actif, la carte graphique l'anime sans redessin (bug n° 29) */
-  @keyframes active-pulse {
-    from { filter: drop-shadow(0 0 6px  color-mix(in srgb, var(--panel-accent) 25%, transparent)); }
-    to   { filter: drop-shadow(0 0 16px color-mix(in srgb, var(--panel-accent) 50%, transparent)); }
-  }
+  /* Les styles des tuiles sont dans Tile.svelte */
 
   /* ── Mobile ── */
   @media (max-width: 600px) {
