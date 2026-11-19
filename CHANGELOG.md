@@ -2,6 +2,24 @@
 
 La version la plus récente en haut. Les versions antérieures à la 1.8.0 ne sont décrites que par l'historique git.
 
+## 1.19.0 — 2026-11-20
+
+### Nouveautés
+
+- **Un onglet piano peut s'afficher en grille fixe**, comme Animaux : 32 tuiles sur 4 lignes de 8 (transposées en portrait), avec le même aspect et une couleur par thème ; l'instrument choisi s'allume dans la couleur de sa tuile. Aucun onglet ne s'en sert encore : c'est une base pour la personnalisation de l'interface.
+
+### À savoir
+
+- **Rien ne change à l'écran** : mêmes onglets, mêmes tuiles, mêmes couleurs. La non-régression le confirme (styles identiques dans 37 états, sur 7 tailles d'écran).
+- Pour les développeurs : la configuration tient en un fichier par type d'onglet (`midi.config.ts`, `sounds.config.ts`, `music.config.ts`). Une seule tuile (`Tile.svelte`) sert aux sons, aux musiques et au piano, et la grille fixe (`FixedGrid.svelte`) à tous les types d'onglets. La couleur d'une tuile en grille fixe est un champ `color`, pris dans une palette de 7 couleurs commune à tous les onglets (bleu, vert, rose, violet, orange, jaune, cyan) ; `catClass` ne sert plus qu'aux variantes `musique-tuile` et `musique-manquant`.
+
+### À vérifier sur la tablette
+
+- Instruments et Sons MIDI : aspect habituel ; un instrument choisi s'allume et pulse.
+- Animaux, Bruits et Ambiances : couleurs des thèmes comme avant ; double flèche sur un son en cours.
+- Musiques et Films : carré stop et progression pendant la lecture, affiches de Films.
+- En paysage et en portrait, sur la tablette de scène (Chrome 106).
+
 ## 1.18.2 — 2026-11-17
 
 ### Corrections
