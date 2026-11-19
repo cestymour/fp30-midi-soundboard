@@ -75,6 +75,10 @@ Morceaux écartés de l'onglet Musiques parce qu'ils se jouent au clavier plutô
 
 - [ ] **Coder un looper.** C'est une très grosse fonctionnalité, qui ferait passer l'application en 2.0. Il serait peut-être dans une fenêtre accessible depuis l'onglet piano. À concevoir : ce qui est enregistré (notes MIDI du piano, ou son audio), comment on lance, superpose et arrête les boucles, et le calage sur un tempo. Étude en cours : `docs/feature-loop-station.md`.
 
+## Personnalisation de l'interface (version majeure)
+
+- [ ] **Choisir l'emplacement des tuiles.** L'utilisateur garde les tuiles qu'il utilise et retire les autres (dans une réserve). Il range chaque tuile par glisser-déposer dans n'importe quel onglet de son type (piano, sons, musiques). Il ajoute et supprime des onglets et des catégories, choisit leur place et, dans les grilles fixes, la couleur de plusieurs tuiles d'un coup. Il enregistre plusieurs dispositions nommées, en partant d'une disposition vide ou d'une disposition existante ; « Par défaut » reste dans la liste et ne se modifie pas. Tout sort ensemble, dans une version majeure. Cahier des charges : `docs/feature-personnalisation.md`.
+
 ## Thèmes (onglet à étudier)
 
 - [ ] **Un onglet de thèmes**, avec des réglages bien plus complets qu'un instrument ou un preset. L'onglet liste les thèmes en tuiles (Asie, Arabie, Enfants…). Toucher une tuile ouvre un nouvel onglet propre au thème, avec ses instruments, ses réglages et ses indications de jeu. Exemples :
